@@ -1,0 +1,19 @@
+{
+  "name": "instead",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"cd backend && node server.js\" \"cd client && npm start\""
+  },
+  "keywords": [],
+  "author": "Daniel Brauer",
+  "license": "MIT",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/danielbrauer/instead.git"
+  },
+  "dependencies": {
+    "concurrently": "^4.1.0"
+  }
+}
