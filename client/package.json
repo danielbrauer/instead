@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "aws-sdk": "^2.462.0",
     "axios": "^0.18.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
@@ -31,8 +32,8 @@
   },
   "license": "MIT",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/danielbrauer/instead.git",
+    "type": "git",
+    "url": "https://github.com/danielbrauer/instead.git",
     "directory": "client"
   },
   "devDependencies": {
