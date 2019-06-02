@@ -1,6 +1,27 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 
+class Add extends Component {
+  onAdd = () => {
+    this.props.onAdd(this.state.message);
+  }
+  render() {
+    return(
+      <div style={{ padding: '10px' }}>
+        <input
+          type="text"
+          onChange={(e) => this.setState({ message: e.target.value })}
+          placeholder="add something in the database"
+          style={{ width: '200px' }}
+        />
+        <button onClick={this.onAdd}>
+          ADD
+        </button>
+      </div>
+    );
+  }
+}
+
 class App extends Component {
   // initialize our state
   state = {
@@ -112,17 +133,7 @@ class App extends Component {
                 </li>
               ))}
         </ul>
-        <div style={{ padding: '10px' }}>
-          <input
-            type="text"
-            onChange={(e) => this.setState({ message: e.target.value })}
-            placeholder="add something in the database"
-            style={{ width: '200px' }}
-          />
-          <button onClick={() => this.putDataToDB(this.state.message)}>
-            ADD
-          </button>
-        </div>
+        <Add onAdd={(newRecord) => this.putDataToDB(newRecord)}/>
         <div style={{ padding: '10px' }}>
           <input
             type="text"
