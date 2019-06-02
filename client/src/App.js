@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import axios from 'axios';
 
 class Add extends Component {
-  onAdd = () => {
-    this.props.onAdd(this.state.message);
+  onSubmit = () => {
+    this.props.onSubmit(this.state.message);
   }
   render() {
     return(
@@ -14,8 +14,56 @@ class Add extends Component {
           placeholder="add something in the database"
           style={{ width: '200px' }}
         />
-        <button onClick={this.onAdd}>
+        <button onClick={this.onSubmit}>
           ADD
+        </button>
+      </div>
+    );
+  }
+}
+
+class Delete extends Component {
+  onSubmit = () => {
+    this.props.onSubmit(this.state.idToDelete);
+  }
+  render() {
+    return (
+      <div style={{ padding: '10px' }}>
+        <input
+          type="text"
+          style={{ width: '200px' }}
+          onChange={(e) => this.setState({ idToDelete: e.target.value })}
+          placeholder="put id of item to delete here"
+        />
+        <button onClick={this.onSubmit}>
+          DELETE
+        </button>
+      </div>
+    );
+  }
+}
+
+class Update extends Component {
+  onSubmit = () => {
+    this.props.onSubmit(this.state.idToUpdate, this.state.updateToApply);
+  }
+  render() {
+    return (
+      <div style={{ padding: '10px' }}>
+        <input
+          type="text"
+          style={{ width: '200px' }}
+          onChange={(e) => this.setState({ idToUpdate: e.target.value })}
+          placeholder="id of item to update here"
+        />
+        <input
+          type="text"
+          style={{ width: '200px' }}
+          onChange={(e) => this.setState({ updateToApply: e.target.value })}
+          placeholder="put new value of the item here"
+        />
+        <button onClick={this.onSubmit}>
+          UPDATE
         </button>
       </div>
     );
@@ -133,39 +181,9 @@ class App extends Component {
                 </li>
               ))}
         </ul>
-        <Add onAdd={(newRecord) => this.putDataToDB(newRecord)}/>
-        <div style={{ padding: '10px' }}>
-          <input
-            type="text"
-            style={{ width: '200px' }}
-            onChange={(e) => this.setState({ idToDelete: e.target.value })}
-            placeholder="put id of item to delete here"
-          />
-          <button onClick={() => this.deleteFromDB(this.state.idToDelete)}>
-            DELETE
-          </button>
-        </div>
-        <div style={{ padding: '10px' }}>
-          <input
-            type="text"
-            style={{ width: '200px' }}
-            onChange={(e) => this.setState({ idToUpdate: e.target.value })}
-            placeholder="id of item to update here"
-          />
-          <input
-            type="text"
-            style={{ width: '200px' }}
-            onChange={(e) => this.setState({ updateToApply: e.target.value })}
-            placeholder="put new value of the item here"
-          />
-          <button
-            onClick={() =>
-              this.updateDB(this.state.idToUpdate, this.state.updateToApply)
-            }
-          >
-            UPDATE
-          </button>
-        </div>
+        <Add onSubmit={this.putDataToDB}/>
+        <Delete onSubmit={this.deleteFromDB}/>
+        <Update onSubmit={this.updateDB}/>
       </div>
     );
   }
