@@ -70,6 +70,18 @@ class Update extends Component {
   }
 }
 
+class ListItem extends Component {
+  render() {
+    return(
+      <li style={{ padding: '10px' }} key={this.props.data.id}>
+        <span style={{ color: 'gray' }}> id: </span> {this.props.data.id} <br />
+        <span style={{ color: 'gray' }}> data: </span>
+        {this.props.data.message}
+      </li>
+    )
+  }
+}
+
 class App extends Component {
   // initialize our state
   constructor(props) {
@@ -177,11 +189,7 @@ class App extends Component {
           {data.length <= 0
             ? 'NO DB ENTRIES YET'
             : data.map((dat) => (
-                <li style={{ padding: '10px' }} key={data.message}>
-                  <span style={{ color: 'gray' }}> id: </span> {dat.id} <br />
-                  <span style={{ color: 'gray' }}> data: </span>
-                  {dat.message}
-                </li>
+              <ListItem data={dat}/>
               ))}
         </ul>
         <Add onSubmit={this.putDataToDB}/>
