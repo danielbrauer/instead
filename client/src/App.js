@@ -186,10 +186,10 @@ class App extends Component {
     return (
       <div>
         <ul>
-          {data.length <= 0
+          {data.length === 0
             ? 'NO DB ENTRIES YET'
             : data.map((dat) => (
-              <ListItem data={dat}/>
+              <ListItem data={dat} key={dat.id}/>
               ))}
         </ul>
         <Add onSubmit={this.putDataToDB}/>
