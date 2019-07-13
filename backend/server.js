@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const logger = require('morgan');
 const Data = require('./data');
 const config = require('config');
+const awsManager = require('./aws').AWSManager;
 
 const API_PORT = 3001;
 const app = express();
@@ -20,7 +21,6 @@ const host = dbConfig.get('host');
 const path = dbConfig.get('path');
 const query = dbConfig.get('query');
 const dbRoute = `${scheme}://${user}:${password}@${host}/${path}?${query}`;
-console.log(dbRoute);
 
 // connects our back end code with the database
 mongoose.connect(dbRoute, { useNewUrlParser: true });
@@ -67,9 +67,15 @@ router.delete('/deleteData', (req, res) => {
   });
 });
 
+// get URL for uploading
+router.post('/getUploadUrl', (req, res) =>{
+  awsManager.instance().sign_s3(req, res);
+})
+
 // this is our create method
 // this method adds new data in our database
 router.post('/putData', (req, res) => {
+
   let data = new Data();
 
   const { id, message } = req.body;
