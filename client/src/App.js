@@ -75,8 +75,7 @@ class ListItem extends Component {
     return(
       <li style={{ padding: '10px' }} key={this.props.data.id}>
         <span style={{ color: 'gray' }}> id: </span> {this.props.data.id} <br />
-        <span style={{ color: 'gray' }}> data: </span>
-        {this.props.data.message}
+        <img src={this.props.data.message} alt={this.props.data.id} width="200" height="200"/>
       </li>
     )
   }
@@ -187,25 +186,25 @@ class App extends Component {
 
   // Perform the upload
   handleUpload = (ev) => {
-    let file = this.uploadInput.files[0];
+    const file = this.uploadInput.files[0];
     // Split the filename to get the name and type
-    let fileParts = this.uploadInput.files[0].name.split('.');
-    let fileName = fileParts[0];
-    let fileType = fileParts[1];
+    const fileParts = this.uploadInput.files[0].name.split('.');
+    const fileName = fileParts[0];
+    const fileType = fileParts[1];
     console.log("Preparing the upload");
     axios.post("http://localhost:3001/api/getUploadUrl",{
       fileName : fileName,
       fileType : fileType
     })
     .then(response => {
-      var returnData = response.data.data.returnData;
-      var signedRequest = returnData.signedRequest;
-      var url = returnData.url;
+      const returnData = response.data.data.returnData;
+      const signedRequest = returnData.signedRequest;
+      const url = returnData.url;
       this.setState({url: url})
       console.log("Recieved a signed request " + signedRequest);
       
      // Put the fileType in the headers for the upload
-      var options = {
+      const options = {
         headers: {
           'Content-Type': fileType
         }
@@ -214,6 +213,8 @@ class App extends Component {
       .then(result => {
         console.log("Response from s3")
         this.setState({success: true});
+
+        this.putDataToDB(url);
       })
       .catch(error => {
         alert("ERROR " + JSON.stringify(error));
@@ -229,7 +230,7 @@ class App extends Component {
   // see them render into our screen
   render() {
     const { data } = this.state;
-    const Success_message = () => (
+    const SuccessMessage = () => (
       <div style={{padding:50}}>
         <h3 style={{color: 'green'}}>SUCCESSFUL UPLOAD</h3>
         <a href={this.state.url}>Access the file here</a>
@@ -250,7 +251,7 @@ class App extends Component {
         <Update onSubmit={this.updateDB}/>
         <center>
           <h1>UPLOAD A FILE</h1>
-          {this.state.success ? <Success_message/> : null}
+          {this.state.success ? <SuccessMessage/> : null}
           <input onChange={this.handleChange} ref={(ref) => { this.uploadInput = ref; }} type="file"/>
           <br/>
           <button onClick={this.handleUpload}>UPLOAD</button>
