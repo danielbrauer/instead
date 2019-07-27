@@ -2,21 +2,23 @@ import React, { Component } from 'react';
 import axios from 'axios';
 
 class Add extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      uploadInput: "",
+    }
+  }
   onSubmit = () => {
-    this.props.onSubmit(this.state.message);
+    this.props.onSubmit(this.state.uploadInput);
+  }
+  onSelect = (ref) => {
+    this.setState({uploadInput: ref});
   }
   render() {
     return(
       <div style={{ padding: '10px' }}>
-        <input
-          type="text"
-          onChange={(e) => this.setState({ message: e.target.value })}
-          placeholder="add something in the database"
-          style={{ width: '200px' }}
-        />
-        <button onClick={this.onSubmit}>
-          ADD
-        </button>
+        <input ref={this.onSelect} type="file"/>
+        <button onClick={this.onSubmit}>Upload</button>
       </div>
     );
   }
@@ -24,17 +26,11 @@ class Add extends Component {
 
 class Delete extends Component {
   onSubmit = () => {
-    this.props.onSubmit(this.state.idToDelete);
+    this.props.onSubmit(this.props.idToDelete);
   }
   render() {
     return (
       <div style={{ padding: '10px' }}>
-        <input
-          type="text"
-          style={{ width: '200px' }}
-          onChange={(e) => this.setState({ idToDelete: e.target.value })}
-          placeholder="put id of item to delete here"
-        />
         <button onClick={this.onSubmit}>
           DELETE
         </button>
@@ -43,38 +39,12 @@ class Delete extends Component {
   }
 }
 
-class Update extends Component {
-  onSubmit = () => {
-    this.props.onSubmit(this.state.idToUpdate, this.state.updateToApply);
-  }
-  render() {
-    return (
-      <div style={{ padding: '10px' }}>
-        <input
-          type="text"
-          style={{ width: '200px' }}
-          onChange={(e) => this.setState({ idToUpdate: e.target.value })}
-          placeholder="id of item to update here"
-        />
-        <input
-          type="text"
-          style={{ width: '200px' }}
-          onChange={(e) => this.setState({ updateToApply: e.target.value })}
-          placeholder="put new value of the item here"
-        />
-        <button onClick={this.onSubmit}>
-          UPDATE
-        </button>
-      </div>
-    );
-  }
-}
-
-class ListItem extends Component {
+class ImageItem extends Component {
   render() {
     return(
       <li style={{ padding: '10px' }} key={this.props.data.id}>
-        <span style={{ color: 'gray' }}> id: </span> {this.props.data.id} <br />
+        <Delete onSubmit={this.props.onDelete} idToDelete={this.props.data.id}/>
+        <br/>
         <img src={this.props.data.message} alt={this.props.data.id} width="200" height="200"/>
       </li>
     )
@@ -93,8 +63,6 @@ class App extends Component {
       idToDelete: null,
       idToUpdate: null,
       objectToUpdate: null,
-      success : false,
-      url : "",
     }
   }
 
@@ -179,16 +147,11 @@ class App extends Component {
     });
   };
 
-  handleChange = (ev) => {
-    this.setState({success: false, url : ""});
-    
-  }
-
   // Perform the upload
-  handleUpload = (ev) => {
-    const file = this.uploadInput.files[0];
+  handleUpload = (uploadInput) => {
+    const file = uploadInput.files[0];
     // Split the filename to get the name and type
-    const fileParts = this.uploadInput.files[0].name.split('.');
+    const fileParts = uploadInput.files[0].name.split('.');
     const fileName = fileParts[0];
     const fileType = fileParts[1];
     console.log("Preparing the upload");
@@ -200,7 +163,6 @@ class App extends Component {
       const returnData = response.data.data.returnData;
       const signedRequest = returnData.signedRequest;
       const url = returnData.url;
-      this.setState({url: url})
       console.log("Recieved a signed request " + signedRequest);
       
      // Put the fileType in the headers for the upload
@@ -212,7 +174,6 @@ class App extends Component {
       axios.put(signedRequest,file,options)
       .then(result => {
         console.log("Response from s3")
-        this.setState({success: true});
 
         this.putDataToDB(url);
       })
@@ -230,32 +191,16 @@ class App extends Component {
   // see them render into our screen
   render() {
     const { data } = this.state;
-    const SuccessMessage = () => (
-      <div style={{padding:50}}>
-        <h3 style={{color: 'green'}}>SUCCESSFUL UPLOAD</h3>
-        <a href={this.state.url}>Access the file here</a>
-        <br/>
-      </div>
-    )
     return (
       <div>
         <ul>
           {data.length === 0
             ? 'NO DB ENTRIES YET'
             : data.map((dat) => (
-              <ListItem data={dat} key={dat.id}/>
+              <ImageItem data={dat} onDelete={this.deleteFromDB} key={dat.id}/>
               ))}
         </ul>
-        <Add onSubmit={this.putDataToDB}/>
-        <Delete onSubmit={this.deleteFromDB}/>
-        <Update onSubmit={this.updateDB}/>
-        <center>
-          <h1>UPLOAD A FILE</h1>
-          {this.state.success ? <SuccessMessage/> : null}
-          <input onChange={this.handleChange} ref={(ref) => { this.uploadInput = ref; }} type="file"/>
-          <br/>
-          <button onClick={this.handleUpload}>UPLOAD</button>
-        </center>
+        <Add onSubmit={this.handleUpload}/>
       </div>
     );
   }
