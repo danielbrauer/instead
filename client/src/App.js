@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import Axios from 'axios';
+import Path from 'path';
 
 class Add extends Component {
   constructor(props) {
@@ -48,7 +49,7 @@ class ImageItem extends Component {
       <li style={{ padding: '10px' }} key={this.props.data.id}>
         <Delete onSubmit={this.props.onDelete} idToDelete={this.props.data.id}/>
         <br/>
-        <img src={this.props.data.message} alt={this.props.data.id} width="200" height="200"/>
+        <img src={this.props.data.url} alt={this.props.data.id} width="200" height="200"/>
       </li>
     )
   }
@@ -104,16 +105,17 @@ class App extends Component {
 
   // our put method that uses our backend api
   // to create new query into our data base
-  putDataToDB = (message) => {
-    let currentIds = this.state.data.map((data) => data.id);
+  putDataToDB = (record) => {
+    const currentIds = this.state.data.map((data) => data.id);
     let idToBeAdded = 0;
     while (currentIds.includes(idToBeAdded)) {
       ++idToBeAdded;
     }
 
-    axios.post('http://localhost:3001/api/putData', {
+    Axios.post('http://localhost:3001/api/putData', {
       id: idToBeAdded,
-      message: message,
+      fileName: record.fileName,
+      url: record.url,
     });
   };
 
@@ -127,46 +129,25 @@ class App extends Component {
       }
     });
 
-    axios.delete('http://localhost:3001/api/deleteData', {
+    Axios.delete('http://localhost:3001/api/deleteData', {
       data: {
         id: objIdToDelete,
       },
     });
   };
 
-  // our update method that uses our backend api
-  // to overwrite existing data base information
-  updateDB = (idToUpdate, updateToApply) => {
-    let objIdToUpdate = null;
-    this.state.data.forEach((dat) => {
-      if (dat.id === parseInt(idToUpdate)) {
-        objIdToUpdate = dat._id;
-      }
-    });
-
-    axios.post('http://localhost:3001/api/updateData', {
-      id: objIdToUpdate,
-      update: { message: updateToApply },
-    });
-  };
-
   // Perform the upload
   handleUpload = (uploadInput) => {
     const file = uploadInput.files[0];
-    // Split the filename to get the name and type
-    const fileParts = uploadInput.files[0].name.split('.');
-    const fileName = fileParts[0];
-    const fileType = fileParts[1];
-    console.log("Preparing the upload");
-    axios.post("http://localhost:3001/api/getUploadUrl",{
-      fileName : fileName,
-      fileType : fileType
+    const fileType = Path.extname(file.name).substr(1) // ext includes . separator
+    Axios.post("http://localhost:3001/api/getUploadUrl",{
+      fileType : fileType,
     })
     .then(response => {
-      const returnData = response.data.data.returnData;
+      const returnData = response.data.data;
       const signedRequest = returnData.signedRequest;
       const url = returnData.url;
-      console.log("Recieved a signed request " + signedRequest);
+      const fileName = returnData.fileName;
       
      // Put the fileType in the headers for the upload
       const options = {
@@ -174,24 +155,13 @@ class App extends Component {
           'Content-Type': fileType
         }
       };
-      axios.put(signedRequest,file,options)
+      Axios.put(signedRequest,file,options)
       .then(result => {
-        console.log("Response from s3")
-
-        this.putDataToDB(url);
+        this.putDataToDB({url: url, fileName: fileName});
       })
-      .catch(error => {
-        alert("ERROR " + JSON.stringify(error));
-      })
-    })
-    .catch(error => {
-      alert(JSON.stringify(error));
     })
   }
 
-  // here is our UI
-  // it is easy to understand their functions when you
-  // see them render into our screen
   render() {
     const { data } = this.state;
     return (

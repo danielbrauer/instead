@@ -1,4 +1,3 @@
-"use strict";
 const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
@@ -7,6 +6,7 @@ const logger = require('morgan');
 const Data = require('./data');
 const config = require('config');
 const awsManager = require('./aws').AWSManager;
+const uuidv1 = require('uuid/v1');
 
 const API_PORT = 3001;
 const app = express();
@@ -47,20 +47,20 @@ router.get('/getData', (req, res) => {
   });
 });
 
-// this method removes existing data in our database, and 
+// removes existing data in our database, and 
 // deletes the associated s3 object
 router.delete('/deleteData', (req, res) => {
   const { id } = req.body;
   Data.findById(id, (err, data) => {
     if (err) return res.send(err);
-    awsManager.instance().delete_s3(data.message,
+    awsManager.instance().delete_s3(data.fileName,
       () => {
         Data.findByIdAndDelete(id, (err) => {
           if (err) return res.send(err);
           return res.json({ success: true });
         });
       },
-      (err) => {
+      err => {
         return res.json({ success: false });
       }
     );
@@ -69,29 +69,27 @@ router.delete('/deleteData', (req, res) => {
 
 // get URL for uploading
 router.post('/getUploadUrl', (req, res) =>{
-  awsManager.instance().sign_s3(req, res);
+  const fileName = uuidv1()
+  console.log(`generated file name: ${fileName}`)
+  awsManager.instance().sign_s3(fileName, req.body.fileType,
+    data => {
+      console.log("got signed upload URL")
+      data.fileName = fileName
+      return res.json({success: true, data: data})
+    },
+    err => {
+      return res.json({ success: false })
+    }
+  )
 })
 
-// this is our create method
-// this method adds new data in our database
+// this method adds a new post
 router.post('/putData', (req, res) => {
-
-  let data = new Data();
-
-  const { id, message } = req.body;
-
-  if ((!id && id !== 0) || !message) {
-    return res.json({
-      success: false,
-      error: 'INVALID INPUTS',
-    });
-  }
-  data.message = message;
-  data.id = id;
-  data.save((err) => {
+  Data.create(req.body, (err, data) => {
     if (err) return res.json({ success: false, error: err });
-    return res.json({ success: true });
-  });
+    console.log(data)
+    return res.json({ success: true })
+  })
 });
 
 // append /api for our http requests

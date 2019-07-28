@@ -26,9 +26,7 @@ class AWSManager {
 		return AWSManager._instance;	
 	}
 
-    sign_s3(req, res) {
-        const fileName = req.body.fileName;
-        const fileType = req.body.fileType;
+    sign_s3(fileName, fileType, successCallback, errorCallback) {
         // Set up the payload of what we are sending to the S3 api
         const s3Params = {
             Bucket: this.bucket,
@@ -40,34 +38,32 @@ class AWSManager {
         // Make a request to the S3 API to get a signed URL which we can use to upload our file
         this.s3.getSignedUrl('putObject', s3Params, (err, data) => {
             if (err) {
-                console.log(err);
-                res.json({ success: false, data: err });
-                return;
+                console.log(err, err.stack);
+                return errorCallback(err);
             }
             // Data payload of what we are sending back, the url of the signedRequest and a URL where we can access the content after its saved. 
             const returnData = {
                 signedRequest: data,
-                url: `https://${this.bucket}.s3.amazonaws.com/${fileName}`
+                url: `https://${this.bucket}.s3.amazonaws.com/${fileName}`,
             };
-            // Send it all back
-            res.json({ success: true, data: { returnData } });
+
+            return successCallback(returnData)
         });
     }
 
-    delete_s3(fileName, callback, errorCallback) {
-        const urlPart = fileName.split("/");
+    delete_s3(key, successCallback, errorCallback) {
         const s3Params = {
             Bucket: this.bucket, 
-            Key: urlPart[urlPart.length - 1],
+            Key: key,
         };
         this.s3.deleteObject(s3Params, (err, data) => {
             if (err) {
                 console.log(err, err.stack)
-                errorCallback(error)
+                errorCallback(err)
                 return
             }
             
-            callback(data)
+            successCallback(data)
         });
     }
 }

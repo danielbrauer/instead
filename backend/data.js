@@ -5,7 +5,8 @@ const Schema = mongoose.Schema;
 const DataSchema = new Schema(
   {
     id: Number,
-    message: String
+    fileName: String,
+    url: String,
   },
   { timestamps: true }
 );
