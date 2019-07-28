@@ -1,7 +1,7 @@
 "use strict";
 const mongoose = require('mongoose');
 const express = require('express');
-var cors = require('cors');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
 const Data = require('./data');
@@ -39,7 +39,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(logger('dev'));
 
-// this is our get method
 // this method fetches all available data in our database
 router.get('/getData', (req, res) => {
   Data.find((err, data) => {
@@ -48,23 +47,23 @@ router.get('/getData', (req, res) => {
   });
 });
 
-// this is our update method
-// this method overwrites existing data in our database
-router.post('/updateData', (req, res) => {
-  const { id, update } = req.body;
-  Data.findByIdAndUpdate(id, update, (err) => {
-    if (err) return res.json({ success: false, error: err });
-    return res.json({ success: true });
-  });
-});
-
-// this is our delete method
-// this method removes existing data in our database
+// this method removes existing data in our database, and 
+// deletes the associated s3 object
 router.delete('/deleteData', (req, res) => {
   const { id } = req.body;
-  Data.findByIdAndRemove(id, (err) => {
+  Data.findById(id, (err, data) => {
     if (err) return res.send(err);
-    return res.json({ success: true });
+    awsManager.instance().delete_s3(data.message,
+      () => {
+        Data.findByIdAndDelete(id, (err) => {
+          if (err) return res.send(err);
+          return res.json({ success: true });
+        });
+      },
+      (err) => {
+        return res.json({ success: false });
+      }
+    );
   });
 });
 

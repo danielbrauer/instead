@@ -14,6 +14,8 @@ class AWSManager {
             accessKeyId: accessKeyId,
             secretAccessKey: secretKey
         })
+
+        this.s3 = new aws.S3();
     }
     
 	static instance(){
@@ -25,7 +27,6 @@ class AWSManager {
 	}
 
     sign_s3(req, res) {
-        const s3 = new aws.S3();  // Create a new instance of S3
         const fileName = req.body.fileName;
         const fileType = req.body.fileType;
         // Set up the payload of what we are sending to the S3 api
@@ -34,10 +35,10 @@ class AWSManager {
             Key: fileName,
             Expires: 500,
             ContentType: fileType,
-            ACL: 'public-read'
+            ACL: 'public-read',
         };
         // Make a request to the S3 API to get a signed URL which we can use to upload our file
-        s3.getSignedUrl('putObject', s3Params, (err, data) => {
+        this.s3.getSignedUrl('putObject', s3Params, (err, data) => {
             if (err) {
                 console.log(err);
                 res.json({ success: false, data: err });
@@ -50,6 +51,23 @@ class AWSManager {
             };
             // Send it all back
             res.json({ success: true, data: { returnData } });
+        });
+    }
+
+    delete_s3(fileName, callback, errorCallback) {
+        const urlPart = fileName.split("/");
+        const s3Params = {
+            Bucket: this.bucket, 
+            Key: urlPart[urlPart.length - 1],
+        };
+        this.s3.deleteObject(s3Params, (err, data) => {
+            if (err) {
+                console.log(err, err.stack)
+                errorCallback(error)
+                return
+            }
+            
+            callback(data)
         });
     }
 }
