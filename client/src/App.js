@@ -8,8 +8,11 @@ class Add extends Component {
       uploadInput: "",
     }
   }
+  enableUpload = () => {
+    return this.state.uploadInput && this.state.uploadInput.files[0];
+  }
   onSubmit = () => {
-    this.props.onSubmit(this.state.uploadInput);
+      this.props.onSubmit(this.state.uploadInput);
   }
   onSelect = (ref) => {
     this.setState({uploadInput: ref});
@@ -18,7 +21,7 @@ class Add extends Component {
     return(
       <div style={{ padding: '10px' }}>
         <input ref={this.onSelect} type="file"/>
-        <button onClick={this.onSubmit}>Upload</button>
+        <button onClick={this.onSubmit} disabled={!this.enableUpload()}>Upload</button>
       </div>
     );
   }
