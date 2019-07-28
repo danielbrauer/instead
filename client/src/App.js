@@ -101,7 +101,8 @@ class App extends Component {
   getDataFromDb = () => {
     Axios.get(`${this.backendUrl}getData`)
       .then(res => {
-        this.setState({ data: res.data.data })
+        if (res.data.data)
+          this.setState({ data: res.data.data })
       })
       .catch(error => {
         console.warn(error.message)
