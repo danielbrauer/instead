@@ -6,7 +6,6 @@ const DataSchema = new Schema(
   {
     id: Number,
     fileName: String,
-    url: String,
   },
   { timestamps: true }
 );

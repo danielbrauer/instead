@@ -39,6 +39,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(logger('dev'));
 
+// get the URL where images are hosted
+router.get('/getConfig', (req, res) => {
+  const contentUrl = awsManager.instance().content_url_s3()
+  const config = {
+    contentUrl: contentUrl,
+  }
+  res.json({ success: true, config });
+})
+
 // this method fetches all available data in our database
 router.get('/getData', (req, res) => {
   Data.find((err, data) => {
@@ -70,12 +79,9 @@ router.delete('/deleteData', (req, res) => {
 // get URL for uploading
 router.post('/getUploadUrl', (req, res) =>{
   const fileName = uuidv1()
-  console.log(`generated file name: ${fileName}`)
   awsManager.instance().sign_s3(fileName, req.body.fileType,
     data => {
-      console.log("got signed upload URL")
-      data.fileName = fileName
-      return res.json({success: true, data: data})
+      return res.json({success: true, data: { signedRequest: data, fileName: fileName}})
     },
     err => {
       return res.json({ success: false })

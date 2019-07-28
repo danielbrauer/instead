@@ -49,7 +49,7 @@ class ImageItem extends Component {
       <li style={{ padding: '10px' }} key={this.props.data.id}>
         <Delete onSubmit={this.props.onDelete} idToDelete={this.props.data.id}/>
         <br/>
-        <img src={this.props.data.url} alt={this.props.data.id} width="200" height="200"/>
+        <img src={this.props.url+this.props.data.fileName} alt={this.props.data.id} width="200" height="200"/>
       </li>
     )
   }
@@ -64,9 +64,7 @@ class App extends Component {
       id: 0,
       message: null,
       intervalIsSet: false,
-      idToDelete: null,
-      idToUpdate: null,
-      objectToUpdate: null,
+      contentUrl: ""
     }
     this.backendUrl = "http://localhost:3001/api/"
   }
@@ -75,9 +73,10 @@ class App extends Component {
   // then we incorporate a polling logic so that we can easily see if our db has
   // changed and implement those changes into our UI
   componentDidMount() {
+    this.getConfig();
     this.getDataFromDb();
     if (!this.state.intervalIsSet) {
-      let interval = setInterval(this.getDataFromDb, 1000);
+      const interval = setInterval(this.getDataFromDb, 1000);
       this.setState({ intervalIsSet: interval });
     }
   }
@@ -91,10 +90,15 @@ class App extends Component {
     }
   }
 
-  // just a note, here, in the front end, we use the id key of our data object
-  // in order to identify which we want to Update or delete.
-  // for our back end, we use the object id assigned by MongoDB to modify
-  // data base entries
+  getConfig = () => {
+    Axios.get(`${this.backendUrl}getConfig`)
+      .then(res => {
+        this.setState({ contentUrl: res.data.config.contentUrl })
+      })
+      .catch(error => {
+        console.warn(error.message)
+      })
+  }
 
   // our first get method that uses our backend api to
   // fetch data from our data base
@@ -121,7 +125,6 @@ class App extends Component {
     Axios.post(`${this.backendUrl}putData`, {
       id: idToBeAdded,
       fileName: record.fileName,
-      url: record.url,
     });
   };
 
@@ -152,7 +155,6 @@ class App extends Component {
     .then(response => {
       const returnData = response.data.data;
       const signedRequest = returnData.signedRequest;
-      const url = returnData.url;
       const fileName = returnData.fileName;
       
      // Put the fileType in the headers for the upload
@@ -163,20 +165,20 @@ class App extends Component {
       };
       Axios.put(signedRequest,file,options)
       .then(result => {
-        this.putDataToDB({url: url, fileName: fileName});
+        this.putDataToDB({fileName: fileName});
       })
     })
   }
 
   render() {
-    const { data } = this.state;
+    const { data, contentUrl } = this.state;
     return (
       <div>
         <ul>
           {data.length === 0
             ? 'NO DB ENTRIES YET'
             : data.map((dat) => (
-              <ImageItem data={dat} onDelete={this.deleteFromDB} key={dat.id}/>
+              <ImageItem data={dat} url={contentUrl} onDelete={this.deleteFromDB} key={dat.id}/>
               ))}
         </ul>
         <Add onSubmit={this.handleUpload}/>

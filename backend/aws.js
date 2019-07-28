@@ -24,7 +24,11 @@ class AWSManager {
 			AWSManager._instance = new AWSManager();
 		}
 		return AWSManager._instance;	
-	}
+    }
+    
+    content_url_s3() {
+        return `https://${this.bucket}.s3.amazonaws.com/`
+    }
 
     sign_s3(fileName, fileType, successCallback, errorCallback) {
         // Set up the payload of what we are sending to the S3 api
@@ -41,13 +45,8 @@ class AWSManager {
                 console.log(err, err.stack);
                 return errorCallback(err);
             }
-            // Data payload of what we are sending back, the url of the signedRequest and a URL where we can access the content after its saved. 
-            const returnData = {
-                signedRequest: data,
-                url: `https://${this.bucket}.s3.amazonaws.com/${fileName}`,
-            };
 
-            return successCallback(returnData)
+            return successCallback(data)
         });
     }
 
