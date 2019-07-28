@@ -68,6 +68,7 @@ class App extends Component {
       idToUpdate: null,
       objectToUpdate: null,
     }
+    this.backendUrl = "http://localhost:3001/api/"
   }
 
   // when component mounts, first thing it does is fetch all existing data in our db
@@ -98,9 +99,10 @@ class App extends Component {
   // our first get method that uses our backend api to
   // fetch data from our data base
   getDataFromDb = () => {
-    fetch('http://localhost:3001/api/getData')
+    fetch(`${this.backendUrl}getData`)
       .then((data) => data.json())
-      .then((res) => this.setState({ data: res.data }));
+      .then((res) => this.setState({ data: res.data }))
+      .catch(error => console.warn(error.message))
   };
 
   // our put method that uses our backend api
@@ -112,7 +114,7 @@ class App extends Component {
       ++idToBeAdded;
     }
 
-    Axios.post('http://localhost:3001/api/putData', {
+    Axios.post(`${this.backendUrl}putData`, {
       id: idToBeAdded,
       fileName: record.fileName,
       url: record.url,
@@ -129,7 +131,7 @@ class App extends Component {
       }
     });
 
-    Axios.delete('http://localhost:3001/api/deleteData', {
+    Axios.delete(`${this.backendUrl}deleteData`, {
       data: {
         id: objIdToDelete,
       },
@@ -140,7 +142,7 @@ class App extends Component {
   handleUpload = (uploadInput) => {
     const file = uploadInput.files[0];
     const fileType = Path.extname(file.name).substr(1) // ext includes . separator
-    Axios.post("http://localhost:3001/api/getUploadUrl",{
+    Axios.post(`${this.backendUrl}getUploadUrl`,{
       fileType : fileType,
     })
     .then(response => {
