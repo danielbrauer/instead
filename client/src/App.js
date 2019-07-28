@@ -99,10 +99,13 @@ class App extends Component {
   // our first get method that uses our backend api to
   // fetch data from our data base
   getDataFromDb = () => {
-    fetch(`${this.backendUrl}getData`)
-      .then((data) => data.json())
-      .then((res) => this.setState({ data: res.data }))
-      .catch(error => console.warn(error.message))
+    Axios.get(`${this.backendUrl}getData`)
+      .then(res => {
+        this.setState({ data: res.data.data })
+      })
+      .catch(error => {
+        console.warn(error.message)
+      })
   };
 
   // our put method that uses our backend api
