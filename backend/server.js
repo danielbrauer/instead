@@ -7,10 +7,12 @@ const Data = require('./data');
 const config = require('config');
 const awsManager = require('./aws').AWSManager;
 const uuidv1 = require('uuid/v1');
+const helmet = require('helmet');
 
 const API_PORT = 3001;
 const app = express();
 app.use(cors());
+app.use(helmet());
 const router = express.Router();
 
 // this is our MongoDB database
