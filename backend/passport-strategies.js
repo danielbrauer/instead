@@ -2,6 +2,7 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const UserModel = require('./schema/user')
 const config = require('config')
+const crypto = require('crypto')
 
 const secret = config.get('Customer.jwt').get('secret');
 
@@ -15,12 +16,20 @@ passport.use(
             passwordField: 'password'
         }, 
         function (email, password, callback) {
-            return UserModel.findOne({email, password})
+            return UserModel.findOne({email})
                 .then(user => {
                     if (!user) {
-                        return callback(null, false, {message: 'Incorrect email or password.'})
+                        return callback(null, false, {message: 'No such user.'})
                     }
-                    return callback(null, user, {message: 'Logged In Successfully'})
+                    crypto.scrypt(password, user.salt, 64, (error, hash) => {
+                        if (error) {
+                            return callback(error, false, {message: 'Error hashing password.'})
+                        }
+                        if (hash.toString('base64') == user.passwordHash) {
+                            return callback(null, user, {message: 'Logged In Successfully'})
+                        }
+                        return callback(null, false, {message: 'Incorrect password'})
+                    })
                 })
                 .catch(err => callback(err))
         }
@@ -33,7 +42,6 @@ passport.use(
         secretOrKey   : secret
     },
     function (jwtPayload, callback) {
-        console.log("chekcing")
         return callback(null, true)
     }
 ));
