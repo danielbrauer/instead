@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Axios from 'axios';
+import AxiosHelper from './AxiosHelper'
 import Path from 'path';
 import User from './User'
 
@@ -16,13 +17,13 @@ class Add extends Component {
     onSubmit = () => {
         this.props.onSubmit(this.state.uploadInput);
     }
-    onSelect = (ref) => {
-        this.setState({ uploadInput: ref });
+    onSelect = (event) => {
+        this.setState({ uploadInput: event.target });
     }
     render() {
         return (
             <div style={{ padding: '10px' }}>
-                <input ref={this.onSelect} type="file" />
+                <input onChange={this.onSelect} type="file" />
                 <button onClick={this.onSubmit} disabled={!this.enableUpload()}>Upload</button>
             </div>
         );
@@ -62,95 +63,86 @@ class App extends Component {
         super(props);
         this.state = {
             data: [],
-            id: 0,
-            message: null,
-            intervalIsSet: false,
             contentUrl: "",
         }
     }
 
     // when component mounts, first thing it does is fetch all existing data in our db
-    // then we incorporate a polling logic so that we can easily see if our db has
-    // changed and implement those changes into our UI
     componentDidMount() {
-        Axios.defaults.headers.common['Authorization'] = `Bearer ${User.getToken()}`;
-        this.getConfig();
-        this.getDataFromDb();
-        if (!this.state.intervalIsSet) {
-            const interval = setInterval(this.getDataFromDb, 1000)
-            this.setState({ intervalIsSet: interval })
-        }
-    }
-
-    // never let a process live forever
-    // always kill a process everytime we are done using it
-    componentWillUnmount() {
-        if (this.state.intervalIsSet) {
-            clearInterval(this.state.intervalIsSet)
-            this.setState({ intervalIsSet: null })
-        }
+        this.authorizedAxios = Axios.create({
+            headers: {'Authorization': `Bearer ${User.getToken()}`}
+        })
+        // Axios.defaults.headers.common['Authorization'] = `Bearer ${User.getToken()}`;
+        this.getConfig()
+        this.getDataFromDb()
     }
 
     getConfig = () => {
-        Axios.get(this.props.serverUrl + 'getConfig')
+        this.authorizedAxios.get(this.props.serverUrl + 'getConfig')
             .then(res => {
                 this.setState({ contentUrl: res.data.config.contentUrl })
             })
             .catch(error => {
-                console.warn(error.message)
+                AxiosHelper.logError(error)
             })
     }
 
     // our first get method that uses our backend api to
     // fetch data from our data base
     getDataFromDb = () => {
-        Axios.get(this.props.serverUrl + 'getData')
+        this.authorizedAxios.get(this.props.serverUrl + 'getData')
             .then(res => {
                 if (res.data.data)
                     this.setState({ data: res.data.data })
             })
             .catch(error => {
-                console.warn(error.message)
+                AxiosHelper.logError(error)
             })
     };
 
     // our put method that uses our backend api
     // to create new query into our data base
     putDataToDB = (record) => {
-        const currentIds = this.state.data.map((data) => data.id);
-        let idToBeAdded = 0;
+        const currentIds = this.state.data.map((data) => data.id)
+        let idToBeAdded = 0
         while (currentIds.includes(idToBeAdded)) {
-            ++idToBeAdded;
+            ++idToBeAdded
         }
 
-        Axios.post(this.props.serverUrl + 'putData', {
+        this.authorizedAxios.post(this.props.serverUrl + 'putData', {
             id: idToBeAdded,
             fileName: record.fileName,
-        });
+        })
+        .then(response => {
+            this.getDataFromDb()
+        })
     };
 
     // our delete method that uses our backend api
     // to remove existing database information
     deleteFromDB = (idTodelete) => {
-        let objIdToDelete = null;
+        let objIdToDelete = null
         this.state.data.forEach((dat) => {
             if (dat.id === parseInt(idTodelete)) {
-                objIdToDelete = dat._id;
+                objIdToDelete = dat._id
             }
-        });
+        })
 
-        Axios.delete(this.props.serverUrl + 'deleteData', {
+        this.authorizedAxios.delete(this.props.serverUrl + 'deleteData', {
             data: {
                 id: objIdToDelete,
             },
-        });
+        })
+        .then(response => {
+            this.getDataFromDb()
+        })
     };
 
     // Perform the upload
     handleUpload = (uploadInput) => {
         const file = uploadInput.files[0];
         const fileType = Path.extname(file.name).substr(1) // ext includes . separator
-        Axios.post(this.props.serverUrl + 'getUploadUrl', {
+        this.authorizedAxios.post(this.props.serverUrl + 'getUploadUrl', {
             fileType: fileType,
         })
             .then(response => {
@@ -161,8 +153,12 @@ class App extends Component {
                 // Put the fileType in the headers for the upload
                 const options = {
                     headers: {
-                        'Content-Type': fileType
-                    }
+                        'Content-Type': fileType,
+                    },
+                    transformRequest: [(data, headers) => {
+                        delete headers.common.Authorization
+                        return data
+                    }],
                 };
                 Axios.put(signedRequest, file, options)
                     .then(result => {
