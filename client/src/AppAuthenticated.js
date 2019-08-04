@@ -73,7 +73,7 @@ class App extends Component {
     // then we incorporate a polling logic so that we can easily see if our db has
     // changed and implement those changes into our UI
     componentDidMount() {
-        Axios.defaults.headers.common['Authorization'] = `JWT ${User.getToken()}`;
+        Axios.defaults.headers.common['Authorization'] = `Bearer ${User.getToken()}`;
         this.getConfig();
         this.getDataFromDb();
         if (!this.state.intervalIsSet) {

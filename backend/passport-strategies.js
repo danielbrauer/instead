@@ -29,7 +29,7 @@ passport.use(
 
 passport.use(
     new JWTStrategy({
-        jwtFromRequest: ExtractJWT.fromAuthHeaderWithScheme('JWT'),
+        jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
         secretOrKey   : secret
     },
     function (jwtPayload, callback) {
