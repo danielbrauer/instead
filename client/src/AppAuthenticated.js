@@ -3,6 +3,7 @@ import Axios from 'axios';
 import AxiosHelper from './AxiosHelper'
 import Path from 'path';
 import User from './User'
+import jwt from 'jsonwebtoken'
 
 class Add extends Component {
     constructor(props) {
@@ -177,6 +178,7 @@ class App extends Component {
         return (
             <div>
                 <button onClick={this.logOut}>Log Out</button>
+                {jwt.decode(User.getToken()).email}
                 <ul>
                     {data.length === 0
                         ? 'NO DB ENTRIES YET'

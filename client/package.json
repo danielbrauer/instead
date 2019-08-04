@@ -37,6 +37,7 @@
     "directory": "client"
   },
   "devDependencies": {
+    "jsonwebtoken": "^8.5.1",
     "typescript": "^3.4.5",
     "valuelink": "^2.0.9"
   },
