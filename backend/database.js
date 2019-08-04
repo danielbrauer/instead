@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const config = require('config')
 
-const dbConfig = config.get('Customer.dbConfig');
+const dbConfig = config.get('Customer.database');
 const scheme = dbConfig.get('scheme');
 const user = encodeURIComponent(dbConfig.get('user'));
 const password = encodeURIComponent(dbConfig.get('password'));
