@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const UserSchema = new Schema(
   {
-    email: String,
+    username: String,
     passwordHash: String,
     salt: String,
   },
@@ -11,4 +11,4 @@ const UserSchema = new Schema(
 );
 
 // export the new Schema so we could modify it using Node.js
-module.exports = mongoose.model("UserModel", UserSchema);
+module.exports = mongoose.model("User", UserSchema);

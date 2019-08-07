@@ -3,11 +3,10 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const helmet = require('helmet')
-const passport = require('passport')
+const authManager = require('./auth-strategies')
 
 const API_PORT = 3001
 const app = express()
-// app.use(cors({allowedHeaders: 'Authorization'}))
 app.use(cors())
 app.use(helmet())
 
@@ -19,14 +18,13 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(morgan('dev'))
 
-app.use(passport.initialize())
-require('./passport-strategies')
+require('./auth-strategies')
 
 const auth = require('./routes/auth')
 app.use('/auth', auth)
 
 const api = require('./routes/api')
-app.use('/api', passport.authenticate('jwt', {session: false}), api)
+app.use('/api', authManager.authenticateBearer, api)
 // app.use('/api', api)
 
 // launch our backend into a port

@@ -1,9 +1,9 @@
 const express = require('express')
 const jwt = require('jsonwebtoken')
-const passport = require('passport')
 const UserModel = require('../schema/user')
 const config = require('config')
 const crypto = require('crypto')
+const authManager = require('../auth-strategies')
 
 const secret = config.get('Customer.jwt').get('secret');
 
@@ -13,29 +13,15 @@ function createTokenForUser(user, callback) {
     return jwt.sign({email: user.email}, secret, callback)
 }
 
-router.post('/login', function (req, res, next) {
-    const authenticator = passport.authenticate('local', { session: false }, (err, user, info) => {
-        if (err) {
-            return res.status(500).send('Authentication error')
-        }
-        if (!user) {
-            return res.status(400).send('Invalid username or password')
-        }
-        req.login(user, { session: false }, (err) => {
-            if (err) {
-                return res.status(500).send('Error logging in')
-            }
-            createTokenForUser(user, (error, token) => {
-                if (error) return res.status(500).send('User created, but error creating token')
-                return res.json({ token })
-            })
-        })
+router.get('/login', authManager.authenticateBasic, function (req, res, next) {
+    createTokenForUser(req.user, (error, token) => {
+        if (error) return res.status(500).send('User created, but error creating token')
+        return res.json({ token })
     })
-    authenticator(req, res, next)
 })
 
 router.post('/new', function (req, res) {
-    UserModel.findOne({ email: req.body.email }, 'email', (error, user) => {
+    UserModel.findOne({ username: req.body.username }, 'username', (error, user) => {
         if (error) {
             return res.status(500).send('Error searching for user')
         }
@@ -54,7 +40,7 @@ router.post('/new', function (req, res) {
                 }
 
                 UserModel.create({
-                    email: req.body.email,
+                    username: req.body.username,
                     passwordHash: hash.toString('base64'),
                     salt: salt
                 }, (error, user) => {

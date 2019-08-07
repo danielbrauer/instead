@@ -46,10 +46,12 @@ class App extends Component {
 
     login = data => {
         console.log('logging in')
-        Axios.post(this.props.serverUrl + 'login',
+        Axios.get(this.props.serverUrl + 'login',
             {
-                email: data.username,
-                password: data.password
+                auth: {
+                    username: data.username,
+                    password: data.password,
+                },
             })
             .then(res => {
                 User.setToken(res.data.token)
@@ -64,7 +66,7 @@ class App extends Component {
         console.log('creating user')
         Axios.post(this.props.serverUrl + 'new',
             {
-                email: data.username,
+                username: data.username,
                 password: data.password
             })
             .then(res => {
