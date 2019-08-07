@@ -55,7 +55,7 @@ router.post('/getUploadUrl', (req, res) => {
     )
 })
 
-// this method adds a new post
+// this method adds a new post (at a POST, incidentally)
 router.post('/putData', (req, res) => {
     Data.create(req.body, (err, data) => {
         if (err) return res.json({ success: false, error: err })

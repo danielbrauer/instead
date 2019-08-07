@@ -9,8 +9,8 @@ const secret = config.get('Customer.jwt').get('secret');
 
 const router = express.Router()
 
-function createTokenForUser(user) {
-    return jwt.sign(user.toJSON(), secret)
+function createTokenForUser(user, callback) {
+    return jwt.sign({email: user.email}, secret, callback)
 }
 
 router.post('/login', function (req, res, next) {
@@ -25,8 +25,10 @@ router.post('/login', function (req, res, next) {
             if (err) {
                 return res.status(500).send('Error logging in')
             }
-            const token = createTokenForUser(user)
-            return res.json({ user, token })
+            createTokenForUser(user, (error, token) => {
+                if (error) return res.status(500).send('User created, but error creating token')
+                return res.json({ token })
+            })
         })
     })
     authenticator(req, res, next)
@@ -59,8 +61,11 @@ router.post('/new', function (req, res) {
                     if (error) {
                         return res.status(500).send('Error creating new user')
                     }
-                    const token = createTokenForUser(user)
-                    return res.json({ user, token })
+                    createTokenForUser(user, (error, token) => {
+                        if (error) return res.status(500).send('User created, but error creating token')
+                        return res.json({ token })
+                    })
+
                 })
             })
         })

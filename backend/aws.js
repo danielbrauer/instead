@@ -35,7 +35,7 @@ class AWSManager {
         const s3Params = {
             Bucket: AWSManager.instance().bucket,
             Key: fileName,
-            Expires: 500,
+            Expires: 300,
             ContentType: fileType,
             ACL: 'public-read',
         };
