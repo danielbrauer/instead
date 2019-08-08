@@ -1,9 +1,9 @@
-const express = require('express')
-const jwt = require('jsonwebtoken')
-const UserModel = require('../schema/user')
-const config = require('config')
-const crypto = require('crypto')
-const authManager = require('../auth-strategies')
+import express from 'express'
+import jwt from 'jsonwebtoken'
+import UserModel from '../schema/user'
+import config from 'config'
+import crypto from 'crypto'
+import authManager from '../auth-strategies'
 
 const secret = config.get('Customer.jwt').get('secret');
 
@@ -58,4 +58,4 @@ router.post('/new', function (req, res) {
     })
 })
 
-module.exports = router
+export default router

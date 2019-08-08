@@ -1,13 +1,13 @@
-const config = require('config');
-const aws = require('aws-sdk');
+import config from 'config'
+import aws from 'aws-sdk'
 
 class AWSManager {
     constructor() {
-        const awsConfig = config.get('Customer.aws');
-        const accessKeyId = awsConfig.get('accessKeyId');
-        const secretKey = awsConfig.get('secretKey');
-        const region = awsConfig.get('region');
-        this.bucket = awsConfig.get('bucket');
+        const awsConfig = config.get('Customer.aws')
+        const accessKeyId = awsConfig.get('accessKeyId')
+        const secretKey = awsConfig.get('secretKey')
+        const region = awsConfig.get('region')
+        this.bucket = awsConfig.get('bucket')
 
         aws.config.update({
             region: region,
@@ -19,9 +19,8 @@ class AWSManager {
     }
     
 	static instance(){
-		if (AWSManager._instance === null || 
-			AWSManager._instance === undefined){
-			AWSManager._instance = new AWSManager();
+		if (AWSManager._instance === null || AWSManager._instance === undefined){
+			AWSManager._instance = new AWSManager()
 		}
 		return AWSManager._instance
     }
@@ -38,7 +37,7 @@ class AWSManager {
             Expires: 300,
             ContentType: fileType,
             ACL: 'public-read',
-        };
+        }
         // Make a request to the S3 API to get a signed URL which we can use to upload our file
         AWSManager.instance().s3.getSignedUrl('putObject', s3Params, (err, data) => {
             if (err) {
@@ -47,14 +46,14 @@ class AWSManager {
             }
 
             return successCallback(data)
-        });
+        })
     }
 
     static delete_s3(key, successCallback, errorCallback) {
         const s3Params = {
             Bucket: AWSManager.instance().bucket, 
             Key: key,
-        };
+        }
         AWSManager.instance().s3.deleteObject(s3Params, (err, data) => {
             if (err) {
                 console.log(err, err.stack)
@@ -63,8 +62,8 @@ class AWSManager {
             }
             
             successCallback(data)
-        });
+        })
     }
 }
 
-module.exports = AWSManager;
+export default AWSManager

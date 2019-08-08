@@ -1,7 +1,7 @@
-const express = require('express')
-const Data = require('../schema/data')
-const awsManager = require('../aws')
-const uuidv1 = require('uuid/v1')
+import express from 'express'
+import Data from '../schema/data'
+import awsManager from '../aws'
+import uuidv1 from 'uuid/v1'
 
 const router  = express.Router()
 
