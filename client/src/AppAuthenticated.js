@@ -51,6 +51,7 @@ class ImageItem extends Component {
         return (
             <li style={{ padding: '10px' }} key={this.props.data.id}>
                 <Delete onSubmit={this.props.onDelete} idToDelete={this.props.data.id} />
+                {this.props.data.username}
                 <br />
                 <img src={this.props.url + this.props.data.fileName} alt={this.props.data.id} width="200" height="200" />
             </li>
@@ -178,7 +179,7 @@ class App extends Component {
         return (
             <div>
                 <button onClick={this.logOut}>Log Out</button>
-                {jwt.decode(User.getToken()).email}
+                {jwt.decode(User.getToken()).username}
                 <ul>
                     {data.length === 0
                         ? 'NO DB ENTRIES YET'

@@ -10,7 +10,7 @@ const secret = config.get('Customer.jwt').get('secret');
 const router = express.Router()
 
 function createTokenForUser(user, callback) {
-    return jwt.sign({email: user.email}, secret, callback)
+    return jwt.sign({username: user.username}, secret, callback)
 }
 
 router.get('/login', authManager.authenticateBasic, function (req, res, next) {

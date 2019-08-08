@@ -57,6 +57,7 @@ router.post('/getUploadUrl', (req, res) => {
 
 // this method adds a new post (via POST, incidentally)
 router.post('/putData', (req, res) => {
+    req.body.username = req.tokenPayload.username
     Data.create(req.body, (err, data) => {
         if (err) return res.json({ success: false, error: err })
         console.log(data)
