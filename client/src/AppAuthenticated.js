@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
-import Axios from 'axios';
+import React, { Component } from 'react'
+import Axios from 'axios'
 import AxiosHelper from './AxiosHelper'
-import Path from 'path';
+import Path from 'path'
 import User from './User'
+import UserCache from './UserCache'
 import jwt from 'jsonwebtoken'
 
 class Add extends Component {
@@ -49,11 +50,11 @@ class Delete extends Component {
 class PostItem extends Component {
     render() {
         return (
-            <li style={{ padding: '10px' }} key={this.props.data._id}>
-                <Delete onSubmit={this.props.onDelete} idToDelete={this.props.data._id} />
-                {this.props.data.userid}
+            <li style={{ padding: '10px' }} key={this.props.post._id}>
+                <Delete onSubmit={this.props.onDelete} idToDelete={this.props.post._id} />
+                {this.props.user.username}
                 <br />
-                <img src={this.props.url + this.props.data._id} alt={this.props.data._id} width="200" height="200" />
+                <img src={this.props.url + this.props.post._id} alt={this.props.post._id} width="200" height="200" />
             </li>
         )
     }
@@ -65,16 +66,24 @@ class App extends Component {
         super(props);
         this.state = {
             data: [],
+            users: {},
             contentUrl: "",
         }
+        this.authorizedAxios = Axios.create({
+            headers: {'Authorization': `Bearer ${User.getToken()}`}
+        })
+        this.addUser = this.addUser.bind(this)
+        this.userCache = new UserCache(() => this.state.users, this.addUser, this.authorizedAxios, this.props.serverUrl + 'getUserById')
+    }
+
+    addUser(user) {
+        let users = Object.assign({}, this.state.users)
+        users[user._id] = user
+        this.setState({ users: users })
     }
 
     // when component mounts, first thing it does is fetch all existing data in our db
     componentDidMount() {
-        this.authorizedAxios = Axios.create({
-            headers: {'Authorization': `Bearer ${User.getToken()}`}
-        })
-        // Axios.defaults.headers.common['Authorization'] = `Bearer ${User.getToken()}`;
         this.getConfig()
         this.getDataFromDb()
     }
@@ -105,16 +114,9 @@ class App extends Component {
     // our delete method that uses our backend api
     // to remove existing database information
     deleteFromDB = (idTodelete) => {
-        let objIdToDelete = null
-        this.state.data.forEach((dat) => {
-            if (dat.id === parseInt(idTodelete)) {
-                objIdToDelete = dat._id
-            }
-        })
-
         this.authorizedAxios.delete(this.props.serverUrl + 'deletePost', {
-            data: {
-                id: objIdToDelete,
+            params: {
+                id: idTodelete,
             },
         })
         .then(response => {
@@ -156,12 +158,18 @@ class App extends Component {
         return (
             <div>
                 <button onClick={this.logOut}>Log Out</button>
-                {jwt.decode(User.getToken()).username}
+                {this.userCache.getUser(jwt.decode(User.getToken()).userid).username}
                 <ul>
                     {data.length === 0
                         ? 'NO DB ENTRIES YET'
-                        : data.map((dat) => (
-                            <PostItem data={dat} url={contentUrl} onDelete={this.deleteFromDB} key={dat._id} />
+                        : data.map((post) => (
+                            <PostItem
+                                post={post}
+                                user={this.userCache.getUser(post.userid)}
+                                url={contentUrl}
+                                onDelete={this.deleteFromDB}
+                                key={post._id}
+                            />
                         ))}
                 </ul>
                 <Add onSubmit={this.handleUpload} />

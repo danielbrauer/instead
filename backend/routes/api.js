@@ -1,5 +1,6 @@
 import express from 'express'
 import Post from '../schema/post'
+import User from '../schema/user'
 import awsManager from '../aws'
 import uuidv1 from 'uuid/v1'
 
@@ -22,15 +23,24 @@ router.get('/getPosts', (req, res) => {
     });
 });
 
+router.post('/getUserById', (req, res) => {
+    const { userid } = req.body
+    User.findById(userid, '_id username', (err, user) => {
+        if (err) return res.send(err)
+        console.log(user)
+        return res.json({ success: true, user })
+    })
+})
+
 // removes existing data in our database, and 
 // deletes the associated s3 object
 router.delete('/deletePost', (req, res) => {
-    const { id } = req.body
-    Post.findById(id, (err, data) => {
+    const id = req.param("id")
+    Post.findById(id, '_id', (err, data) => {
         if (err) return res.send(err)
-        awsManager.delete_s3(data.fileName,
+        awsManager.delete_s3(data._id,
             () => {
-                Post.findByIdAndDelete(id, (err) => {
+                Post.findByIdAndDelete(data._id, (err) => {
                     if (err) return res.send(err)
                     return res.json({ success: true })
                 });
