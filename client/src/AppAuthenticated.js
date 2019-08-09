@@ -46,14 +46,14 @@ class Delete extends Component {
     }
 }
 
-class ImageItem extends Component {
+class PostItem extends Component {
     render() {
         return (
-            <li style={{ padding: '10px' }} key={this.props.data.id}>
-                <Delete onSubmit={this.props.onDelete} idToDelete={this.props.data.id} />
-                {this.props.data.username}
+            <li style={{ padding: '10px' }} key={this.props.data._id}>
+                <Delete onSubmit={this.props.onDelete} idToDelete={this.props.data._id} />
+                {this.props.data.userid}
                 <br />
-                <img src={this.props.url + this.props.data.fileName} alt={this.props.data.id} width="200" height="200" />
+                <img src={this.props.url + this.props.data._id} alt={this.props.data._id} width="200" height="200" />
             </li>
         )
     }
@@ -92,7 +92,7 @@ class App extends Component {
     // our first get method that uses our backend api to
     // fetch data from our data base
     getDataFromDb = () => {
-        this.authorizedAxios.get(this.props.serverUrl + 'getData')
+        this.authorizedAxios.get(this.props.serverUrl + 'getPosts')
             .then(res => {
                 if (res.data.data)
                     this.setState({ data: res.data.data })
@@ -100,24 +100,6 @@ class App extends Component {
             .catch(error => {
                 AxiosHelper.logError(error)
             })
-    };
-
-    // our put method that uses our backend api
-    // to create new query into our data base
-    putDataToDB = (record) => {
-        const currentIds = this.state.data.map((data) => data.id)
-        let idToBeAdded = 0
-        while (currentIds.includes(idToBeAdded)) {
-            ++idToBeAdded
-        }
-
-        this.authorizedAxios.post(this.props.serverUrl + 'putData', {
-            id: idToBeAdded,
-            fileName: record.fileName,
-        })
-        .then(response => {
-            this.getDataFromDb()
-        })
     };
 
     // our delete method that uses our backend api
@@ -130,7 +112,7 @@ class App extends Component {
             }
         })
 
-        this.authorizedAxios.delete(this.props.serverUrl + 'deleteData', {
+        this.authorizedAxios.delete(this.props.serverUrl + 'deletePost', {
             data: {
                 id: objIdToDelete,
             },
@@ -144,29 +126,24 @@ class App extends Component {
     handleUpload = (uploadInput) => {
         const file = uploadInput.files[0];
         const fileType = Path.extname(file.name).substr(1) // ext includes . separator
-        this.authorizedAxios.post(this.props.serverUrl + 'getUploadUrl', {
+        this.authorizedAxios.post(this.props.serverUrl + 'createPost', {
             fileType: fileType,
         })
-            .then(response => {
-                const returnData = response.data.data;
-                const signedRequest = returnData.signedRequest;
-                const fileName = returnData.fileName;
+        .then(response => {
+            const returnData = response.data.data;
+            const signedRequest = returnData.signedRequest;
 
-                // Put the fileType in the headers for the upload
-                const options = {
-                    headers: {
-                        'Content-Type': fileType,
-                    },
-                    transformRequest: [(data, headers) => {
-                        delete headers.common.Authorization
-                        return data
-                    }],
-                };
-                Axios.put(signedRequest, file, options)
-                    .then(result => {
-                        this.putDataToDB({ fileName: fileName });
-                    })
+            // Put the fileType in the headers for the upload
+            const options = {
+                headers: {
+                    'Content-Type': fileType,
+                },
+            };
+            Axios.put(signedRequest, file, options)
+            .then(response => {
+                this.getDataFromDb()
             })
+        })
     }
 
     logOut = () => {
@@ -184,7 +161,7 @@ class App extends Component {
                     {data.length === 0
                         ? 'NO DB ENTRIES YET'
                         : data.map((dat) => (
-                            <ImageItem data={dat} url={contentUrl} onDelete={this.deleteFromDB} key={dat.id} />
+                            <PostItem data={dat} url={contentUrl} onDelete={this.deleteFromDB} key={dat._id} />
                         ))}
                 </ul>
                 <Add onSubmit={this.handleUpload} />

@@ -1,16 +1,12 @@
 import mongoose, {Schema} from 'mongoose'
 
-const DataSchema = new Schema(
+const PostSchema = new Schema(
 	{
-		username: {
+		_id: {
 			type: String,
 			required: true,
 		},
-		id: {
-			type: Number,
-			required: true,
-		},
-		fileName: {
+		userid: {
 			type: String,
 			required: true,
 		},
@@ -20,4 +16,4 @@ const DataSchema = new Schema(
 	}
 )
 
-export default mongoose.model("Data", DataSchema)
+export default mongoose.model("Post", PostSchema)

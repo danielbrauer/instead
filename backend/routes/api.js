@@ -1,5 +1,5 @@
 import express from 'express'
-import Data from '../schema/data'
+import Post from '../schema/post'
 import awsManager from '../aws'
 import uuidv1 from 'uuid/v1'
 
@@ -15,8 +15,8 @@ router.get('/getConfig', (req, res) => {
 })
 
 // this method fetches all available data in our database
-router.get('/getData', (req, res) => {
-    Data.find((err, data) => {
+router.get('/getPosts', (req, res) => {
+    Post.find({ userid: req.tokenPayload.userid }, (err, data) => {
         if (err) return res.json({ success: false, error: err })
         return res.json({ success: true, data: data })
     });
@@ -24,13 +24,13 @@ router.get('/getData', (req, res) => {
 
 // removes existing data in our database, and 
 // deletes the associated s3 object
-router.delete('/deleteData', (req, res) => {
+router.delete('/deletePost', (req, res) => {
     const { id } = req.body
-    Data.findById(id, (err, data) => {
+    Post.findById(id, (err, data) => {
         if (err) return res.send(err)
         awsManager.delete_s3(data.fileName,
             () => {
-                Data.findByIdAndDelete(id, (err) => {
+                Post.findByIdAndDelete(id, (err) => {
                     if (err) return res.send(err)
                     return res.json({ success: true })
                 });
@@ -43,26 +43,24 @@ router.delete('/deleteData', (req, res) => {
 });
 
 // get URL for uploading
-router.post('/getUploadUrl', (req, res) => {
+router.post('/createPost', (req, res) => {
     const fileName = uuidv1()
-    awsManager.sign_s3(fileName, req.body.fileType,
-        data => {
-            return res.json({ success: true, data: { signedRequest: data, fileName: fileName } })
+    Post.create(
+        {
+            _id: fileName,
+            userid: req.tokenPayload.userid,
         },
-        err => {
-            return res.json({ success: false })
-        }
-    )
-})
-
-// this method adds a new post (via POST, incidentally)
-router.post('/putData', (req, res) => {
-    req.body.username = req.tokenPayload.username
-    Data.create(req.body, (err, data) => {
+    (err, data) => {
         if (err) return res.json({ success: false, error: err })
-        console.log(data)
-        return res.json({ success: true })
+        awsManager.sign_s3(fileName, req.body.fileType,
+            data => {
+                return res.json({ success: true, data: { signedRequest: data, fileName: fileName } })
+            },
+            err => {
+                return res.json({ success: false })
+            }
+        )
     })
-});
+})
 
 module.exports = router

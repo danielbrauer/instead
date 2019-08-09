@@ -4,13 +4,14 @@ import UserModel from '../schema/user'
 import config from 'config'
 import crypto from 'crypto'
 import authManager from '../auth-strategies'
+import uuidv1 from 'uuid/v1'
 
 const secret = config.get('Customer.jwt').get('secret');
 
 const router = express.Router()
 
 function createTokenForUser(user, callback) {
-    return jwt.sign({username: user.username}, secret, callback)
+    return jwt.sign({ userid: user._id }, secret, callback)
 }
 
 router.get('/login', authManager.authenticateBasic, function (req, res, next) {
@@ -40,6 +41,7 @@ router.post('/new', function (req, res) {
                 }
 
                 UserModel.create({
+                    _id: uuidv1(),
                     username: req.body.username,
                     passwordHash: hash.toString('base64'),
                     salt: salt
