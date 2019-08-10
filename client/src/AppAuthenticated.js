@@ -196,7 +196,8 @@ class App extends Component {
                 <List>
                     {posts.map((post) => (
                         <List.Item key={post._id}>
-                            <Button onClick={() => this.deleteFromDB(post._id)}>Delete</Button>
+                            {CurrentUser.getPayload().userid === post.userid ?
+                            <Button onClick={() => this.deleteFromDB(post._id)}>Delete</Button> : null}
                             <List.Content>{this.userCache.getUser(post.userid).username}</List.Content>
                             <Image fluid src={contentUrl + post._id} alt={post._id} />
                         </List.Item>

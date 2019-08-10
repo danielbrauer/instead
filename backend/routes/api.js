@@ -121,12 +121,14 @@ router.post('/acceptFollowRequest', (req, res) => {
 // deletes the associated s3 object
 router.delete('/deletePost', (req, res) => {
     const id = req.query.id
-    Post.findById(id, '_id', (err, data) => {
+    Post.findById(id, '_id userid', (err, post) => {
         if (err) return res.status(500).send(err)
-        if (!data) return res.status(400).send('Post not found')
-        awsManager.delete_s3(data._id,
+        if (!post) return res.status(400).send('Post not found')
+        if (post.userid !== req.tokenPayload.userid)
+            return res.status(400).send('Can\'t delete other people\'s posts')
+        awsManager.delete_s3(post._id,
             () => {
-                Post.findByIdAndDelete(data._id, (err) => {
+                Post.findByIdAndDelete(post._id, (err) => {
                     if (err) return res.status(500).send(err)
                     return res.json({ success: true })
                 });
