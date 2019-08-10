@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import Axios from 'axios'
-import User from './User'
 import AxiosHelper from './AxiosHelper'
+import CurrentUser from './CurrentUser'
 import { LinkedComponent } from 'valuelink'
 
 class UserForm extends LinkedComponent {
@@ -54,7 +54,7 @@ class App extends Component {
                 },
             })
             .then(res => {
-                User.setToken(res.data.token)
+                CurrentUser.setToken(res.data.token)
                 this.props.setLoggedIn(true)
             })
             .catch(error => {
@@ -70,7 +70,7 @@ class App extends Component {
                 password: data.password
             })
             .then(res => {
-                User.setToken(res.data.token)
+                CurrentUser.setToken(res.data.token)
                 this.props.setLoggedIn(true)
             })
             .catch(error => {

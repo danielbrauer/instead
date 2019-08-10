@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import User from './User'
+import CurrentUser from './CurrentUser'
 
 import 'semantic-ui-css/semantic.min.css'
 
@@ -14,7 +14,7 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            loggedIn: User.loggedIn(),
+            loggedIn: CurrentUser.loggedIn(),
         }
     }
 
