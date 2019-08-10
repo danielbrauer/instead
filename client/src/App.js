@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import User from './User'
 
+import 'semantic-ui-css/semantic.min.css'
+
 // const AppAuthenticated = React.lazy(() => import('./AppAuthenticated'))
 // const AppUnauthenticated = React.lazy(() => import('./AppUnauthenticated'))
 import AppAuthenticated from './AppAuthenticated'

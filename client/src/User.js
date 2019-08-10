@@ -1,8 +1,14 @@
+import jwt from 'jsonwebtoken'
+
 const kTokenKey = 'jwt'
 
 class User {
     static getToken() {
         return localStorage.getItem(kTokenKey)
+    }
+
+    static getPayload() {
+        return jwt.decode(this.getToken())
     }
 
     static setToken(token) {
@@ -18,4 +24,4 @@ class User {
     }
 }
 
-module.exports = User
+export default User

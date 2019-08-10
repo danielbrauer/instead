@@ -4,7 +4,9 @@ import AxiosHelper from './AxiosHelper'
 import Path from 'path'
 import User from './User'
 import UserCache from './UserCache'
-import jwt from 'jsonwebtoken'
+
+import { Button } from 'semantic-ui-react'
+import FollowUserForm from './FollowUserForm'
 
 class Add extends Component {
     constructor(props) {
@@ -14,18 +16,18 @@ class Add extends Component {
         }
     }
     enableUpload = () => {
-        return this.state.uploadInput && this.state.uploadInput.files[0];
+        return this.state.uploadInput && this.state.uploadInput.files[0]
     }
     onSubmit = () => {
-        this.props.onSubmit(this.state.uploadInput);
+        this.props.onSubmit(this.state.uploadInput)
     }
-    onSelect = (event) => {
-        this.setState({ uploadInput: event.target });
+    onChange = (event) => {
+        this.setState({ uploadInput: event.target })
     }
     render() {
         return (
             <div style={{ padding: '10px' }}>
-                <input onChange={this.onSelect} type="file" />
+                <input onChange={this.onChange} type="file" />
                 <button onClick={this.onSubmit} disabled={!this.enableUpload()}>Upload</button>
             </div>
         );
@@ -34,14 +36,14 @@ class Add extends Component {
 
 class Delete extends Component {
     onSubmit = () => {
-        this.props.onSubmit(this.props.idToDelete);
+        this.props.onSubmit(this.props.idToDelete)
     }
     render() {
         return (
             <div style={{ padding: '10px' }}>
                 <button onClick={this.onSubmit}>
                     DELETE
-        </button>
+                </button>
             </div>
         );
     }
@@ -70,20 +72,19 @@ class App extends Component {
             contentUrl: "",
         }
         this.authorizedAxios = Axios.create({
-            headers: {'Authorization': `Bearer ${User.getToken()}`}
+            headers: { 'Authorization': `Bearer ${User.getToken()}` }
         })
-        this.addUser = this.addUser.bind(this)
         this.userCache = new UserCache(() => this.state.users, this.addUser, this.authorizedAxios, this.props.serverUrl + 'getUserById')
     }
 
-    addUser(user) {
+    addUser = (user) => {
         let users = Object.assign({}, this.state.users)
         users[user._id] = user
         this.setState({ users: users })
     }
 
     // when component mounts, first thing it does is fetch all existing data in our db
-    componentDidMount() {
+    componentDidMount = () => {
         this.getConfig()
         this.getDataFromDb()
     }
@@ -119,9 +120,9 @@ class App extends Component {
                 id: idTodelete,
             },
         })
-        .then(response => {
-            this.getDataFromDb()
-        })
+            .then(response => {
+                this.getDataFromDb()
+            })
     };
 
     // Perform the upload
@@ -131,20 +132,35 @@ class App extends Component {
         this.authorizedAxios.post(this.props.serverUrl + 'createPost', {
             fileType: fileType,
         })
-        .then(response => {
-            const returnData = response.data.data;
-            const signedRequest = returnData.signedRequest;
-
-            // Put the fileType in the headers for the upload
-            const options = {
-                headers: {
-                    'Content-Type': fileType,
-                },
-            };
-            Axios.put(signedRequest, file, options)
             .then(response => {
-                this.getDataFromDb()
+                const returnData = response.data.data;
+                const signedRequest = returnData.signedRequest;
+
+                // Put the fileType in the headers for the upload
+                const options = {
+                    headers: {
+                        'Content-Type': fileType,
+                    },
+                };
+                Axios.put(signedRequest, file, options)
+                    .then(response => {
+                        this.getDataFromDb()
+                    })
             })
+    }
+
+    follow = (username, callback) => {
+        this.authorizedAxios.get(this.props.serverUrl + 'sendFollowRequest', {
+            params: {
+                username: username,
+            },
+        })
+        .then(response => {
+            callback(true, "Request sent")
+        })
+        .catch(error => {
+            console.log(error.response.data)
+            callback(false, error.response.data)
         })
     }
 
@@ -157,8 +173,8 @@ class App extends Component {
         const { data, contentUrl } = this.state;
         return (
             <div>
-                <button onClick={this.logOut}>Log Out</button>
-                {this.userCache.getUser(jwt.decode(User.getToken()).userid).username}
+                <Button color="red" onClick={this.logOut}>Log Out</Button>
+                {this.userCache.getUser(User.getPayload().userid).username}
                 <ul>
                     {data.length === 0
                         ? 'NO DB ENTRIES YET'
@@ -173,6 +189,7 @@ class App extends Component {
                         ))}
                 </ul>
                 <Add onSubmit={this.handleUpload} />
+                <FollowUserForm callback={this.follow}/>
             </div>
         );
     }
