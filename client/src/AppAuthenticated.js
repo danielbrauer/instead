@@ -52,11 +52,23 @@ class Delete extends Component {
 class PostItem extends Component {
     render() {
         return (
-            <li style={{ padding: '10px' }} key={this.props.post._id}>
+            <li style={{ padding: '10px' }} key={this.props.user._id}>
                 <Delete onSubmit={this.props.onDelete} idToDelete={this.props.post._id} />
                 {this.props.user.username}
                 <br />
                 <img src={this.props.url + this.props.post._id} alt={this.props.post._id} width="200" height="200" />
+            </li>
+        )
+    }
+}
+
+class FollowRequestItem extends Component {
+    render() {
+        return (
+            <li style={{ padding: '10px' }} key={this.props.userid}>
+                <button onClick={this.props.onAccept}>accept</button>
+                <button onClick={this.props.onReject}>reject</button>
+                {this.props.username}
             </li>
         )
     }
@@ -68,6 +80,7 @@ class App extends Component {
         super(props);
         this.state = {
             data: [],
+            followRequests: [],
             users: {},
             contentUrl: "",
         }
@@ -87,6 +100,7 @@ class App extends Component {
     componentDidMount = () => {
         this.getConfig()
         this.getDataFromDb()
+        this.getFollowRequests()
     }
 
     getConfig = () => {
@@ -99,8 +113,6 @@ class App extends Component {
             })
     }
 
-    // our first get method that uses our backend api to
-    // fetch data from our data base
     getDataFromDb = () => {
         this.authorizedAxios.get(this.props.serverUrl + 'getPosts')
             .then(res => {
@@ -111,6 +123,17 @@ class App extends Component {
                 AxiosHelper.logError(error)
             })
     };
+
+    getFollowRequests = () => {
+        this.authorizedAxios.get(this.props.serverUrl + 'getFollowRequests')
+            .then(res => {
+                if (res.data.data)
+                    this.setState({ followRequests: res.data.data })
+            })
+            .catch(error => {
+                AxiosHelper.logError(error)
+            })
+    }
 
     // our delete method that uses our backend api
     // to remove existing database information
@@ -150,18 +173,34 @@ class App extends Component {
     }
 
     follow = (username, callback) => {
-        this.authorizedAxios.get(this.props.serverUrl + 'sendFollowRequest', {
-            params: {
-                username: username,
-            },
+        this.authorizedAxios.post(this.props.serverUrl + 'sendFollowRequest', {
+            username: username,
         })
-        .then(response => {
-            callback(true, "Request sent")
+            .then(response => {
+                callback(true, "Request sent")
+            })
+            .catch(error => {
+                console.log(error.response.data)
+                callback(false, error.response.data)
+            })
+    }
+
+    rejectFollowRequest = (userid) => {
+        this.authorizedAxios.post(this.props.serverUrl + 'rejectFollowRequest', {
+            userid: userid
         })
-        .catch(error => {
-            console.log(error.response.data)
-            callback(false, error.response.data)
+            .then(response => {
+                this.getFollowRequests()
+            })
+    }
+
+    acceptFollowRequest = (userid) => {
+        this.authorizedAxios.post(this.props.serverUrl + 'acceptFollowRequest', {
+            userid: userid
         })
+            .then(response => {
+                this.getFollowRequests()
+            })
     }
 
     logOut = () => {
@@ -170,7 +209,7 @@ class App extends Component {
     }
 
     render() {
-        const { data, contentUrl } = this.state;
+        const { data, followRequests, contentUrl } = this.state;
         return (
             <div>
                 <Button color="red" onClick={this.logOut}>Log Out</Button>
@@ -180,16 +219,29 @@ class App extends Component {
                         ? 'NO DB ENTRIES YET'
                         : data.map((post) => (
                             <PostItem
+                                key={post._id}
                                 post={post}
                                 user={this.userCache.getUser(post.userid)}
                                 url={contentUrl}
                                 onDelete={this.deleteFromDB}
-                                key={post._id}
                             />
                         ))}
                 </ul>
                 <Add onSubmit={this.handleUpload} />
-                <FollowUserForm callback={this.follow}/>
+                <FollowUserForm callback={this.follow} />
+                <ul>
+                    {followRequests.length === 0
+                        ? 'no follow requests'
+                        : followRequests.map((request) => (
+                            <FollowRequestItem
+                                key={request.requesterId}
+                                userid={request.requesterId}
+                                username={this.userCache.getUser(request.requesterId).username}
+                                onReject={() => this.rejectFollowRequest(request.requesterId)}
+                                onAccept={() => this.acceptFollowRequest(request.requesterId)}
+                            />
+                        ))}
+                </ul>
             </div>
         );
     }

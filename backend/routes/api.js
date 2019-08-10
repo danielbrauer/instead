@@ -39,8 +39,9 @@ router.get('/getUserById', (req, res) => {
     })
 })
 
-router.get('/sendFollowRequest', (req, res) => {
-    const requesteeName = req.query.username
+router.post('/sendFollowRequest', (req, res) => {
+    const requesteeName = req.body.username
+    console.log(req)
     User.findOne({ username: requesteeName }, '_id', (err, requestee) => {
         if (err) return res.status(500).send(err)
         if (requestee === null) return res.status(400).send('User does not exist')
@@ -53,6 +54,50 @@ router.get('/sendFollowRequest', (req, res) => {
             FollowRequest.create(potentialRequest, (err, newRequest) => {
                 if (err) return res.status(500).send(err)
                 return res.json({ success: true })
+            })
+        })
+    })
+})
+
+router.post('/rejectFollowRequest', (req, res) => {
+    const requesterId = req.body.userid
+    const requesteeId = req.tokenPayload.userid
+    FollowRequest.findOneAndDelete({requesterId: requesterId, requesteeId: requesteeId}, (err, request) => {
+        if (err) return res.status(500).send(err)
+        return res.json({ success: true })
+    })
+})
+
+router.post('/acceptFollowRequest', (req, res) => {
+    const requesterId = req.body.userid
+    const requesteeId = req.tokenPayload.userid
+    FollowRequest.findOne({requesterId: requesterId, requesteeId: requesteeId}, '_id', (err, request) => {
+        if (err) return res.status(500).send(err)
+        if (request === null) return res.status(400).send('No such follow request')
+        User.findOne({_id: requesterId}, (err, follower) => {
+            if (err) return res.status(500).send(err)
+            if (!follower) return res.status(400).send('No such user')
+            User.findOne({_id: requesteeId}, (err, user) => {
+                if (err) return res.status(500).send(err)
+                if (!user) return res.status(400).send('No such user')
+                follower.following.push(user._id)
+                follower.save((err) => {
+                    if (err) return res.status(500).send(err)
+                    user.followers.push(follower._id)
+                    user.save((err) => {
+                        if (err) {
+                            //not sure how to recover here
+                            if (err) return res.status(500).send(err)
+                        }
+                        request.remove((err) => {
+                            if (err) {
+                                //not sure how to recover here
+                                if (err) return res.status(500).send(err)
+                            }
+                            return res.json({ success: true })
+                        })
+                    })
+                })
             })
         })
     })
