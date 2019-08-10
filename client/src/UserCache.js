@@ -13,7 +13,9 @@ class UserCache {
     getUser(userid) {
         const user = this.getData()[userid]
         if (user === undefined) {
-            this.authorizedAxios.post(this.getUserUrl, {userid})
+            this.authorizedAxios.get(this.getUserUrl, {
+                params: {userid: userid}
+            })
             .then(response => {
                 this.setData(response.data.user)
             })

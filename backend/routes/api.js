@@ -23,8 +23,8 @@ router.get('/getPosts', (req, res) => {
     });
 });
 
-router.post('/getUserById', (req, res) => {
-    const { userid } = req.body
+router.get('/getUserById', (req, res) => {
+    const userid = req.param("userid")
     User.findById(userid, '_id username', (err, user) => {
         if (err) return res.send(err)
         console.log(user)
