@@ -18,10 +18,15 @@ router.get('/getConfig', (req, res) => {
 
 // this method fetches all available data in our database
 router.get('/getPosts', (req, res) => {
-    Post.find({ userid: req.tokenPayload.userid }, (err, data) => {
+    User.findById(req.tokenPayload.userid, (err, user) => {
         if (err) return res.status(500).send(err)
-        return res.json({ success: true, posts: data })
-    });
+        if (!user) return res.status(400).send('User does not exist')
+        user.following.push(user._id)
+        Post.find({ userid: user.following }, (err, data) => {
+            if (err) return res.status(500).send(err)
+            return res.json({ success: true, posts: data })
+        });
+    })
 });
 
 router.get('/getFollowRequests', (req, res) => {
@@ -49,15 +54,16 @@ router.get('/getUserById', (req, res) => {
 
 router.post('/sendFollowRequest', (req, res) => {
     const requesteeName = req.body.username
-    console.log(req)
     User.findOne({ username: requesteeName }, '_id', (err, requestee) => {
         if (err) return res.status(500).send(err)
-        if (requestee === null) return res.status(400).send('User does not exist')
+        if (!requestee) return res.status(400).send('User does not exist')
         const requesterId = req.tokenPayload.userid
+        if (requestee._id === requesterId)
+            return res.status(400).send('You don\'t need to follow yourself')
         const potentialRequest = {requesterId: requesterId, requesteeId: requestee._id}
         FollowRequest.findOne(potentialRequest, (err, existingRequest) => {
             if (err) return res.status(500).send(err)
-            if (existingRequest !== null) return res.status(400).send('Request already exists')
+            if (existingRequest) return res.status(400).send('Request already exists')
             potentialRequest._id = uuidv1()
             FollowRequest.create(potentialRequest, (err, newRequest) => {
                 if (err) return res.status(500).send(err)
@@ -81,7 +87,7 @@ router.post('/acceptFollowRequest', (req, res) => {
     const requesteeId = req.tokenPayload.userid
     FollowRequest.findOne({requesterId: requesterId, requesteeId: requesteeId}, '_id', (err, request) => {
         if (err) return res.status(500).send(err)
-        if (request === null) return res.status(400).send('No such follow request')
+        if (!request) return res.status(400).send('No such follow request')
         User.findOne({_id: requesterId}, (err, follower) => {
             if (err) return res.status(500).send(err)
             if (!follower) return res.status(400).send('No such user')
@@ -117,7 +123,7 @@ router.delete('/deletePost', (req, res) => {
     const id = req.query.id
     Post.findById(id, '_id', (err, data) => {
         if (err) return res.status(500).send(err)
-        if (data === null) return res.status(400).send('Post not found')
+        if (!data) return res.status(400).send('Post not found')
         awsManager.delete_s3(data._id,
             () => {
                 Post.findByIdAndDelete(data._id, (err) => {
