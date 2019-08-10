@@ -5,7 +5,7 @@ import Path from 'path'
 import CurrentUser from './CurrentUser'
 import UserCache from './UserCache'
 
-import { Button } from 'semantic-ui-react'
+import { Button, List, Image, Header } from 'semantic-ui-react'
 import FollowUserForm from './Components/FollowUserForm'
 
 class Add extends Component {
@@ -34,52 +34,13 @@ class Add extends Component {
     }
 }
 
-class Delete extends Component {
-    onSubmit = () => {
-        this.props.onSubmit(this.props.idToDelete)
-    }
-    render() {
-        return (
-            <div style={{ padding: '10px' }}>
-                <button onClick={this.onSubmit}>
-                    DELETE
-                </button>
-            </div>
-        );
-    }
-}
-
-class PostItem extends Component {
-    render() {
-        return (
-            <li style={{ padding: '10px' }} key={this.props.user._id}>
-                <Delete onSubmit={this.props.onDelete} idToDelete={this.props.post._id} />
-                {this.props.user.username}
-                <br />
-                <img src={this.props.url + this.props.post._id} alt={this.props.post._id} width="200" height="200" />
-            </li>
-        )
-    }
-}
-
-class FollowRequestItem extends Component {
-    render() {
-        return (
-            <li style={{ padding: '10px' }} key={this.props.userid}>
-                <button onClick={this.props.onAccept}>accept</button>
-                <button onClick={this.props.onReject}>reject</button>
-                {this.props.username}
-            </li>
-        )
-    }
-}
-
 class App extends Component {
     // initialize our state
     constructor(props) {
         super(props);
         this.state = {
-            data: [],
+            posts: [],
+            followers: [],
             followRequests: [],
             users: {},
             contentUrl: "",
@@ -99,8 +60,13 @@ class App extends Component {
     // when component mounts, first thing it does is fetch all existing data in our db
     componentDidMount = () => {
         this.getConfig()
-        this.getDataFromDb()
+        this.getPosts()
+        this.updateFollowerList()
+    }
+
+    updateFollowerList = () => {
         this.getFollowRequests()
+        this.getFollowers()
     }
 
     getConfig = () => {
@@ -113,22 +79,36 @@ class App extends Component {
             })
     }
 
-    getDataFromDb = () => {
+    getPosts = () => {
         this.authorizedAxios.get(this.props.serverUrl + 'getPosts')
             .then(res => {
-                if (res.data.data)
-                    this.setState({ data: res.data.data })
+                if (res.data.posts) {
+                    this.setState({ posts: res.data.posts })
+                }
             })
             .catch(error => {
                 AxiosHelper.logError(error)
             })
     };
 
+    getFollowers = () => {
+        this.authorizedAxios.get(this.props.serverUrl + 'getFollowers')
+            .then(res => {
+                if (res.data.followers) {
+                    this.setState({ followers: res.data.followers })
+                }
+            })
+            .catch(error => {
+                AxiosHelper.logError(error)
+            })
+    }
+
     getFollowRequests = () => {
         this.authorizedAxios.get(this.props.serverUrl + 'getFollowRequests')
             .then(res => {
-                if (res.data.data)
-                    this.setState({ followRequests: res.data.data })
+                if (res.data.requests) {
+                    this.setState({ followRequests: res.data.requests })
+                }
             })
             .catch(error => {
                 AxiosHelper.logError(error)
@@ -144,7 +124,7 @@ class App extends Component {
             },
         })
             .then(response => {
-                this.getDataFromDb()
+                this.getPosts()
             })
     };
 
@@ -167,7 +147,7 @@ class App extends Component {
                 };
                 Axios.put(signedRequest, file, options)
                     .then(response => {
-                        this.getDataFromDb()
+                        this.getPosts()
                     })
             })
     }
@@ -180,7 +160,6 @@ class App extends Component {
                 callback(true, "Request sent")
             })
             .catch(error => {
-                console.log(error.response.data)
                 callback(false, error.response.data)
             })
     }
@@ -190,7 +169,7 @@ class App extends Component {
             userid: userid
         })
             .then(response => {
-                this.getFollowRequests()
+                this.updateFollowerList()
             })
     }
 
@@ -199,7 +178,7 @@ class App extends Component {
             userid: userid
         })
             .then(response => {
-                this.getFollowRequests()
+                this.updateFollowerList()
             })
     }
 
@@ -209,39 +188,39 @@ class App extends Component {
     }
 
     render() {
-        const { data, followRequests, contentUrl } = this.state;
+        const { posts, followers, followRequests, contentUrl } = this.state
         return (
             <div>
                 <Button color="red" onClick={this.logOut}>Log Out</Button>
                 {this.userCache.getUser(CurrentUser.getPayload().userid).username}
-                <ul>
-                    {data.length === 0
-                        ? 'NO DB ENTRIES YET'
-                        : data.map((post) => (
-                            <PostItem
-                                key={post._id}
-                                post={post}
-                                user={this.userCache.getUser(post.userid)}
-                                url={contentUrl}
-                                onDelete={this.deleteFromDB}
-                            />
-                        ))}
-                </ul>
+                <List>
+                    {posts.map((post) => (
+                        <List.Item key={post._id}>
+                            <Button onClick={() => this.deleteFromDB(post._id)}>Delete</Button>
+                            <List.Content>{this.userCache.getUser(post.userid).username}</List.Content>
+                            <Image fluid src={contentUrl + post._id} alt={post._id} />
+                        </List.Item>
+                    ))}
+                </List>
                 <Add onSubmit={this.handleUpload} />
                 <FollowUserForm callback={this.follow} />
-                <ul>
-                    {followRequests.length === 0
-                        ? 'no follow requests'
-                        : followRequests.map((request) => (
-                            <FollowRequestItem
-                                key={request.requesterId}
-                                userid={request.requesterId}
-                                username={this.userCache.getUser(request.requesterId).username}
-                                onReject={() => this.rejectFollowRequest(request.requesterId)}
-                                onAccept={() => this.acceptFollowRequest(request.requesterId)}
-                            />
-                        ))}
-                </ul>
+                <List>
+                    {followRequests.map((request) => (
+                        <List.Item key={request.requesterId}>
+                            <Button onClick={() => this.acceptFollowRequest(request.requesterId)}>accept</Button>
+                            <Button onClick={() => this.rejectFollowRequest(request.requesterId)}>reject</Button>
+                            <List.Content>{this.userCache.getUser(request.requesterId).username}</List.Content>
+                        </List.Item>
+                    ))}
+                </List>
+                <Header>Followers</Header>
+                <List>
+                    {followers.map(follower => (
+                        <List.Item key={follower}>
+                            <List.Content>{this.userCache.getUser(follower).username}</List.Content>
+                        </List.Item>
+                    ))}
+                </List>
             </div>
         );
     }

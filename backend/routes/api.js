@@ -20,19 +20,27 @@ router.get('/getConfig', (req, res) => {
 router.get('/getPosts', (req, res) => {
     Post.find({ userid: req.tokenPayload.userid }, (err, data) => {
         if (err) return res.status(500).send(err)
-        return res.json({ success: true, data: data })
+        return res.json({ success: true, posts: data })
     });
 });
 
 router.get('/getFollowRequests', (req, res) => {
     FollowRequest.find({requesteeId: req.tokenPayload.userid}, 'requesterId', (err, data) => {
         if (err) return res.status(500).send(err)
-        return res.json({ success: true, data: data })
+        return res.json({ success: true, requests: data })
+    })
+})
+
+router.get('/getFollowers', (req, res) => {
+    User.findById(req.tokenPayload.userid, 'followers', (err, user) => {
+        if (err) return res.status(500).send(err)
+        return res.json({ success: true, followers: user.followers })
     })
 })
 
 router.get('/getUserById', (req, res) => {
     const userid = req.query.userid
+    console.log(req)
     User.findById(userid, '_id username', (err, user) => {
         if (err) return res.status(500).send(err)
         return res.json({ success: true, user })
