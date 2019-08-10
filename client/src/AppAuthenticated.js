@@ -2,11 +2,11 @@ import React, { Component } from 'react'
 import Axios from 'axios'
 import AxiosHelper from './AxiosHelper'
 import Path from 'path'
-import User from './User'
+import CurrentUser from './CurrentUser'
 import UserCache from './UserCache'
 
 import { Button } from 'semantic-ui-react'
-import FollowUserForm from './FollowUserForm'
+import FollowUserForm from './Components/FollowUserForm'
 
 class Add extends Component {
     constructor(props) {
@@ -72,7 +72,7 @@ class App extends Component {
             contentUrl: "",
         }
         this.authorizedAxios = Axios.create({
-            headers: { 'Authorization': `Bearer ${User.getToken()}` }
+            headers: { 'Authorization': `Bearer ${CurrentUser.getToken()}` }
         })
         this.userCache = new UserCache(() => this.state.users, this.addUser, this.authorizedAxios, this.props.serverUrl + 'getUserById')
     }
@@ -165,7 +165,7 @@ class App extends Component {
     }
 
     logOut = () => {
-        User.clearToken()
+        CurrentUser.clearToken()
         this.props.setLoggedIn(false)
     }
 
@@ -174,7 +174,7 @@ class App extends Component {
         return (
             <div>
                 <Button color="red" onClick={this.logOut}>Log Out</Button>
-                {this.userCache.getUser(User.getPayload().userid).username}
+                {this.userCache.getUser(CurrentUser.getPayload().userid).username}
                 <ul>
                     {data.length === 0
                         ? 'NO DB ENTRIES YET'
