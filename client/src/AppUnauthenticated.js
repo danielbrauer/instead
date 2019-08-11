@@ -3,6 +3,7 @@ import Axios from 'axios'
 import AxiosHelper from './AxiosHelper'
 import CurrentUser from './CurrentUser'
 import LoginForm from './Components/LoginForm'
+import NewUserForm from './Components/NewUserForm'
 import { Button, Message, Grid } from 'semantic-ui-react'
 
 class App extends Component {
@@ -38,16 +39,16 @@ class App extends Component {
         console.log('creating user')
         Axios.post(this.props.serverUrl + 'new',
             {
-                params: {
-                    username: data.username,
-                    password: data.password,
-                },
+                username: data.username,
+                password: data.password,
             })
             .then(res => {
                 CurrentUser.setToken(res.data.token)
                 this.props.setLoggedIn(true)
             })
             .catch(error => {
+                if (error.response)
+                    return callback({message: error.response.data}, null)
                 AxiosHelper.logError(error)
             })
     }
@@ -61,19 +62,17 @@ class App extends Component {
             <Grid textAlign='center' style={{ height: '100vh' }} verticalAlign='middle'>
                 <Grid.Column style={{ maxWidth: 450 }}>
                 {this.state.newUser ?
-                    <Message error>
-                        Signups broke
-                    </Message>
+                    <NewUserForm onSubmit={this.createUser}/>
                     :
                     <LoginForm onSubmit={this.login}/>
                 }
                 {this.state.newUser ?
                     <Message>
-                        Already have an account? <Button as='a' onClick={this.switch}>Log In</Button>
+                        Already have an account? <Button onClick={this.switch}>Log In</Button>
                     </Message>
                     :
                     <Message>
-                        New to Instead? <Button as='a' onClick={this.switch}>Sign Up</Button>
+                        New to Instead? <Button onClick={this.switch}>Sign Up</Button>
                     </Message>
                 }
                 </Grid.Column>
