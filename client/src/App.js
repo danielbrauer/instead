@@ -1,12 +1,11 @@
-import React, { Component } from 'react'
+import React, { Component, Suspense } from 'react'
 import CurrentUser from './CurrentUser'
 
+import { Loader, Dimmer } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.min.css'
 
-// const AppAuthenticated = React.lazy(() => import('./AppAuthenticated'))
-// const AppUnauthenticated = React.lazy(() => import('./AppUnauthenticated'))
-import AppAuthenticated from './AppAuthenticated'
-import AppUnauthenticated from './AppUnauthenticated'
+const AppAuthenticated = React.lazy(() => import('./AppAuthenticated'))
+const AppUnauthenticated = React.lazy(() => import('./AppUnauthenticated'))
 
 const serverUrl = "http://localhost:3001/"
 
@@ -25,9 +24,11 @@ class App extends Component {
     render() {
         return (
             <div>
+                <Suspense fallback={<Dimmer active inverted><Loader size='massive'/></Dimmer>}>
                 {this.state.loggedIn
                     ? <AppAuthenticated setLoggedIn={this.setLoggedIn} serverUrl={serverUrl + "api/"}/>
                     : <AppUnauthenticated setLoggedIn={this.setLoggedIn} serverUrl={serverUrl + "auth/"}/>}
+                </Suspense>
             </div>
         )
     }
