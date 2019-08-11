@@ -12,7 +12,7 @@ class UserForm extends LinkedComponent {
             username: '',
             password: '',
             passwordAgain: '',
-        };
+        }
     }
 
     handleSubmit = (event) => {
@@ -31,17 +31,17 @@ class UserForm extends LinkedComponent {
                     : null}
                 <input type="submit" value="Submit" />
             </form>
-        );
+        )
     }
 }
 
 class App extends Component {
     // initialize our state
     constructor(props) {
-        super(props);
+        super(props)
         this.state = {
             newUser: false,
-        };
+        }
     }
 
     login = data => {
@@ -94,7 +94,7 @@ class App extends Component {
                 {form}
                 <button onClick={this.switch}>switch</button>
             </div>
-        );
+        )
     }
 }
 

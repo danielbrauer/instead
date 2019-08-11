@@ -1,21 +1,21 @@
 import mongoose from 'mongoose'
 import config from 'config'
 
-const dbConfig = config.get('Customer.database');
-const scheme = dbConfig.get('scheme');
-const user = encodeURIComponent(dbConfig.get('user'));
-const password = encodeURIComponent(dbConfig.get('password'));
-const host = dbConfig.get('host');
-const path = dbConfig.get('path');
-const query = dbConfig.get('query');
-const dbRoute = `${scheme}://${user}:${password}@${host}/${path}?${query}`;
+const dbConfig = config.get('Customer.database')
+const scheme = dbConfig.get('scheme')
+const user = encodeURIComponent(dbConfig.get('user'))
+const password = encodeURIComponent(dbConfig.get('password'))
+const host = dbConfig.get('host')
+const path = dbConfig.get('path')
+const query = dbConfig.get('query')
+const dbRoute = `${scheme}://${user}:${password}@${host}/${path}?${query}`
 
 // connects our back end code with the database
-mongoose.connect(dbRoute, { useNewUrlParser: true });
+mongoose.connect(dbRoute, { useNewUrlParser: true })
 
-let db = mongoose.connection;
+let db = mongoose.connection
 
-db.once('open', () => console.log('connected to the database'));
+db.once('open', () => console.log('connected to the database'))
 
 // checks if connection with the database is successful
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.on('error', console.error.bind(console, 'MongoDB connection error:'))

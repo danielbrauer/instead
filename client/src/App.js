@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import CurrentUser from './CurrentUser'
 
 import 'semantic-ui-css/semantic.min.css'
@@ -12,7 +12,7 @@ const serverUrl = "http://localhost:3001/"
 
 class App extends Component {
     constructor(props) {
-        super(props);
+        super(props)
         this.state = {
             loggedIn: CurrentUser.loggedIn(),
         }

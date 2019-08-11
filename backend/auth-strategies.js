@@ -14,7 +14,7 @@ class AuthManager {
     
 	static instance(){
 		if (AuthManager._instance === null || AuthManager._instance === undefined){
-            AuthManager._instance = new AuthManager();
+            AuthManager._instance = new AuthManager()
 		}
 		return AuthManager._instance
     }

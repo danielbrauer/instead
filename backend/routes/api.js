@@ -25,9 +25,9 @@ router.get('/getPosts', (req, res) => {
         Post.find({ userid: user.following }, (err, data) => {
             if (err) return res.status(500).send(err)
             return res.json({ success: true, posts: data })
-        });
+        })
     })
-});
+})
 
 router.get('/getFollowRequests', (req, res) => {
     FollowRequest.find({requesteeId: req.tokenPayload.userid}, 'requesterId', (err, data) => {
@@ -45,7 +45,6 @@ router.get('/getFollowers', (req, res) => {
 
 router.get('/getUserById', (req, res) => {
     const userid = req.query.userid
-    console.log(req)
     User.findById(userid, '_id username', (err, user) => {
         if (err) return res.status(500).send(err)
         return res.json({ success: true, user })
@@ -131,14 +130,14 @@ router.delete('/deletePost', (req, res) => {
                 Post.findByIdAndDelete(post._id, (err) => {
                     if (err) return res.status(500).send(err)
                     return res.json({ success: true })
-                });
+                })
             },
             err => {
                 return res.status(500).send(err)
             }
-        );
-    });
-});
+        )
+    })
+})
 
 // get URL for uploading
 router.post('/createPost', (req, res) => {

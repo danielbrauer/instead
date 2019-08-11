@@ -10,7 +10,7 @@ import FollowUserForm from './Components/FollowUserForm'
 
 class Add extends Component {
     constructor(props) {
-        super(props);
+        super(props)
         this.state = {
             uploadInput: "",
         }
@@ -30,14 +30,14 @@ class Add extends Component {
                 <input onChange={this.onChange} type="file" />
                 <button onClick={this.onSubmit} disabled={!this.enableUpload()}>Upload</button>
             </div>
-        );
+        )
     }
 }
 
 class App extends Component {
     // initialize our state
     constructor(props) {
-        super(props);
+        super(props)
         this.state = {
             posts: [],
             followers: [],
@@ -89,7 +89,7 @@ class App extends Component {
             .catch(error => {
                 AxiosHelper.logError(error)
             })
-    };
+    }
 
     getFollowers = () => {
         this.authorizedAxios.get(this.props.serverUrl + 'getFollowers')
@@ -126,25 +126,25 @@ class App extends Component {
             .then(response => {
                 this.getPosts()
             })
-    };
+    }
 
     // Perform the upload
     handleUpload = (uploadInput) => {
-        const file = uploadInput.files[0];
+        const file = uploadInput.files[0]
         const fileType = Path.extname(file.name).substr(1) // ext includes . separator
         this.authorizedAxios.post(this.props.serverUrl + 'createPost', {
             fileType: fileType,
         })
             .then(response => {
-                const returnData = response.data.data;
-                const signedRequest = returnData.signedRequest;
+                const returnData = response.data.data
+                const signedRequest = returnData.signedRequest
 
                 // Put the fileType in the headers for the upload
                 const options = {
                     headers: {
                         'Content-Type': fileType,
                     },
-                };
+                }
                 Axios.put(signedRequest, file, options)
                     .then(response => {
                         this.getPosts()
@@ -223,7 +223,7 @@ class App extends Component {
                     ))}
                 </List>
             </div>
-        );
+        )
     }
 }
 
