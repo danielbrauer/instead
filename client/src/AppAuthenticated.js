@@ -191,7 +191,7 @@ class App extends Component {
         const { posts, followers, followRequests, contentUrl } = this.state
         return (
             <div>
-                <Menu size='mini'>
+                <Menu inverted fixed='top' size='small'>
                     <Menu.Item header>
                         Instead
                     </Menu.Item>
@@ -203,6 +203,8 @@ class App extends Component {
                         </Dropdown>
                     </Menu.Item>
                 </Menu>
+                <br/>
+                <br/>
                 <List>
                     {posts.map((post) => (
                         <List.Item key={post._id}>
