@@ -2,38 +2,8 @@ import React, { Component } from 'react'
 import Axios from 'axios'
 import AxiosHelper from './AxiosHelper'
 import CurrentUser from './CurrentUser'
-import { LinkedComponent } from 'valuelink'
-
-class UserForm extends LinkedComponent {
-    // initialize our state
-    constructor(props) {
-        super(props)
-        this.state = {
-            username: '',
-            password: '',
-            passwordAgain: '',
-        }
-    }
-
-    handleSubmit = (event) => {
-        this.props.onSubmit(this.state)
-        event.preventDefault()
-    }
-
-    render() {
-        const linked = this.linkAll()
-        return (
-            <form onSubmit={this.handleSubmit}>
-                <input type="text" placeholder="username" {...linked.username.props} />
-                <input type="password" placeholder="password" {...linked.password.props} />
-                {this.props.newUser
-                    ? <input type="password" placeholder="repeat password" {...linked.passwordAgain.props} />
-                    : null}
-                <input type="submit" value="Submit" />
-            </form>
-        )
-    }
-}
+import LoginForm from './Components/LoginForm'
+import { Button, Message, Grid } from 'semantic-ui-react'
 
 class App extends Component {
     // initialize our state
@@ -44,7 +14,7 @@ class App extends Component {
         }
     }
 
-    login = data => {
+    login = (data, callback) => {
         console.log('logging in')
         Axios.get(this.props.serverUrl + 'login',
             {
@@ -58,16 +28,20 @@ class App extends Component {
                 this.props.setLoggedIn(true)
             })
             .catch(error => {
+                if (error.response)
+                    return callback({message: error.response.data}, null)
                 AxiosHelper.logError(error)
             })
     }
 
-    createUser = data => {
+    createUser = (data, callback) => {
         console.log('creating user')
         Axios.post(this.props.serverUrl + 'new',
             {
-                username: data.username,
-                password: data.password
+                params: {
+                    username: data.username,
+                    password: data.password,
+                },
             })
             .then(res => {
                 CurrentUser.setToken(res.data.token)
@@ -83,17 +57,27 @@ class App extends Component {
     }
 
     render() {
-        let form
-        if (this.state.newUser) {
-            form = <UserForm newUser={true} onSubmit={this.createUser}/>
-        } else {
-            form = <UserForm newUser={false} onSubmit={this.login}/>
-        }
         return (
-            <div>
-                {form}
-                <button onClick={this.switch}>switch</button>
-            </div>
+            <Grid textAlign='center' style={{ height: '100vh' }} verticalAlign='middle'>
+                <Grid.Column style={{ maxWidth: 450 }}>
+                {this.state.newUser ?
+                    <Message error>
+                        Signups broke
+                    </Message>
+                    :
+                    <LoginForm onSubmit={this.login}/>
+                }
+                {this.state.newUser ?
+                    <Message>
+                        Already have an account? <Button as='a' onClick={this.switch}>Log In</Button>
+                    </Message>
+                    :
+                    <Message>
+                        New to Instead? <Button as='a' onClick={this.switch}>Sign Up</Button>
+                    </Message>
+                }
+                </Grid.Column>
+            </Grid>
         )
     }
 }

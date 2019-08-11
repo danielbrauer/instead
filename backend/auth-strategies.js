@@ -25,27 +25,30 @@ class AuthManager {
     
         if (!username || !password) {
             AuthManager.instance().basicPermit.fail(res)
-            return next(new Error(`Username and password required!`))
+            return res.status(401).send(`Username and password required`)
         }
         // Find user and generate a session token
         return UserModel.findOne({ username: username })
             .then(user => {
                 if (!user) {
                     AuthManager.instance().basicPermit.fail(res)
-                    return next(new Error('No such user.'))
+                    return res.status(401).send(`No such user`)
                 }
                 crypto.scrypt(password, user.salt, 64, (error, hash) => {
                     if (error) {
-                        return next(new Error('Error hashing password.'))
+                        return res.status(500).send('Error hashing password')
                     }
                     if (hash.toString('base64') == user.passwordHash) {
                         req.user = user
                         return next()
                     }
-                    return next(new Error('Incorrect password'))
+                    return res.status(401).send('Incorrect password')
                 })
             })
-            .catch(err => next(err))
+            .catch(err => {
+                console.log(err)
+                return res.status(500).send('An unexpected error occurred')
+            })
     }
     
     static authenticateBearer(req, res, next) {
