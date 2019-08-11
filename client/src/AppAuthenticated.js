@@ -5,7 +5,7 @@ import Path from 'path'
 import CurrentUser from './CurrentUser'
 import UserCache from './UserCache'
 
-import { Button, List, Image, Header } from 'semantic-ui-react'
+import { Button, List, Image, Header, Menu, Dropdown } from 'semantic-ui-react'
 import FollowUserForm from './Components/FollowUserForm'
 
 class Add extends Component {
@@ -191,13 +191,23 @@ class App extends Component {
         const { posts, followers, followRequests, contentUrl } = this.state
         return (
             <div>
-                <Button color="red" onClick={this.logOut}>Log Out</Button>
-                {this.userCache.getUser(CurrentUser.getPayload().userid).username}
+                <Menu size='mini'>
+                    <Menu.Item header>
+                        Instead
+                    </Menu.Item>
+                    <Menu.Item fitted position='right'>
+                        <Dropdown item direction='left' text={this.userCache.getUser(CurrentUser.getPayload().userid).username}>
+                            <Dropdown.Menu>
+                                <Dropdown.Item onClick={this.logOut}>Log Out</Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    </Menu.Item>
+                </Menu>
                 <List>
                     {posts.map((post) => (
                         <List.Item key={post._id}>
                             {CurrentUser.getPayload().userid === post.userid ?
-                            <Button onClick={() => this.deleteFromDB(post._id)}>Delete</Button> : null}
+                                <Button onClick={() => this.deleteFromDB(post._id)}>Delete</Button> : null}
                             <List.Content>{this.userCache.getUser(post.userid).username}</List.Content>
                             <Image fluid src={contentUrl + post._id} alt={post._id} />
                         </List.Item>
