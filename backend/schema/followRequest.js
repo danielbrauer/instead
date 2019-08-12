@@ -1,4 +1,5 @@
-import mongoose, {Schema} from 'mongoose'
+const mongoose = require('mongoose')
+const Schema = require('mongoose').Schema
 
 const FollowRequestSchema = new Schema(
 	{
@@ -20,4 +21,4 @@ const FollowRequestSchema = new Schema(
 	}
 )
 
-export default mongoose.model("FollowRequest", FollowRequestSchema)
+module.exports = mongoose.model("FollowRequest", FollowRequestSchema)

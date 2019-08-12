@@ -1,10 +1,10 @@
-import express from 'express'
-import jwt from 'jsonwebtoken'
-import UserModel from '../schema/user'
-import config from 'config'
-import crypto from 'crypto'
-import authManager from '../auth-strategies'
-import uuidv1 from 'uuid/v1'
+const express = require('express')
+const jwt = require('jsonwebtoken')
+const UserModel = require('../schema/user')
+const config = require('config')
+const crypto = require('crypto')
+const authManager = require('../auth-strategies')
+const uuidv1 = require('uuid/v1')
 
 const secret = config.get('Customer.jwt').get('secret')
 
@@ -50,4 +50,4 @@ router.post('/new', function (req, res) {
     })
 })
 
-export default router
+module.exports = router

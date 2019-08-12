@@ -1,9 +1,9 @@
-import express from 'express'
-import cors from 'cors'
-import bodyParser from 'body-parser'
-import morgan from 'morgan'
-import helmet from 'helmet'
-import authManager from './auth-strategies'
+const express = require('express')
+const cors = require('cors')
+const bodyParser = require('body-parser')
+const morgan = require('morgan')
+const helmet = require('helmet')
+const authManager = require('./auth-strategies')
 
 const API_PORT = 3001
 const app = express()
@@ -18,10 +18,10 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(morgan('dev'))
 
-import auth from './routes/auth'
+const auth = require('./routes/auth')
 app.use('/auth', auth)
 
-import api from './routes/api'
+const api = require('./routes/api')
 app.use('/api', authManager.authenticateBearer, api)
 
 // launch our backend into a port

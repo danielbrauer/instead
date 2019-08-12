@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'
-import config from 'config'
+const mongoose = require('mongoose')
+const config = require('config')
 
 const dbConfig = config.get('Customer.database')
 const scheme = dbConfig.get('scheme')

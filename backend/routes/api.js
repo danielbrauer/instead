@@ -1,9 +1,9 @@
-import express from 'express'
-import Post from '../schema/post'
-import User from '../schema/user'
-import FollowRequest from '../schema/followRequest'
-import awsManager from '../aws'
-import uuidv1 from 'uuid/v1'
+const express = require('express')
+const Post = require('../schema/post')
+const User = require('../schema/user')
+const FollowRequest = require('../schema/followRequest')
+const awsManager = require('../aws')
+const uuidv1 = require('uuid/v1')
 
 const router  = express.Router()
 

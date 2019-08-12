@@ -1,5 +1,5 @@
-import config from 'config'
-import aws from 'aws-sdk'
+const config = require('config')
+const aws = require('aws-sdk')
 
 class AWSManager {
     constructor() {
@@ -7,7 +7,7 @@ class AWSManager {
         const accessKeyId = awsConfig.get('accessKeyId')
         const secretKey = awsConfig.get('secretKey')
         const region = awsConfig.get('region')
-        this.bucket = awsConfig.get('bucket')
+        this.bucket = awsConfig.get('s3.bucket')
 
         aws.config.update({
             region: region,
@@ -66,4 +66,4 @@ class AWSManager {
     }
 }
 
-export default AWSManager
+module.exports = AWSManager

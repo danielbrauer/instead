@@ -1,8 +1,9 @@
-import UserModel from './schema/user'
-import config from 'config'
-import crypto from 'crypto'
-import jwt from 'jsonwebtoken'
-import { Basic, Bearer } from 'permit'
+const UserModel = require('./schema/user')
+const config = require('config')
+const crypto = require('crypto')
+const jwt = require('jsonwebtoken')
+const Basic = require('permit').Basic
+const Bearer = require('permit').Bearer
 
 class AuthManager {
     constructor() {
@@ -72,4 +73,4 @@ class AuthManager {
     }
 }
 
-export default AuthManager
+module.exports = AuthManager

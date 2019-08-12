@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --exec babel-node server.js"
+    "start": "nodemon --exec node server.js"
   },
   "author": "Daniel Brauer",
   "license": "MIT",
@@ -27,10 +27,6 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.5.5",
-    "@babel/core": "^7.5.5",
-    "@babel/node": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
     "nodemon": "^1.19.1"
   }
 }
