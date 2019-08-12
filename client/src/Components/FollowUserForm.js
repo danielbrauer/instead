@@ -1,44 +1,43 @@
-import React from 'react'
+import React, { useState } from 'react'
+import useInput from './useInput'
 import { Form, Message } from 'semantic-ui-react'
-import { LinkedComponent } from 'valuelink'
 
-class FollowUserForm extends LinkedComponent {
-    state = { username: '', success: false, error: false, message: '' }
+export default function FollowUserForm(props) {
+    const { value: username, bind: bindUsername, reset: resetUsername } = useInput('')
+    const [success, setSuccess] = useState(false)
+    const [error, setError] = useState(false)
+    const [message, setMessage] = useState('')
 
-    responseCallback = (success, message) => {
-        this.setState({ error: !success, success: success, message: message })
+    function responseCallback(success, message) {
+        setSuccess(success)
+        setError(!success)
+        setMessage(message)
     }
 
-    handleSubmit = () => {
-        this.props.callback(this.state.username, this.responseCallback)
-        this.setState({ username: '' })
+    function handleSubmit() {
+        this.props.callback(username, responseCallback)
+        resetUsername()
     }
 
-    render() {
-        const linked = this.linkAll()
-        const { success, error, message } = this.state
-        return (
-            <div>
-                <Form error={error} success={success} onSubmit={this.handleSubmit}>
-                    <Form.Group>
-                        <Form.Input placeholder='Follow' name='username' {...linked.username.props} />
-                        <Form.Button content='Request' />
-                    </Form.Group>
-                    <Message
-                        error
-                        header={`Can't follow`}
-                        content={message}
-                    />
-                    <Message
-                        success
-                        header={`Success`}
-                        content={message}
-                    />
-                </Form>
+    return (
+        <div>
+            <Form error={error} success={success} onSubmit={handleSubmit}>
+                <Form.Group>
+                    <Form.Input placeholder='Follow' name='username' {...bindUsername} />
+                    <Form.Button content='Request' />
+                </Form.Group>
+                <Message
+                    error
+                    header={`Can't follow`}
+                    content={message}
+                />
+                <Message
+                    success
+                    header={`Success`}
+                    content={message}
+                />
+            </Form>
 
-            </div>
-        )
-    }
+        </div>
+    )
 }
-
-export default FollowUserForm

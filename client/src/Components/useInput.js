@@ -10,14 +10,14 @@ export default function useInput(initialValue) {
         reset: () => setValue(initialValue),
         bind: isBool ? {
             value:String(value),
-            onChange: (event, data) => {
-                setValue(Boolean(data.checked))
+            onChange: (event, {checked}) => {
+                setValue(checked)
             }
         }
         : {
             value:value,
-            onChange: event => {
-                setValue(event.target.value)
+            onChange: (event, {value}) => {
+                setValue(value)
             }
         }
     }

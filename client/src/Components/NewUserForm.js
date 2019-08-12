@@ -7,12 +7,12 @@ export default function NewUserForm(props) {
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: repeatPassword, bind: bindRepeatPassword, reset: resetRepeatPassword } = useInput('')
     const { value: agreeTerms, bind: bindAgreeTerms } = useInput(false)
-    const [serverStatus, setServerStatus] = useState(false)
+    const [serverStatus, setServerStatus] = useState('')
     const [loadingStatus, setLoadingStatus] = useState(false)
     const [missedTerms, setMissedTerms] = useState(false)
     const [missedRepeatPassword, setMissedRepeatPassword] = useState(false)
 
-    const handleSubmit = (evt) => {
+    function handleSubmit(evt) {
         evt.preventDefault()
         const userMissedTerms = !agreeTerms
         setMissedTerms(userMissedTerms)
@@ -23,11 +23,11 @@ export default function NewUserForm(props) {
         setMissedRepeatPassword(userMissedRepeatPassword)
         if (userMissedTerms || userMissedRepeatPassword) return
         setLoadingStatus(true)
-        setServerStatus(false)
+        setServerStatus('')
         props.onSubmit({ username, password }, submitCallback)
     }
 
-    const submitCallback = (error, response) => {
+    function submitCallback(error, response) {
         setLoadingStatus(false)
         resetPassword()
         resetRepeatPassword()
@@ -39,7 +39,7 @@ export default function NewUserForm(props) {
 
     return (
         <div>
-            <Form error={serverStatus} loading={loadingStatus} onSubmit={handleSubmit} size='large'>
+            <Form error={serverStatus !== ''} loading={loadingStatus} onSubmit={handleSubmit} size='large'>
                 <Segment inverted stacked>
                     <Header as='h2' textAlign='center' content='Instead' />
                     <Form.Input

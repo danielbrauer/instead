@@ -9,14 +9,14 @@ export default function LoginForm(props) {
     const [statusMessage, setStatusMessage] = useState(false)
     const [loadingStatus, setLoadingStatus] = useState(false)
 
-    const handleSubmit = (evt) => {
+    function handleSubmit(evt) {
         setLoadingStatus(true)
         evt.preventDefault()
         setErrorStatus(false)
         props.onSubmit({ username, password }, submitCallback)
     }
 
-    const submitCallback = (error, response) => {
+    function submitCallback(error, response) {
         setLoadingStatus(false)
         resetPassword()
         if (error) {
