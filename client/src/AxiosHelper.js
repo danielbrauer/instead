@@ -16,4 +16,4 @@ class AxiosHelper {
     }
 }
 
-module.exports = AxiosHelper
+export default AxiosHelper

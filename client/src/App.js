@@ -7,7 +7,7 @@ import 'semantic-ui-css/semantic.min.css'
 const AppAuthenticated = React.lazy(() => import('./AppAuthenticated'))
 const AppUnauthenticated = React.lazy(() => import('./AppUnauthenticated'))
 
-const serverUrl = "http://localhost:3001/"
+const serverUrl = process.env.REACT_APP_BACKEND_URL
 
 class App extends Component {
     constructor(props) {
