@@ -4,10 +4,12 @@ const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const helmet = require('helmet')
 const authManager = require('./auth-strategies')
+const accessControlHeaders = require('./access-control-headers')
 
-const API_PORT = 3001
+const API_PORT = 8081
 const app = express()
 app.use(cors())
+app.use(accessControlHeaders)
 app.use(helmet())
 
 require('./database')
