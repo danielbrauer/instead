@@ -29,11 +29,11 @@ class App extends Component {
                 this.props.setLoggedIn(true)
             })
             .catch(error => {
+                AxiosHelper.logError(error)
                 if (error.response)
                     return callback({message: error.response.data}, null)
                 if (error.request)
-                    return callback({message: 'Timed out'}, null)
-                AxiosHelper.logError(error)
+                    return callback({message: 'No response'}, null)
             })
     }
 
@@ -49,11 +49,11 @@ class App extends Component {
                 this.props.setLoggedIn(true)
             })
             .catch(error => {
+                AxiosHelper.logError(error)
                 if (error.response)
                     return callback({message: error.response.data}, null)
                 if (error.request)
-                    return callback({message: 'Timed out'}, null)
-                AxiosHelper.logError(error)
+                    return callback({message: 'No response'}, null)
             })
     }
 
