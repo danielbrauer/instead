@@ -4,7 +4,10 @@ import AxiosHelper from './AxiosHelper'
 import CurrentUser from './CurrentUser'
 import LoginForm from './Components/LoginForm'
 import NewUserForm from './Components/NewUserForm'
-import { Button, Message, Grid } from 'semantic-ui-react'
+import { Grid } from 'semantic-ui-react'
+import { Route, Switch, Redirect } from 'react-router-dom'
+
+const serverUrl = process.env.REACT_APP_BACKEND_URL + 'auth/'
 
 class App extends Component {
     // initialize our state
@@ -17,7 +20,7 @@ class App extends Component {
 
     login = (data, callback) => {
         console.log('logging in')
-        Axios.get(this.props.serverUrl + 'login',
+        Axios.get(serverUrl + 'login',
             {
                 auth: {
                     username: data.username,
@@ -26,20 +29,20 @@ class App extends Component {
             })
             .then(res => {
                 CurrentUser.setToken(res.data.token)
-                this.props.setLoggedIn(true)
+                this.props.history.push('/home')
             })
             .catch(error => {
                 AxiosHelper.logError(error)
                 if (error.response)
-                    return callback({message: error.response.data}, null)
+                    return callback({ message: error.response.data }, null)
                 if (error.request)
-                    return callback({message: 'No response'}, null)
+                    return callback({ message: 'No response' }, null)
             })
     }
 
     createUser = (data, callback) => {
         console.log('creating user')
-        Axios.post(this.props.serverUrl + 'new',
+        Axios.post(serverUrl + 'new',
             {
                 username: data.username,
                 password: data.password,
@@ -51,34 +54,21 @@ class App extends Component {
             .catch(error => {
                 AxiosHelper.logError(error)
                 if (error.response)
-                    return callback({message: error.response.data}, null)
+                    return callback({ message: error.response.data }, null)
                 if (error.request)
-                    return callback({message: 'No response'}, null)
+                    return callback({ message: 'No response' }, null)
             })
-    }
-
-    switch = () => {
-        this.setState({newUser: !this.state.newUser})
     }
 
     render() {
         return (
             <Grid textAlign='center' style={{ height: '100vh' }} verticalAlign='middle'>
                 <Grid.Column style={{ maxWidth: 450 }}>
-                {this.state.newUser ?
-                    <NewUserForm onSubmit={this.createUser}/>
-                    :
-                    <LoginForm onSubmit={this.login}/>
-                }
-                {this.state.newUser ?
-                    <Message>
-                        Already have an account? <Button onClick={this.switch}>Log In</Button>
-                    </Message>
-                    :
-                    <Message>
-                        New to Instead? <Button onClick={this.switch}>Sign Up</Button>
-                    </Message>
-                }
+                    <Switch>
+                        <Route exact path="/" render={props => <Redirect {...props} to="/login" />} />
+                        <Route exact path="/signup" render={props => <NewUserForm {...props} onSubmit={this.createUser} />} />
+                        <Route exact path="/login" render={props => <LoginForm {...props} onSubmit={this.login} />} />
+                    </Switch>
                 </Grid.Column>
             </Grid>
         )

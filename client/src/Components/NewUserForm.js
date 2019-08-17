@@ -83,6 +83,9 @@ export default function NewUserForm(props) {
                     <Button size='large' content='Sign Up' />
                 </Segment>
             </Form>
+            <Message>
+                Already have an account? <Button onClick={() => props.history.push('/login')}>Log In</Button>
+            </Message>
         </div>
     )
 }

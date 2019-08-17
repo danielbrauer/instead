@@ -5,34 +5,13 @@ import Path from 'path'
 import CurrentUser from './CurrentUser'
 import UserCache from './UserCache'
 import FollowerPage from './FollowerPage'
+import Posts from './Posts'
+import NewPost from './NewPost'
+import { Route, Switch, Redirect } from 'react-router-dom'
 
-import { Button, List, Image, Menu, Dropdown } from 'semantic-ui-react'
+import { Menu, Dropdown } from 'semantic-ui-react'
 
-class Add extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            uploadInput: "",
-        }
-    }
-    enableUpload = () => {
-        return this.state.uploadInput && this.state.uploadInput.files[0]
-    }
-    onSubmit = () => {
-        this.props.onSubmit(this.state.uploadInput)
-    }
-    onChange = (event) => {
-        this.setState({ uploadInput: event.target })
-    }
-    render() {
-        return (
-            <div style={{ padding: '10px' }}>
-                <input onChange={this.onChange} type="file" />
-                <button onClick={this.onSubmit} disabled={!this.enableUpload()}>Upload</button>
-            </div>
-        )
-    }
-}
+const serverUrl = process.env.REACT_APP_BACKEND_URL + 'api/'
 
 class App extends Component {
     // initialize our state
@@ -45,10 +24,11 @@ class App extends Component {
             users: {},
             contentUrl: "",
         }
+        if (!CurrentUser.loggedIn()) return
         this.authorizedAxios = Axios.create({
             headers: { 'Authorization': `Bearer ${CurrentUser.getToken()}` }
         })
-        this.userCache = new UserCache(() => this.state.users, this.addUser, this.authorizedAxios, this.props.serverUrl + 'getUserById')
+        this.userCache = new UserCache(() => this.state.users, this.addUser, this.authorizedAxios, serverUrl + 'getUserById')
     }
 
     addUser = (user) => {
@@ -59,6 +39,7 @@ class App extends Component {
 
     // when component mounts, first thing it does is fetch all existing data in our db
     componentDidMount = () => {
+        if (!CurrentUser.loggedIn()) return
         this.getConfig()
         this.getPosts()
         this.updateFollowerList()
@@ -70,7 +51,7 @@ class App extends Component {
     }
 
     getConfig = () => {
-        this.authorizedAxios.get(this.props.serverUrl + 'getConfig')
+        this.authorizedAxios.get(serverUrl + 'getConfig')
             .then(res => {
                 this.setState({ contentUrl: res.data.config.contentUrl })
             })
@@ -80,7 +61,7 @@ class App extends Component {
     }
 
     getPosts = () => {
-        this.authorizedAxios.get(this.props.serverUrl + 'getPosts')
+        this.authorizedAxios.get(serverUrl + 'getPosts')
             .then(res => {
                 if (res.data.posts) {
                     this.setState({ posts: res.data.posts })
@@ -92,7 +73,7 @@ class App extends Component {
     }
 
     getFollowers = () => {
-        this.authorizedAxios.get(this.props.serverUrl + 'getFollowers')
+        this.authorizedAxios.get(serverUrl + 'getFollowers')
             .then(res => {
                 if (res.data.followers) {
                     this.setState({ followers: res.data.followers })
@@ -104,7 +85,7 @@ class App extends Component {
     }
 
     getFollowRequests = () => {
-        this.authorizedAxios.get(this.props.serverUrl + 'getFollowRequests')
+        this.authorizedAxios.get(serverUrl + 'getFollowRequests')
             .then(res => {
                 if (res.data.requests) {
                     this.setState({ followRequests: res.data.requests })
@@ -118,7 +99,7 @@ class App extends Component {
     // our delete method that uses our backend api
     // to remove existing database information
     deleteFromDB = (idTodelete) => {
-        this.authorizedAxios.delete(this.props.serverUrl + 'deletePost', {
+        this.authorizedAxios.delete(serverUrl + 'deletePost', {
             params: {
                 id: idTodelete,
             },
@@ -132,7 +113,7 @@ class App extends Component {
     handleUpload = (uploadInput) => {
         const file = uploadInput.files[0]
         const fileType = Path.extname(file.name).substr(1) // ext includes . separator
-        this.authorizedAxios.post(this.props.serverUrl + 'createPost', {
+        this.authorizedAxios.post(serverUrl + 'createPost', {
             fileType: fileType,
         })
             .then(response => {
@@ -153,7 +134,7 @@ class App extends Component {
     }
 
     follow = (username, callback) => {
-        this.authorizedAxios.post(this.props.serverUrl + 'sendFollowRequest', {
+        this.authorizedAxios.post(serverUrl + 'sendFollowRequest', {
             username: username,
         })
             .then(response => {
@@ -165,7 +146,7 @@ class App extends Component {
     }
 
     rejectFollowRequest = (userid) => {
-        this.authorizedAxios.post(this.props.serverUrl + 'rejectFollowRequest', {
+        this.authorizedAxios.post(serverUrl + 'rejectFollowRequest', {
             userid: userid
         })
             .then(response => {
@@ -174,7 +155,7 @@ class App extends Component {
     }
 
     acceptFollowRequest = (userid) => {
-        this.authorizedAxios.post(this.props.serverUrl + 'acceptFollowRequest', {
+        this.authorizedAxios.post(serverUrl + 'acceptFollowRequest', {
             userid: userid
         })
             .then(response => {
@@ -184,11 +165,17 @@ class App extends Component {
 
     logOut = () => {
         CurrentUser.clearToken()
-        this.props.setLoggedIn(false)
+        this.props.history.push('/login')
     }
 
     render() {
+        if (!CurrentUser.loggedIn())
+            return (<Redirect to='/login'/>)
         const { posts, followers, followRequests, contentUrl } = this.state
+        const postCallbacks = {
+            delete: this.deleteFromDB,
+            getUser: this.userCache.getUser,
+        }
         const followCallbacks = {
             follow: this.follow,
             accept: this.acceptFollowRequest,
@@ -204,6 +191,9 @@ class App extends Component {
                     <Menu.Item fitted position='right'>
                         <Dropdown item direction='left' text={this.userCache.getUser(CurrentUser.getPayload().userid).username}>
                             <Dropdown.Menu>
+                                <Dropdown.Item onClick={() => this.props.history.push('/home')}>Home</Dropdown.Item>
+                                <Dropdown.Item onClick={() => this.props.history.push('/new')}>New Post</Dropdown.Item>
+                                <Dropdown.Item onClick={() => this.props.history.push('/followers')}>Followers</Dropdown.Item>
                                 <Dropdown.Item onClick={this.logOut}>Log Out</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
@@ -211,18 +201,11 @@ class App extends Component {
                 </Menu>
                 <br />
                 <br />
-                <List>
-                    {posts.map((post) => (
-                        <List.Item key={post._id}>
-                            {CurrentUser.getPayload().userid === post.userid ?
-                                <Button onClick={() => this.deleteFromDB(post._id)}>Delete</Button> : null}
-                            <List.Content>{this.userCache.getUser(post.userid).username}</List.Content>
-                            <Image fluid src={contentUrl + post._id} alt={post._id} />
-                        </List.Item>
-                    ))}
-                </List>
-                <Add onSubmit={this.handleUpload} />
-                <FollowerPage requests={followRequests} followers={followers} callbacks={followCallbacks} />
+                <Switch>
+                    <Route path='/followers' render={props => <FollowerPage {...props} requests={followRequests} followers={followers} callbacks={followCallbacks} />} />
+                    <Route path='/home' render={props => <Posts {...props} posts={posts} contentUrl={contentUrl} callbacks={postCallbacks} />} />
+                    <Route path='/new' render={props => <NewPost {...props} onSubmit={this.handleUpload} />} />
+                </Switch>
             </div>
         )
     }

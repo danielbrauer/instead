@@ -15,7 +15,7 @@ export default function FollowUserForm(props) {
     }
 
     function handleSubmit() {
-        this.props.callback(username, responseCallback)
+        props.callback(username, responseCallback)
         resetUsername()
     }
 
