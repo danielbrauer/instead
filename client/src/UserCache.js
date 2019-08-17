@@ -10,7 +10,7 @@ class UserCache {
         }
     }
 
-    getUser(userid) {
+    getUser = (userid) => {
         const user = this.getData()[userid]
         if (user === undefined) {
             this.authorizedAxios.get(this.getUserUrl, {

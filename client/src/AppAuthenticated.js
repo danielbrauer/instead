@@ -4,9 +4,9 @@ import AxiosHelper from './AxiosHelper'
 import Path from 'path'
 import CurrentUser from './CurrentUser'
 import UserCache from './UserCache'
+import FollowerPage from './FollowerPage'
 
-import { Button, List, Image, Header, Menu, Dropdown } from 'semantic-ui-react'
-import FollowUserForm from './Components/FollowUserForm'
+import { Button, List, Image, Menu, Dropdown } from 'semantic-ui-react'
 
 class Add extends Component {
     constructor(props) {
@@ -189,6 +189,12 @@ class App extends Component {
 
     render() {
         const { posts, followers, followRequests, contentUrl } = this.state
+        const followCallbacks = {
+            follow: this.follow,
+            accept: this.acceptFollowRequest,
+            reject: this.rejectFollowRequest,
+            getUser: this.userCache.getUser,
+        }
         return (
             <div>
                 <Menu inverted fixed='top' size='small'>
@@ -203,8 +209,8 @@ class App extends Component {
                         </Dropdown>
                     </Menu.Item>
                 </Menu>
-                <br/>
-                <br/>
+                <br />
+                <br />
                 <List>
                     {posts.map((post) => (
                         <List.Item key={post._id}>
@@ -216,24 +222,7 @@ class App extends Component {
                     ))}
                 </List>
                 <Add onSubmit={this.handleUpload} />
-                <FollowUserForm callback={this.follow} />
-                <List>
-                    {followRequests.map((request) => (
-                        <List.Item key={request.requesterId}>
-                            <Button onClick={() => this.acceptFollowRequest(request.requesterId)}>accept</Button>
-                            <Button onClick={() => this.rejectFollowRequest(request.requesterId)}>reject</Button>
-                            <List.Content>{this.userCache.getUser(request.requesterId).username}</List.Content>
-                        </List.Item>
-                    ))}
-                </List>
-                <Header>Followers</Header>
-                <List>
-                    {followers.map(follower => (
-                        <List.Item key={follower}>
-                            <List.Content>{this.userCache.getUser(follower).username}</List.Content>
-                        </List.Item>
-                    ))}
-                </List>
+                <FollowerPage requests={followRequests} followers={followers} callbacks={followCallbacks} />
             </div>
         )
     }
