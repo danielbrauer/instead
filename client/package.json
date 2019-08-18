@@ -5,6 +5,7 @@
   "dependencies": {
     "aws-sdk": "^2.462.0",
     "axios": "^0.18.1",
+    "fileapi": "^2.1.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.0.1",

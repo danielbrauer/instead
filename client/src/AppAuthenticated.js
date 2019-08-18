@@ -110,8 +110,7 @@ class App extends Component {
     }
 
     // Perform the upload
-    handleUpload = (uploadInput, callback) => {
-        const file = uploadInput.files[0]
+    handleUpload = (file, callback) => {
         const fileType = Path.extname(file.name).substr(1) // ext includes . separator
         this.authorizedAxios.post(serverUrl + 'createPost', {
             fileType: fileType,

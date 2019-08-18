@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently \"cd backend && npm start\" \"cd client && npm start\""
+    "start": "concurrently \"cd backend && yarn start\" \"cd client && yarn start\""
   },
   "keywords": [],
   "author": "Daniel Brauer",
