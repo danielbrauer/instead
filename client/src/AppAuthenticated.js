@@ -11,6 +11,8 @@ import { Route, Switch, Redirect } from 'react-router-dom'
 
 import { Menu, Dropdown } from 'semantic-ui-react'
 
+const Crypto = window.crypto
+
 const serverUrl = process.env.REACT_APP_BACKEND_URL + 'api/'
 
 class App extends Component {
@@ -111,26 +113,52 @@ class App extends Component {
 
     // Perform the upload
     handleUpload = (file, callback) => {
-        const fileType = Path.extname(file.name).substr(1) // ext includes . separator
-        this.authorizedAxios.post(serverUrl + 'createPost', {
-            fileType: fileType,
-        })
-            .then(response => {
-                const returnData = response.data.data
-                const signedRequest = returnData.signedRequest
-
-                // Put the fileType in the headers for the upload
-                const options = {
-                    headers: {
-                        'Content-Type': fileType,
+        // const reader = new FileReader()
+        // const buffer = reader.readAsArrayBuffer(file)
+        file.arrayBuffer().then(buffer => {
+            console.log('buffer generated')
+            const iv = Crypto.getRandomValues(new Uint8Array(16));
+            Crypto.subtle.generateKey(
+                {
+                    name: "AES-GCM",
+                    length: 256
+                },
+                true,
+                ["encrypt", "decrypt"]
+            ).then(key => {
+                console.log('key generated')
+                Crypto.subtle.encrypt(
+                    {
+                        name: "AES-GCM",
+                        iv,
                     },
-                }
-                Axios.put(signedRequest, file, options)
-                    .then(response => {
-                        this.getPosts()
-                        callback()
+                    key,
+                    buffer
+                ).then(encrypted => {
+                    console.log('blob encrypted')
+                    const fileType = Path.extname(file.name).substr(1) // ext includes . separator
+                    this.authorizedAxios.post(serverUrl + 'createPost', {
+                        fileType: fileType,
                     })
+                        .then(response => {
+                            const returnData = response.data.data
+                            const signedRequest = returnData.signedRequest
+        
+                            // Put the fileType in the headers for the upload
+                            const options = {
+                                headers: {
+                                    'Content-Type': fileType,
+                                },
+                            }
+                            Axios.put(signedRequest, encrypted, options)
+                                .then(response => {
+                                    this.getPosts()
+                                    callback()
+                                })
+                        })
+                })
             })
+        })
     }
 
     follow = (username, callback) => {
@@ -170,7 +198,7 @@ class App extends Component {
 
     render() {
         if (!CurrentUser.loggedIn())
-            return (<Redirect to='/login'/>)
+            return (<Redirect to='/login' />)
         const { posts, followers, followRequests, contentUrl } = this.state
         const postCallbacks = {
             delete: this.deleteFromDB,
