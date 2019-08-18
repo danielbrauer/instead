@@ -110,7 +110,7 @@ class App extends Component {
     }
 
     // Perform the upload
-    handleUpload = (uploadInput) => {
+    handleUpload = (uploadInput, callback) => {
         const file = uploadInput.files[0]
         const fileType = Path.extname(file.name).substr(1) // ext includes . separator
         this.authorizedAxios.post(serverUrl + 'createPost', {
@@ -129,6 +129,7 @@ class App extends Component {
                 Axios.put(signedRequest, file, options)
                     .then(response => {
                         this.getPosts()
+                        callback()
                     })
             })
     }

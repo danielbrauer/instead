@@ -21,8 +21,9 @@ router.get('/getPosts', (req, res) => {
     User.findById(req.tokenPayload.userid, (err, user) => {
         if (err) return res.status(500).send(err)
         if (!user) return res.status(400).send('User does not exist')
+        // users can't follow themselves but should see their own pictures
         user.following.push(user._id)
-        Post.find({ userid: user.following }, (err, data) => {
+        Post.find({ userid: user.following }).sort({createdAt: -1}).exec((err, data) => {
             if (err) return res.status(500).send(err)
             return res.json({ success: true, posts: data })
         })
