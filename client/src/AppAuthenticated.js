@@ -8,8 +8,11 @@ import FollowerPage from './FollowerPage'
 import Posts from './Posts'
 import NewPost from './NewPost'
 import { Route, Switch, Redirect } from 'react-router-dom'
+import toBuffer from 'typedarray-to-buffer'
 
 import { Menu, Dropdown } from 'semantic-ui-react'
+
+require('buffer')
 
 const Crypto = window.crypto
 
@@ -113,11 +116,9 @@ class App extends Component {
 
     // Perform the upload
     handleUpload = (file, callback) => {
-        // const reader = new FileReader()
-        // const buffer = reader.readAsArrayBuffer(file)
         file.arrayBuffer().then(buffer => {
             console.log('buffer generated')
-            const iv = Crypto.getRandomValues(new Uint8Array(16));
+            const iv = Crypto.getRandomValues(new Uint8Array(12));
             Crypto.subtle.generateKey(
                 {
                     name: "AES-GCM",
@@ -127,35 +128,43 @@ class App extends Component {
                 ["encrypt", "decrypt"]
             ).then(key => {
                 console.log('key generated')
-                Crypto.subtle.encrypt(
-                    {
-                        name: "AES-GCM",
-                        iv,
-                    },
-                    key,
-                    buffer
-                ).then(encrypted => {
-                    console.log('blob encrypted')
-                    const fileType = Path.extname(file.name).substr(1) // ext includes . separator
-                    this.authorizedAxios.post(serverUrl + 'createPost', {
-                        fileType: fileType,
-                    })
-                        .then(response => {
-                            const returnData = response.data.data
-                            const signedRequest = returnData.signedRequest
-        
-                            // Put the fileType in the headers for the upload
-                            const options = {
-                                headers: {
-                                    'Content-Type': fileType,
-                                },
-                            }
-                            Axios.put(signedRequest, encrypted, options)
-                                .then(response => {
-                                    this.getPosts()
-                                    callback()
-                                })
+                Crypto.subtle.exportKey(
+                    "jwk",
+                    key
+                ).then(exportedKey => {
+                    Crypto.subtle.encrypt(
+                        {
+                            name: "AES-GCM",
+                            iv,
+                        },
+                        key,
+                        buffer
+                    ).then(encrypted => {
+                        console.log('blob encrypted')
+                        const fileType = Path.extname(file.name).substr(1) // ext includes . separator
+                        const ivBuffer = toBuffer(iv)
+                        this.authorizedAxios.post(serverUrl + 'createPost', {
+                            fileType: fileType,
+                            key: exportedKey.k,
+                            iv: ivBuffer.toString('base64'),
                         })
+                            .then(response => {
+                                const returnData = response.data.data
+                                const signedRequest = returnData.signedRequest
+            
+                                // Put the fileType in the headers for the upload
+                                const options = {
+                                    headers: {
+                                        'Content-Type': fileType,
+                                    },
+                                }
+                                Axios.put(signedRequest, encrypted, options)
+                                    .then(response => {
+                                        this.getPosts()
+                                        callback()
+                                    })
+                            })
+                    })
                 })
             })
         })

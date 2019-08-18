@@ -147,6 +147,8 @@ router.post('/createPost', (req, res) => {
         {
             _id: fileName,
             userid: req.tokenPayload.userid,
+            iv: req.body.iv,
+            key: req.body.key,
         },
     (err, data) => {
         if (err) return res.status(500).send(err)
