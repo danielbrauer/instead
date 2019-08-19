@@ -12,10 +12,17 @@ class PostCache {
         this.inProgress = {}
     }
 
+    clear = () => {
+        const data = this.getData()
+        for (var key in this.getData()) {
+            URL.revokeObjectURL(data[key])
+        }
+    }
+
     getDecryptedUrl = (postUrl, iv, key) => {
         if (this.inProgress[postUrl])
             return this.placeHolderUrl
-        const decryptedUrl = this.getData(postUrl)
+        const decryptedUrl = this.getData()[postUrl]
         if (decryptedUrl === undefined) {
             this.inProgress[postUrl] = true
             Crypto.subtle.importKey(

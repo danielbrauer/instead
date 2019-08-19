@@ -36,7 +36,7 @@ class App extends Component {
             headers: { 'Authorization': `Bearer ${CurrentUser.getToken()}` }
         })
         this.userCache = new UserCache(() => this.state.users, this.addUser, this.authorizedAxios, serverUrl + 'getUserById')
-        this.postCache = new PostCache(url => this.state.decryptedPostUrls[url], this.addDecryptedPost)
+        this.postCache = new PostCache(() => this.state.decryptedPostUrls, this.addDecryptedPost)
     }
 
     addUser = (user) => {
@@ -57,6 +57,10 @@ class App extends Component {
         this.getConfig()
         this.getPosts()
         this.updateFollowerList()
+    }
+
+    componentWillUnmount = () => {
+        this.postCache.clear()
     }
 
     updateFollowerList = () => {
