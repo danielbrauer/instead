@@ -11,7 +11,7 @@ export default function (props) {
                         {CurrentUser.getPayload().userid === post.userid ?
                             <Button onClick={() => props.callbacks.delete(post._id)}>Delete</Button> : null}
                         <List.Content>{props.callbacks.getUser(post.userid).username}</List.Content>
-                        <Image fluid src={props.contentUrl + post._id} alt={post._id} />
+                        <Image fluid src={props.callbacks.getPostUrl(props.contentUrl + post._id, post.iv, post.key)} alt={post._id} />
                     </List.Item>
                 ))}
             </List>

@@ -4,6 +4,7 @@ import AxiosHelper from './AxiosHelper'
 import Path from 'path'
 import CurrentUser from './CurrentUser'
 import UserCache from './UserCache'
+import PostCache from './PostCache'
 import FollowerPage from './FollowerPage'
 import Posts from './Posts'
 import NewPost from './NewPost'
@@ -27,6 +28,7 @@ class App extends Component {
             followers: [],
             followRequests: [],
             users: {},
+            decryptedPostUrls: {},
             contentUrl: "",
         }
         if (!CurrentUser.loggedIn()) return
@@ -34,12 +36,19 @@ class App extends Component {
             headers: { 'Authorization': `Bearer ${CurrentUser.getToken()}` }
         })
         this.userCache = new UserCache(() => this.state.users, this.addUser, this.authorizedAxios, serverUrl + 'getUserById')
+        this.postCache = new PostCache(url => this.state.decryptedPostUrls[url], this.addDecryptedPost)
     }
 
     addUser = (user) => {
         let users = Object.assign({}, this.state.users)
         users[user._id] = user
         this.setState({ users: users })
+    }
+
+    addDecryptedPost = (url, decryptedUrl) => {
+        let urls = Object.assign({}, this.state.decryptedPostUrls)
+        urls[url] = decryptedUrl
+        this.setState({ decryptedPostUrls: urls })
     }
 
     // when component mounts, first thing it does is fetch all existing data in our db
@@ -145,7 +154,7 @@ class App extends Component {
                         const ivBuffer = toBuffer(iv)
                         this.authorizedAxios.post(serverUrl + 'createPost', {
                             fileType: fileType,
-                            key: exportedKey.k,
+                            key: JSON.stringify(exportedKey),
                             iv: ivBuffer.toString('base64'),
                         })
                             .then(response => {
@@ -211,6 +220,7 @@ class App extends Component {
         const { posts, followers, followRequests, contentUrl } = this.state
         const postCallbacks = {
             delete: this.deleteFromDB,
+            getPostUrl: this.postCache.getDecryptedUrl,
             getUser: this.userCache.getUser,
         }
         const followCallbacks = {
