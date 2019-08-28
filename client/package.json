@@ -3,18 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@types/jest": "^24.0.18",
+    "@types/jsonwebtoken": "^8.3.3",
+    "@types/node": "^12.7.2",
+    "@types/react": "^16.9.2",
+    "@types/react-dom": "^16.9.0",
     "aws-sdk": "^2.462.0",
     "axios": "^0.18.1",
     "base64-js": "^1.3.1",
     "buffer": "^5.4.0",
     "fileapi": "^2.1.1",
+    "promise-cancelable": "^2.1.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^0.87.3",
-    "typedarray-to-buffer": "^3.1.5"
+    "typedarray-to-buffer": "^3.1.5",
+    "typescript": "^3.5.3"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -44,7 +51,7 @@
     "directory": "client"
   },
   "devDependencies": {
-    "jsonwebtoken": "^8.5.1",
-    "typescript": "^3.4.5"
+    "@types/react-router-dom": "^4.3.4",
+    "jsonwebtoken": "^8.5.1"
   }
 }

@@ -1,14 +1,19 @@
 import React, { useState } from 'react'
-import useInput from './useInput'
+import { useInput } from './useInput'
 import { Form, Message } from 'semantic-ui-react'
+import { FollowUserCallback } from '../Interfaces';
 
-export default function FollowUserForm(props) {
+interface FollowUserFormProps {
+    callback : (username : string, callback : FollowUserCallback) => void,
+}
+
+export default function FollowUserForm(props : FollowUserFormProps) {
     const { value: username, bind: bindUsername, reset: resetUsername } = useInput('')
     const [success, setSuccess] = useState(false)
     const [error, setError] = useState(false)
     const [message, setMessage] = useState('')
 
-    function responseCallback(success, message) {
+    function responseCallback(success : boolean, message : string) {
         setSuccess(success)
         setError(!success)
         setMessage(message)

@@ -1,18 +1,28 @@
 import React, { useState } from 'react'
-import useInput from './useInput'
+import { useInput, useInputBool } from './useInput'
 import { Button, Form, Message, Header, Segment } from 'semantic-ui-react'
+import { MessageCallback, UserPasswordCombo } from '../Interfaces'
+import { RouterProps } from 'react-router'
 
-export default function NewUserForm(props) {
+interface SubmitCallback {
+    (userPassword : UserPasswordCombo, callback : MessageCallback) : void
+}
+
+interface NewUserFormProps extends RouterProps {
+    onSubmit : SubmitCallback
+}
+
+export default function NewUserForm(props : NewUserFormProps) {
     const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: repeatPassword, bind: bindRepeatPassword, reset: resetRepeatPassword } = useInput('')
-    const { value: agreeTerms, bind: bindAgreeTerms } = useInput(false)
+    const { value: agreeTerms, bind: bindAgreeTerms } = useInputBool(false)
     const [serverStatus, setServerStatus] = useState('')
     const [loadingStatus, setLoadingStatus] = useState(false)
     const [missedTerms, setMissedTerms] = useState(false)
     const [missedRepeatPassword, setMissedRepeatPassword] = useState(false)
 
-    function handleSubmit(evt) {
+    function handleSubmit(evt : React.FormEvent<HTMLFormElement>) {
         evt.preventDefault()
         const userMissedTerms = !agreeTerms
         setMissedTerms(userMissedTerms)
@@ -27,12 +37,12 @@ export default function NewUserForm(props) {
         props.onSubmit({ username, password }, submitCallback)
     }
 
-    function submitCallback(error, response) {
+    function submitCallback(message : string) {
         setLoadingStatus(false)
         resetPassword()
         resetRepeatPassword()
-        if (error) {
-            setServerStatus(error.message)
+        if (message) {
+            setServerStatus(message)
             return
         }
     }

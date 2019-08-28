@@ -6,19 +6,30 @@ import LoginForm from './Components/LoginForm'
 import NewUserForm from './Components/NewUserForm'
 import { Grid } from 'semantic-ui-react'
 import { Route, Switch, Redirect } from 'react-router-dom'
+import {MessageCallback} from './Interfaces'
+import { History } from 'history';
 
 const serverUrl = process.env.REACT_APP_BACKEND_URL + 'auth/'
 
-class App extends Component {
+export interface AppProps {
+    history: History,
+}
+
+interface User {
+    username: string,
+    password: string,
+}
+
+class App extends Component<AppProps, {}> {
     // initialize our state
-    constructor(props) {
+    constructor(props : AppProps) {
         super(props)
         this.state = {
             newUser: false,
         }
     }
 
-    login = (data, callback) => {
+    login = (data : User, callback : MessageCallback) => {
         console.log('logging in')
         Axios.get(serverUrl + 'login',
             {
@@ -34,13 +45,13 @@ class App extends Component {
             .catch(error => {
                 AxiosHelper.logError(error)
                 if (error.response)
-                    return callback({ message: error.response.data }, null)
+                    return callback(error.response.data)
                 if (error.request)
-                    return callback({ message: 'No response' }, null)
+                    return callback('No response')
             })
     }
 
-    createUser = (data, callback) => {
+    createUser = (data : User, callback : MessageCallback) => {
         console.log('creating user')
         Axios.post(serverUrl + 'new',
             {
@@ -49,14 +60,14 @@ class App extends Component {
             })
             .then(res => {
                 CurrentUser.setToken(res.data.token)
-                this.props.setLoggedIn(true)
+                this.context.history.push('/home')
             })
             .catch(error => {
                 AxiosHelper.logError(error)
                 if (error.response)
-                    return callback({ message: error.response.data }, null)
+                    return callback(error.response.data)
                 if (error.request)
-                    return callback({ message: 'No response' }, null)
+                    return callback('No response')
             })
     }
 

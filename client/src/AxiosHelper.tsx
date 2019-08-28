@@ -1,6 +1,6 @@
 
 class AxiosHelper {
-    static logError(error) {
+    static logError(error : any) {
         if (error.response) {
             // Request made and server responded
             console.warn(error.response.data)

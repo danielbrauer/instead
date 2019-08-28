@@ -1,27 +1,43 @@
 import React, { Component } from 'react'
-import Axios from 'axios'
+import Axios, { AxiosInstance } from 'axios'
 import AxiosHelper from './AxiosHelper'
 import Path from 'path'
 import CurrentUser from './CurrentUser'
 import UserCache from './UserCache'
-import PostCache from './PostCache'
-import FollowerPage from './FollowerPage'
-import Posts from './Posts'
+import FollowerPage, { FollowerPageProps } from './FollowerPage'
+import Posts, { PostsProps } from './Posts'
 import NewPost from './NewPost'
 import { Route, Switch, Redirect } from 'react-router-dom'
-import toBuffer from 'typedarray-to-buffer'
 
 import { Menu, Dropdown } from 'semantic-ui-react'
+import { User } from './Interfaces'
+import { History } from 'history';
 
+const toBuffer = require('typedarray-to-buffer')
 require('buffer')
 
 const Crypto = window.crypto
 
 const serverUrl = process.env.REACT_APP_BACKEND_URL + 'api/'
 
-class App extends Component {
+export interface AppProps {
+    history: History,
+}
+
+interface AppState {
+    posts: never[],
+    followers: never[],
+    followRequests: never[],
+    users: { [id: string] : User},
+    decryptedPostUrls: { [id: string] : string},
+    contentUrl: string,
+}
+
+class App extends Component<AppProps, AppState> {
+    authorizedAxios: AxiosInstance
+    userCache: UserCache
     // initialize our state
-    constructor(props) {
+    constructor(props : AppProps) {
         super(props)
         this.state = {
             posts: [],
@@ -31,24 +47,21 @@ class App extends Component {
             decryptedPostUrls: {},
             contentUrl: "",
         }
-        if (!CurrentUser.loggedIn()) return
         this.authorizedAxios = Axios.create({
             headers: { 'Authorization': `Bearer ${CurrentUser.getToken()}` }
         })
-        this.userCache = new UserCache(() => this.state.users, this.addUser, this.authorizedAxios, serverUrl + 'getUserById')
-        this.postCache = new PostCache(() => this.state.decryptedPostUrls, this.addDecryptedPost)
+        this.userCache = new UserCache(this.getUser, this.addUser, this.authorizedAxios, serverUrl + 'getUserById')
+        if (!CurrentUser.loggedIn()) return
     }
 
-    addUser = (user) => {
+    getUser = (id : string) => {
+        return this.state.users[id]
+    }
+
+    addUser = (user : User) => {
         let users = Object.assign({}, this.state.users)
         users[user._id] = user
         this.setState({ users: users })
-    }
-
-    addDecryptedPost = (url, decryptedUrl) => {
-        let urls = Object.assign({}, this.state.decryptedPostUrls)
-        urls[url] = decryptedUrl
-        this.setState({ decryptedPostUrls: urls })
     }
 
     // when component mounts, first thing it does is fetch all existing data in our db
@@ -57,10 +70,6 @@ class App extends Component {
         this.getConfig()
         this.getPosts()
         this.updateFollowerList()
-    }
-
-    componentWillUnmount = () => {
-        this.postCache.clear()
     }
 
     updateFollowerList = () => {
@@ -116,7 +125,7 @@ class App extends Component {
 
     // our delete method that uses our backend api
     // to remove existing database information
-    deleteFromDB = (idTodelete) => {
+    deleteFromDB = (idTodelete : string) => {
         this.authorizedAxios.delete(serverUrl + 'deletePost', {
             params: {
                 id: idTodelete,
@@ -128,8 +137,10 @@ class App extends Component {
     }
 
     // Perform the upload
-    handleUpload = (file, callback) => {
-        file.arrayBuffer().then(buffer => {
+    handleUpload = (file : File, callback : () => void) => {
+        const fileReader = new FileReader()
+
+        fileReader.onload = () => {
             console.log('buffer generated')
             const iv = Crypto.getRandomValues(new Uint8Array(12));
             Crypto.subtle.generateKey(
@@ -151,7 +162,7 @@ class App extends Component {
                             iv,
                         },
                         key,
-                        buffer
+                        fileReader.result as ArrayBuffer
                     ).then(encrypted => {
                         console.log('blob encrypted')
                         const fileType = Path.extname(file.name).substr(1) // ext includes . separator
@@ -180,10 +191,11 @@ class App extends Component {
                     })
                 })
             })
-        })
+        }
+        fileReader.readAsArrayBuffer(file)
     }
 
-    follow = (username, callback) => {
+    follow = (username : string, callback : (arg0: boolean, arg1: string) => void) => {
         this.authorizedAxios.post(serverUrl + 'sendFollowRequest', {
             username: username,
         })
@@ -195,7 +207,7 @@ class App extends Component {
             })
     }
 
-    rejectFollowRequest = (userid) => {
+    rejectFollowRequest = (userid : string) => {
         this.authorizedAxios.post(serverUrl + 'rejectFollowRequest', {
             userid: userid
         })
@@ -204,7 +216,7 @@ class App extends Component {
             })
     }
 
-    acceptFollowRequest = (userid) => {
+    acceptFollowRequest = (userid : string) => {
         this.authorizedAxios.post(serverUrl + 'acceptFollowRequest', {
             userid: userid
         })
@@ -222,12 +234,15 @@ class App extends Component {
         if (!CurrentUser.loggedIn())
             return (<Redirect to='/login' />)
         const { posts, followers, followRequests, contentUrl } = this.state
-        const postCallbacks = {
+        const postsProps : PostsProps = {
+            posts: posts,
+            contentUrl: contentUrl,
             delete: this.deleteFromDB,
-            getPostUrl: this.postCache.getDecryptedUrl,
             getUser: this.userCache.getUser,
         }
-        const followCallbacks = {
+        const followProps : FollowerPageProps = {
+            requests: followRequests,
+            followers,
             follow: this.follow,
             accept: this.acceptFollowRequest,
             reject: this.rejectFollowRequest,
@@ -253,8 +268,8 @@ class App extends Component {
                 <br />
                 <br />
                 <Switch>
-                    <Route path='/followers' render={props => <FollowerPage {...props} requests={followRequests} followers={followers} callbacks={followCallbacks} />} />
-                    <Route path='/home' render={props => <Posts {...props} posts={posts} contentUrl={contentUrl} callbacks={postCallbacks} />} />
+                    <Route path='/followers' render={props => <FollowerPage {...props} {...followProps} />} />
+                    <Route path='/home' render={props => <Posts {...props} {...postsProps} />} />
                     <Route path='/new' render={props => <NewPost {...props} onSubmit={this.handleUpload} />} />
                 </Switch>
             </div>

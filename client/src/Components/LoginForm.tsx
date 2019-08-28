@@ -1,27 +1,37 @@
 import React, {useState} from 'react'
-import useInput from './useInput'
+import { useInput } from './useInput'
 import { Button, Form, Message, Header, Segment } from 'semantic-ui-react'
+import { RouterProps } from 'react-router'
+import { MessageCallback, UserPasswordCombo } from '../Interfaces'
 
-export default function LoginForm(props) {
+interface SubmitCallback {
+    (userPassword : UserPasswordCombo, callback : MessageCallback) : void
+}
+
+interface LoginFormProps extends RouterProps {
+    onSubmit : SubmitCallback
+}
+
+export default function LoginForm(props : LoginFormProps) {
     const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const [errorStatus, setErrorStatus] = useState(false)
     const [statusMessage, setStatusMessage] = useState(false)
     const [loadingStatus, setLoadingStatus] = useState(false)
 
-    function handleSubmit(evt) {
+    function handleSubmit(evt : React.FormEvent<HTMLFormElement>) {
         setLoadingStatus(true)
         evt.preventDefault()
         setErrorStatus(false)
         props.onSubmit({ username, password }, submitCallback)
     }
 
-    function submitCallback(error, response) {
+    function submitCallback(message : string) {
         setLoadingStatus(false)
         resetPassword()
-        if (error) {
+        if (message) {
             setErrorStatus(true)
-            setStatusMessage(error.message)
+            setStatusMessage(message !== null)
             return
         }
     }
