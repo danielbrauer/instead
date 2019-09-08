@@ -16,5 +16,7 @@
   "dependencies": {
     "concurrently": "^4.1.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "jest": "^24.9.0"
+  }
 }
