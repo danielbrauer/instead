@@ -21,7 +21,7 @@ router.get('/login', asyncHandler(authManager.authenticateBasic), asyncHandler(a
 }))
 
 router.post('/new', asyncHandler(async function (req, res) {
-    const existingUser = await UserModel.findOne({ username: req.body.username }, 'username')
+    const existingUser = await UserModel.findOne({ username: req.body.username }, 'username').exec()
     if (existingUser) return res.status(400).send('User already exists')
     const buffer = await crypto.randomBytes(32)
     const salt = buffer.toString('base64')
@@ -31,7 +31,7 @@ router.post('/new', asyncHandler(async function (req, res) {
         username: req.body.username,
         passwordHash: hash.toString('base64'),
         salt: salt,
-    })
+    }).exec()
     const token = await createTokenForUser(user)
     return res.json({ token })
 }))
