@@ -60,7 +60,7 @@ class App extends Component<AppProps, {}> {
             })
             .then(res => {
                 CurrentUser.setToken(res.data.token)
-                this.context.history.push('/home')
+                this.props.history.push('/home')
             })
             .catch(error => {
                 AxiosHelper.logError(error)
