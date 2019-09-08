@@ -1,53 +1,39 @@
 const express = require('express')
-const jwt = require('jsonwebtoken')
+const jwt = require('../jwt-promise')
 const UserModel = require('../schema/user')
 const config = require('config')
-const crypto = require('crypto')
+const crypto = require('../crypto-promise')
 const authManager = require('../auth-strategies')
 const uuidv1 = require('uuid/v1')
+const asyncHandler = require('express-async-handler')
 
 const secret = config.get('Customer.jwt').get('secret')
 
 const router = express.Router()
 
-function createTokenForUser(user, callback) {
-    return jwt.sign({ userid: user._id }, secret, callback)
+async function createTokenForUser(user) {
+    return await jwt.sign({ userid: user._id }, secret)
 }
 
-router.get('/login', authManager.authenticateBasic, function (req, res, next) {
-    createTokenForUser(req.user, (error, token) => {
-        if (error) return res.status(500).send('User created, but error creating token')
-        return res.json({ token })
+router.get('/login', asyncHandler(authManager.authenticateBasic), asyncHandler(async function (req, res, next) {
+    const token = await createTokenForUser(req.user);
+    return res.json({ token })
+}))
+
+router.post('/new', asyncHandler(async function (req, res) {
+    const existingUser = await UserModel.findOne({ username: req.body.username }, 'username')
+    if (existingUser) return res.status(400).send('User already exists')
+    const buffer = await crypto.randomBytes(32)
+    const salt = buffer.toString('base64')
+    const hash = await crypto.scrypt(req.body.password, salt, 64)
+    const user = await UserModel.create({
+        _id: uuidv1(),
+        username: req.body.username,
+        passwordHash: hash.toString('base64'),
+        salt: salt,
     })
-})
-
-router.post('/new', function (req, res) {
-    UserModel.findOne({ username: req.body.username }, 'username', (error, user) => {
-        if (error) return res.status(500).send('Error searching for user')
-        if (user) return res.status(400).send('User already exists')
-
-        crypto.randomBytes(32, (error, buffer) => {
-            if (error) return res.status(500).send('Error generating salt')
-            const salt = buffer.toString('base64')
-            crypto.scrypt(req.body.password, salt, 64, (error, hash) => {
-                if (error) return res.status(500).send('Error hashing password')
-
-                UserModel.create({
-                    _id: uuidv1(),
-                    username: req.body.username,
-                    passwordHash: hash.toString('base64'),
-                    salt: salt
-                }, (error, user) => {
-                    if (error) return res.status(500).send('Error creating new user')
-                    createTokenForUser(user, (error, token) => {
-                        if (error) return res.status(500).send('User created, but error creating token')
-                        return res.json({ token })
-                    })
-
-                })
-            })
-        })
-    })
-})
+    const token = await createTokenForUser(user)
+    return res.json({ token })
+}))
 
 module.exports = router

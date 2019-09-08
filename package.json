@@ -14,7 +14,7 @@
     "url": "https://github.com/danielbrauer/instead.git"
   },
   "dependencies": {
-    "concurrently": "^4.1.0"
+    "concurrently": "^4.1.2"
   },
   "devDependencies": {}
 }
