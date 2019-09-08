@@ -97,17 +97,9 @@ router.delete('/deletePost', asyncHandler(async (req, res) => {
         return res.status(400).send('Post not found')
     if (post.userid !== req.tokenPayload.userid)
         return res.status(400).send('Can\'t delete other people\'s posts')
-    awsManager.delete_s3(post._id,
-        () => {
-            Post.findByIdAndDelete(post._id, (err) => {
-                if (err) return res.status(500).send(err)
-                return res.json({ success: true })
-            })
-        },
-        err => {
-            return res.status(500).send(err)
-        }
-    )
+    await awsManager.delete_s3(post._id)
+    await Post.findByIdAndDelete(post._id).exec()
+    return res.json({ success: true })
 }))
 
 // get URL for uploading
@@ -119,15 +111,9 @@ router.post('/createPost', asyncHandler(async (req, res) => {
         iv: req.body.iv,
         key: req.body.key,
     }
-    await Post.create(newPost).exec()
-    awsManager.sign_s3(fileName, req.body.fileType,
-        data => {
-            return res.json({ success: true, data: { signedRequest: data, fileName: fileName } })
-        },
-        err => {
-            return res.json({ success: false })
-        }
-    )
+    await Post.create(newPost)
+    const data = await awsManager.sign_s3(fileName, req.body.fileType)
+    return res.json({ success: true, data: { signedRequest: data, fileName: fileName } })
 }))
 
 module.exports = router

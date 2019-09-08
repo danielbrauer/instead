@@ -29,7 +29,7 @@ class AWSManager {
         return `https://${AWSManager.instance().bucket}.s3.amazonaws.com/`
     }
 
-    static sign_s3(fileName, fileType, successCallback, errorCallback) {
+    static async sign_s3(fileName, fileType) {
         // Set up the payload of what we are sending to the S3 api
         const s3Params = {
             Bucket: AWSManager.instance().bucket,
@@ -39,30 +39,17 @@ class AWSManager {
             ACL: 'public-read',
         }
         // Make a request to the S3 API to get a signed URL which we can use to upload our file
-        AWSManager.instance().s3.getSignedUrl('putObject', s3Params, (err, data) => {
-            if (err) {
-                console.log(err, err.stack)
-                return errorCallback(err)
-            }
-
-            return successCallback(data)
-        })
+        const data = await AWSManager.instance().s3.getSignedUrlPromise('putObject', s3Params)
+        return data
     }
 
-    static delete_s3(key, successCallback, errorCallback) {
+    static async delete_s3(key) {
         const s3Params = {
             Bucket: AWSManager.instance().bucket, 
             Key: key,
         }
-        AWSManager.instance().s3.deleteObject(s3Params, (err, data) => {
-            if (err) {
-                console.log(err, err.stack)
-                errorCallback(err)
-                return
-            }
-            
-            successCallback(data)
-        })
+        const data = await AWSManager.instance().s3.deleteObject(s3Params).promise()
+        return data
     }
 }
 
