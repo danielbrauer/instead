@@ -16,7 +16,7 @@ async function createTokenForUser(user) {
 }
 
 router.get('/login', asyncHandler(authManager.authenticateBasic), asyncHandler(async function (req, res, next) {
-    const token = await createTokenForUser(req.user);
+    const token = await createTokenForUser(req.user)
     return res.json({ token })
 }))
 

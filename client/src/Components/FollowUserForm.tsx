@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useInput } from './useInput'
 import { Form, Message } from 'semantic-ui-react'
-import { FollowUserCallback } from '../Interfaces';
+import { FollowUserCallback } from '../Interfaces'
 
 interface FollowUserFormProps {
     callback : (username : string, callback : FollowUserCallback) => void,

@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 // import Caman from 'caman'
 import { Button, Loader, Segment, Dimmer } from 'semantic-ui-react'
+import { History } from 'history'
 
 let urls = new WeakMap()
 
@@ -53,6 +54,7 @@ class Dropper extends Component<DropperProps, DropperState> {
 }
 
 interface NewPostProps {
+    history: History,
     onSubmit : (file : File, callback: (() => void)) => void,
 }
 
@@ -80,7 +82,7 @@ export default class NewPost extends Component<NewPostProps, NewPostState> {
         this.setState({ uploadInput: file })
     }
     onFinished = () => {
-        this.context.push('/home')
+        this.props.history.push('/home')
     }
     render() {
         return (

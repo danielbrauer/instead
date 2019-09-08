@@ -7,7 +7,7 @@ import NewUserForm from './Components/NewUserForm'
 import { Grid } from 'semantic-ui-react'
 import { Route, Switch, Redirect } from 'react-router-dom'
 import {MessageCallback} from './Interfaces'
-import { History } from 'history';
+import { History } from 'history'
 
 const serverUrl = process.env.REACT_APP_BACKEND_URL + 'auth/'
 

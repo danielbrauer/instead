@@ -11,7 +11,7 @@ import { Route, Switch, Redirect } from 'react-router-dom'
 
 import { Menu, Dropdown } from 'semantic-ui-react'
 import { User } from './Interfaces'
-import { History } from 'history';
+import { History } from 'history'
 
 const toBuffer = require('typedarray-to-buffer')
 require('buffer')
@@ -142,7 +142,7 @@ class App extends Component<AppProps, AppState> {
 
         fileReader.onload = () => {
             console.log('buffer generated')
-            const iv = Crypto.getRandomValues(new Uint8Array(12));
+            const iv = Crypto.getRandomValues(new Uint8Array(12))
             Crypto.subtle.generateKey(
                 {
                     name: "AES-GCM",

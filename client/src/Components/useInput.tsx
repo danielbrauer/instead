@@ -1,5 +1,5 @@
 import { useState, ChangeEvent, FormEvent } from "react"
-import { CheckboxProps, FormProps } from "semantic-ui-react";
+import { CheckboxProps, FormProps } from "semantic-ui-react"
 
 export function useInput(initialValue : string) {
     const [value, setValue] = useState(initialValue)
