@@ -16,7 +16,7 @@ export default function LoginForm(props : LoginFormProps) {
     const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const [errorStatus, setErrorStatus] = useState(false)
-    const [statusMessage, setStatusMessage] = useState(false)
+    const [statusMessage, setStatusMessage] = useState('')
     const [loadingStatus, setLoadingStatus] = useState(false)
 
     function handleSubmit(evt : React.FormEvent<HTMLFormElement>) {
@@ -31,7 +31,7 @@ export default function LoginForm(props : LoginFormProps) {
         resetPassword()
         if (message) {
             setErrorStatus(true)
-            setStatusMessage(message !== null)
+            setStatusMessage(message)
             return
         }
     }
