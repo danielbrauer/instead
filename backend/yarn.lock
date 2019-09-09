@@ -574,11 +574,6 @@ encodeurl@~1.0.2:
   resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-1.0.2.tgz#ad3ff4c86ec2d029322f5a02c3a9a606c95b3f59"
   integrity sha1-rT/0yG7C0CkyL1oCw6mmBslbP1k=
 
-es6-denodeify@^0.1.5:
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/es6-denodeify/-/es6-denodeify-0.1.5.tgz#31d4d5fe9c5503e125460439310e16a2a3f39c1f"
-  integrity sha1-MdTV/pxVA+ElRgQ5MQ4WoqPznB8=
-
 escape-html@~1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/escape-html/-/escape-html-1.0.3.tgz#0258eae4d3d0c0974de1c169188ef0051d1d1988"
@@ -1269,6 +1264,13 @@ jws@^3.2.2:
   dependencies:
     jwa "^1.4.1"
     safe-buffer "^5.0.1"
+
+jwt-promise@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/jwt-promise/-/jwt-promise-1.0.0.tgz#9d3ce408317b57de27a236f9d6c4bd2e834a9c75"
+  integrity sha512-bRdSqYuUqWVhEM3n1DRsqZpRQk9e95qk4mDnkWBtHysBXtTHwTxFBHlwaq6c604CLddNCXH2cD7Ukr+0MWMqGQ==
+  dependencies:
+    jsonwebtoken "^8.5.1"
 
 kareem@2.3.1:
   version "2.3.1"

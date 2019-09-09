@@ -1,5 +1,5 @@
 const express = require('express')
-const jwt = require('../jwt-promise')
+const jwt = require('jwt-promise')
 const UserModel = require('../schema/user')
 const config = require('config')
 const crypto = require('../crypto-promise')

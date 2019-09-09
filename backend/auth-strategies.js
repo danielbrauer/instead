@@ -2,7 +2,7 @@ const UserModel = require('./schema/user')
 const config = require('config')
 const crypto = require('./crypto-promise')
 
-const jwt = require('./jwt-promise')
+const jwt = require('jwt-promise')
 const Basic = require('permit').Basic
 const Bearer = require('permit').Bearer
 
