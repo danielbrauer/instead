@@ -12,7 +12,7 @@ const secret = config.get('Customer.jwt').get('secret')
 const router = express.Router()
 
 async function createTokenForUser(user) {
-    return await jwt.sign({ userid: user._id }, secret)
+    return jwt.sign({ userid: user._id }, secret)
 }
 
 router.get('/login', asyncHandler(authManager.authenticateBasic), asyncHandler(async function (req, res, next) {
@@ -22,7 +22,8 @@ router.get('/login', asyncHandler(authManager.authenticateBasic), asyncHandler(a
 
 router.post('/new', asyncHandler(async function (req, res) {
     const existingUser = await UserModel.findOne({ username: req.body.username }, 'username').exec()
-    if (existingUser) return res.status(400).send('User already exists')
+    if (existingUser)
+        return res.status(400).send('User already exists')
     const buffer = await crypto.randomBytes(32)
     const salt = buffer.toString('base64')
     const hash = await crypto.scrypt(req.body.password, salt, 64)

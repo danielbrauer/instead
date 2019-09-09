@@ -83,10 +83,8 @@ router.post('/acceptFollowRequest', asyncHandler(async (req, res) => {
     if (!user)
         return res.status(400).send('No such user')
     follower.following.push(user._id)
-    await follower.save()
     user.followers.push(follower._id)
-    await user.save()
-    await request.remove()
+    await Promise.all([follower.save(), user.save(), request.remove()])
     return res.json({ success: true })
 }))
 
@@ -99,8 +97,7 @@ router.delete('/deletePost', asyncHandler(async (req, res) => {
         return res.status(400).send('Post not found')
     if (post.userid !== req.tokenPayload.userid)
         return res.status(400).send('Can\'t delete other people\'s posts')
-    await awsManager.delete_s3(post._id)
-    await Post.findByIdAndDelete(post._id).exec()
+    await Promise.all([Post.findByIdAndDelete(post._id).exec(), awsManager.delete_s3(post._id)])
     return res.json({ success: true })
 }))
 
@@ -113,9 +110,8 @@ router.post('/createPost', asyncHandler(async (req, res) => {
         iv: req.body.iv,
         key: req.body.key,
     }
-    await Post.create(newPost)
-    const data = await awsManager.sign_s3(fileName, req.body.fileType)
-    return res.json({ success: true, data: { signedRequest: data, fileName: fileName } })
+    const results = await Promise.all([awsManager.sign_s3(fileName, req.body.fileType), Post.create(newPost)])
+    return res.json({ success: true, data: { signedRequest: results[0], fileName: fileName } })
 }))
 
 module.exports = router
