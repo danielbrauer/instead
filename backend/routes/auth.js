@@ -32,7 +32,7 @@ router.post('/new', asyncHandler(async function (req, res) {
         username: req.body.username,
         passwordHash: hash.toString('base64'),
         salt: salt,
-    }).exec()
+    })
     const token = await createTokenForUser(user)
     return res.json({ token })
 }))
