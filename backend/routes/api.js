@@ -46,12 +46,14 @@ router.get('/getUserById', asyncHandler(async (req, res) => {
 
 router.post('/sendFollowRequest', asyncHandler(async (req, res) => {
     const requesteeName = req.body.username
-    const requestee = await User.findOne({ username: requesteeName }, '_id').exec()
+    const requestee = await User.findOne({ username: requesteeName }, '_id followers').exec()
     if (!requestee)
         return res.status(400).send('User does not exist')
     const requesterId = req.tokenPayload.userid
     if (requestee._id === requesterId)
         return res.status(400).send('You don\'t need to follow yourself')
+    if (requestee.followers.find(x => x === requesterId))
+        return res.status(400).send('Already following user')
     const potentialRequest = {requesterId: requesterId, requesteeId: requestee._id}
     const existingRequest = await FollowRequest.findOne(potentialRequest).exec()
     if (existingRequest)
