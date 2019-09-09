@@ -29,46 +29,44 @@ class App extends Component<AppProps, {}> {
         }
     }
 
-    login = (data : User, callback : MessageCallback) => {
+    async login(data : User, callback : MessageCallback) {
         console.log('logging in')
-        Axios.get(serverUrl + 'login',
+        try {
+            const res = await Axios.get(serverUrl + 'login',
             {
                 auth: {
                     username: data.username,
                     password: data.password,
                 },
             })
-            .then(res => {
-                CurrentUser.setToken(res.data.token)
-                this.props.history.push('/home')
-            })
-            .catch(error => {
-                AxiosHelper.logError(error)
-                if (error.response)
-                    return callback(error.response.data)
-                if (error.request)
-                    return callback('No response')
-            })
+            CurrentUser.setToken(res.data.token)
+            this.props.history.push('/home')
+        } catch (error) {
+            AxiosHelper.logError(error)
+            if (error.response)
+                return callback(error.response.data)
+            if (error.request)
+                return callback('No response')
+        }
     }
 
-    createUser = (data : User, callback : MessageCallback) => {
+    async createUser(data : User, callback : MessageCallback) {
         console.log('creating user')
-        Axios.post(serverUrl + 'new',
-            {
+        try {
+            const request = {
                 username: data.username,
                 password: data.password,
-            })
-            .then(res => {
-                CurrentUser.setToken(res.data.token)
-                this.props.history.push('/home')
-            })
-            .catch(error => {
-                AxiosHelper.logError(error)
-                if (error.response)
-                    return callback(error.response.data)
-                if (error.request)
-                    return callback('No response')
-            })
+            }
+            const res = await Axios.post(serverUrl + 'new', request)
+            CurrentUser.setToken(res.data.token)
+            this.props.history.push('/home')
+        } catch (error) {
+            AxiosHelper.logError(error)
+            if (error.response)
+                return callback(error.response.data)
+            if (error.request)
+                return callback('No response')
+        }
     }
 
     render() {
