@@ -29,28 +29,20 @@ class App extends Component<AppProps, {}> {
         }
     }
 
-    async login(data : User, callback : MessageCallback) {
+    login = async(data : User) => {
         console.log('logging in')
-        try {
-            const res = await Axios.get(serverUrl + 'login',
-            {
-                auth: {
-                    username: data.username,
-                    password: data.password,
-                },
-            })
-            CurrentUser.setToken(res.data.token)
-            this.props.history.push('/home')
-        } catch (error) {
-            AxiosHelper.logError(error)
-            if (error.response)
-                return callback(error.response.data)
-            if (error.request)
-                return callback('No response')
-        }
+        const res = await Axios.get(serverUrl + 'login',
+        {
+            auth: {
+                username: data.username,
+                password: data.password,
+            },
+        })
+        CurrentUser.setToken(res.data.token)
+        this.props.history.push('/home')
     }
 
-    async createUser(data : User, callback : MessageCallback) {
+    createUser = async(data : User, callback : MessageCallback) => {
         console.log('creating user')
         try {
             const request = {

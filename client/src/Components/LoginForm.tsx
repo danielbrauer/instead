@@ -2,10 +2,10 @@ import React, {useState} from 'react'
 import { useInput } from './useInput'
 import { Button, Form, Message, Header, Segment } from 'semantic-ui-react'
 import { RouterProps } from 'react-router'
-import { MessageCallback, UserPasswordCombo } from '../Interfaces'
+import { UserPasswordCombo } from '../Interfaces'
 
 interface SubmitCallback {
-    (userPassword : UserPasswordCombo, callback : MessageCallback) : void
+    (userPassword : UserPasswordCombo) : void
 }
 
 interface LoginFormProps extends RouterProps {
@@ -19,20 +19,20 @@ export default function LoginForm(props : LoginFormProps) {
     const [statusMessage, setStatusMessage] = useState('')
     const [loadingStatus, setLoadingStatus] = useState(false)
 
-    function handleSubmit(evt : React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(evt : React.FormEvent<HTMLFormElement>) {
         setLoadingStatus(true)
         evt.preventDefault()
         setErrorStatus(false)
-        props.onSubmit({ username, password }, submitCallback)
-    }
-
-    function submitCallback(message : string) {
-        setLoadingStatus(false)
-        resetPassword()
-        if (message) {
+        try {
+            await props.onSubmit({ username, password })
+        } catch (error) {
+            let message = 'Please try again'
+            if (error.response)
+                message = error.response.data
+            setLoadingStatus(false)
+            resetPassword()
             setErrorStatus(true)
             setStatusMessage(message)
-            return
         }
     }
 
