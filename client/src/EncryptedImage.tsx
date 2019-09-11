@@ -6,13 +6,13 @@ const base64js = require('base64-js')
 const Crypto = window.crypto
 
 interface EncryptedImageProps {
-    url: string,
+    encryptedUrl: string,
     iv: string,
     decKey: string,
 }
 
 interface EncryptedImageState {
-    url: string,
+    imageUrl: string,
     promise: any,
 }
 
@@ -38,46 +38,47 @@ export default class EncryptedImage extends Component<EncryptedImageProps, Encry
     constructor(props: EncryptedImageProps) {
         super(props)
         this.state = {
-            url: '',
+            imageUrl: '',
             promise: null,
         }
     }
 
     componentDidMount() {
-        const promise = makeCancelable(
+        const promise = makeCancelable(this.decrypt())
+        this.setState({ promise })
+    }
+
+    async decrypt() {
+        const [cryptoKey, encryptedImage] = await Promise.all([
             Crypto.subtle.importKey(
                 'jwk',
                 JSON.parse(this.props.decKey),
                 'AES-GCM',
                 false,
                 ['encrypt', 'decrypt'],
-            ).then(cryptoKey => {
-                Axios.get(
-                    this.props.url,
-                    { responseType: 'arraybuffer' }
-                ).then(response => {
-                    const ivBuffer = base64js.toByteArray(this.props.iv)
-                    Crypto.subtle.decrypt(
-                        {
-                            name: 'AES-GCM',
-                            iv: ivBuffer,
-                        },
-                        cryptoKey,
-                        response.data,
-                    ).then(decrypted => {
-                        const blob = new Blob([decrypted], { type: 'image/jpeg' })
-                        const createdUrl = URL.createObjectURL(blob)
-                        this.setState({ url: createdUrl })
-                    })
-                })
-            })
+            ),
+            Axios.get(
+                this.props.encryptedUrl,
+                { responseType: 'arraybuffer' }
+            )
+        ])
+        const ivBuffer = base64js.toByteArray(this.props.iv)
+        const decrypted = await Crypto.subtle.decrypt(
+            {
+                name: 'AES-GCM',
+                iv: ivBuffer,
+            },
+            cryptoKey,
+            encryptedImage.data,
         )
-        this.setState({ promise: promise })
+        const blob = new Blob([decrypted], { type: 'image/jpeg' })
+        const imageUrl = URL.createObjectURL(blob)
+        this.setState({ imageUrl })
     }
 
     componentWillUnmount() {
-        if (this.state.url) {
-            URL.revokeObjectURL(this.state.url)
+        if (this.state.imageUrl) {
+            URL.revokeObjectURL(this.state.imageUrl)
         } else if (this.state.promise) {
             this.state.promise.cancel()
         }
@@ -87,8 +88,8 @@ export default class EncryptedImage extends Component<EncryptedImageProps, Encry
         return (
             <div>
                 {
-                    this.state.url
-                    ? <Image fluid src={this.state.url} alt={'HAM'} />
+                    this.state.imageUrl
+                    ? <Image fluid src={this.state.imageUrl} alt={'HAM'} />
                     : <Placeholder><Placeholder.Image /></Placeholder>
                 }
             </div>

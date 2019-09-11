@@ -20,7 +20,7 @@ export default function (props : PostsProps) {
                         {CurrentUser.getPayload().userid === post.userid ?
                             <Button onClick={() => props.delete(post._id)}>Delete</Button> : null}
                         <List.Content>{props.getUser(post.userid).username}</List.Content>
-                        <EncryptedImage url={props.contentUrl + post._id} iv={post.iv} decKey={post.key} />
+                        <EncryptedImage encryptedUrl={props.contentUrl + post._id} iv={post.iv} decKey={post.key} />
                     </List.Item>
                 ))}
             </List>
