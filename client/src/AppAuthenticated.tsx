@@ -59,7 +59,7 @@ class App extends Component<AppProps, AppState> {
     }
 
     addUser = (user : User) => {
-        let users = Object.assign({}, this.state.users)
+        let users = {...this.state.users}
         users[user._id] = user
         this.setState({ users: users })
     }
