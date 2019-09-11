@@ -4,12 +4,8 @@ import { Button, Form, Message, Header, Segment } from 'semantic-ui-react'
 import { RouterProps } from 'react-router'
 import { UserPasswordCombo } from '../Interfaces'
 
-interface SubmitCallback {
-    (userPassword : UserPasswordCombo) : void
-}
-
 interface LoginFormProps extends RouterProps {
-    onSubmit : SubmitCallback
+    onSubmit : (userPassword : UserPasswordCombo) => void
 }
 
 export default function LoginForm(props : LoginFormProps) {

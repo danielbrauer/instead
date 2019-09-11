@@ -1,15 +1,11 @@
 import React, { useState } from 'react'
 import { useInput, useInputBool } from './useInput'
 import { Button, Form, Message, Header, Segment } from 'semantic-ui-react'
-import { MessageCallback, UserPasswordCombo } from '../Interfaces'
+import { UserPasswordCombo } from '../Interfaces'
 import { RouterProps } from 'react-router'
 
-interface SubmitCallback {
-    (userPassword : UserPasswordCombo, callback : MessageCallback) : void
-}
-
 interface NewUserFormProps extends RouterProps {
-    onSubmit : SubmitCallback
+    onSubmit : (userPassword : UserPasswordCombo) => void
 }
 
 export default function NewUserForm(props : NewUserFormProps) {
@@ -22,28 +18,32 @@ export default function NewUserForm(props : NewUserFormProps) {
     const [missedTerms, setMissedTerms] = useState(false)
     const [missedRepeatPassword, setMissedRepeatPassword] = useState(false)
 
-    function handleSubmit(evt : React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(evt : React.FormEvent<HTMLFormElement>) {
         evt.preventDefault()
         const userMissedTerms = !agreeTerms
         setMissedTerms(userMissedTerms)
         const userMissedRepeatPassword = password !== repeatPassword
         if (userMissedRepeatPassword) {
+            resetPassword()
             resetRepeatPassword()
         }
         setMissedRepeatPassword(userMissedRepeatPassword)
         if (userMissedTerms || userMissedRepeatPassword) return
         setLoadingStatus(true)
         setServerStatus('')
-        props.onSubmit({ username, password }, submitCallback)
-    }
-
-    function submitCallback(message : string) {
-        setLoadingStatus(false)
-        resetPassword()
-        resetRepeatPassword()
-        if (message) {
-            setServerStatus(message)
-            return
+        try {
+            await props.onSubmit({ username, password })
+        } catch (error) {
+            setLoadingStatus(false)
+            resetPassword()
+            resetRepeatPassword()
+            let message = 'Please try again'
+            if (error.response)
+                message = error.response.data
+            if (message) {
+                setServerStatus(message)
+                return
+            }
         }
     }
 
