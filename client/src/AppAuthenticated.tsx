@@ -65,19 +65,19 @@ class App extends Component<AppProps, AppState> {
     }
 
     // when component mounts, first thing it does is fetch all existing data in our db
-    componentDidMount = () => {
+    componentDidMount() {
         if (!CurrentUser.loggedIn()) return
         this.getConfig()
         this.getPosts()
         this.updateFollowerList()
     }
 
-    updateFollowerList = () => {
+    updateFollowerList() {
         this.getFollowRequests()
         this.getFollowers()
     }
 
-    getConfig = () => {
+    getConfig() {
         this.authorizedAxios.get(serverUrl + 'getConfig')
             .then(res => {
                 this.setState({ contentUrl: res.data.config.contentUrl })
@@ -87,7 +87,7 @@ class App extends Component<AppProps, AppState> {
             })
     }
 
-    getPosts = () => {
+    getPosts() {
         this.authorizedAxios.get(serverUrl + 'getPosts')
             .then(res => {
                 if (res.data.posts) {
@@ -99,7 +99,7 @@ class App extends Component<AppProps, AppState> {
             })
     }
 
-    getFollowers = () => {
+    getFollowers() {
         this.authorizedAxios.get(serverUrl + 'getFollowers')
             .then(res => {
                 if (res.data.followers) {
@@ -111,7 +111,7 @@ class App extends Component<AppProps, AppState> {
             })
     }
 
-    getFollowRequests = () => {
+    getFollowRequests() {
         this.authorizedAxios.get(serverUrl + 'getFollowRequests')
             .then(res => {
                 if (res.data.requests) {
