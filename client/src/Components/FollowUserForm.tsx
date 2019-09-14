@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
 import { useInput } from './useInput'
 import { Form, Message } from 'semantic-ui-react'
-import { FollowUserCallback } from '../Interfaces'
 
 interface FollowUserFormProps {
-    callback : (username : string, callback : FollowUserCallback) => void,
+    callback : (username : string) => Promise<any>,
 }
 
 export default function FollowUserForm(props : FollowUserFormProps) {
@@ -13,15 +12,20 @@ export default function FollowUserForm(props : FollowUserFormProps) {
     const [error, setError] = useState(false)
     const [message, setMessage] = useState('')
 
+    async function handleSubmit() {
+        resetUsername()
+        try {
+            await props.callback(username)
+            responseCallback(true, "Request sent")
+        } catch (error) {
+            responseCallback(false, error.response.data)
+        }
+    }
+    
     function responseCallback(success : boolean, message : string) {
         setSuccess(success)
         setError(!success)
         setMessage(message)
-    }
-
-    function handleSubmit() {
-        props.callback(username, responseCallback)
-        resetUsername()
     }
 
     return (

@@ -55,7 +55,7 @@ class Dropper extends Component<DropperProps, DropperState> {
 
 interface NewPostProps {
     history: History,
-    onSubmit : (file : File, callback: (() => void)) => void,
+    onSubmit : (file : File) => void,
 }
 
 interface NewPostState {
@@ -74,15 +74,13 @@ export default class NewPost extends Component<NewPostProps, NewPostState> {
     enableUpload = () => {
         return this.state.uploadInput !== null
     }
-    onSubmit = () => {
-        this.props.onSubmit(this.state.uploadInput!, this.onFinished)
+    onSubmit = async() => {
         this.setState({ uploading: true })
+        await this.props.onSubmit(this.state.uploadInput!)
+        this.props.history.push('/home')
     }
     onChange = (file : File) => {
         this.setState({ uploadInput: file })
-    }
-    onFinished = () => {
-        this.props.history.push('/home')
     }
     render() {
         return (

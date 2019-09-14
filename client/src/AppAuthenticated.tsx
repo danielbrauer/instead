@@ -8,6 +8,7 @@ import FollowerPage, { FollowerPageProps } from './FollowerPage'
 import Posts, { PostsProps } from './Posts'
 import NewPost from './NewPost'
 import { Route, Switch, Redirect } from 'react-router-dom'
+import { readAsArrayBuffer } from 'promise-file-reader'
 
 import { Menu, Dropdown } from 'semantic-ui-react'
 import { User } from './Interfaces'
@@ -51,7 +52,6 @@ class App extends Component<AppProps, AppState> {
             headers: { 'Authorization': `Bearer ${CurrentUser.getToken()}` }
         })
         this.userCache = new UserCache(this.getUser, this.addUser, this.authorizedAxios, serverUrl + 'getUserById')
-        if (!CurrentUser.loggedIn()) return
     }
 
     getUser = (id : string) => {
@@ -65,164 +65,117 @@ class App extends Component<AppProps, AppState> {
     }
 
     // when component mounts, first thing it does is fetch all existing data in our db
-    componentDidMount() {
+    async componentDidMount() {
         if (!CurrentUser.loggedIn()) return
-        this.getConfig()
-        this.getPosts()
-        this.updateFollowerList()
+        try {
+            await Promise.all([this.getConfig(), this.getPosts(), this.updateFollowerList()])
+        } catch (error) {
+            AxiosHelper.logError(error)
+        }
     }
 
-    updateFollowerList() {
-        this.getFollowRequests()
-        this.getFollowers()
+    async updateFollowerList() {
+        await Promise.all([this.getFollowRequests(), this.getFollowers()])
     }
 
-    getConfig() {
-        this.authorizedAxios.get(serverUrl + 'getConfig')
-            .then(res => {
-                this.setState({ contentUrl: res.data.config.contentUrl })
-            })
-            .catch(error => {
-                AxiosHelper.logError(error)
-            })
+    async getConfig() {
+        const response = await this.authorizedAxios.get(serverUrl + 'getConfig')
+        this.setState({ contentUrl: response.data.config.contentUrl })
     }
 
-    getPosts() {
-        this.authorizedAxios.get(serverUrl + 'getPosts')
-            .then(res => {
-                if (res.data.posts) {
-                    this.setState({ posts: res.data.posts })
-                }
-            })
-            .catch(error => {
-                AxiosHelper.logError(error)
-            })
+    async getPosts() {
+        const response = await this.authorizedAxios.get(serverUrl + 'getPosts')
+        this.setState({ posts: response.data.posts })
     }
 
-    getFollowers() {
-        this.authorizedAxios.get(serverUrl + 'getFollowers')
-            .then(res => {
-                if (res.data.followers) {
-                    this.setState({ followers: res.data.followers })
-                }
-            })
-            .catch(error => {
-                AxiosHelper.logError(error)
-            })
+    async getFollowers() {
+        const response = await this.authorizedAxios.get(serverUrl + 'getFollowers')
+        this.setState({ followers: response.data.followers })
     }
 
-    getFollowRequests() {
-        this.authorizedAxios.get(serverUrl + 'getFollowRequests')
-            .then(res => {
-                if (res.data.requests) {
-                    this.setState({ followRequests: res.data.requests })
-                }
-            })
-            .catch(error => {
-                AxiosHelper.logError(error)
-            })
+    async getFollowRequests() {
+        const response = await this.authorizedAxios.get(serverUrl + 'getFollowRequests')
+        this.setState({ followRequests: response.data.requests })
     }
 
     // our delete method that uses our backend api
     // to remove existing database information
-    deleteFromDB = (idTodelete : string) => {
-        this.authorizedAxios.delete(serverUrl + 'deletePost', {
+    deleteFromDB = async(idTodelete : string) => {
+        await this.authorizedAxios.delete(serverUrl + 'deletePost', {
             params: {
                 id: idTodelete,
             },
         })
-            .then(response => {
-                this.getPosts()
-            })
+        this.getPosts()
+    }
+
+    async postWithKeys(key : CryptoKey, fileType : string, ivBuffer : Buffer) {
+        const exportedKey = await Crypto.subtle.exportKey(
+            "jwk",
+            key
+        )
+        return this.authorizedAxios.post(serverUrl + 'createPost', {
+            fileType: fileType,
+            key: JSON.stringify(exportedKey),
+            iv: ivBuffer.toString('base64'),
+        })
     }
 
     // Perform the upload
-    handleUpload = (file : File, callback : () => void) => {
-        const fileReader = new FileReader()
+    handleUpload = async(file : File) => {
+        const filePromise = readAsArrayBuffer(file)
+        const keyPromise = Crypto.subtle.generateKey(
+            {
+                name: "AES-GCM",
+                length: 256
+            },
+            true,
+            ["encrypt", "decrypt"]
+        )
+        const iv = Crypto.getRandomValues(new Uint8Array(12))
+        const [result, key] = await Promise.all([filePromise, keyPromise])
+        const fileType = Path.extname(file.name).substr(1) // ext includes . separator
+        const ivBuffer = toBuffer(iv)
+        const encryptedPromise = Crypto.subtle.encrypt(
+            {
+                name: "AES-GCM",
+                iv,
+            },
+            key,
+            result
+        )
+        const responsePromise = this.postWithKeys(key, fileType, ivBuffer)
+        const [encrypted, response] = await Promise.all([encryptedPromise, responsePromise])
+        const signedRequest = response.data.data.signedRequest
 
-        fileReader.onload = () => {
-            console.log('buffer generated')
-            const iv = Crypto.getRandomValues(new Uint8Array(12))
-            Crypto.subtle.generateKey(
-                {
-                    name: "AES-GCM",
-                    length: 256
-                },
-                true,
-                ["encrypt", "decrypt"]
-            ).then(key => {
-                console.log('key generated')
-                Crypto.subtle.exportKey(
-                    "jwk",
-                    key
-                ).then(exportedKey => {
-                    Crypto.subtle.encrypt(
-                        {
-                            name: "AES-GCM",
-                            iv,
-                        },
-                        key,
-                        fileReader.result as ArrayBuffer
-                    ).then(encrypted => {
-                        console.log('blob encrypted')
-                        const fileType = Path.extname(file.name).substr(1) // ext includes . separator
-                        const ivBuffer = toBuffer(iv)
-                        this.authorizedAxios.post(serverUrl + 'createPost', {
-                            fileType: fileType,
-                            key: JSON.stringify(exportedKey),
-                            iv: ivBuffer.toString('base64'),
-                        })
-                            .then(response => {
-                                const returnData = response.data.data
-                                const signedRequest = returnData.signedRequest
-            
-                                // Put the fileType in the headers for the upload
-                                const options = {
-                                    headers: {
-                                        'Content-Type': fileType,
-                                    },
-                                }
-                                Axios.put(signedRequest, encrypted, options)
-                                    .then(response => {
-                                        this.getPosts()
-                                        callback()
-                                    })
-                            })
-                    })
-                })
-            })
+        // Put the fileType in the headers for the upload
+        const options = {
+            headers: {
+                'Content-Type': fileType,
+            },
         }
-        fileReader.readAsArrayBuffer(file)
+        await Axios.put(signedRequest, encrypted, options)
+        this.getPosts()
     }
 
-    follow = (username : string, callback : (arg0: boolean, arg1: string) => void) => {
-        this.authorizedAxios.post(serverUrl + 'sendFollowRequest', {
+    follow = async(username : string) => {
+        return this.authorizedAxios.post(serverUrl + 'sendFollowRequest', {
             username: username,
         })
-            .then(response => {
-                callback(true, "Request sent")
-            })
-            .catch(error => {
-                callback(false, error.response.data)
-            })
     }
 
-    rejectFollowRequest = (userid : string) => {
-        this.authorizedAxios.post(serverUrl + 'rejectFollowRequest', {
+    rejectFollowRequest = async(userid : string) => {
+        await this.authorizedAxios.post(serverUrl + 'rejectFollowRequest', {
             userid: userid
         })
-            .then(response => {
-                this.updateFollowerList()
-            })
+        this.updateFollowerList()
     }
 
-    acceptFollowRequest = (userid : string) => {
-        this.authorizedAxios.post(serverUrl + 'acceptFollowRequest', {
+    acceptFollowRequest = async(userid : string) => {
+        await this.authorizedAxios.post(serverUrl + 'acceptFollowRequest', {
             userid: userid
         })
-            .then(response => {
-                this.updateFollowerList()
-            })
+        this.updateFollowerList()
     }
 
     logOut = () => {

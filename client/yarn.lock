@@ -8107,6 +8107,10 @@ progress@^2.0.0:
   resolved "https://registry.yarnpkg.com/progress/-/progress-2.0.3.tgz#7e8cf8d8f5b8f239c1bc68beb4eb78567d572ef8"
   integrity sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA==
 
+"promise-file-reader@https://github.com/jahredhope/promise-file-reader.git#98d38d0965605ee80208d8a66f913b2279b5852b":
+  version "1.0.2"
+  resolved "https://github.com/jahredhope/promise-file-reader.git#98d38d0965605ee80208d8a66f913b2279b5852b"
+
 promise-inflight@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/promise-inflight/-/promise-inflight-1.0.1.tgz#98472870bf228132fcbdd868129bad12c3c029e3"

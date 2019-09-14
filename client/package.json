@@ -13,6 +13,7 @@
     "base64-js": "^1.3.1",
     "buffer": "^5.4.0",
     "fileapi": "^2.1.1",
+    "promise-file-reader": "https://github.com/jahredhope/promise-file-reader.git#98d38d0965605ee80208d8a66f913b2279b5852b",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.0.1",

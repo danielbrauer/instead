@@ -16,10 +16,6 @@ export interface User {
     username : string,
 }
 
-export interface FollowUserCallback {
-    (success : boolean, message : string) : void
-}
-
 export interface Post {
     _id : string,
     userid : string,

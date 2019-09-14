@@ -1,12 +1,12 @@
 import React from 'react'
 import FollowUserForm from './Components/FollowUserForm'
 import { Button, List, Header } from 'semantic-ui-react'
-import { FollowRequest, FollowUserCallback, User } from './Interfaces'
+import { FollowRequest, User } from './Interfaces'
 
 export interface FollowerPageProps {
     requests : FollowRequest[],
     followers : string[],
-    follow: (username : string, callback : FollowUserCallback) => void,
+    follow: (username : string) => Promise<any>,
     accept: (userid : string) => void,
     reject: (userid : string) => void,
     getUser: (userid : string) => User,
