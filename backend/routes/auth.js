@@ -1,26 +1,25 @@
-const express = require('express')
+const Router = require('express-promise-router')
 const jwt = require('jwt-promise')
 const UserModel = require('../schema/user')
 const config = require('config')
 const crypto = require('../crypto-promise')
 const authManager = require('../auth-strategies')
 const uuidv1 = require('uuid/v1')
-const asyncHandler = require('express-async-handler')
 
 const secret = config.get('Customer.jwt').get('secret')
 
-const router = express.Router()
+const router = new Router()
 
 async function createTokenForUser(user) {
     return jwt.sign({ userid: user._id }, secret)
 }
 
-router.get('/login', asyncHandler(authManager.authenticateBasic), asyncHandler(async function (req, res, next) {
+router.get('/login', authManager.authenticateBasic, async function (req, res) {
     const token = await createTokenForUser(req.user)
     return res.json({ token })
-}))
+})
 
-router.post('/new', asyncHandler(async function (req, res) {
+router.post('/new', async function (req, res) {
     const existingUser = await UserModel.findOne({ username: req.body.username }, 'username').exec()
     if (existingUser)
         return res.status(400).send('User already exists')
@@ -35,6 +34,6 @@ router.post('/new', asyncHandler(async function (req, res) {
     })
     const token = await createTokenForUser(user)
     return res.json({ token })
-}))
+})
 
 module.exports = router

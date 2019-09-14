@@ -1,12 +1,11 @@
-const express = require('express')
+const Router = require('express-promise-router')
 const Post = require('../schema/post')
 const User = require('../schema/user')
 const FollowRequest = require('../schema/followRequest')
 const awsManager = require('../aws')
 const uuidv1 = require('uuid/v1')
-const asyncHandler = require('express-async-handler')
 
-const router  = express.Router()
+const router = new Router()
 
 // get the URL where images are hosted
 router.get('/getConfig', (req, res) => {
@@ -18,7 +17,7 @@ router.get('/getConfig', (req, res) => {
 })
 
 // this method fetches all available data in our database
-router.get('/getPosts', asyncHandler(async (req, res) => {
+router.get('/getPosts', async (req, res) => {
     const user = await User.findById(req.tokenPayload.userid).exec()
     if (!user)
         return res.status(400).send('User does not exist')
@@ -26,25 +25,25 @@ router.get('/getPosts', asyncHandler(async (req, res) => {
     user.following.push(user._id)
     const data = await Post.find({ userid: user.following }).sort({createdAt: -1}).exec()
     return res.json({ success: true, posts: data })
-}))
+})
 
-router.get('/getFollowRequests', asyncHandler(async (req, res) => {
+router.get('/getFollowRequests', async (req, res) => {
     const data = await FollowRequest.find({requesteeId: req.tokenPayload.userid}, 'requesterId').exec()
     return res.json({ success: true, requests: data })
-}))
+})
 
-router.get('/getFollowers', asyncHandler(async (req, res) => {
+router.get('/getFollowers', async (req, res) => {
     const user = await User.findById(req.tokenPayload.userid, 'followers').exec()
     return res.json({ success: true, followers: user.followers })
-}))
+})
 
-router.get('/getUserById', asyncHandler(async (req, res) => {
+router.get('/getUserById', async (req, res) => {
     const userid = req.query.userid
     const user = await User.findById(userid, '_id username').exec()
     return res.json({ success: true, user })
-}))
+})
 
-router.post('/sendFollowRequest', asyncHandler(async (req, res) => {
+router.post('/sendFollowRequest', async (req, res) => {
     const requesteeName = req.body.username
     const requestee = await User.findOne({ username: requesteeName }, '_id followers').exec()
     if (!requestee)
@@ -61,16 +60,16 @@ router.post('/sendFollowRequest', asyncHandler(async (req, res) => {
     potentialRequest._id = uuidv1()
     await FollowRequest.create(potentialRequest)
     return res.json({ success: true })
-}))
+})
 
-router.post('/rejectFollowRequest', asyncHandler(async (req, res) => {
+router.post('/rejectFollowRequest', async (req, res) => {
     const requesterId = req.body.userid
     const requesteeId = req.tokenPayload.userid
     await FollowRequest.findOneAndDelete({requesterId: requesterId, requesteeId: requesteeId}).exec()
     return res.json({ success: true })
-}))
+})
 
-router.post('/acceptFollowRequest', asyncHandler(async (req, res) => {
+router.post('/acceptFollowRequest', async (req, res) => {
     const requesterId = req.body.userid
     const requesteeId = req.tokenPayload.userid
     const request = await FollowRequest.findOne({requesterId: requesterId, requesteeId: requesteeId}, '_id').exec()
@@ -86,11 +85,11 @@ router.post('/acceptFollowRequest', asyncHandler(async (req, res) => {
     user.followers.push(follower._id)
     await Promise.all([follower.save(), user.save(), request.remove()])
     return res.json({ success: true })
-}))
+})
 
 // removes existing data in our database, and 
 // deletes the associated s3 object
-router.delete('/deletePost', asyncHandler(async (req, res) => {
+router.delete('/deletePost', async (req, res) => {
     const id = req.query.id
     const post = await Post.findById(id, '_id userid').exec()
     if (!post)
@@ -99,10 +98,10 @@ router.delete('/deletePost', asyncHandler(async (req, res) => {
         return res.status(400).send('Can\'t delete other people\'s posts')
     await Promise.all([Post.findByIdAndDelete(post._id).exec(), awsManager.delete_s3(post._id)])
     return res.json({ success: true })
-}))
+})
 
 // get URL for uploading
-router.post('/createPost', asyncHandler(async (req, res) => {
+router.post('/createPost', async (req, res) => {
     const fileName = uuidv1()
     const newPost = {
         _id: fileName,
@@ -112,6 +111,6 @@ router.post('/createPost', asyncHandler(async (req, res) => {
     }
     const results = await Promise.all([awsManager.sign_s3(fileName, req.body.fileType), Post.create(newPost)])
     return res.json({ success: true, data: { signedRequest: results[0], fileName: fileName } })
-}))
+})
 
 module.exports = router
