@@ -53,32 +53,36 @@ router.get('/getUserById', async (req, res) => {
 })
 
 router.post('/sendFollowRequest', async (req, res) => {
-    const requesteeName = req.body.username
-    const requestee = await db.queryOne(
-        'SELECT id FROM users WHERE username = $1',
-        [requesteeName]
-    )
-    if (!requestee)
-        return res.status(400).send('User does not exist')
-    const requesterId = req.tokenPayload.userid
-    if (requestee.id === requesterId)
-        return res.status(400).send('You don\'t need to follow yourself')
-    const followCount = await db.count(
-        'SELECT COUNT(*) FROM followers WHERE follower_id = $1 AND followee_id = $2',
-        [requesterId, requestee.id]
-    )
-    if (followCount > 0)
-        return res.status(400).send('Already following user')
-    const requestCount = await db.count(
-        'SELECT COUNT(*) FROM follow_requests WHERE requester_id = $1 AND requestee_id = $2',
-        [requesterId, requestee.id]
-    )
-    if (requestCount > 0)
-        return res.status(400).send('Request already exists')
-    await db.query(
-        'INSERT INTO follow_requests (requester_id, requestee_id) VALUES ($1, $2)',
-        [requesterId, requestee.id]
-    )
+    const error = await db.transaction(async(client) => {
+        const requesteeName = req.body.username
+        const requestee = await db.queryOne(
+            'SELECT id FROM users WHERE username = $1',
+            [requesteeName]
+        )
+        if (!requestee)
+            return [400, 'User does not exist']
+        const requesterId = req.tokenPayload.userid
+        if (requestee.id === requesterId)
+            return [400, 'You don\'t need to follow yourself']
+        const followCount = await db.count(
+            'SELECT COUNT(*) FROM followers WHERE follower_id = $1 AND followee_id = $2',
+            [requesterId, requestee.id]
+        )
+        if (followCount > 0)
+            return [400, 'Already following user']
+        const requestCount = await db.count(
+            'SELECT COUNT(*) FROM follow_requests WHERE requester_id = $1 AND requestee_id = $2',
+            [requesterId, requestee.id]
+        )
+        if (requestCount > 0)
+            return [400, 'Request already exists']
+        await db.query(
+            'INSERT INTO follow_requests (requester_id, requestee_id) VALUES ($1, $2)',
+            [requesterId, requestee.id]
+        )
+    })
+    if (error)
+        return res.status(error[0]).send(error[1])
     return res.json({ success: true })
 })
 
