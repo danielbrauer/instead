@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import Axios, { AxiosInstance } from 'axios'
 import AxiosHelper from './AxiosHelper'
-import Path from 'path'
 import CurrentUser from './CurrentUser'
 import UserCache from './UserCache'
 import FollowerPage, { FollowerPageProps } from './FollowerPage'
@@ -54,13 +53,13 @@ class App extends Component<AppProps, AppState> {
         this.userCache = new UserCache(this.getUser, this.addUser, this.authorizedAxios, serverUrl + 'getUserById')
     }
 
-    getUser = (id : string) => {
+    getUser = (id : number) => {
         return this.state.users[id]
     }
 
     addUser = (user : User) => {
         let users = {...this.state.users}
-        users[user._id] = user
+        users[user.id] = user
         this.setState({ users: users })
     }
 
@@ -100,7 +99,7 @@ class App extends Component<AppProps, AppState> {
 
     // our delete method that uses our backend api
     // to remove existing database information
-    deleteFromDB = async(idTodelete : string) => {
+    deleteFromDB = async(idTodelete : number) => {
         await this.authorizedAxios.delete(serverUrl + 'deletePost', {
             params: {
                 id: idTodelete,
@@ -109,14 +108,13 @@ class App extends Component<AppProps, AppState> {
         this.getPosts()
     }
 
-    async postWithKeys(key : CryptoKey, fileType : string, ivBuffer : Buffer) {
+    async postWithKeys(key : CryptoKey, ivBuffer : Buffer) {
         const exportedKey = await Crypto.subtle.exportKey(
             "jwk",
             key
         )
         return this.authorizedAxios.post(serverUrl + 'createPost', {
-            fileType: fileType,
-            key: JSON.stringify(exportedKey),
+            key: exportedKey,
             iv: ivBuffer.toString('base64'),
         })
     }
@@ -134,7 +132,7 @@ class App extends Component<AppProps, AppState> {
         )
         const iv = Crypto.getRandomValues(new Uint8Array(12))
         const [result, key] = await Promise.all([filePromise, keyPromise])
-        const fileType = Path.extname(file.name).substr(1) // ext includes . separator
+        // const fileType = Path.extname(file.name).substr(1) // ext includes . separator
         const ivBuffer = toBuffer(iv)
         const encryptedPromise = Crypto.subtle.encrypt(
             {
@@ -144,14 +142,14 @@ class App extends Component<AppProps, AppState> {
             key,
             result
         )
-        const responsePromise = this.postWithKeys(key, fileType, ivBuffer)
+        const responsePromise = this.postWithKeys(key, ivBuffer)
         const [encrypted, response] = await Promise.all([encryptedPromise, responsePromise])
         const signedRequest = response.data.data.signedRequest
 
         // Put the fileType in the headers for the upload
         const options = {
             headers: {
-                'Content-Type': fileType,
+                'Content-Type': 'application/octet-stream',
             },
         }
         await Axios.put(signedRequest, encrypted, options)
@@ -164,14 +162,14 @@ class App extends Component<AppProps, AppState> {
         })
     }
 
-    rejectFollowRequest = async(userid : string) => {
+    rejectFollowRequest = async(userid : number) => {
         await this.authorizedAxios.post(serverUrl + 'rejectFollowRequest', {
             userid: userid
         })
         this.updateFollowerList()
     }
 
-    acceptFollowRequest = async(userid : string) => {
+    acceptFollowRequest = async(userid : number) => {
         await this.authorizedAxios.post(serverUrl + 'acceptFollowRequest', {
             userid: userid
         })

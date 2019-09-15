@@ -5,11 +5,11 @@ import { FollowRequest, User } from './Interfaces'
 
 export interface FollowerPageProps {
     requests : FollowRequest[],
-    followers : string[],
+    followers : number[],
     follow: (username : string) => Promise<any>,
-    accept: (userid : string) => void,
-    reject: (userid : string) => void,
-    getUser: (userid : string) => User,
+    accept: (userid : number) => void,
+    reject: (userid : number) => void,
+    getUser: (userid : number) => User,
 }
 
 export default function FollowerPage(props : FollowerPageProps) {
@@ -18,10 +18,10 @@ export default function FollowerPage(props : FollowerPageProps) {
             <FollowUserForm callback={props.follow} />
             <List>
                 {props.requests.map((request) => (
-                    <List.Item key={request.requesterId}>
-                        <Button onClick={() => props.accept(request.requesterId)}>accept</Button>
-                        <Button onClick={() => props.reject(request.requesterId)}>reject</Button>
-                        <List.Content>{props.getUser(request.requesterId).username}</List.Content>
+                    <List.Item key={request.requester_id}>
+                        <Button onClick={() => props.accept(request.requester_id)}>accept</Button>
+                        <Button onClick={() => props.reject(request.requester_id)}>reject</Button>
+                        <List.Content>{props.getUser(request.requester_id).username}</List.Content>
                     </List.Item>
                 ))}
             </List>

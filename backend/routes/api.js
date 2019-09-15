@@ -1,7 +1,5 @@
 const Router = require('express-promise-router')
-const Post = require('../schema/post')
-const User = require('../schema/user')
-const FollowRequest = require('../schema/followRequest')
+const db = require('../database')
 const awsManager = require('../aws')
 const uuidv1 = require('uuid/v1')
 
@@ -16,101 +14,126 @@ router.get('/getConfig', (req, res) => {
     res.json({ success: true, config })
 })
 
-// this method fetches all available data in our database
 router.get('/getPosts', async (req, res) => {
-    const user = await User.findById(req.tokenPayload.userid).exec()
-    if (!user)
-        return res.status(400).send('User does not exist')
-    // users can't follow themselves but should see their own pictures
-    user.following.push(user._id)
-    const data = await Post.find({ userid: user.following }).sort({createdAt: -1}).exec()
-    return res.json({ success: true, posts: data })
+    const { rows } = await db.query(
+        `SELECT * FROM posts WHERE author_id = $1 OR author_id IN (
+            SELECT followee_id
+            FROM followers
+            WHERE followers.follower_id = $1
+        ) ORDER BY timestamp`,
+        [req.tokenPayload.userid]
+    )
+    return res.json({ success: true, posts: rows })
 })
 
 router.get('/getFollowRequests', async (req, res) => {
-    const data = await FollowRequest.find({requesteeId: req.tokenPayload.userid}, 'requesterId').exec()
-    return res.json({ success: true, requests: data })
+    const { rows } = await db.query(
+        'SELECT requester_id FROM follow_requests WHERE requestee_id = $1',
+        [req.tokenPayload.userid]
+    )
+    return res.json({ success: true, requests: rows })
 })
 
 router.get('/getFollowers', async (req, res) => {
-    const user = await User.findById(req.tokenPayload.userid, 'followers').exec()
-    return res.json({ success: true, followers: user.followers })
+    const { rows } = await db.query(
+        'SELECT follower_id FROM followers WHERE followee_id = $1',
+        [req.tokenPayload.userid]
+    )
+    return res.json({ success: true, followers: rows.map(r => r.follower_id) })
 })
 
 router.get('/getUserById', async (req, res) => {
-    const userid = req.query.userid
-    const user = await User.findById(userid, '_id username').exec()
-    return res.json({ success: true, user })
+    const user = await db.queryOne(
+        'SELECT id, username FROM users WHERE id = $1',
+        [req.query.userid]
+    )
+    if (!user)
+        return res.status(400).send('User does not exist')
+    return res.json({ success: true, user: user })
 })
 
 router.post('/sendFollowRequest', async (req, res) => {
-    const requesteeName = req.body.username
-    const requestee = await User.findOne({ username: requesteeName }, '_id followers').exec()
-    if (!requestee)
-        return res.status(400).send('User does not exist')
-    const requesterId = req.tokenPayload.userid
-    if (requestee._id === requesterId)
-        return res.status(400).send('You don\'t need to follow yourself')
-    if (requestee.followers.find(x => x === requesterId))
-        return res.status(400).send('Already following user')
-    const potentialRequest = {requesterId: requesterId, requesteeId: requestee._id}
-    const existingRequest = await FollowRequest.findOne(potentialRequest).exec()
-    if (existingRequest)
-        return res.status(400).send('Request already exists')
-    potentialRequest._id = uuidv1()
-    await FollowRequest.create(potentialRequest)
+    const error = await db.transaction(async(client) => {
+        const requesteeName = req.body.username
+        const requestee = await db.queryOne(
+            'SELECT id FROM users WHERE username = $1',
+            [requesteeName]
+        )
+        if (!requestee)
+            return [400, 'User does not exist']
+        const requesterId = req.tokenPayload.userid
+        if (requestee.id === requesterId)
+            return [400, 'You don\'t need to follow yourself']
+        const followCount = await db.count(
+            'SELECT COUNT(*) FROM followers WHERE follower_id = $1 AND followee_id = $2',
+            [requesterId, requestee.id]
+        )
+        if (followCount > 0)
+            return [400, 'Already following user']
+        const requestCount = await db.count(
+            'SELECT COUNT(*) FROM follow_requests WHERE requester_id = $1 AND requestee_id = $2',
+            [requesterId, requestee.id]
+        )
+        if (requestCount > 0)
+            return [400, 'Request already exists']
+        await db.query(
+            'INSERT INTO follow_requests (requester_id, requestee_id) VALUES ($1, $2)',
+            [requesterId, requestee.id]
+        )
+    })
+    if (error)
+        return res.status(error[0]).send(error[1])
     return res.json({ success: true })
 })
 
 router.post('/rejectFollowRequest', async (req, res) => {
-    const requesterId = req.body.userid
-    const requesteeId = req.tokenPayload.userid
-    await FollowRequest.findOneAndDelete({requesterId: requesterId, requesteeId: requesteeId}).exec()
+    await db.query(
+        'DELETE FROM follow_requests WHERE requester_id = $1 AND requestee_id = $2',
+        [req.body.userid, req.tokenPayload.userid]
+    )
     return res.json({ success: true })
 })
 
 router.post('/acceptFollowRequest', async (req, res) => {
-    const requesterId = req.body.userid
-    const requesteeId = req.tokenPayload.userid
-    const request = await FollowRequest.findOne({requesterId: requesterId, requesteeId: requesteeId}, '_id').exec()
-    if (!request)
-        return res.status(400).send('No such follow request')
-    const follower = await User.findOne({_id: requesterId}).exec()
-    if (!follower)
-        return res.status(400).send('No such user')
-    const user = await User.findOne({_id: requesteeId}).exec()
-    if (!user)
-        return res.status(400).send('No such user')
-    follower.following.push(user._id)
-    user.followers.push(follower._id)
-    await Promise.all([follower.save(), user.save(), request.remove()])
+    const error = await db.transaction(async(client) => {
+        const request = await client.queryOne(
+            'DELETE FROM follow_requests WHERE requester_id = $1 AND requestee_id = $2 RETURNING *',
+            [req.body.userid, req.tokenPayload.userid]
+        )
+        if (!request)
+            return { status:400, message:'No such follow request' }
+        await client.query(
+            'INSERT INTO followers (follower_id, followee_id) VALUES ($1, $2)',
+            [request.requester_id, request.requestee_id]
+        )
+    })
+    if (error)
+        return res.status(error.status).send(error.message)
     return res.json({ success: true })
 })
 
 // removes existing data in our database, and 
 // deletes the associated s3 object
 router.delete('/deletePost', async (req, res) => {
-    const id = req.query.id
-    const post = await Post.findById(id, '_id userid').exec()
-    if (!post)
+    const deleted = await db.query(
+        'DELETE FROM posts WHERE id = $1 AND author_id = $2 RETURNING *',
+        [req.query.id, req.tokenPayload.userid]
+    )
+    if (!deleted)
         return res.status(400).send('Post not found')
-    if (post.userid !== req.tokenPayload.userid)
-        return res.status(400).send('Can\'t delete other people\'s posts')
-    await Promise.all([Post.findByIdAndDelete(post._id).exec(), awsManager.delete_s3(post._id)])
     return res.json({ success: true })
 })
 
 // get URL for uploading
 router.post('/createPost', async (req, res) => {
     const fileName = uuidv1()
-    const newPost = {
-        _id: fileName,
-        userid: req.tokenPayload.userid,
-        iv: req.body.iv,
-        key: req.body.key,
-    }
-    const results = await Promise.all([awsManager.sign_s3(fileName, req.body.fileType), Post.create(newPost)])
-    return res.json({ success: true, data: { signedRequest: results[0], fileName: fileName } })
+    const postPromise = db.queryOne(
+        'INSERT INTO posts (filename, author_id, iv, key) VALUES ($1, $2, $3, $4)',
+        [fileName, req.tokenPayload.userid, req.body.iv, req.body.key]
+    )
+    const requestPromise = awsManager.sign_s3(fileName, req.body.fileType)
+    const [signedRequest, ] = await Promise.all([requestPromise, postPromise])
+    return res.json({ success: true, data: { signedRequest, fileName } })
 })
 
 module.exports = router

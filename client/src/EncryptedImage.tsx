@@ -8,7 +8,7 @@ const Crypto = window.crypto
 interface EncryptedImageProps {
     encryptedUrl: string,
     iv: string,
-    decKey: string,
+    decKey: JsonWebKey,
 }
 
 interface EncryptedImageState {
@@ -52,7 +52,7 @@ export default class EncryptedImage extends Component<EncryptedImageProps, Encry
         const [cryptoKey, encryptedImage] = await Promise.all([
             Crypto.subtle.importKey(
                 'jwk',
-                JSON.parse(this.props.decKey),
+                this.props.decKey,
                 'AES-GCM',
                 false,
                 ['encrypt', 'decrypt'],

@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 const kTokenKey = 'jwt'
 
 interface UserToken {
-    userid : string
+    userid : number
 }
 
 class CurrentUser {
@@ -11,7 +11,7 @@ class CurrentUser {
         return localStorage.getItem(kTokenKey)
     }
 
-    static getPayload() : UserToken{
+    static getPayload() : UserToken {
         return jwt.decode(CurrentUser.getToken()!) as UserToken
     }
 

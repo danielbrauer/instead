@@ -1,21 +1,53 @@
-const mongoose = require('mongoose')
+const { Pool } = require('pg')
 const config = require('config')
 
-const dbConfig = config.get('Customer.database')
-const scheme = dbConfig.get('scheme')
-const user = encodeURIComponent(dbConfig.get('user'))
-const password = encodeURIComponent(dbConfig.get('password'))
+const dbConfig = config.get('Customer.postgres')
+const user = dbConfig.get('user')
 const host = dbConfig.get('host')
-const path = dbConfig.get('path')
-const query = dbConfig.get('query')
-const dbRoute = `${scheme}://${user}:${password}@${host}/${path}?${query}`
+const database = dbConfig.get('database')
+const password = dbConfig.get('password')
+const port = parseInt(dbConfig.get('port'), 10)
 
-// connects our back end code with the database
-mongoose.connect(dbRoute, { useNewUrlParser: true })
+const pool = new Pool({
+    user: user,
+    host: host,
+    database: database,
+    password: password,
+    port: port,
+})
 
-let db = mongoose.connection
+function PromiseClient(client) {
+    this.client = client
+}
 
-db.once('open', () => console.log('connected to the database'))
+PromiseClient.prototype.query = function(text, params) {
+    return this.client.query(text, params)
+}
 
-// checks if connection with the database is successful
-db.on('error', console.error.bind(console, 'MongoDB connection error:'))
+PromiseClient.prototype.queryOne = async function(text, params) {
+    const { rows: [one = null] } = await this.client.query(text, params)
+    return one
+}
+
+PromiseClient.prototype.count = async function(text, params) {
+    const { rows: [{ count }] } = await this.client.query(text, params)
+    return count
+}
+
+module.exports = new PromiseClient(pool)
+
+module.exports.transaction = async (commands) => {
+    const client = await pool.connect()
+    let result = null
+    try {
+        await client.query('BEGIN')
+        result = await commands(new PromiseClient(client))
+        await client.query('COMMIT')
+    } catch (e) {
+        await client.query('ROLLBACK')
+        throw e
+    } finally {
+        client.release()
+    }
+    return result
+}

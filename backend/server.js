@@ -12,8 +12,6 @@ app.use(cors())
 app.use(accessControlHeaders)
 app.use(helmet())
 
-require('./database')
-
 // (optional) only made for logging and
 // bodyParser, parses the request body to be a readable json format
 app.use(bodyParser.urlencoded({ extended: true }))
