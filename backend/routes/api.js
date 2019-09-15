@@ -20,7 +20,7 @@ router.get('/getPosts', async (req, res) => {
             SELECT followee_id
             FROM followers
             WHERE followers.follower_id = $1
-        ) ORDER BY timestamp`,
+        ) ORDER BY timestamp DESC`,
         [req.tokenPayload.userid]
     )
     return res.json({ success: true, posts: rows })
