@@ -12,8 +12,7 @@ class CurrentUser {
     }
 
     static getPayload() : UserToken {
-        const decoded = jwt.decode(CurrentUser.getToken()!)
-        return decoded as UserToken
+        return jwt.decode(CurrentUser.getToken()!) as UserToken
     }
 
     static setToken(token : string) {
