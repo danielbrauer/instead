@@ -31,12 +31,11 @@ class AuthManager {
         }
         // Find user and generate a session token
         // const user = await UserModel.findOne({ username: username })
-        const { rows, rowCount } = await db.query('SELECT * FROM users WHERE username = $1', [username])
-        if (rowCount === 0) {
+        const user = await db.queryOne('SELECT * FROM users WHERE username = $1', [username])
+        if (!user) {
             AuthManager.instance().basicPermit.fail(res)
             return res.status(401).send(`No such user`)
         }
-        const user = rows[0]
         const hash = await crypto.scrypt(password, user.salt, 64)
         if (hash.toString('base64') == user.password_hash) {
             req.user = user
