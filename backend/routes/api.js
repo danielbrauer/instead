@@ -91,16 +91,20 @@ router.post('/rejectFollowRequest', async (req, res) => {
 })
 
 router.post('/acceptFollowRequest', async (req, res) => {
-    const request = await db.queryOne(
-        'DELETE FROM follow_requests WHERE requester_id = $1 AND requestee_id = $2 RETURNING *',
-        [req.body.userid, req.tokenPayload.userid]
-    )
-    if (!request)
-        return res.status(400).send('No such follow request')
-    await db.query(
-        'INSERT INTO followers (follower_id, followee_id) VALUES ($1, $2)',
-        [request.requester_id, request.requestee_id]
-    )
+    const error = await db.transaction(async(client) => {
+        const request = await client.queryOne(
+            'DELETE FROM follow_requests WHERE requester_id = $1 AND requestee_id = $2 RETURNING *',
+            [req.body.userid, req.tokenPayload.userid]
+        )
+        if (!request)
+            return { status:400, message:'No such follow request' }
+        await client.query(
+            'INSERT INTO followers (follower_id, followee_id) VALUES ($1, $2)',
+            [request.requester_id, request.requestee_id]
+        )
+    })
+    if (error)
+        return res.status(error.status).send(error.message)
     return res.json({ success: true })
 })
 
