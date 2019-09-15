@@ -36,7 +36,7 @@ router.post('/new', async function (req, res) {
             salt,
         ]
     )
-    const token = await createTokenForUser(rows[0].id)
+    const token = await createTokenForUser(rows[0])
     return res.json({ token })
 })
 
