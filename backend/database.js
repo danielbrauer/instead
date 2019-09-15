@@ -18,4 +18,12 @@ const pool = new Pool({
 
 module.exports = {
     query: (text, params) => pool.query(text, params),
+    queryOne: async(text, params) => {
+        const { rows: [ one = null ] } = await pool.query(text, params)
+        return one
+    },
+    count: async(text, params) => {
+        const { rows: [ { count } ] } = await pool.query(text, params)
+        return count
+    },
 }

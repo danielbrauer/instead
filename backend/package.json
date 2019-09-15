@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --exec node server.js"
+    "start": "nodemon --exec node --inspect server.js"
   },
   "author": "Daniel Brauer",
   "license": "MIT",

@@ -4,7 +4,6 @@ const jwt = require('jwt-promise')
 const config = require('config')
 const crypto = require('../crypto-promise')
 const authManager = require('../auth-strategies')
-const uuidv1 = require('uuid/v1')
 
 const secret = config.get('Customer.jwt').get('secret')
 
