@@ -16,8 +16,11 @@ router.get('/getConfig', (req, res) => {
 
 router.get('/getPosts', async (req, res) => {
     const { rows } = await db.query(
-        //needs ORDERBY p.timestamp
-        'SELECT * FROM posts WHERE author_id = $1',
+        `SELECT * FROM posts WHERE author_id = $1 OR author_id IN (
+            SELECT followee_id
+            FROM followers
+            WHERE followers.follower_id = $1
+        ) ORDER BY timestamp`,
         [req.tokenPayload.userid]
     )
     return res.json({ success: true, posts: rows })
