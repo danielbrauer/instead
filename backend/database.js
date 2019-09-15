@@ -34,29 +34,20 @@ PromiseClient.prototype.count = async function(text, params) {
     return count
 }
 
-module.exports = {
-    query: (text, params) => pool.query(text, params),
-    queryOne: async (text, params) => {
-        const { rows: [one = null] } = await pool.query(text, params)
-        return one
-    },
-    count: async (text, params) => {
-        const { rows: [{ count }] } = await pool.query(text, params)
-        return count
-    },
-    transaction: async (commands) => {
-        const client = await pool.connect()
-        let result
-        try {
-            await client.query('BEGIN')
-            result = await commands(new PromiseClient(client))
-            await client.query('COMMIT')
-        } catch (e) {
-            await client.query('ROLLBACK')
-            throw e
-        } finally {
-            client.release()
-        }
-        return result
+module.exports = new PromiseClient(pool)
+
+module.exports.transaction = async (commands) => {
+    const client = await pool.connect()
+    let result = null
+    try {
+        await client.query('BEGIN')
+        result = await commands(new PromiseClient(client))
+        await client.query('COMMIT')
+    } catch (e) {
+        await client.query('ROLLBACK')
+        throw e
+    } finally {
+        client.release()
     }
+    return result
 }
