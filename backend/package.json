@@ -23,7 +23,6 @@
     "helmet": "^3.20.0",
     "jsonwebtoken": "^8.5.1",
     "jwt-promise": "^1.0.0",
-    "mongoose": "^5.5.10",
     "morgan": "^1.9.1",
     "permit": "^0.2.4",
     "pg": "^7.12.1",
