@@ -20,6 +20,8 @@ const Crypto = window.crypto
 
 const serverUrl = `/api`
 
+const kBinaryContentType = 'application/octet-stream'
+
 export interface AppProps {
     history: History,
 }
@@ -116,6 +118,7 @@ class App extends Component<AppProps, AppState> {
         return this.authorizedAxios.post(serverUrl + '/createPost', {
             key: exportedKey,
             iv: ivBuffer.toString('base64'),
+            fileType: kBinaryContentType,
         })
     }
 
@@ -149,7 +152,7 @@ class App extends Component<AppProps, AppState> {
         // Put the fileType in the headers for the upload
         const options = {
             headers: {
-                'Content-Type': 'application/octet-stream',
+                'Content-Type': kBinaryContentType,
                 'Accept': '*/*',
             },
         }
