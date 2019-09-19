@@ -146,13 +146,7 @@ class App extends Component<AppProps, AppState> {
         const [encrypted, response] = await Promise.all([encryptedPromise, responsePromise])
         const signedRequest = response.data.data.signedRequest
 
-        // Put the fileType in the headers for the upload
-        const options = {
-            headers: {
-                'Content-Type': 'application/octet-stream',
-            },
-        }
-        await Axios.put(signedRequest, encrypted, options)
+        await Axios.put(signedRequest, encrypted)
         this.getPosts()
     }
 
