@@ -18,7 +18,7 @@ require('buffer')
 
 const Crypto = window.crypto
 
-const serverUrl = `http://localhost:${process.env.PORT}/api/`
+const serverUrl = `/api`
 
 export interface AppProps {
     history: History,
@@ -78,29 +78,29 @@ class App extends Component<AppProps, AppState> {
     }
 
     async getConfig() {
-        const response = await this.authorizedAxios.get(serverUrl + 'getConfig')
+        const response = await this.authorizedAxios.get(serverUrl + '/getConfig')
         this.setState({ contentUrl: response.data.config.contentUrl })
     }
 
     async getPosts() {
-        const response = await this.authorizedAxios.get(serverUrl + 'getPosts')
+        const response = await this.authorizedAxios.get(serverUrl + '/getPosts')
         this.setState({ posts: response.data.posts })
     }
 
     async getFollowers() {
-        const response = await this.authorizedAxios.get(serverUrl + 'getFollowers')
+        const response = await this.authorizedAxios.get(serverUrl + '/getFollowers')
         this.setState({ followers: response.data.followers })
     }
 
     async getFollowRequests() {
-        const response = await this.authorizedAxios.get(serverUrl + 'getFollowRequests')
+        const response = await this.authorizedAxios.get(serverUrl + '/getFollowRequests')
         this.setState({ followRequests: response.data.requests })
     }
 
     // our delete method that uses our backend api
     // to remove existing database information
     deleteFromDB = async(idTodelete : number) => {
-        await this.authorizedAxios.delete(serverUrl + 'deletePost', {
+        await this.authorizedAxios.delete(serverUrl + '/deletePost', {
             params: {
                 id: idTodelete,
             },
@@ -113,7 +113,7 @@ class App extends Component<AppProps, AppState> {
             "jwk",
             key
         )
-        return this.authorizedAxios.post(serverUrl + 'createPost', {
+        return this.authorizedAxios.post(serverUrl + '/createPost', {
             key: exportedKey,
             iv: ivBuffer.toString('base64'),
         })
@@ -157,20 +157,20 @@ class App extends Component<AppProps, AppState> {
     }
 
     follow = async(username : string) => {
-        return this.authorizedAxios.post(serverUrl + 'sendFollowRequest', {
+        return this.authorizedAxios.post(serverUrl + '/sendFollowRequest', {
             username: username,
         })
     }
 
     rejectFollowRequest = async(userid : number) => {
-        await this.authorizedAxios.post(serverUrl + 'rejectFollowRequest', {
+        await this.authorizedAxios.post(serverUrl + '/rejectFollowRequest', {
             userid: userid
         })
         this.updateFollowerList()
     }
 
     acceptFollowRequest = async(userid : number) => {
-        await this.authorizedAxios.post(serverUrl + 'acceptFollowRequest', {
+        await this.authorizedAxios.post(serverUrl + '/acceptFollowRequest', {
             userid: userid
         })
         this.updateFollowerList()

@@ -7,7 +7,7 @@ import { Grid } from 'semantic-ui-react'
 import { Route, Switch, Redirect } from 'react-router-dom'
 import { History } from 'history'
 
-const serverUrl = `http://localhost:${process.env.PORT}/auth/`
+const serverUrl = `/auth`
 
 export interface AppProps {
     history: History,
@@ -29,7 +29,7 @@ class App extends Component<AppProps, {}> {
 
     login = async(data : User) => {
         console.log('logging in')
-        const res = await Axios.get(serverUrl + 'login',
+        const res = await Axios.get(serverUrl + '/login',
         {
             auth: {
                 username: data.username,
@@ -46,7 +46,7 @@ class App extends Component<AppProps, {}> {
             username: data.username,
             password: data.password,
         }
-        const res = await Axios.post(serverUrl + 'new', request)
+        const res = await Axios.post(serverUrl + '/new', request)
         CurrentUser.setToken(res.data.token)
         this.props.history.push('/home')
     }
