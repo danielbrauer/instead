@@ -50,7 +50,7 @@ class App extends Component<AppProps, AppState> {
         this.authorizedAxios = Axios.create({
             headers: { 'Authorization': `Bearer ${CurrentUser.getToken()}` }
         })
-        this.userCache = new UserCache(this.getUser, this.addUser, this.authorizedAxios, serverUrl + 'getUserById')
+        this.userCache = new UserCache(this.getUser, this.addUser, this.authorizedAxios, serverUrl + '/getUserById')
     }
 
     getUser = (id : number) => {
