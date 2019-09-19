@@ -1,5 +1,5 @@
 const db = require('./database')
-const config = require('config')
+const config = require('./config')
 const crypto = require('./crypto-promise')
 
 const jwt = require('jwt-promise')
@@ -8,7 +8,7 @@ const Bearer = require('permit').Bearer
 
 class AuthManager {
     constructor() {
-        this.jwtSecret = config.get('Customer.jwt').get('secret')
+        this.jwtSecret = config.jwtSecret
 
         this.basicPermit = new Basic()
         this.bearerPermit = new Bearer()

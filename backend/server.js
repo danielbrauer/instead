@@ -3,10 +3,11 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const helmet = require('helmet')
+const path = require('path')
 const authManager = require('./auth-strategies')
 const accessControlHeaders = require('./access-control-headers')
+const config = require('./config')
 
-const API_PORT = 8081
 const app = express()
 app.use(cors())
 app.use(accessControlHeaders)
@@ -24,5 +25,14 @@ app.use('/auth', auth)
 const api = require('./routes/api')
 app.use('/api', authManager.authenticateBearer, api)
 
-// launch our backend into a port
-app.listen(API_PORT, () => console.log(`LISTENING ON PORT ${API_PORT}`))
+app.listen(config.apiPort, () => console.log(`Backend listening on ${config.apiPort}`))
+
+const frontend = express()
+/*Adds the react production build to serve react requests*/
+frontend.use(express.static(path.join(__dirname, "/../client/build")))
+/*React root*/
+frontend.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname + "/../client/build/index.html"))
+})
+
+frontend.listen(config.webPort, () => console.log(`Frontend listening on ${config.webPort}`))

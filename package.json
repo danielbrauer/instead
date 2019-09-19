@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently \"cd backend && yarn start\" \"cd client && yarn start\"",
-    "client": "cd client && yarn start",
-    "backend": "cd backend && yarn start"
+    "start": "cd backend && yarn install && node server.js",
+    "build": "cd client && yarn install && yarn run build"
   },
   "keywords": [],
   "author": "Daniel Brauer",

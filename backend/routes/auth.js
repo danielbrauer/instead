@@ -1,11 +1,11 @@
 const Router = require('express-promise-router')
 const db = require('../database')
 const jwt = require('jwt-promise')
-const config = require('config')
+const config = require('../config')
 const crypto = require('../crypto-promise')
 const authManager = require('../auth-strategies')
 
-const secret = config.get('Customer.jwt').get('secret')
+const secret = config.jwtSecret
 
 const router = new Router()
 

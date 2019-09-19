@@ -1,13 +1,13 @@
-const config = require('config')
+const config = require('./config')
 const aws = require('aws-sdk')
 
 class AWSManager {
     constructor() {
-        const awsConfig = config.get('Customer.aws')
-        const accessKeyId = awsConfig.get('accessKeyId')
-        const secretKey = awsConfig.get('secretKey')
-        const region = awsConfig.get('region')
-        this.bucket = awsConfig.get('s3.bucket')
+        const awsConfig = config.aws
+        const accessKeyId = awsConfig.accessKeyId
+        const secretKey = awsConfig.secretKey
+        const region = awsConfig.region
+        this.bucket = awsConfig.s3Bucket
 
         aws.config.update({
             region: region,

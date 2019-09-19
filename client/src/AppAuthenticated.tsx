@@ -18,7 +18,7 @@ require('buffer')
 
 const Crypto = window.crypto
 
-const serverUrl = process.env.REACT_APP_BACKEND_URL + 'api/'
+const serverUrl = process.env.API_URL + 'api/'
 
 export interface AppProps {
     history: History,
