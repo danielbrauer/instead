@@ -7,7 +7,7 @@ import { Grid } from 'semantic-ui-react'
 import { Route, Switch, Redirect } from 'react-router-dom'
 import { History } from 'history'
 
-const serverUrl = process.env.API_URL + 'auth/'
+const serverUrl = `http://localhost:${process.env.PORT}/auth/`
 
 export interface AppProps {
     history: History,

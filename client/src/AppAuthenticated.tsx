@@ -18,7 +18,7 @@ require('buffer')
 
 const Crypto = window.crypto
 
-const serverUrl = process.env.API_URL + 'api/'
+const serverUrl = `http://localhost:${process.env.PORT}/api/`
 
 export interface AppProps {
     history: History,
