@@ -7,5 +7,6 @@ module.exports = {
         region: process.env.AWS_REGION,
         s3Bucked: process.env.AWS_S3_BUCKET,
     },
+    databaseUrl: process.env.DATABASE_URL,
     jwtSecret: process.env.JWT_SECRET,
 }
