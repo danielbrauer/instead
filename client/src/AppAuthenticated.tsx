@@ -12,13 +12,14 @@ import { readAsArrayBuffer } from 'promise-file-reader'
 import { Menu, Dropdown } from 'semantic-ui-react'
 import { User } from './Interfaces'
 import { History } from 'history'
+import config from './config'
+
+const serverUrl = `${config.serverUrl}/api`
 
 const toBuffer = require('typedarray-to-buffer')
 require('buffer')
 
 const Crypto = window.crypto
-
-const serverUrl = `${process.env.REACT_APP_LOCAL_API_URL}/api` || `/api`
 
 const kBinaryContentType = 'application/octet-stream'
 

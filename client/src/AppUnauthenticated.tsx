@@ -6,8 +6,9 @@ import NewUserForm from './Components/NewUserForm'
 import { Grid } from 'semantic-ui-react'
 import { Route, Switch, Redirect } from 'react-router-dom'
 import { History } from 'history'
+import config from './config'
 
-const serverUrl = `${process.env.REACT_APP_LOCAL_API_URL}/auth` || `/auth`
+const serverUrl = `${config.serverUrl}/auth`
 
 export interface AppProps {
     history: History,
