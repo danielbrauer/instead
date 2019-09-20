@@ -1,5 +1,5 @@
 module.exports = {
-    localDev: process.env.LOCAL_DEV,
+    localDev: process.env.NODE_ENV != 'production',
     webPort: process.env.PORT,
     aws: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
