@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --exec node --inspect server.js"
+    "start": "nodemon --exec node -r dotenv/config --inspect server.js"
   },
   "author": "Daniel Brauer",
   "license": "MIT",
@@ -28,6 +28,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "dotenv": "^8.1.0",
     "nodemon": "^1.19.1"
   }
 }

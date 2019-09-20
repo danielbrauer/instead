@@ -18,7 +18,7 @@ require('buffer')
 
 const Crypto = window.crypto
 
-const serverUrl = `/api`
+const serverUrl = `${process.env.REACT_APP_LOCAL_API_URL}/api` || `/api`
 
 const kBinaryContentType = 'application/octet-stream'
 

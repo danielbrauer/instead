@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "cd backend && yarn install && node server.js",
-    "build": "cd client && yarn install && yarn run build"
+    "build": "cd client && yarn install && yarn run build",
+    "local": "concurrently \"cd backend && yarn start\" \"cd client && yarn start\""
   },
   "keywords": [],
   "author": "Daniel Brauer",

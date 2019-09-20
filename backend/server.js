@@ -25,11 +25,13 @@ app.use('/auth', auth)
 const api = require('./routes/api')
 app.use('/api', authManager.authenticateBearer, api)
 
-// Statically host React app
-app.use(express.static(path.join(__dirname, "/../client/build")))
+if (!config.localDev) {
+    // Statically host React app
+    app.use(express.static(path.join(__dirname, "/../client/build")))
+    
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname + "/../client/build/index.html"))
+    })
+}
 
-app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname + "/../client/build/index.html"))
-})
-
-app.listen(config.webPort, () => console.log(`Frontend listening on ${config.webPort}`))
+app.listen(config.webPort, () => console.log(`Server listening on ${config.webPort}`))
