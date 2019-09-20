@@ -10,8 +10,8 @@ class AuthManager {
     constructor() {
         this.jwtSecret = config.jwtSecret
 
-        this.basicPermit = new Basic()
-        this.bearerPermit = new Bearer()
+        this.basicPermit = new Basic({ scheme: 'RestBasic' })
+        this.bearerPermit = new Bearer({ scheme: 'RestBearer' })
     }
     
 	static instance(){
