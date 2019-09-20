@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import Axios, { AxiosInstance } from 'axios'
+import Axios from 'axios'
 import CurrentUser from './CurrentUser'
 import LoginForm from './Components/LoginForm'
 import NewUserForm from './Components/NewUserForm'
@@ -20,21 +20,17 @@ interface User {
 }
 
 class App extends Component<AppProps, {}> {
-    xmlAxios : AxiosInstance
     // initialize our state
     constructor(props : AppProps) {
         super(props)
         this.state = {
             newUser: false,
         }
-        this.xmlAxios = Axios.create({
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
     }
 
     login = async(data : User) => {
         console.log('logging in')
-        const res = await this.xmlAxios.get(serverUrl + '/login',
+        const res = await Axios.get(serverUrl + '/login',
         {
             auth: {
                 username: data.username,
@@ -51,7 +47,7 @@ class App extends Component<AppProps, {}> {
             username: data.username,
             password: data.password,
         }
-        const res = await this.xmlAxios.post(serverUrl + '/new', request)
+        const res = await Axios.post(serverUrl + '/new', request)
         CurrentUser.setToken(res.data.token)
         this.props.history.push('/home')
     }
@@ -63,9 +59,9 @@ class App extends Component<AppProps, {}> {
             <Grid textAlign='center' style={{ height: '100vh' }} verticalAlign='middle'>
                 <Grid.Column style={{ maxWidth: 450 }}>
                     <Switch>
-                        <Route exact path='/' render={props => <Redirect {...props} to='/login' />} />
-                        <Route exact path='/signup' render={props => <NewUserForm {...props} onSubmit={this.createUser} />} />
-                        <Route exact path='/login' render={props => <LoginForm {...props} onSubmit={this.login} />} />
+                        <Route exact path="/" render={props => <Redirect {...props} to="/login" />} />
+                        <Route exact path="/signup" render={props => <NewUserForm {...props} onSubmit={this.createUser} />} />
+                        <Route exact path="/login" render={props => <LoginForm {...props} onSubmit={this.login} />} />
                     </Switch>
                 </Grid.Column>
             </Grid>
