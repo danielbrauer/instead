@@ -7,10 +7,12 @@ const path = require('path')
 const authManager = require('./auth-strategies')
 const accessControlHeaders = require('./access-control-headers')
 const config = require('./config')
+const forceHttps = require('./force-https')
 
 const app = express()
 app.use(cors())
 app.use(accessControlHeaders)
+app.use(forceHttps)
 app.use(helmet())
 
 // (optional) only made for logging and
