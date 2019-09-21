@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && eslint \"**/*.{js,ts}\" --quiet --fix",
+    "build-dev": "tsc && eslint \"**/*.{js,ts}\" --quiet --fix",
+    "build": "tsc",
     "watch-debug": "concurrently -k \"tsc -w\" \"nodemon -r dotenv/config --inspect dist/server.js\""
   },
   "author": "Daniel Brauer",
