@@ -1,6 +1,7 @@
-const config = require('./config')
+import config from './config'
+import { Request, Response, NextFunction } from 'express-serve-static-core'
 
-module.exports = function requireHTTPS(req, res, next) {
+export default function requireHTTPS(req: Request, res: Response, next: NextFunction) {
     // The 'x-forwarded-proto' check is for Heroku
     if (!config.localDev && !req.secure && req.get('x-forwarded-proto') !== 'https') {
         if (req.method === 'GET') {

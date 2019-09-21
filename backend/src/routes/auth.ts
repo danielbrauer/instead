@@ -1,15 +1,16 @@
-const Router = require('express-promise-router')
-const db = require('../database')
-const jwt = require('jwt-promise')
-const config = require('../config')
-const crypto = require('../crypto-promise')
-const authManager = require('../auth-strategies')
+import Router from 'express-promise-router'
+import db from '../database'
+import jwt from '../jwt-promise'
+import config from '../config'
+import crypto from '../crypto-promise'
+import authManager from '../auth-strategies'
+import { User } from 'interfaces'
 
 const secret = config.jwtSecret
 
-const router = new Router()
+const router = Router()
 
-async function createTokenForUser(user) {
+async function createTokenForUser(user: User) {
     return jwt.sign({ userid: user.id }, secret)
 }
 
@@ -40,4 +41,4 @@ router.post('/new', async function (req, res) {
     return res.json({ token })
 })
 
-module.exports = router
+export default router

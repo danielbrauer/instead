@@ -10,6 +10,7 @@
 
 # production
 /build
+/dist
 
 # config
 /config

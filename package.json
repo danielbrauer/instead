@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "cd backend && yarn install && node server.js",
-    "build": "cd client && yarn install && yarn run build",
-    "local": "concurrently \"cd backend && yarn start\" \"cd client && yarn start\""
+    "start": "cd backend && node server.js",
+    "build": "cd client && yarn install && yarn run build && cd ../backend && yarn install && yarn run build",
+    "local": "concurrently \"cd backend && yarn run watch-debug\" \"cd client && yarn start\""
   },
   "keywords": [],
   "author": "Daniel Brauer",
@@ -15,8 +15,8 @@
     "type": "git",
     "url": "https://github.com/danielbrauer/instead.git"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "concurrently": "^4.1.2"
-  },
-  "devDependencies": {}
+  }
 }

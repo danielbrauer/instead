@@ -1,7 +1,11 @@
-const config = require('./config')
-const aws = require('aws-sdk')
+import config from './config'
+import aws from 'aws-sdk'
 
-class AWSManager {
+export default class AWSManager {
+    static _instance: AWSManager
+    bucket: string
+    s3: any
+
     constructor() {
         const awsConfig = config.aws
         const accessKeyId = awsConfig.accessKeyId
@@ -25,11 +29,11 @@ class AWSManager {
 		return AWSManager._instance
     }
     
-    static content_url_s3() {
+    static S3ContentUrl() {
         return `https://${AWSManager.instance().bucket}.s3.amazonaws.com/`
     }
 
-    static async sign_s3(fileName, fileType) {
+    static async S3GetSignedUploadUrl(fileName: string, fileType: string) {
         // Set up the payload of what we are sending to the S3 api
         const s3Params = {
             Bucket: AWSManager.instance().bucket,
@@ -43,7 +47,7 @@ class AWSManager {
         return data
     }
 
-    static async delete_s3(key) {
+    static async S3DeleteObject(key: string) {
         const s3Params = {
             Bucket: AWSManager.instance().bucket, 
             Key: key,
@@ -52,5 +56,3 @@ class AWSManager {
         return data
     }
 }
-
-module.exports = AWSManager

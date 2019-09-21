@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     localDev: process.env.NODE_ENV != 'production',
     webPort: process.env.PORT,
     aws: {

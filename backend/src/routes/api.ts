@@ -1,20 +1,22 @@
-const Router = require('express-promise-router')
-const db = require('../database')
-const awsManager = require('../aws')
-const uuidv1 = require('uuid/v1')
+import { Request, Response } from 'express-serve-static-core'
 
-const router = new Router()
+import Router from 'express-promise-router'
+import db, { PromiseClient } from '../database'
+import awsManager from '../aws'
+import uuidv1 from 'uuid/v1'
+
+const router = Router()
 
 // get the URL where images are hosted
-router.get('/getConfig', (req, res) => {
-    const contentUrl = awsManager.content_url_s3()
+router.get('/getConfig', (req: Request, res: Response) => {
+    const contentUrl = awsManager.S3ContentUrl()
     const config = {
         contentUrl: contentUrl,
     }
     res.json({ success: true, config })
 })
 
-router.get('/getPosts', async (req, res) => {
+router.get('/getPosts', async (req: Request, res: Response) => {
     const { rows } = await db.query(
         `SELECT * FROM posts WHERE author_id = $1 OR author_id IN (
             SELECT followee_id
@@ -26,7 +28,7 @@ router.get('/getPosts', async (req, res) => {
     return res.json({ success: true, posts: rows })
 })
 
-router.get('/getFollowRequests', async (req, res) => {
+router.get('/getFollowRequests', async (req: Request, res: Response) => {
     const { rows } = await db.query(
         'SELECT requester_id FROM follow_requests WHERE requestee_id = $1',
         [req.tokenPayload.userid]
@@ -34,7 +36,7 @@ router.get('/getFollowRequests', async (req, res) => {
     return res.json({ success: true, requests: rows })
 })
 
-router.get('/getFollowers', async (req, res) => {
+router.get('/getFollowers', async (req: Request, res: Response) => {
     const { rows } = await db.query(
         'SELECT follower_id FROM followers WHERE followee_id = $1',
         [req.tokenPayload.userid]
@@ -42,7 +44,7 @@ router.get('/getFollowers', async (req, res) => {
     return res.json({ success: true, followers: rows.map(r => r.follower_id) })
 })
 
-router.get('/getUserById', async (req, res) => {
+router.get('/getUserById', async (req: Request, res: Response) => {
     const user = await db.queryOne(
         'SELECT id, username FROM users WHERE id = $1',
         [req.query.userid]
@@ -52,8 +54,8 @@ router.get('/getUserById', async (req, res) => {
     return res.json({ success: true, user: user })
 })
 
-router.post('/sendFollowRequest', async (req, res) => {
-    const error = await db.transaction(async(client) => {
+router.post('/sendFollowRequest', async (req: Request, res: Response) => {
+    const error = await db.transaction(async(db: PromiseClient) => {
         const requesteeName = req.body.username
         const requestee = await db.queryOne(
             'SELECT id FROM users WHERE username = $1',
@@ -131,9 +133,9 @@ router.post('/createPost', async (req, res) => {
         'INSERT INTO posts (filename, author_id, iv, key) VALUES ($1, $2, $3, $4)',
         [fileName, req.tokenPayload.userid, req.body.iv, req.body.key]
     )
-    const requestPromise = awsManager.sign_s3(fileName, req.body.fileType)
+    const requestPromise = awsManager.S3GetSignedUploadUrl(fileName, req.body.fileType)
     const [signedRequest, ] = await Promise.all([requestPromise, postPromise])
     return res.json({ success: true, data: { signedRequest, fileName } })
 })
 
-module.exports = router
+export default router
