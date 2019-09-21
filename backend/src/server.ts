@@ -29,10 +29,11 @@ app.use('/api', authManager.authenticateBearer, api)
 
 if (!config.localDev) {
     // Statically host React app
-    app.use(express.static(path.join(__dirname, '/../client/build')))
+    const relativePathToReact = '/../../client/build'
+    app.use(express.static(path.join(__dirname, relativePathToReact)))
     
     app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname + '/../client/build/index.html'))
+        res.sendFile(path.join(__dirname, relativePathToReact, '/index.html'))
     })
 }
 
