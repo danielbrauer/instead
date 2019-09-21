@@ -29,11 +29,11 @@ export default class AWSManager {
 		return AWSManager._instance
     }
     
-    static S3ContentUrl() {
+    static s3ContentUrl() {
         return `https://${AWSManager.instance().bucket}.s3.amazonaws.com/`
     }
 
-    static async S3GetSignedUploadUrl(fileName: string, fileType: string) {
+    static async s3GetSignedUploadUrl(fileName: string, fileType: string) {
         // Set up the payload of what we are sending to the S3 api
         const s3Params = {
             Bucket: AWSManager.instance().bucket,
@@ -47,7 +47,7 @@ export default class AWSManager {
         return data
     }
 
-    static async S3DeleteObject(key: string) {
+    static async s3DeleteObject(key: string) {
         const s3Params = {
             Bucket: AWSManager.instance().bucket, 
             Key: key,

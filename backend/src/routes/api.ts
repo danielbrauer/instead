@@ -9,7 +9,7 @@ const router = Router()
 
 // get the URL where images are hosted
 router.get('/getConfig', (req: Request, res: Response) => {
-    const contentUrl = awsManager.S3ContentUrl()
+    const contentUrl = awsManager.s3ContentUrl()
     const config = {
         contentUrl: contentUrl,
     }
@@ -133,7 +133,7 @@ router.post('/createPost', async (req, res) => {
         'INSERT INTO posts (filename, author_id, iv, key) VALUES ($1, $2, $3, $4)',
         [fileName, req.tokenPayload.userid, req.body.iv, req.body.key]
     )
-    const requestPromise = awsManager.S3GetSignedUploadUrl(fileName, req.body.fileType)
+    const requestPromise = awsManager.s3GetSignedUploadUrl(fileName, req.body.fileType)
     const [signedRequest, ] = await Promise.all([requestPromise, postPromise])
     return res.json({ success: true, data: { signedRequest, fileName } })
 })
