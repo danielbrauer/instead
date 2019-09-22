@@ -1,22 +1,16 @@
 import db from './database'
-import config from './config'
 import crypto from './crypto-promise'
-import jwt from './jwt-promise'
-import { Basic, Bearer } from 'permit'
+import { Basic, Permit } from 'permit'
 import { Request, Response, NextFunction } from 'express-serve-static-core'
-import { TokenPayload } from 'interfaces'
 
 export default class AuthManager {
     static _instance: AuthManager
-    jwtSecret: string
     basicPermit: Basic
-    bearerPermit: Bearer
+    sessionPermit: Permit
 
     constructor() {
-        this.jwtSecret = config.jwtSecret
-
         this.basicPermit = new Basic({ scheme: 'RestBasic' })
-        this.bearerPermit = new Bearer({ scheme: 'RestBearer' })
+        this.sessionPermit = new Permit({ scheme: 'RestSession' })
     }
     
 	static instance(){
@@ -42,25 +36,22 @@ export default class AuthManager {
         }
         const hash = await crypto.scrypt(password, user.salt, 64)
         if (hash.toString('base64') == user.password_hash) {
-            req.user = user
+            req.session.user = user
             return next()
         }
         AuthManager.instance().basicPermit.fail(res)
         return res.status(401).send('Incorrect password')
     }
     
-    static async authenticateBearer(req: Request, res: Response, next: NextFunction) {
-        // Try to find the bearer token in the request header.
-        const token = AuthManager.instance().bearerPermit.check(req)
+    static async authenticateSession(req: Request, res: Response, next: NextFunction) {
+
+        const user = req.session.user
         
-        if (!token) {
-            AuthManager.instance().bearerPermit.fail(res)
-            return next(new Error('Token required!'))
+        if (!user) {
+            AuthManager.instance().sessionPermit.fail(res)
+            return next(new Error('Unauthenticated session!'))
         }
-    
-        // Verify token and put it in the request
-        const payload = await jwt.verify(token, AuthManager.instance().jwtSecret)
-        req.tokenPayload = payload as TokenPayload
+
         return next()
     }
 }

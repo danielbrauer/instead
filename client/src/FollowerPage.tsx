@@ -5,11 +5,11 @@ import { FollowRequest, User } from './Interfaces'
 
 export interface FollowerPageProps {
     requests : FollowRequest[],
-    followers : number[],
+    followers : string[],
     follow: (username : string) => Promise<any>,
-    accept: (userid : number) => void,
-    reject: (userid : number) => void,
-    getUser: (userid : number) => User,
+    accept: (userid : string) => void,
+    reject: (userid : string) => void,
+    getUser: (userid : string) => User,
 }
 
 export default function FollowerPage(props : FollowerPageProps) {

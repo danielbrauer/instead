@@ -37,7 +37,7 @@ class App extends Component<AppProps, {}> {
                 password: data.password,
             },
         })
-        CurrentUser.setToken(res.data.token)
+        CurrentUser.setId(res.data.id)
         this.props.history.push('/home')
     }
 
@@ -48,7 +48,7 @@ class App extends Component<AppProps, {}> {
             password: data.password,
         }
         const res = await Axios.post(serverUrl + '/new', request)
-        CurrentUser.setToken(res.data.token)
+        CurrentUser.setId(res.data.id)
         this.props.history.push('/home')
     }
 

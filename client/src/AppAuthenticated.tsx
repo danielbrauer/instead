@@ -50,13 +50,11 @@ class App extends Component<AppProps, AppState> {
             decryptedPostUrls: {},
             contentUrl: "",
         }
-        this.authorizedAxios = Axios.create({
-            headers: { 'Authorization': `Bearer ${CurrentUser.getToken()}` }
-        })
+        this.authorizedAxios = Axios.create({ withCredentials: true })
         this.userCache = new UserCache(this.getUser, this.addUser, this.authorizedAxios, serverUrl + '/getUserById')
     }
 
-    getUser = (id : number) => {
+    getUser = (id : string) => {
         return this.state.users[id]
     }
 
@@ -102,7 +100,7 @@ class App extends Component<AppProps, AppState> {
 
     // our delete method that uses our backend api
     // to remove existing database information
-    deleteFromDB = async(idTodelete : number) => {
+    deleteFromDB = async(idTodelete : string) => {
         await this.authorizedAxios.delete(serverUrl + '/deletePost', {
             params: {
                 id: idTodelete,
@@ -167,14 +165,14 @@ class App extends Component<AppProps, AppState> {
         })
     }
 
-    rejectFollowRequest = async(userid : number) => {
+    rejectFollowRequest = async(userid : string) => {
         await this.authorizedAxios.post(serverUrl + '/rejectFollowRequest', {
             userid: userid
         })
         this.updateFollowerList()
     }
 
-    acceptFollowRequest = async(userid : number) => {
+    acceptFollowRequest = async(userid : string) => {
         await this.authorizedAxios.post(serverUrl + '/acceptFollowRequest', {
             userid: userid
         })
@@ -182,7 +180,8 @@ class App extends Component<AppProps, AppState> {
     }
 
     logOut = () => {
-        CurrentUser.clearToken()
+        CurrentUser.clearId()
+        
         this.props.history.push('/login')
     }
 
@@ -211,7 +210,7 @@ class App extends Component<AppProps, AppState> {
                         Instead
                     </Menu.Item>
                     <Menu.Item fitted position='right'>
-                        <Dropdown item direction='left' text={this.userCache.getUser(CurrentUser.getPayload().userid).username}>
+                        <Dropdown item direction='left' text={this.userCache.getUser(CurrentUser.getId()).username}>
                             <Dropdown.Menu>
                                 <Dropdown.Item onClick={() => this.props.history.push('/home')}>Home</Dropdown.Item>
                                 <Dropdown.Item onClick={() => this.props.history.push('/new')}>New Post</Dropdown.Item>
