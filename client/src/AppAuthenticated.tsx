@@ -10,7 +10,7 @@ import { Route, Switch, Redirect } from 'react-router-dom'
 import { readAsArrayBuffer } from 'promise-file-reader'
 
 import { Menu, Dropdown } from 'semantic-ui-react'
-import { User } from './Interfaces'
+import { User, Post } from './Interfaces'
 import { History } from 'history'
 import config from './config'
 
@@ -28,11 +28,11 @@ export interface AppProps {
 }
 
 interface AppState {
-    posts: never[],
+    posts: Post[],
     followers: never[],
     followRequests: never[],
-    users: { [id: string] : User},
-    decryptedPostUrls: { [id: string] : string},
+    users: { [id: string]: User },
+    decryptedPostUrls: { [id: string]: string },
     contentUrl: string,
 }
 
@@ -40,7 +40,7 @@ class App extends Component<AppProps, AppState> {
     authorizedAxios: AxiosInstance
     userCache: UserCache
     // initialize our state
-    constructor(props : AppProps) {
+    constructor(props: AppProps) {
         super(props)
         this.state = {
             posts: [],
@@ -53,23 +53,22 @@ class App extends Component<AppProps, AppState> {
         this.authorizedAxios = Axios.create({ withCredentials: true })
         this.authorizedAxios.interceptors.response.use(response => {
             return response
-          }, error => {
-            if (error.response.status === 401)
-            {
+        }, error => {
+            if (error.response.status === 401) {
                 console.log('Not logged in')
                 this.goToLogin()
             }
             return Promise.reject(error)
-          })
+        })
         this.userCache = new UserCache(this.getUser, this.addUser, this.authorizedAxios, serverUrl + '/getUserById')
     }
 
-    getUser = (id : string) => {
+    getUser = (id: number) => {
         return this.state.users[id]
     }
 
-    addUser = (user : User) => {
-        let users = {...this.state.users}
+    addUser = (user: User) => {
+        let users = { ...this.state.users }
         users[user.id] = user
         this.setState({ users: users })
     }
@@ -110,7 +109,7 @@ class App extends Component<AppProps, AppState> {
 
     // our delete method that uses our backend api
     // to remove existing database information
-    deleteFromDB = async(idTodelete : string) => {
+    deleteFromDB = async (idTodelete: number) => {
         await this.authorizedAxios.delete(serverUrl + '/deletePost', {
             params: {
                 id: idTodelete,
@@ -119,7 +118,7 @@ class App extends Component<AppProps, AppState> {
         this.getPosts()
     }
 
-    async postWithKeys(key : CryptoKey, ivBuffer : Buffer) {
+    async postWithKeys(key: CryptoKey, ivBuffer: Buffer) {
         const exportedKey = await Crypto.subtle.exportKey(
             "jwk",
             key
@@ -132,7 +131,7 @@ class App extends Component<AppProps, AppState> {
     }
 
     // Perform the upload
-    handleUpload = async(file : File) => {
+    handleUpload = async (file: File) => {
         const filePromise = readAsArrayBuffer(file)
         const keyPromise = Crypto.subtle.generateKey(
             {
@@ -169,27 +168,27 @@ class App extends Component<AppProps, AppState> {
         this.getPosts()
     }
 
-    follow = async(username : string) => {
+    follow = async (username: string) => {
         return this.authorizedAxios.post(serverUrl + '/sendFollowRequest', {
             username: username,
         })
     }
 
-    rejectFollowRequest = async(userid : string) => {
+    rejectFollowRequest = async (userid: number) => {
         await this.authorizedAxios.post(serverUrl + '/rejectFollowRequest', {
             userid: userid
         })
         this.updateFollowerList()
     }
 
-    acceptFollowRequest = async(userid : string) => {
+    acceptFollowRequest = async (userid: number) => {
         await this.authorizedAxios.post(serverUrl + '/acceptFollowRequest', {
             userid: userid
         })
         this.updateFollowerList()
     }
 
-    logOut = async() => {
+    logOut = async () => {
         try {
             await this.authorizedAxios.get(serverUrl + '/logout')
         } finally {
@@ -206,13 +205,13 @@ class App extends Component<AppProps, AppState> {
         if (!CurrentUser.loggedIn())
             return (<Redirect to='/login' />)
         const { posts, followers, followRequests, contentUrl } = this.state
-        const postsProps : PostsProps = {
+        const postsProps: PostsProps = {
             posts: posts,
             contentUrl: contentUrl,
             delete: this.deleteFromDB,
             getUser: this.userCache.getUser,
         }
-        const followProps : FollowerPageProps = {
+        const followProps: FollowerPageProps = {
             requests: followRequests,
             followers,
             follow: this.follow,

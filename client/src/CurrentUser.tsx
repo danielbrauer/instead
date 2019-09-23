@@ -3,12 +3,12 @@ const kIdKey = 'userId'
 
 class CurrentUser {
 
-    static getId() : string {
-        return localStorage.getItem(kIdKey) as string
+    static getId() : number {
+        return parseInt(localStorage.getItem(kIdKey) as string, 10)
     }
 
-    static setId(id : string) {
-        localStorage.setItem(kIdKey, id)
+    static setId(id : number) {
+        localStorage.setItem(kIdKey, id.toString())
     }
 
     static clearId() {

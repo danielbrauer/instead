@@ -8,18 +8,18 @@ export interface UserPasswordCombo {
 }
 
 export interface FollowRequest {
-    requester_id : string,
+    requester_id : number,
 }
 
 export interface User {
-    id : string,
+    id : number,
     username : string,
 }
 
 export interface Post {
-    id: string,
+    id: number,
     filename : string,
-    author_id : string,
+    author_id : number,
     iv : string,
     key : JsonWebKey,
 }
