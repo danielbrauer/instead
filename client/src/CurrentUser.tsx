@@ -1,30 +1,22 @@
-import jwt from 'jsonwebtoken'
 
-const kTokenKey = 'jwt'
-
-interface UserToken {
-    userid : number
-}
+const kIdKey = 'userId'
 
 class CurrentUser {
-    static getToken() {
-        return localStorage.getItem(kTokenKey)
+
+    static getId() : string {
+        return localStorage.getItem(kIdKey) as string
     }
 
-    static getPayload() : UserToken {
-        return jwt.decode(CurrentUser.getToken()!) as UserToken
+    static setId(id : string) {
+        localStorage.setItem(kIdKey, id)
     }
 
-    static setToken(token : string) {
-        localStorage.setItem(kTokenKey, token)
-    }
-
-    static clearToken() {
-        localStorage.removeItem(kTokenKey)
+    static clearId() {
+        localStorage.removeItem(kIdKey)
     }
 
     static loggedIn() {
-        return localStorage.getItem(kTokenKey) !== null
+        return localStorage.getItem(kIdKey) !== null
     }
 }
 

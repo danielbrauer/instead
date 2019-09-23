@@ -32,23 +32,25 @@ class App extends Component<AppProps, {}> {
         console.log('logging in')
         const res = await Axios.get(serverUrl + '/login',
         {
+            withCredentials: true,
             auth: {
                 username: data.username,
                 password: data.password,
             },
         })
-        CurrentUser.setToken(res.data.token)
+        CurrentUser.setId(res.data.id)
         this.props.history.push('/home')
     }
 
     createUser = async(data : User) => {
         console.log('creating user')
         const request = {
+            withCredentials: true,
             username: data.username,
             password: data.password,
         }
         const res = await Axios.post(serverUrl + '/new', request)
-        CurrentUser.setToken(res.data.token)
+        CurrentUser.setId(res.data.id)
         this.props.history.push('/home')
     }
 

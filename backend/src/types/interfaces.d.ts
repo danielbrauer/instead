@@ -3,13 +3,8 @@ export interface User {
     username: string,
 }
 
-export interface TokenPayload {
-    userid: string,
-}
-
 declare module 'express-serve-static-core' {
     interface Request {
         user?: User,
-        tokenPayload?: TokenPayload,
     }
 }

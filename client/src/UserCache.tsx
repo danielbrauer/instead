@@ -2,25 +2,25 @@ import { AxiosInstance } from "axios"
 import { User } from './Interfaces'
 
 class UserCache {
-    getExistingUser: (userid : number) => User
+    getExistingUser: (userid : string) => User
     addUser: (user : User) => void
     authorizedAxios: AxiosInstance
     getUserUrl: string
     placeHolderUser: User
 
-    constructor(getUser : (userid : number) => User, setData : (user : User) => void, authorizedAxios : AxiosInstance, getUserUrl : string) {
+    constructor(getUser : (userid : string) => User, setData : (user : User) => void, authorizedAxios : AxiosInstance, getUserUrl : string) {
         this.getExistingUser = getUser
         this.addUser = setData
         this.authorizedAxios = authorizedAxios
         this.getUserUrl = getUserUrl
 
         this.placeHolderUser = {
-            id: -1,
+            id: "",
             username: "loading",
         }
     }
 
-    getUser = (userid : number) : User => {
+    getUser = (userid : string) : User => {
         const user = this.getExistingUser(userid)
         if (user === undefined) {
             this.authorizedAxios.get(this.getUserUrl, {
