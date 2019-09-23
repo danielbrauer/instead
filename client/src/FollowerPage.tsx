@@ -6,9 +6,12 @@ import { FollowRequest, User } from './Interfaces'
 export interface FollowerPageProps {
     requests : FollowRequest[],
     followers : number[],
+    followees : number[],
     follow: (username : string) => Promise<any>,
     accept: (userid : number) => void,
     reject: (userid : number) => void,
+    unfollow: (userid : number) => void,
+    removeFollower: (userid : number) => void,
     getUser: (userid : number) => User,
 }
 
@@ -29,7 +32,17 @@ export default function FollowerPage(props : FollowerPageProps) {
             <List>
                 {props.followers.map(follower => (
                     <List.Item key={follower}>
+                    <Button onClick={() => props.removeFollower(follower)}>remove</Button>
                         <List.Content>{props.getUser(follower).username}</List.Content>
+                    </List.Item>
+                ))}
+            </List>
+            <Header>Following</Header>
+            <List>
+                {props.followees.map(followee => (
+                    <List.Item key={followee}>
+                    <Button onClick={() => props.unfollow(followee)}>unfollow</Button>
+                        <List.Content>{props.getUser(followee).username}</List.Content>
                     </List.Item>
                 ))}
             </List>

@@ -30,6 +30,7 @@ export interface AppProps {
 interface AppState {
     posts: Post[],
     followers: never[],
+    followees: never[],
     followRequests: never[],
     users: { [id: string]: User },
     decryptedPostUrls: { [id: string]: string },
@@ -45,6 +46,7 @@ class App extends Component<AppProps, AppState> {
         this.state = {
             posts: [],
             followers: [],
+            followees: [],
             followRequests: [],
             users: {},
             decryptedPostUrls: {},
@@ -84,7 +86,7 @@ class App extends Component<AppProps, AppState> {
     }
 
     async updateFollowerList() {
-        await Promise.all([this.getFollowRequests(), this.getFollowers()])
+        await Promise.all([this.getFollowRequests(), this.getFollowers(), this.getFollowees()])
     }
 
     async getConfig() {
@@ -100,6 +102,11 @@ class App extends Component<AppProps, AppState> {
     async getFollowers() {
         const response = await this.authorizedAxios.get(serverUrl + '/getFollowers')
         this.setState({ followers: response.data.followers })
+    }
+
+    async getFollowees() {
+        const response = await this.authorizedAxios.get(serverUrl + '/getFollowees')
+        this.setState({ followees: response.data.followees })
     }
 
     async getFollowRequests() {
@@ -181,6 +188,20 @@ class App extends Component<AppProps, AppState> {
         this.updateFollowerList()
     }
 
+    unfollow = async (userid: number) => {
+        await this.authorizedAxios.post(serverUrl + '/unfollow', {
+            userid: userid
+        })
+        this.updateFollowerList()
+    }
+
+    removeFollower = async (userid: number) => {
+        await this.authorizedAxios.post(serverUrl + '/removeFollower', {
+            userid: userid
+        })
+        this.updateFollowerList()
+    }
+
     acceptFollowRequest = async (userid: number) => {
         await this.authorizedAxios.post(serverUrl + '/acceptFollowRequest', {
             userid: userid
@@ -204,7 +225,7 @@ class App extends Component<AppProps, AppState> {
     render() {
         if (!CurrentUser.loggedIn())
             return (<Redirect to='/login' />)
-        const { posts, followers, followRequests, contentUrl } = this.state
+        const { posts, followers, followees, followRequests, contentUrl } = this.state
         const postsProps: PostsProps = {
             posts: posts,
             contentUrl: contentUrl,
@@ -214,9 +235,12 @@ class App extends Component<AppProps, AppState> {
         const followProps: FollowerPageProps = {
             requests: followRequests,
             followers,
+            followees,
             follow: this.follow,
             accept: this.acceptFollowRequest,
             reject: this.rejectFollowRequest,
+            unfollow: this.unfollow,
+            removeFollower: this.removeFollower,
             getUser: this.userCache.getUser,
         }
         return (

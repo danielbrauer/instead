@@ -42,6 +42,14 @@ router.get('/getFollowers', async (req, res) => {
     return res.json({ success: true, followers: rows.map(r => r.follower_id) })
 })
 
+router.get('/getFollowees', async (req, res) => {
+    const { rows } = await db.query(
+        'SELECT followee_id FROM followers WHERE follower_id = $1',
+        [req.user.id]
+    )
+    return res.json({ success: true, followees: rows.map(r => r.followee_id) })
+})
+
 router.get('/getUserById', async (req, res) => {
     const user = await db.queryOne(
         'SELECT id, username FROM users WHERE id = $1',
@@ -89,6 +97,22 @@ router.post('/sendFollowRequest', async (req, res) => {
 router.post('/rejectFollowRequest', async (req, res) => {
     await db.query(
         'DELETE FROM follow_requests WHERE requester_id = $1 AND requestee_id = $2',
+        [req.body.userid, req.user.id]
+    )
+    return res.json({ success: true })
+})
+
+router.post('/unfollow', async (req, res) => {
+    await db.query(
+        'DELETE FROM follower WHERE follower_id = $1 AND followee_id = $2',
+        [req.user.id, req.body.userid]
+    )
+    return res.json({ success: true })
+})
+
+router.post('/removeFollower', async (req, res) => {
+    await db.query(
+        'DELETE FROM follower WHERE follower_id = $1 AND followee_id = $2',
         [req.body.userid, req.user.id]
     )
     return res.json({ success: true })
