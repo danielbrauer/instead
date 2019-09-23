@@ -1,14 +1,12 @@
-import { Request, Response } from 'express-serve-static-core'
-
 import Router from 'express-promise-router'
-import db, { PromiseClient } from '../database'
+import db from '../database'
 import awsManager from '../aws'
 import uuidv1 from 'uuid/v1'
 
 const router = Router()
 
 // get the URL where images are hosted
-router.get('/getConfig', (req: Request, res: Response) => {
+router.get('/getConfig', (req, res) => {
     const contentUrl = awsManager.s3ContentUrl()
     const config = {
         contentUrl: contentUrl,
@@ -16,7 +14,7 @@ router.get('/getConfig', (req: Request, res: Response) => {
     res.json({ success: true, config })
 })
 
-router.get('/getPosts', async (req: Request, res: Response) => {
+router.get('/getPosts', async (req, res) => {
     const { rows } = await db.query(
         `SELECT * FROM posts WHERE author_id = $1 OR author_id IN (
             SELECT followee_id
@@ -28,7 +26,7 @@ router.get('/getPosts', async (req: Request, res: Response) => {
     return res.json({ success: true, posts: rows })
 })
 
-router.get('/getFollowRequests', async (req: Request, res: Response) => {
+router.get('/getFollowRequests', async (req, res) => {
     const { rows } = await db.query(
         'SELECT requester_id FROM follow_requests WHERE requestee_id = $1',
         [req.user.id]
@@ -36,7 +34,7 @@ router.get('/getFollowRequests', async (req: Request, res: Response) => {
     return res.json({ success: true, requests: rows })
 })
 
-router.get('/getFollowers', async (req: Request, res: Response) => {
+router.get('/getFollowers', async (req, res) => {
     const { rows } = await db.query(
         'SELECT follower_id FROM followers WHERE followee_id = $1',
         [req.user.id]
@@ -44,7 +42,7 @@ router.get('/getFollowers', async (req: Request, res: Response) => {
     return res.json({ success: true, followers: rows.map(r => r.follower_id) })
 })
 
-router.get('/getUserById', async (req: Request, res: Response) => {
+router.get('/getUserById', async (req, res) => {
     const user = await db.queryOne(
         'SELECT id, username FROM users WHERE id = $1',
         [req.query.userid]
@@ -54,8 +52,8 @@ router.get('/getUserById', async (req: Request, res: Response) => {
     return res.json({ success: true, user: user })
 })
 
-router.post('/sendFollowRequest', async (req: Request, res: Response) => {
-    const error = await db.transaction(async(db: PromiseClient) => {
+router.post('/sendFollowRequest', async (req, res) => {
+    const error = await db.transaction(async(db) => {
         const requesteeName = req.body.username
         const requestee = await db.queryOne(
             'SELECT id FROM users WHERE username = $1',
@@ -136,6 +134,15 @@ router.post('/createPost', async (req, res) => {
     const requestPromise = awsManager.s3GetSignedUploadUrl(fileName, req.body.fileType)
     const [signedRequest, ] = await Promise.all([requestPromise, postPromise])
     return res.json({ success: true, data: { signedRequest, fileName } })
+})
+
+router.get('/logout', async function (req, res) {
+    req.session.destroy(err => {
+        if (err)
+            res.status(500).send('Could not end session')
+        else
+            res.send('Logged out')
+    })
 })
 
 export default router

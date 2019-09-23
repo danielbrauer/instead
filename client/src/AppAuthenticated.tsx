@@ -51,6 +51,16 @@ class App extends Component<AppProps, AppState> {
             contentUrl: "",
         }
         this.authorizedAxios = Axios.create({ withCredentials: true })
+        this.authorizedAxios.interceptors.response.use(response => {
+            return response
+          }, error => {
+            if (error.response.status === 401)
+            {
+                console.log('Not logged in')
+                this.goToLogin()
+            }
+            return Promise.reject(error)
+          })
         this.userCache = new UserCache(this.getUser, this.addUser, this.authorizedAxios, serverUrl + '/getUserById')
     }
 
@@ -179,9 +189,16 @@ class App extends Component<AppProps, AppState> {
         this.updateFollowerList()
     }
 
-    logOut = () => {
+    logOut = async() => {
+        try {
+            await this.authorizedAxios.get(serverUrl + '/logout')
+        } finally {
+            this.goToLogin()
+        }
+    }
+
+    goToLogin = () => {
         CurrentUser.clearId()
-        
         this.props.history.push('/login')
     }
 
