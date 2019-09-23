@@ -1,5 +1,5 @@
 import express from 'express'
-import cors from 'cors'
+import cors from './cors'
 import bodyParser from 'body-parser'
 import morgan from 'morgan'
 import helmet from 'helmet'
@@ -10,13 +10,9 @@ import forceHttps from './force-https'
 import session from './session'
 
 const app = express()
-app.use(cors({
-    origin: config.clientOrigin,
-    credentials: true,
-}))
 app.use(forceHttps)
 app.use(helmet())
-
+app.use(cors)
 if (!config.localDev)
     app.set('trust proxy', 1) // trust first proxy
 app.use(session)

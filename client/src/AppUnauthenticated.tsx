@@ -32,6 +32,7 @@ class App extends Component<AppProps, {}> {
         console.log('logging in')
         const res = await Axios.get(serverUrl + '/login',
         {
+            withCredentials: true,
             auth: {
                 username: data.username,
                 password: data.password,
@@ -44,6 +45,7 @@ class App extends Component<AppProps, {}> {
     createUser = async(data : User) => {
         console.log('creating user')
         const request = {
+            withCredentials: true,
             username: data.username,
             password: data.password,
         }

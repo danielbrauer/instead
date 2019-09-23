@@ -52,6 +52,8 @@ export default class AuthManager {
             return next(new Error('Unauthenticated session!'))
         }
 
+        req.user = user
+
         return next()
     }
 }
