@@ -3,7 +3,9 @@ import redis from 'redis'
 import config from './config'
 
 const RedisStore = require('connect-redis')(session)
-const client = redis.createClient()
+const client = redis.createClient({
+    url: config.redisUrl,
+})
 
 let sessionConfig = {
     secret: config.sessionSecret,

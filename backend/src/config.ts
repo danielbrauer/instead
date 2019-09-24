@@ -9,5 +9,6 @@ export default {
         s3Bucket: process.env.AWS_S3_BUCKET,
     },
     databaseUrl: process.env.DATABASE_URL,
+    redisUrl: process.env.REDIS_URL,
     sessionSecret: process.env.SESSION_SECRET,
 }
