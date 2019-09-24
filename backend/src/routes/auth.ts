@@ -28,7 +28,7 @@ router.post('/new', async function (req, res) {
         ]
     )
     req.session.user = user
-    return res.send({ id: user.id })
+    return res.send({ id: req.session.user.id })
 })
 
 export default router

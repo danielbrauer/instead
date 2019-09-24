@@ -36,7 +36,7 @@ export default class AuthManager {
         }
         const hash = await crypto.scrypt(password, user.salt, 64)
         if (hash.toString('base64') == user.password_hash) {
-            req.session.user = user
+            req.session.user = { id: user.id}
             return next()
         }
         AuthManager.instance().basicPermit.fail(res)

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import Axios from 'axios'
+import Axios, { AxiosInstance } from 'axios'
 import CurrentUser from './CurrentUser'
 import LoginForm from './Components/LoginForm'
 import NewUserForm from './Components/NewUserForm'
@@ -20,19 +20,19 @@ interface User {
 }
 
 class App extends Component<AppProps, {}> {
+    authorizedAxios : AxiosInstance
     // initialize our state
     constructor(props : AppProps) {
         super(props)
         this.state = {
             newUser: false,
         }
+        this.authorizedAxios = Axios.create({ withCredentials: true })
     }
 
     login = async(data : User) => {
         console.log('logging in')
-        const res = await Axios.get(serverUrl + '/login',
-        {
-            withCredentials: true,
+        const res = await this.authorizedAxios.get(serverUrl + '/login', {
             auth: {
                 username: data.username,
                 password: data.password,
@@ -44,12 +44,10 @@ class App extends Component<AppProps, {}> {
 
     createUser = async(data : User) => {
         console.log('creating user')
-        const request = {
-            withCredentials: true,
+        const res = await this.authorizedAxios.post(serverUrl + '/new', {
             username: data.username,
             password: data.password,
-        }
-        const res = await Axios.post(serverUrl + '/new', request)
+        })
         CurrentUser.setId(res.data.id)
         this.props.history.push('/home')
     }

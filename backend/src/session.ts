@@ -7,7 +7,7 @@ let sessionConfig = {
     resave: false,
     saveUninitialized: false,
     cookie: {
-        httpOnly: false,
+        httpOnly: true,
         secure: false,
         maxAge: 30 * 24 * 60 * 60 * 1000,
     },
