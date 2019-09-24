@@ -6,7 +6,7 @@ let settings : CorsOptions = {
         if (origin === config.clientOrigin || !origin) {
             callback(null, true)
         } else {
-            callback(new Error('Not allowed by CORS'))
+            callback(new Error(`Origin ${origin} not allowed by CORS`))
         }
     },
     credentials: true,
