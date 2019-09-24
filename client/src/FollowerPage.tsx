@@ -2,6 +2,7 @@ import React from 'react'
 import FollowUserForm from './Components/FollowUserForm'
 import { Button, List, Header, Icon } from 'semantic-ui-react'
 import { FollowRequest, User } from './Interfaces'
+import SafetyButton from './SafetyButton'
 
 export interface FollowerPageProps {
     requests: FollowRequest[],
@@ -41,7 +42,7 @@ export default function FollowerPage(props: FollowerPageProps) {
                 {props.followers.map(follower => (
                     <List.Item key={follower}>
                         <List.Content floated='right'>
-                            <Button color='red' onClick={() => props.removeFollower(follower)}>remove</Button>
+                            <SafetyButton size='mini' onClick={() => props.removeFollower(follower)}>Remove</SafetyButton>
                         </List.Content>
                         <List.Content>
                             <Icon size='big' name='user'/>
@@ -55,7 +56,7 @@ export default function FollowerPage(props: FollowerPageProps) {
                 {props.followees.map(followee => (
                     <List.Item key={followee}>
                         <List.Content floated='right'>
-                            <Button color='red' onClick={() => props.unfollow(followee)}>unfollow</Button>
+                            <SafetyButton size='mini' onClick={() => props.unfollow(followee)}>Unfollow</SafetyButton>
                         </List.Content>
                         <List.Content>
                             <Icon size='big' name='user'/>

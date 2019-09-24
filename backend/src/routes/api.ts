@@ -104,7 +104,7 @@ router.post('/rejectFollowRequest', async (req, res) => {
 
 router.post('/unfollow', async (req, res) => {
     await db.query(
-        'DELETE FROM follower WHERE follower_id = $1 AND followee_id = $2',
+        'DELETE FROM followers WHERE follower_id = $1 AND followee_id = $2',
         [req.user.id, req.body.userid]
     )
     return res.json({ success: true })
@@ -112,7 +112,7 @@ router.post('/unfollow', async (req, res) => {
 
 router.post('/removeFollower', async (req, res) => {
     await db.query(
-        'DELETE FROM follower WHERE follower_id = $1 AND followee_id = $2',
+        'DELETE FROM followers WHERE follower_id = $1 AND followee_id = $2',
         [req.body.userid, req.user.id]
     )
     return res.json({ success: true })

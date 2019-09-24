@@ -1,3 +1,5 @@
+import { ButtonProps } from "semantic-ui-react";
+
 export interface MessageCallback {
     (message : string) : void
 }
@@ -23,3 +25,5 @@ export interface Post {
     iv : string,
     key : JsonWebKey,
 }
+
+export type ButtonCallback = (event: React.MouseEvent<HTMLButtonElement>, data: ButtonProps) => void
