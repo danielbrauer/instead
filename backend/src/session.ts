@@ -1,9 +1,14 @@
 import session from 'express-session'
+import redis from 'redis'
 import config from './config'
+
+const RedisStore = require('connect-redis')(session)
+const client = redis.createClient()
 
 let sessionConfig = {
     secret: config.sessionSecret,
     name: 'instead-photos',
+    store: new RedisStore({ client }),
     resave: false,
     saveUninitialized: false,
     cookie: {
