@@ -3,6 +3,7 @@ import { useInput, useInputBool } from './useInput'
 import { Button, Form, Message, Header, Segment } from 'semantic-ui-react'
 import { UserPasswordCombo } from '../Interfaces'
 import { RouterProps } from 'react-router'
+import { pwnedPassword } from 'hibp'
 
 interface NewUserFormProps extends RouterProps {
     onSubmit : (userPassword : UserPasswordCombo) => void
@@ -17,6 +18,7 @@ export default function NewUserForm(props : NewUserFormProps) {
     const [loadingStatus, setLoadingStatus] = useState(false)
     const [missedTerms, setMissedTerms] = useState(false)
     const [missedRepeatPassword, setMissedRepeatPassword] = useState(false)
+    const [passwordBreached, setPasswordBreached] = useState(0)
 
     async function handleSubmit(evt : React.FormEvent<HTMLFormElement>) {
         evt.preventDefault()
@@ -28,23 +30,38 @@ export default function NewUserForm(props : NewUserFormProps) {
             resetRepeatPassword()
         }
         setMissedRepeatPassword(userMissedRepeatPassword)
-        if (userMissedTerms || userMissedRepeatPassword) return
+        if (userMissedTerms || userMissedRepeatPassword)
+            return
         setLoadingStatus(true)
-        setServerStatus('')
         try {
+            const passwordBreachCount = await pwnedPassword(password)
+            setPasswordBreached(passwordBreachCount)
+            if (passwordBreachCount > 0)
+                return
+            setServerStatus('')
             await props.onSubmit({ username, password })
         } catch (error) {
-            setLoadingStatus(false)
-            resetPassword()
-            resetRepeatPassword()
             let message = 'Please try again'
             if (error.response)
                 message = error.response.data
-            if (message) {
+            if (message)
                 setServerStatus(message)
-                return
-            }
+        } finally {
+            setLoadingStatus(false)
+            resetPassword()
+            resetRepeatPassword()
         }
+    }
+
+    function getPasswordError() : string | boolean {
+        let content = ""
+        if (passwordBreached) {
+            content = 'This password is well-known, and you can\'t use it here. If it is your password, you should change it.'
+        }
+        if (missedRepeatPassword) {
+            content = 'Your password must match'
+        }
+        return content || false
     }
 
     return (
@@ -73,9 +90,7 @@ export default function NewUserForm(props : NewUserFormProps) {
                         iconPosition='left'
                         placeholder='Repeat password'
                         type='password'
-                        error={missedRepeatPassword ? {
-                            content: 'Your password must match',
-                        } : false}
+                        error={getPasswordError()}
                         {...bindRepeatPassword}
                     />
                     <Form.Checkbox
