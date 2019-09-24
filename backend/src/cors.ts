@@ -3,7 +3,7 @@ import config from './config'
 
 let settings : CorsOptions = {
     origin: function (origin, callback) {
-        if (origin === config.clientOrigin || !origin) {
+        if (config.clientOrigin.some(x => x === origin) || !origin) {
             callback(null, true)
         } else {
             callback(new Error(`Origin ${origin} not allowed by CORS`))

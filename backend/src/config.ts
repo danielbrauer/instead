@@ -1,6 +1,13 @@
+function split(input : string) {
+    if (input === null || input === undefined)
+        return []
+    else
+        return input.split(',')
+}
+
 export default {
     localDev: process.env.NODE_ENV != 'production',
-    clientOrigin: process.env.CLIENT_ORIGIN,
+    clientOrigin: split(process.env.CLIENT_ORIGIN),
     webPort: process.env.PORT,
     aws: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
