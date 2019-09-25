@@ -44,6 +44,7 @@ export default function NewPost(props : NewPostProps) {
     })
 
     return (
+        <div>
         <Segment>
             <Dimmer inverted active={uploading} >
                 <Loader inverted />
@@ -55,13 +56,18 @@ export default function NewPost(props : NewPostProps) {
                     <input {...getInputProps()} />
                     {
                         isDragActive ?
-                            <p>Drop the photo here ...</p>
+                            <Button fluid size='huge' color='blue'>Drop here...</Button>
                             :
-                            <p>Drag and drop a photo here, or click to select one</p>
+                            <Button fluid size='huge'>Drop a photo here</Button>
                     }
                 </div>
             }
-            <Button onClick={onSubmit} disabled={!enableUpload()}>Upload</Button>
         </Segment>
+        {enableUpload() ?
+            <Button onClick={onSubmit} disabled={!enableUpload()}>Upload</Button>
+            :
+            null
+        }
+        </div>
     )
 }
