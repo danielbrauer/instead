@@ -42,6 +42,7 @@ export default function LoginForm(props : LoginFormProps) {
                         icon='user'
                         iconPosition='left'
                         placeholder='Username'
+                        autoComplete='username'
                         {...bindUsername}
                     />
                     <Form.Input
@@ -50,6 +51,7 @@ export default function LoginForm(props : LoginFormProps) {
                         iconPosition='left'
                         placeholder='Password'
                         type='password'
+                        autoComplete="current-password"
                         {...bindPassword}
                     />
                     <Message

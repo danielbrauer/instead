@@ -74,6 +74,7 @@ export default function NewUserForm(props : NewUserFormProps) {
                         icon='user'
                         iconPosition='left'
                         placeholder='Username'
+                        autoComplete='off'
                         {...bindUsername}
                     />
                     <Form.Input
@@ -82,6 +83,7 @@ export default function NewUserForm(props : NewUserFormProps) {
                         iconPosition='left'
                         placeholder='Password'
                         type='password'
+                        autoComplete='off'
                         {...bindPassword}
                     />
                     <Form.Input
@@ -90,6 +92,7 @@ export default function NewUserForm(props : NewUserFormProps) {
                         iconPosition='left'
                         placeholder='Repeat password'
                         type='password'
+                        autoComplete='off'
                         error={getPasswordError()}
                         {...bindRepeatPassword}
                     />
