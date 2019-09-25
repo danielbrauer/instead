@@ -252,10 +252,11 @@ class App extends Component<AppProps, AppState> {
                     <Menu.Item fitted position='right'>
                         <Dropdown item direction='left' text={this.userCache.getUser(CurrentUser.getId()).username}>
                             <Dropdown.Menu>
-                                <Dropdown.Item onClick={() => this.props.history.push('/home')}>Home</Dropdown.Item>
-                                <Dropdown.Item onClick={() => this.props.history.push('/new')}>New Post</Dropdown.Item>
-                                <Dropdown.Item onClick={() => this.props.history.push('/followers')}>Followers</Dropdown.Item>
-                                <Dropdown.Item onClick={this.logOut}>Log Out</Dropdown.Item>
+                                <Dropdown.Item icon='list' text='Home' onClick={() => this.props.history.push('/home')}/>
+                                <Dropdown.Item icon='image' text='New Post' onClick={() => this.props.history.push('/new')}/>
+                                <Dropdown.Item icon='user' text='Followers' onClick={() => this.props.history.push('/followers')}/>
+                                <Dropdown.Divider />
+                                <Dropdown.Item icon='sign-out' text='Log Out' onClick={this.logOut}/>
                             </Dropdown.Menu>
                         </Dropdown>
                     </Menu.Item>
