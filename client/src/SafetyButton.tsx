@@ -31,7 +31,7 @@ export default function SafetyButton(props : SafetyButtonProps) {
     return (
         <div>
             {tapped ?
-                <Button size={props.size} onClick={props.onClick} color='red'>Confirm</Button>
+                <Button size={props.size} onClick={props.onClick} negative>Confirm</Button>
             :
                 <Button size={props.size} onClick={firstTap}>{props.children}</Button>
             }

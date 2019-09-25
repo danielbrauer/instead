@@ -26,8 +26,8 @@ export default function FollowerPage(props: FollowerPageProps) {
                     <List.Item key={request.requester_id}>
                         <List.Content floated='right'>
                             <Button.Group size='mini'>
-                                <Button color='green' onClick={() => props.accept(request.requester_id)}>Accept</Button>
-                                <Button color='red' onClick={() => props.reject(request.requester_id)}>Reject</Button>
+                                <Button positive onClick={() => props.accept(request.requester_id)}>Accept</Button>
+                                <Button negative onClick={() => props.reject(request.requester_id)}>Reject</Button>
                             </Button.Group>
                         </List.Content>
                         <List.Content>
