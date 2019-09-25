@@ -24,14 +24,14 @@ export default function NewPost(props : NewPostProps) {
     const [uploadInput, setUploadInput] = useState<File | null>(null)
     const [uploading, setUploading] = useState(false)
 
-    function enableUpload() {
-        return uploadInput !== null
-    }
-
     async function onSubmit() {
         setUploading(true)
         await props.onSubmit(uploadInput!)
         props.history.push('/home')
+    }
+
+    function onCancel() {
+        setUploadInput(null)
     }
 
     const onDropAccepted = useCallback(acceptedFiles => {
@@ -45,29 +45,32 @@ export default function NewPost(props : NewPostProps) {
 
     return (
         <div>
-        <Segment>
-            <Dimmer inverted active={uploading} >
-                <Loader inverted />
-            </Dimmer>
-            {enableUpload() ?
-                <img src={blobUrl(uploadInput!)}/>
-                :
-                <div {...getRootProps()}>
-                    <input {...getInputProps()} />
-                    {
-                        isDragActive ?
-                            <Button fluid size='huge' color='blue'>Drop here...</Button>
-                            :
-                            <Button fluid size='huge'>Drop a photo here</Button>
-                    }
+            <Segment>
+                <Dimmer inverted active={uploading} >
+                    <Loader inverted />
+                </Dimmer>
+                {uploadInput !== null ?
+                    <img src={blobUrl(uploadInput!)}/>
+                    :
+                    <div {...getRootProps()}>
+                        <input {...getInputProps()} />
+                        {
+                            isDragActive ?
+                                <Button fluid size='huge' color='blue'>Drop here...</Button>
+                                :
+                                <Button fluid size='huge'>Drop a photo here</Button>
+                        }
+                    </div>
+                }
+            </Segment>
+            {uploadInput !== null && !uploading ?
+                <div>
+                    <Button negative onClick={onCancel}>Cancel</Button>
+                    <Button positive onClick={onSubmit}>Upload</Button>
                 </div>
+                :
+                null
             }
-        </Segment>
-        {enableUpload() ?
-            <Button onClick={onSubmit} disabled={!enableUpload()}>Upload</Button>
-            :
-            null
-        }
         </div>
     )
 }
