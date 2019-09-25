@@ -17,6 +17,7 @@
     "promise-file-reader": "https://github.com/jahredhope/promise-file-reader.git#98d38d0965605ee80208d8a66f913b2279b5852b",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "react-dropzone": "^10.1.9",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
     "semantic-ui-css": "^2.4.1",

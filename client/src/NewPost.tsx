@@ -1,7 +1,7 @@
-import React, { Component } from 'react'
-// import Caman from 'caman'
+import React, { useCallback, useState } from 'react'
 import { Button, Loader, Segment, Dimmer } from 'semantic-ui-react'
 import { History } from 'history'
+import { useDropzone } from 'react-dropzone'
 
 let urls = new WeakMap()
 
@@ -15,82 +15,53 @@ let blobUrl = (blob : Blob) => {
     }
 }
 
-interface DropperProps {
-    onSet : (file : File) => void,
-}
-
-interface DropperState {
-    file? : File,
-}
-
-class Dropper extends Component<DropperProps, DropperState> {
-    constructor(props : DropperProps) {
-        super(props)
-        this.state = { file: undefined }
-    }
-
-    onDrag = (event : React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault()
-    }
-
-    onDrop = (event : React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault()
-        let file = event.dataTransfer.files[0]
-        this.setState({ file })
-        this.props.onSet(file)
-    }
-
-    render() {
-        let { file } = this.state
-        let url = file && blobUrl(file)
-
-        return (
-            <div onDragOver={this.onDrag} onDrop={this.onDrop}>
-                <p>Drop an image!</p>
-                <img data-caman="brightness(10) contrast(30) sepia(60) saturation(-30)" src={url} />
-            </div>
-        )
-    }
-}
-
 interface NewPostProps {
     history: History,
-    onSubmit : (file : File) => void,
+    onSubmit: (file: File) => void,
 }
 
-interface NewPostState {
-    uploadInput? : File,
-    uploading : boolean,
-}
+export default function NewPost(props : NewPostProps) {
+    const [uploadInput, setUploadInput] = useState<File | null>(null)
+    const [uploading, setUploading] = useState(false)
 
-export default class NewPost extends Component<NewPostProps, NewPostState> {
-    constructor(props : NewPostProps) {
-        super(props)
-        this.state = {
-            uploadInput: undefined,
-            uploading: false,
-        }
+    function enableUpload() {
+        return uploadInput !== null
     }
-    enableUpload = () => {
-        return this.state.uploadInput !== null
+
+    async function onSubmit() {
+        setUploading(true)
+        await props.onSubmit(uploadInput!)
+        props.history.push('/home')
     }
-    onSubmit = async() => {
-        this.setState({ uploading: true })
-        await this.props.onSubmit(this.state.uploadInput!)
-        this.props.history.push('/home')
-    }
-    onChange = (file : File) => {
-        this.setState({ uploadInput: file })
-    }
-    render() {
-        return (
-            <Segment>
-                <Dimmer inverted active={this.state.uploading} >
-                    <Loader inverted />
-                </Dimmer>
-                <Dropper onSet={this.onChange} />
-                <Button onClick={this.onSubmit} disabled={!this.enableUpload()}>Upload</Button>
-            </Segment>
-        )
-    }
+
+    const onDropAccepted = useCallback(acceptedFiles => {
+        setUploadInput(acceptedFiles[0])
+    }, [])
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDropAccepted,
+        accept: ['image/jpeg', 'image/png'],
+    })
+
+    return (
+        <Segment>
+            <Dimmer inverted active={uploading} >
+                <Loader inverted />
+            </Dimmer>
+            {enableUpload() ?
+                <img src={blobUrl(uploadInput!)}/>
+                :
+                <div {...getRootProps()}>
+                    <input {...getInputProps()} />
+                    {
+                        isDragActive ?
+                            <p>Drop the photo here ...</p>
+                            :
+                            <p>Drag and drop a photo here, or click to select one</p>
+                    }
+                </div>
+            }
+            <Button onClick={onSubmit} disabled={!enableUpload()}>Upload</Button>
+        </Segment>
+    )
 }
