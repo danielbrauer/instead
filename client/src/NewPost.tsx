@@ -50,7 +50,7 @@ export default function NewPost(props : NewPostProps) {
                     <Loader inverted />
                 </Dimmer>
                 {uploadInput !== null ?
-                    <img src={blobUrl(uploadInput!)}/>
+                    <img src={blobUrl(uploadInput!)} alt={uploadInput.name}/>
                     :
                     <div {...getRootProps()}>
                         <input {...getInputProps()} />
