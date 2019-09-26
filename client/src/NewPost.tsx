@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from 'react'
-import { Button, Loader, Segment, Dimmer } from 'semantic-ui-react'
+import { Image, Button, Loader, Segment, Dimmer, Menu } from 'semantic-ui-react'
 import { History } from 'history'
 import { useDropzone } from 'react-dropzone'
 
 let urls = new WeakMap()
 
-let blobUrl = (blob : Blob) => {
+let blobUrl = (blob: Blob) => {
     if (urls.has(blob)) {
         return urls.get(blob)
     } else {
@@ -20,7 +20,7 @@ interface NewPostProps {
     onSubmit: (file: File) => void,
 }
 
-export default function NewPost(props : NewPostProps) {
+export default function NewPost(props: NewPostProps) {
     const [uploadInput, setUploadInput] = useState<File | null>(null)
     const [uploading, setUploading] = useState(false)
 
@@ -45,13 +45,15 @@ export default function NewPost(props : NewPostProps) {
 
     return (
         <div>
-            <Segment>
-                <Dimmer inverted active={uploading} >
-                    <Loader inverted />
-                </Dimmer>
-                {uploadInput !== null ?
-                    <img src={blobUrl(uploadInput!)} alt={uploadInput.name}/>
-                    :
+            {uploadInput !== null ?
+                <div>
+                    <Dimmer inverted active={uploading} >
+                        <Loader inverted />
+                    </Dimmer>
+                    <Image fluid src={blobUrl(uploadInput!)} alt={uploadInput.name} />
+                </div>
+                :
+                <Segment>
                     <div {...getRootProps()}>
                         <input {...getInputProps()} />
                         {
@@ -61,13 +63,18 @@ export default function NewPost(props : NewPostProps) {
                                 <Button fluid size='huge'>Drop a photo here</Button>
                         }
                     </div>
-                }
-            </Segment>
+                </Segment>
+            }
             {uploadInput !== null && !uploading ?
-                <div>
-                    <Button negative onClick={onCancel}>Cancel</Button>
-                    <Button positive onClick={onSubmit}>Upload</Button>
-                </div>
+                <Menu secondary fluid fixed='bottom'>
+                    <Menu.Item>
+                        <Button negative onClick={onCancel}>Cancel</Button>
+                    </Menu.Item>
+
+                    <Menu.Item position='right'>
+                        <Button positive onClick={onSubmit}>Upload</Button>
+                    </Menu.Item>
+                </Menu>
                 :
                 null
             }
