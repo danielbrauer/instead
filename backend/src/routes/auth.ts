@@ -14,7 +14,7 @@ router.post('/new', async function (req, res) {
         'SELECT COUNT(*) FROM users WHERE username = $1',
         [req.body.username]
     )
-    if (count === 0)
+    if (count > 0)
         return res.status(400).send('User already exists')
     const buffer = await crypto.randomBytes(32)
     const salt = buffer.toString('base64')
