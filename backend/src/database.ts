@@ -1,4 +1,4 @@
-import { Client, Pool, QueryResult, QueryResultRow, QueryConfig, ClientBase } from 'pg'
+import { Pool, ClientBase } from 'pg'
 import config from './config'
 
 const pool = (config.databaseUrl === undefined) ? new Pool() : new Pool({connectionString: config.databaseUrl})
@@ -18,9 +18,9 @@ export class PromiseClient {
         return one
     }
 
-    async count(text: string, params: string[]) {
+    async count(text: string, params: string[]) : Promise<number> {
         const { rows: [{ count }] } = await this.client.query(text, params)
-        return count
+        return parseInt(count)
     }
 }
 
