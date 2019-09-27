@@ -4,12 +4,13 @@ import { Button, Form, Message, Header, Segment } from 'semantic-ui-react'
 import { UserPasswordCombo } from '../Interfaces'
 import { RouterProps } from 'react-router'
 import { pwnedPassword } from 'hibp'
+import { useCleanupPromise } from '../UnmountCleanup'
 
 interface NewUserFormProps extends RouterProps {
-    onSubmit : (userPassword : UserPasswordCombo) => void
+    onSubmit: (userPassword: UserPasswordCombo) => Promise<void>
 }
 
-export default function NewUserForm(props : NewUserFormProps) {
+export default function NewUserForm(props: NewUserFormProps) {
     const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: repeatPassword, bind: bindRepeatPassword, reset: resetRepeatPassword } = useInput('')
@@ -19,8 +20,9 @@ export default function NewUserForm(props : NewUserFormProps) {
     const [missedTerms, setMissedTerms] = useState(false)
     const [missedRepeatPassword, setMissedRepeatPassword] = useState(false)
     const [passwordBreached, setPasswordBreached] = useState(0)
+    const cleanupPromise = useCleanupPromise()
 
-    async function handleSubmit(evt : React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
         evt.preventDefault()
         const userMissedTerms = !agreeTerms
         setMissedTerms(userMissedTerms)
@@ -34,26 +36,27 @@ export default function NewUserForm(props : NewUserFormProps) {
             return
         setLoadingStatus(true)
         try {
-            const passwordBreachCount = await pwnedPassword(password)
+            const passwordBreachCount = await cleanupPromise(pwnedPassword(password))
             setPasswordBreached(passwordBreachCount)
             if (passwordBreachCount > 0)
                 return
             setServerStatus('')
-            await props.onSubmit({ username, password })
+            await cleanupPromise(props.onSubmit({ username, password }))
         } catch (error) {
+            if (error.isCanceled)
+                return
             let message = 'Please try again'
             if (error.response)
                 message = error.response.data
             if (message)
                 setServerStatus(message)
-        } finally {
             setLoadingStatus(false)
             resetPassword()
             resetRepeatPassword()
         }
     }
 
-    function getPasswordError() : string | boolean {
+    function getPasswordError(): string | boolean {
         let content = ""
         if (passwordBreached) {
             content = 'This password is well-known, and you can\'t use it here. If it is your password, you should change it.'

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Placeholder, Image } from 'semantic-ui-react'
 import Axios from 'axios'
-
+import { makeCanceler } from './UnmountCleanup'
 const base64js = require('base64-js')
 const Crypto = window.crypto
 
@@ -13,25 +13,7 @@ interface EncryptedImageProps {
 
 interface EncryptedImageState {
     imageUrl: string,
-    promise: any,
-}
-
-const makeCancelable = (promise: any) => {
-    let hasCanceled_ = false
-
-    const wrappedPromise = new Promise((resolve, reject) => {
-        promise.then(
-            (val : any) => hasCanceled_ ? reject({ isCanceled: true }) : resolve(val),
-            (error : any) => hasCanceled_ ? reject({ isCanceled: true }) : reject(error)
-        )
-    })
-
-    return {
-        promise: wrappedPromise,
-        cancel() {
-            hasCanceled_ = true
-        },
-    }
+    canceler: any,
 }
 
 export default class EncryptedImage extends Component<EncryptedImageProps, EncryptedImageState> {
@@ -39,13 +21,13 @@ export default class EncryptedImage extends Component<EncryptedImageProps, Encry
         super(props)
         this.state = {
             imageUrl: '',
-            promise: null,
+            canceler: null,
         }
     }
 
     componentDidMount() {
-        const promise = makeCancelable(this.decrypt())
-        this.setState({ promise })
+        const canceler = makeCanceler(this.decrypt())
+        this.setState({ canceler })
     }
 
     async decrypt() {
@@ -79,8 +61,8 @@ export default class EncryptedImage extends Component<EncryptedImageProps, Encry
     componentWillUnmount() {
         if (this.state.imageUrl) {
             URL.revokeObjectURL(this.state.imageUrl)
-        } else if (this.state.promise) {
-            this.state.promise.cancel()
+        } else if (this.state.canceler) {
+            this.state.canceler.cancel()
         }
     }
 
