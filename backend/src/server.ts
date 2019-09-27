@@ -34,16 +34,7 @@ if (!config.localDev) {
     const relativePathToReact = '/../../client/build'
     app.use(express.static(path.join(__dirname, relativePathToReact)))
 
-    app.get([
-        '/',
-        '/signup',
-        '/login',
-        '/home',
-        '/user',
-        '/post',
-        '/followers',
-        '/new'
-    ], (req, res) => {
+    app.get('*', (req, res) => {
         res.sendFile(path.join(__dirname, relativePathToReact, '/index.html'))
     })
 }
