@@ -7,6 +7,7 @@ import { Grid } from 'semantic-ui-react'
 import { Route, Switch, Redirect } from 'react-router-dom'
 import { History } from 'history'
 import config from './config'
+import srp from 'secure-remote-password/client'
 
 const serverUrl = `${config.serverUrl}/auth`
 
@@ -30,23 +31,44 @@ class App extends Component<AppProps, {}> {
         this.authorizedAxios = Axios.create({ withCredentials: true })
     }
 
-    login = async(data : User) => {
+    login = async(user : User) => {
         console.log('logging in')
-        const res = await this.authorizedAxios.get(serverUrl + '/login', {
-            auth: {
-                username: data.username,
-                password: data.password,
-            },
-        })
-        CurrentUser.setId(res.data.id)
-        this.props.history.push('/home')
+        try {
+            const clientEphemeral = srp.generateEphemeral()
+            const startRes = await this.authorizedAxios.post(serverUrl + '/startLogin', {
+                username: user.username,
+                clientEphemeralPublic: clientEphemeral.public,
+            })
+            const { salt, serverEphemeralPublic } = startRes.data
+            const privateKey = srp.derivePrivateKey(salt, user.username, user.password)
+            const clientSession = srp.deriveSession(clientEphemeral.secret, serverEphemeralPublic, salt, user.username, privateKey)
+            const finishRes = await this.authorizedAxios.post(serverUrl + '/finishLogin', {
+                clientSessionProof: clientSession.proof,
+            })
+            const { serverSessionProof, userid } = finishRes.data
+            srp.verifySession(clientEphemeral.public, clientSession, serverSessionProof)
+            CurrentUser.setId(userid)
+            this.props.history.push('/home')
+        } catch (error) {
+            try {
+                await this.authorizedAxios.get(serverUrl + '/cancelLogin')
+                console.log('canceled login')
+            } catch (error) {
+                throw new Error('Authentication failed and can\'t cancel session')
+            }
+            throw new Error('Authentication failed')
+        }
     }
 
-    createUser = async(data : User) => {
+    createUser = async(user : User) => {
         console.log('creating user')
+        const salt = srp.generateSalt()
+        const privateKey = srp.derivePrivateKey(salt, user.username, user.password)
+        const verifier = srp.deriveVerifier(privateKey)
         const res = await this.authorizedAxios.post(serverUrl + '/new', {
-            username: data.username,
-            password: data.password,
+            username: user.username,
+            salt,
+            verifier,
         })
         CurrentUser.setId(res.data.id)
         this.props.history.push('/home')

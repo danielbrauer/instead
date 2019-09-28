@@ -20,6 +20,7 @@
     "react-dropzone": "^10.1.9",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
+    "secure-remote-password": "^0.3.1",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^0.88.1",
     "typedarray-to-buffer": "^3.1.5",
