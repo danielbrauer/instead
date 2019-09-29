@@ -8,16 +8,17 @@ import { Route, Switch, Redirect } from 'react-router-dom'
 import { History } from 'history'
 import config from './config'
 import srp from 'secure-remote-password/client'
+import scrypt, { ScryptOptions } from 'scrypt-async-modern'
+import { Buffer } from 'buffer'
+import { LoginInfo, NewUserInfo } from './Interfaces'
+const toBuffer = require('typedarray-to-buffer')
+
+const Crypto = window.crypto
 
 const serverUrl = `${config.serverUrl}/auth`
 
 export interface AppProps {
     history: History,
-}
-
-interface User {
-    username: string,
-    password: string,
 }
 
 class App extends Component<AppProps, {}> {
@@ -31,23 +32,38 @@ class App extends Component<AppProps, {}> {
         this.authorizedAxios = Axios.create({ withCredentials: true })
     }
 
-    login = async(user : User) => {
+    async derivePrivateKey(salt : string, password : string, secretKey : string) {
+        const scryptOptions : ScryptOptions = {
+            N: 16384,
+            r: 8,
+            p: 1,
+            dkLen: 16,
+            encoding: 'hex'
+        }
+        const passwordBuffer = Buffer.from(password.trim().normalize('NFKC'))
+        const saltBuffer = Buffer.from(salt, 'hex')
+        const secretKeyBuffer = Buffer.from(secretKey, 'hex')
+        const keyAndPassword = Buffer.concat([secretKeyBuffer, passwordBuffer])
+        return await scrypt(keyAndPassword, saltBuffer, scryptOptions)
+    }
+
+    login = async(info : LoginInfo) => {
         console.log('logging in')
         try {
             const clientEphemeral = srp.generateEphemeral()
             const startRes = await this.authorizedAxios.post(serverUrl + '/startLogin', {
-                username: user.username,
+                username: info.username,
                 clientEphemeralPublic: clientEphemeral.public,
             })
             const { salt, serverEphemeralPublic } = startRes.data
-            const privateKey = srp.derivePrivateKey(salt, user.username, user.password)
-            const clientSession = srp.deriveSession(clientEphemeral.secret, serverEphemeralPublic, salt, user.username, privateKey)
+            const privateKey = await this.derivePrivateKey(salt, info.password, info.secretKey)
+            const clientSession = srp.deriveSession(clientEphemeral.secret, serverEphemeralPublic, salt, info.username, privateKey)
             const finishRes = await this.authorizedAxios.post(serverUrl + '/finishLogin', {
                 clientSessionProof: clientSession.proof,
             })
             const { serverSessionProof, userid } = finishRes.data
             srp.verifySession(clientEphemeral.public, clientSession, serverSessionProof)
-            CurrentUser.setId(userid)
+            CurrentUser.set(userid, info.username, info.secretKey)
             this.props.history.push('/home')
         } catch (error) {
             try {
@@ -60,18 +76,21 @@ class App extends Component<AppProps, {}> {
         }
     }
 
-    createUser = async(user : User) => {
+    createUser = async(info : NewUserInfo) => {
         console.log('creating user')
-        const salt = srp.generateSalt()
-        const privateKey = srp.derivePrivateKey(salt, user.username, user.password)
+        const salt = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
+        const secretKey = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
+        const privateKey = await this.derivePrivateKey(salt, info.password, secretKey)
         const verifier = srp.deriveVerifier(privateKey)
+        
         const res = await this.authorizedAxios.post(serverUrl + '/new', {
-            username: user.username,
+            displayName: info.displayName,
             salt,
             verifier,
         })
-        CurrentUser.setId(res.data.id)
-        this.props.history.push('/home')
+        const { id, username } = res.data.user
+        CurrentUser.set(id, username, secretKey)
+        this.props.history.push('/welcome')
     }
 
     render() {

@@ -55,22 +55,18 @@ router.post('/finishLogin', async function(req, res) {
 })
 
 router.post('/new', async function (req, res) {
-    const count = await db.count(
-        'SELECT COUNT(*) FROM users WHERE username = $1',
-        [req.body.username]
-    )
-    if (count > 0)
-        return res.status(400).send('User already exists')
+    const username = 'james'
     const user = await db.queryOne(
-        'INSERT INTO users (username, verifier, salt) VALUES ($1, $2, $3) RETURNING id', 
+        'INSERT INTO users (username, display_name, verifier, salt) VALUES ($1, $2, $3, $4) RETURNING id, username', 
         [
-            req.body.username,
+            username,
+            req.body.displayName,
             req.body.verifier,
             req.body.salt,
         ]
     )
-    req.session.user = user
-    return res.send({ id: req.session.user.id })
+    req.session.user = { id: user.id }
+    return res.send({ user })
 })
 
 router.get('/cancelLogin', async function (req, res) {

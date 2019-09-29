@@ -1,12 +1,14 @@
-import { ButtonProps } from "semantic-ui-react";
+import { ButtonProps } from "semantic-ui-react"
 
-export interface MessageCallback {
-    (message : string) : void
+export interface LoginInfo {
+    username: string,
+    password: string,
+    secretKey: string,
 }
 
-export interface UserPasswordCombo {
-    username : string,
-    password : string,
+export interface NewUserInfo {
+    displayName: string,
+    password: string,
 }
 
 export interface FollowRequest {

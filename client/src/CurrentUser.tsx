@@ -1,18 +1,35 @@
 
 const kIdKey = 'userId'
+const kUsernameKey = 'username'
+const kSecretKeyKey = 'secretKey'
 
 class CurrentUser {
 
     static getId() : number {
-        return parseInt(localStorage.getItem(kIdKey) as string, 10)
+        return parseInt(localStorage.getItem(kIdKey)!, 10)
     }
 
-    static setId(id : number) {
+    static getUsername() : string {
+        return localStorage.getItem(kUsernameKey)!
+    }
+
+    static getSecretKey() : string | null {
+        return localStorage.getItem(kSecretKeyKey)
+    }
+
+    static set(id : number, username : string, secretKey : string) {
         localStorage.setItem(kIdKey, id.toString())
+        localStorage.setItem(kUsernameKey, username)
+        localStorage.setItem(kSecretKeyKey, secretKey)
     }
 
-    static clearId() {
+    static clear() {
         localStorage.removeItem(kIdKey)
+        localStorage.removeItem(kUsernameKey)
+    }
+
+    static clearSecretKey() {
+        localStorage.removeItem(kSecretKeyKey)
     }
 
     static loggedIn() {

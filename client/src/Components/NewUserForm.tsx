@@ -1,17 +1,17 @@
 import React, { useState } from 'react'
 import { useInput, useInputBool } from './useInput'
 import { Button, Form, Message, Header, Segment } from 'semantic-ui-react'
-import { UserPasswordCombo } from '../Interfaces'
+import { NewUserInfo } from '../Interfaces'
 import { RouterProps } from 'react-router'
 import { pwnedPassword } from 'hibp'
 import { useCleanupPromise } from '../UnmountCleanup'
 
 interface NewUserFormProps extends RouterProps {
-    onSubmit: (userPassword: UserPasswordCombo) => Promise<void>
+    onSubmit: (userPassword: NewUserInfo) => Promise<void>
 }
 
 export default function NewUserForm(props: NewUserFormProps) {
-    const { value: username, bind: bindUsername } = useInput('')
+    const { value: displayName, bind: bindDisplayName } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: repeatPassword, bind: bindRepeatPassword, reset: resetRepeatPassword } = useInput('')
     const { value: agreeTerms, bind: bindAgreeTerms } = useInputBool(false)
@@ -41,7 +41,7 @@ export default function NewUserForm(props: NewUserFormProps) {
             if (passwordBreachCount > 0)
                 return
             setServerStatus('')
-            await cleanupPromise(props.onSubmit({ username, password }))
+            await cleanupPromise(props.onSubmit({ displayName, password }))
         } catch (error) {
             if (error.isCanceled)
                 return
@@ -76,9 +76,9 @@ export default function NewUserForm(props: NewUserFormProps) {
                         fluid
                         icon='user'
                         iconPosition='left'
-                        placeholder='Username'
+                        placeholder='Display Name'
                         autoComplete='off'
-                        {...bindUsername}
+                        {...bindDisplayName}
                     />
                     <Form.Input
                         fluid
