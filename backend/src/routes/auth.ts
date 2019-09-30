@@ -1,7 +1,7 @@
 import Router from 'express-promise-router'
 import db from '../database'
 import srp from 'secure-remote-password/server'
-import authManager from '../auth-strategies'
+import { generateCombination } from '../util/animalGenerator'
 
 const router = Router()
 
@@ -55,9 +55,9 @@ router.post('/finishLogin', async function(req, res) {
 })
 
 router.post('/new', async function (req, res) {
-    const username = 'james'
+    const username = generateCombination(1, '', true)
     const user = await db.queryOne(
-        'INSERT INTO users (username, display_name, verifier, salt) VALUES ($1, $2, $3, $4) RETURNING id, username', 
+        'INSERT INTO users (username, display_name, verifier, salt) VALUES ($1, $2, $3, $4) RETURNING id', 
         [
             username,
             req.body.displayName,
@@ -66,7 +66,7 @@ router.post('/new', async function (req, res) {
         ]
     )
     req.session.user = { id: user.id }
-    return res.send({ user })
+    return res.send({ user: { username, id: user.id} })
 })
 
 router.get('/cancelLogin', async function (req, res) {

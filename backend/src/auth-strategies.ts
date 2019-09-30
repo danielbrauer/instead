@@ -1,5 +1,3 @@
-import db from './database'
-import srp from 'secure-remote-password/server'
 import { Request, Response, NextFunction } from 'express-serve-static-core'
 
 export default class AuthManager {
