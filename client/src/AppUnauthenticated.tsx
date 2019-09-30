@@ -42,7 +42,7 @@ class App extends Component<AppProps, {}> {
         }
         const passwordBuffer = Buffer.from(password.trim().normalize('NFKC'))
         const saltBuffer = Buffer.from(salt, 'hex')
-        const secretKeyBuffer = Buffer.from(secretKey, 'hex')
+        const secretKeyBuffer = Buffer.from(secretKey)
         const keyAndPassword = Buffer.concat([secretKeyBuffer, passwordBuffer])
         return await scrypt(keyAndPassword, saltBuffer, scryptOptions)
     }
@@ -76,10 +76,18 @@ class App extends Component<AppProps, {}> {
         }
     }
 
+    createSecretKey() : string {
+        const characters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+        const values = Crypto.getRandomValues(new Uint8Array(26))
+        let output = ''
+        values.forEach(x => output += characters.charAt(x%32))
+        return output
+    }
+
     createUser = async(info : NewUserInfo) => {
         console.log('creating user')
         const salt = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
-        const secretKey = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
+        const secretKey = this.createSecretKey()
         const privateKey = await this.derivePrivateKey(salt, info.password, secretKey)
         const verifier = srp.deriveVerifier(privateKey)
         
