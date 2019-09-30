@@ -1,5 +1,5 @@
 import React from 'react'
-import { Menu, Segment, Header, Button } from "semantic-ui-react"
+import { Menu, Segment, Header, Button, Message } from "semantic-ui-react"
 import { History } from 'history'
 import CurrentUser from './CurrentUser'
 
@@ -28,8 +28,12 @@ export default function AppWelcome(props : AppProps) {
                 <Header>Secret Key</Header>
                 {CurrentUser.getSecretKey()}
             <br />
-            You will need these, along with your password, to log in. Please print this page, take a screenshot, or write them down, and store them somewhere safe.
-
+            <br />
+            <Message warning>
+                <Message.Header>Important</Message.Header>
+                <p>You will need these, along with your password, to log in. Please print this page, take a screenshot, or write them down, and store them somewhere safe.</p>
+                </Message>
+            
             </Segment>
             <Button onClick={ok}>Got it</Button>
         </div>
