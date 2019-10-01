@@ -5,8 +5,6 @@ import { generateCombination } from '../util/animalGenerator'
 
 const router = Router()
 
-
-
 router.post('/startLogin', async function(req, res) {
     const session = req.session
     if (session.user)
@@ -18,26 +16,22 @@ router.post('/startLogin', async function(req, res) {
     )
     if (!user)
         return res.status(403).send('No such user')
-    try {
-        const serverEphemeral = srp.generateEphemeral(user.verifier)
-        session.loginInfo = {
-            user,
-            clientEphemeralPublic,
-            serverEphemeralSecret: serverEphemeral.secret
-        }
-        return res.send({
-            salt: user.salt,
-            serverEphemeralPublic: serverEphemeral.public,
-        })
-    } catch (error) {
-        return res.status(403).send('No such user')
+    const serverEphemeral = srp.generateEphemeral(user.verifier)
+    session.loginInfo = {
+        user,
+        clientEphemeralPublic,
+        serverEphemeralSecret: serverEphemeral.secret
     }
+    return res.send({
+        salt: user.salt,
+        serverEphemeralPublic: serverEphemeral.public,
+    })
 })
 
 router.post('/finishLogin', async function(req, res) {
     const session = req.session
     if (!session.loginInfo)
-        return res.status(405).send('Session hasn\'t started logging in')
+        throw new Error('Missing info from startLogin')
     const { clientSessionProof } = req.body
     const loginInfo = session.loginInfo
     const serverSession = srp.deriveSession(
@@ -80,11 +74,9 @@ router.post('/finishSignup', async function (req, res) {
     return res.send({ user: { id: user.id} })
 })
 
-router.get('/cancelLogin', async function (req, res) {
-    req.session.destroy(err => {
-        if (err) return res.status(500).send({ message: 'Error destroying session'})
-        return res.send('Session destroyed')
-    })
+router.use(function hangupHandler(err: any, req: any, res: any, next: any) {
+    delete req.session
+    return res.status(403).send('Authentication failed')
 })
 
 export default router

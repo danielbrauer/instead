@@ -49,31 +49,21 @@ class App extends Component<AppProps, {}> {
 
     login = async(info : LoginInfo) => {
         console.log('logging in')
-        try {
-            const clientEphemeral = srp.generateEphemeral()
-            const startRes = await this.authorizedAxios.post(serverUrl + '/startLogin', {
-                username: info.username,
-                clientEphemeralPublic: clientEphemeral.public,
-            })
-            const { salt, serverEphemeralPublic } = startRes.data
-            const privateKey = await this.derivePrivateKey(salt, info.password, info.secretKey)
-            const clientSession = srp.deriveSession(clientEphemeral.secret, serverEphemeralPublic, salt, info.username, privateKey)
-            const finishRes = await this.authorizedAxios.post(serverUrl + '/finishLogin', {
-                clientSessionProof: clientSession.proof,
-            })
-            const { serverSessionProof, userid } = finishRes.data
-            srp.verifySession(clientEphemeral.public, clientSession, serverSessionProof)
-            CurrentUser.set(userid, info.username, info.secretKey)
-            this.props.history.push('/home')
-        } catch (error) {
-            try {
-                await this.authorizedAxios.get(serverUrl + '/cancelLogin')
-                console.log('canceled login')
-            } catch (error) {
-                throw new Error('Authentication failed and can\'t cancel session')
-            }
-            throw new Error('Authentication failed')
-        }
+        const clientEphemeral = srp.generateEphemeral()
+        const startRes = await this.authorizedAxios.post(serverUrl + '/startLogin', {
+            username: info.username,
+            clientEphemeralPublic: clientEphemeral.public,
+        })
+        const { salt, serverEphemeralPublic } = startRes.data
+        const privateKey = await this.derivePrivateKey(salt, info.password, info.secretKey)
+        const clientSession = srp.deriveSession(clientEphemeral.secret, serverEphemeralPublic, salt, info.username, privateKey)
+        const finishRes = await this.authorizedAxios.post(serverUrl + '/finishLogin', {
+            clientSessionProof: clientSession.proof,
+        })
+        const { serverSessionProof, userid } = finishRes.data
+        srp.verifySession(clientEphemeral.public, clientSession, serverSessionProof)
+        CurrentUser.set(userid, info.username, info.secretKey)
+        this.props.history.push('/home')
     }
 
     createSecretKey() : string {
