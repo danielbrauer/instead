@@ -86,17 +86,19 @@ class App extends Component<AppProps, {}> {
 
     createUser = async(info : NewUserInfo) => {
         console.log('creating user')
+        const startRes = await this.authorizedAxios.get(serverUrl + '/startSignup')
+        const { username } = startRes.data
         const salt = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
         const secretKey = this.createSecretKey()
         const privateKey = await this.derivePrivateKey(salt, info.password, secretKey)
         const verifier = srp.deriveVerifier(privateKey)
         
-        const res = await this.authorizedAxios.post(serverUrl + '/new', {
+        const finishRes = await this.authorizedAxios.post(serverUrl + '/finishSignup', {
             displayName: info.displayName,
             salt,
             verifier,
         })
-        const { id, username } = res.data.user
+        const { id } = finishRes.data.user
         CurrentUser.set(id, username, secretKey)
         this.props.history.push('/welcome')
     }

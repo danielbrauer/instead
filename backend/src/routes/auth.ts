@@ -5,6 +5,8 @@ import { generateCombination } from '../util/animalGenerator'
 
 const router = Router()
 
+
+
 router.post('/startLogin', async function(req, res) {
     const session = req.session
     if (session.user)
@@ -17,10 +19,12 @@ router.post('/startLogin', async function(req, res) {
     if (!user)
         return res.status(403).send('No such user')
     try {
-        session.user = user
-        session.clientEphemeralPublic = clientEphemeralPublic
         const serverEphemeral = srp.generateEphemeral(user.verifier)
-        session.serverEphemeralSecret = serverEphemeral.secret
+        session.loginInfo = {
+            user,
+            clientEphemeralPublic,
+            serverEphemeralSecret: serverEphemeral.secret
+        }
         return res.send({
             salt: user.salt,
             serverEphemeralPublic: serverEphemeral.public,
@@ -32,41 +36,48 @@ router.post('/startLogin', async function(req, res) {
 
 router.post('/finishLogin', async function(req, res) {
     const session = req.session
-    if (!session.user)
+    if (!session.loginInfo)
         return res.status(405).send('Session hasn\'t started logging in')
-    if (!session.user.salt)
-        return res.status(405).send('Session already logged in')
     const { clientSessionProof } = req.body
+    const loginInfo = session.loginInfo
     const serverSession = srp.deriveSession(
-        session.serverEphemeralSecret,
-        session.clientEphemeralPublic,
-        session.user.salt,
-        session.user.username,
-        session.user.verifier,
+        loginInfo.serverEphemeralSecret,
+        loginInfo.clientEphemeralPublic,
+        loginInfo.user.salt,
+        loginInfo.user.username,
+        loginInfo.user.verifier,
         clientSessionProof
     )
-    delete session.serverEphemeralSecret
-    delete session.clientPublicEphemeral
-    session.user = { id: session.user.id }
+    session.user = { id: loginInfo.user.id }
+    delete session.loginInfo
     return res.send({
-        userid: req.session.user.id,
+        userid: session.user.id,
         serverSessionProof: serverSession.proof,
     })
 })
 
-router.post('/new', async function (req, res) {
+router.get('/startSignup', async function (req, res) {
     const username = generateCombination(1, '', true)
+    req.session.signupInfo = { username }
+    return res.send({ username })
+})
+
+router.post('/finishSignup', async function (req, res) {
+    const session = req.session
+    if (!session.signupInfo)
+        return res.status(405).send('Session hasn\'t started signing in')
     const user = await db.queryOne(
         'INSERT INTO users (username, display_name, verifier, salt) VALUES ($1, $2, $3, $4) RETURNING id', 
         [
-            username,
+            session.signupInfo.username,
             req.body.displayName,
             req.body.verifier,
             req.body.salt,
         ]
     )
-    req.session.user = { id: user.id }
-    return res.send({ user: { username, id: user.id} })
+    session.user = { id: user.id }
+    delete session.signupInfo
+    return res.send({ user: { id: user.id} })
 })
 
 router.get('/cancelLogin', async function (req, res) {
