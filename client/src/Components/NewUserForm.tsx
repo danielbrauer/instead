@@ -82,7 +82,7 @@ export default function NewUserForm(props: NewUserFormProps) {
                     />
                     <Form.Input
                         fluid
-                        icon='lock'
+                        icon='ellipsis horizontal'
                         iconPosition='left'
                         placeholder='Password'
                         type='password'
@@ -91,7 +91,7 @@ export default function NewUserForm(props: NewUserFormProps) {
                     />
                     <Form.Input
                         fluid
-                        icon='lock'
+                        icon='ellipsis horizontal'
                         iconPosition='left'
                         placeholder='Repeat password'
                         type='password'

@@ -49,7 +49,7 @@ export default function LoginForm(props : LoginFormProps) {
                     />
                     <Form.Input
                         fluid
-                        icon='lock'
+                        icon='ellipsis horizontal'
                         iconPosition='left'
                         placeholder='Password'
                         type='password'
