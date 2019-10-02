@@ -34,37 +34,6 @@ class App extends Component<AppProps, {}> {
         this.authorizedAxios = Axios.create({ withCredentials: true })
     }
 
-    // async hkdf(secret : Buffer, salt: Buffer, info: Buffer) {
-    //     return this.hmac(
-    //         { name: 'HKDF', hash: 'SHA-256', salt, info},
-    //         secret
-    //     )
-    // }
-
-    // async hmac(alg: HkdfParams | Pbkdf2Params, secret: Buffer)
-    // {
-    //     const secretJwk = await crypto.subtle.importKey(
-    //         'raw',
-    //         secret,
-    //         { name: 'HMAC', hash: 'SHA-256' },
-    //         false,
-    //         ['deriveKey']
-    //     )
-    //     const hashJwk = await crypto.subtle.deriveKey(
-    //         // @ts-ignore
-    //         alg,
-    //         secretJwk,
-    //         { name: 'HMAC', hash: 'SHA-256'},
-    //         true,
-    //         []
-    //     )
-    //     const hashArrayBuffer = await crypto.subtle.exportKey(
-    //         'raw',
-    //         hashJwk
-    //     )
-    //     return Buffer.from(hashArrayBuffer)
-    // }
-
     async derivePrivateKey(salt : string, password : string, secretKey : string, username : string) {
         const scryptOptions : ScryptOptions = {
             N: 16384,
@@ -78,10 +47,6 @@ class App extends Component<AppProps, {}> {
         const key = keyParts.join()
 
         const passwordBuffer = Buffer.from(password.trim().normalize('NFKC'))
-        // const saltBuffer = Buffer.from(salt, 'hex')
-        // const versionBuffer = Buffer.from(version)
-        // const secretKeyBuffer = Buffer.from(secretKey)
-        // const usernameBuffer = Buffer.from(username)
 
         const saltedSalt = hkdf(salt, 32, {salt: username, info: version, hash: 'SHA-256'})
         const hashedPassword = toBuffer(await scrypt(passwordBuffer, saltedSalt, scryptOptions))
