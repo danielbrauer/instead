@@ -11,11 +11,12 @@ router.post('/startLogin', async function(req, res) {
         return res.status(405).send('Session already started logging in')
     const { username, clientEphemeralPublic } = req.body
     const user = await db.queryOne(
-        'SELECT id, username, salt, verifier FROM users WHERE username = $1',
+        'SELECT id, username, srp_salt, verifier FROM users WHERE username = $1',
         [username]
     )
     if (!user)
         return res.status(403).send('No such user')
+    user.srpSalt = user.srp_salt
     const serverEphemeral = srp.generateEphemeral(user.verifier)
     session.loginInfo = {
         user,
@@ -23,7 +24,7 @@ router.post('/startLogin', async function(req, res) {
         serverEphemeralSecret: serverEphemeral.secret
     }
     return res.send({
-        salt: user.salt,
+        srpSalt: user.srpSalt,
         serverEphemeralPublic: serverEphemeral.public,
     })
 })
@@ -37,7 +38,7 @@ router.post('/finishLogin', async function(req, res) {
     const serverSession = srp.deriveSession(
         loginInfo.serverEphemeralSecret,
         loginInfo.clientEphemeralPublic,
-        loginInfo.user.salt,
+        loginInfo.user.srpSalt,
         loginInfo.user.username,
         loginInfo.user.verifier,
         clientSessionProof
@@ -61,12 +62,15 @@ router.post('/finishSignup', async function (req, res) {
     if (!session.signupInfo)
         return res.status(405).send('Session hasn\'t started signing in')
     const user = await db.queryOne(
-        'INSERT INTO users (username, display_name, verifier, salt) VALUES ($1, $2, $3, $4) RETURNING id', 
+        'INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id', 
         [
             session.signupInfo.username,
             req.body.displayName,
             req.body.verifier,
-            req.body.salt,
+            req.body.srpSalt,
+            req.body.mukSalt,
+            req.body.publicKey,
+            req.body.privateKey,
         ]
     )
     session.user = { id: user.id }

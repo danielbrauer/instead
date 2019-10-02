@@ -6,7 +6,7 @@ export interface User {
 export interface LoginUser {
     id: string,
     username: string,
-    salt: string,
+    srpSalt: string,
     verifier: string,
 }
 

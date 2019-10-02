@@ -7,5 +7,5 @@ declare module 'scrypt-async-modern' {
         encoding: string,
     }
 
-    export default function(password : Uint8Array, salt : Uint8Array, options : ScryptOptions) : Promise<string>
+    export default function(password : Uint8Array, salt : Uint8Array, options : ScryptOptions) : Promise<UInt8Array>
 }
