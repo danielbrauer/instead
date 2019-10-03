@@ -70,7 +70,7 @@ router.post('/finishSignup', async function (req, res) {
     if (!session.signupInfo)
         return res.status(405).send('Session hasn\'t started signing in')
     const user = await db.queryOne(
-        'INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id', 
+        'INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key, private_key_iv) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id', 
         [
             session.signupInfo.username,
             req.body.displayName,
@@ -79,6 +79,7 @@ router.post('/finishSignup', async function (req, res) {
             req.body.mukSalt,
             req.body.publicKey,
             req.body.privateKey,
+            req.body.privateKeyIv
         ]
     )
     session.user = { id: user.id }

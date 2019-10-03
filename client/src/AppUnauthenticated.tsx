@@ -94,14 +94,47 @@ class App extends Component<AppProps, {}> {
         const verifier = srp.deriveVerifier(srpKey)
 
         const mukSalt = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
-        
+        const muk = await this.derivePrivateKey(mukSalt, info.password, secretKey, username)
+        // @ts-ignore
+        const mukJwk = await Crypto.subtle.importKey(
+            'raw',
+            Buffer.from(muk, 'hex'),
+            // @ts-ignore
+            { name: 'AES-GCM'},
+            false,
+            ["encrypt", "decrypt", 'wrapKey', 'unwrapKey']
+        )
+        const keyParams: RsaHashedKeyGenParams = {
+            name: 'RSA-OAEP',
+            modulusLength: 4096,
+            publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+            hash: 'SHA-256',
+        }
+        const accountKeys = await Crypto.subtle.generateKey(
+            keyParams,
+            true,
+            ["encrypt", "decrypt"]
+        )
+        const exportedPublic = await Crypto.subtle.exportKey(
+            'jwk',
+            accountKeys.publicKey
+        )
+        const accountPrivateIv = Crypto.getRandomValues(new Uint8Array(12))
+        const wrappedPrivate = await Crypto.subtle.wrapKey(
+            'jwk',
+            accountKeys.privateKey,
+            mukJwk,
+            // @ts-ignore
+            { name: 'AES-GCM', iv: accountPrivateIv}
+        )
         const finishRes = await this.authorizedAxios.post(serverUrl + '/finishSignup', {
             displayName: info.displayName,
             srpSalt,
             verifier,
             mukSalt,
-            publicKey: "pub",
-            privateKey: "priv"
+            publicKey: exportedPublic,
+            privateKey: Buffer.from(wrappedPrivate).toString('hex'),
+            privateKeyIv: Buffer.from(accountPrivateIv).toString('hex')
         })
         const { id } = finishRes.data.user
         CurrentUser.set(id, username, secretKey)
