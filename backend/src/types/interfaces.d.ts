@@ -8,6 +8,7 @@ export interface LoginUser {
     username: string,
     srpSalt: string,
     verifier: string,
+    displayName: string,
 }
 
 export interface LoginInfo {

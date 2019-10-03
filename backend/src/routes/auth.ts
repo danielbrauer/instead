@@ -13,7 +13,7 @@ router.post('/startLogin', async function(req, res) {
         return res.status(401).send('Session already started logging in')
     const { username, clientEphemeralPublic } = req.body
     const user = await db.queryOne(
-        'SELECT id, username, srp_salt, verifier FROM users WHERE username = $1',
+        'SELECT id, username, srp_salt, verifier, display_name FROM users WHERE username = $1',
         [username]
     )
     if (!user) {
@@ -25,6 +25,7 @@ router.post('/startLogin', async function(req, res) {
         })
     }
     user.srpSalt = user.srp_salt
+    user.displayName = user.display_name
     const serverEphemeral = srp.generateEphemeral(user.verifier)
     session.loginInfo = {
         user,
@@ -56,6 +57,7 @@ router.post('/finishLogin', async function(req, res) {
     return res.send({
         userid: session.user.id,
         serverSessionProof: serverSession.proof,
+        displayName: session.user.displayName,
     })
 })
 

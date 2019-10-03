@@ -68,9 +68,9 @@ class App extends Component<AppProps, {}> {
         const finishRes = await this.authorizedAxios.post(serverUrl + '/finishLogin', {
             clientSessionProof: clientSession.proof,
         })
-        const { serverSessionProof, userid } = finishRes.data
+        const { serverSessionProof, userid, displayName } = finishRes.data
         srp.verifySession(clientEphemeral.public, clientSession, serverSessionProof)
-        CurrentUser.set(userid, info.username, info.secretKey)
+        CurrentUser.set(userid, info.username, info.secretKey, displayName)
         this.props.history.push('/home')
     }
 
@@ -137,7 +137,7 @@ class App extends Component<AppProps, {}> {
             privateKeyIv: Buffer.from(accountPrivateIv).toString('hex')
         })
         const { id } = finishRes.data.user
-        CurrentUser.set(id, username, secretKey)
+        CurrentUser.set(id, username, secretKey, info.displayName)
         this.props.history.push('/welcome')
     }
 

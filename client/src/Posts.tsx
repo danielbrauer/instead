@@ -1,6 +1,6 @@
 import React from 'react'
 import CurrentUser from './CurrentUser'
-import { List } from 'semantic-ui-react'
+import { List, Message } from 'semantic-ui-react'
 import { Post, User } from './Interfaces'
 import EncryptedImage from './EncryptedImage'
 import SafetyButton from './SafetyButton'
@@ -15,6 +15,11 @@ export interface PostsProps {
 export default function (props : PostsProps) {
     return (
         <div>
+            {props.posts.length === 0 ?
+            <Message>Your posts will appear hear, along with those of the people you follow.
+                <br/><br/>
+                To post a photo or follow people, use the menu in the upper-right.</Message>
+            :
             <List>
                 {props.posts.map(post => (
                     <List.Item key={post.id}>
@@ -30,6 +35,7 @@ export default function (props : PostsProps) {
                     </List.Item>
                 ))}
             </List>
+            }
         </div>
     )
 }
