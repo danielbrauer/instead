@@ -7,7 +7,7 @@ export default class AuthManager {
         const user = req.session.user
         
         if (!user || user.salt) {
-            return next(new Error('Unauthenticated session!'))
+            return res.status(401).send('Unauthenticated session')
         }
 
         req.user = user
