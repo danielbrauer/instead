@@ -18,4 +18,5 @@ export default {
     databaseUrl: process.env.DATABASE_URL,
     redisUrl: process.env.REDIS_URL,
     sessionSecret: split(process.env.SECURE_KEY),
+    garbageSeed: process.env.GARBAGE_SEED,
 }

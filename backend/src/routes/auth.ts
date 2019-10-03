@@ -2,20 +2,28 @@ import Router from 'express-promise-router'
 import db from '../database'
 import srp from 'secure-remote-password/server'
 import { generateCombination } from '../util/animalGenerator'
+import crypto from '../crypto-promise'
+import config from '../config'
 
 const router = Router()
 
 router.post('/startLogin', async function(req, res) {
     const session = req.session
     if (session.user)
-        return res.status(405).send('Session already started logging in')
+        return res.status(401).send('Session already started logging in')
     const { username, clientEphemeralPublic } = req.body
     const user = await db.queryOne(
         'SELECT id, username, srp_salt, verifier FROM users WHERE username = $1',
         [username]
     )
-    if (!user)
-        return res.status(403).send('No such user')
+    if (!user) {
+        const bytes = await crypto.randomBytes(256)
+        const hash = crypto.createHash('sha256').update(username).update(config.garbageSeed)
+        return res.send({
+            srpSalt: hash.digest('hex').substring(32),
+            serverEphemeralPublic: bytes.toString('hex'),
+        })
+    }
     user.srpSalt = user.srp_salt
     const serverEphemeral = srp.generateEphemeral(user.verifier)
     session.loginInfo = {
