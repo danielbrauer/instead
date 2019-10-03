@@ -41,7 +41,7 @@ export default function LoginForm(props : LoginFormProps) {
                     <Header as='h2' textAlign='center' content='Instead'/>
                     <Form.Input
                         fluid
-                        icon='user'
+                        icon='paw'
                         iconPosition='left'
                         placeholder='Username'
                         autoComplete='username'

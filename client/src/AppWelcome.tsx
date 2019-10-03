@@ -1,5 +1,5 @@
 import React from 'react'
-import { Menu, Segment, Header, Button, Message } from "semantic-ui-react"
+import { Menu, Segment, Header, Button, Message, Icon, Label } from "semantic-ui-react"
 import { History } from 'history'
 import CurrentUser from './CurrentUser'
 
@@ -23,19 +23,21 @@ export default function AppWelcome(props : AppProps) {
             <br />
             <br />
             <Segment>
-                <Header>Username</Header>
-                {CurrentUser.getUsername()}
-                <Header>Secret Key</Header>
-                {CurrentUser.getSecretKey()}
+                <Header as='h5'>Username</Header>
+                <Label color='black' size='large'><Icon name='paw'/>{CurrentUser.getUsername()}</Label>
+                <Header as='h5'>Secret Key</Header>
+                <Label color='black' size='large'><Icon name='key'/>{CurrentUser.getSecretKey()}</Label>
+                
             <br />
             <br />
             <Message warning>
                 <Message.Header>Important</Message.Header>
                 <p>You will need these, along with your password, to log in. Please print this page, take a screenshot, or write them down, and store them somewhere safe.</p>
+
+            <Button onClick={ok}>Got it</Button>
                 </Message>
             
             </Segment>
-            <Button onClick={ok}>Got it</Button>
         </div>
     )
 }
