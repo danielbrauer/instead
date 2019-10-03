@@ -2,15 +2,17 @@ import React, {useState} from 'react'
 import { useInput } from './useInput'
 import { Button, Form, Message, Header, Segment } from 'semantic-ui-react'
 import { RouterProps } from 'react-router'
-import { UserPasswordCombo } from '../Interfaces'
+import { LoginInfo } from '../Interfaces'
+import CurrentUser from '../CurrentUser'
 
 interface LoginFormProps extends RouterProps {
-    onSubmit : (userPassword : UserPasswordCombo) => void
+    onSubmit : (userPassword : LoginInfo) => Promise<void>
 }
 
 export default function LoginForm(props : LoginFormProps) {
     const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
+    const { value: secretKey, bind: bindSecretKey } = useInput(CurrentUser.getSecretKey() || '')
     const [errorStatus, setErrorStatus] = useState(false)
     const [statusMessage, setStatusMessage] = useState('')
     const [loadingStatus, setLoadingStatus] = useState(false)
@@ -20,7 +22,7 @@ export default function LoginForm(props : LoginFormProps) {
         evt.preventDefault()
         setErrorStatus(false)
         try {
-            await props.onSubmit({ username, password })
+            await props.onSubmit({ username, password, secretKey })
         } catch (error) {
             let message = 'Please try again'
             if (error.response)
@@ -47,12 +49,20 @@ export default function LoginForm(props : LoginFormProps) {
                     />
                     <Form.Input
                         fluid
-                        icon='lock'
+                        icon='ellipsis horizontal'
                         iconPosition='left'
                         placeholder='Password'
                         type='password'
                         autoComplete="current-password"
                         {...bindPassword}
+                    />
+                    <Form.Input
+                        fluid
+                        icon='key'
+                        iconPosition='left'
+                        placeholder='Secret Key'
+                        // autoComplete="current-password"
+                        {...bindSecretKey}
                     />
                     <Message
                       error

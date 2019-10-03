@@ -37,9 +37,9 @@
     "express-session": "^1.16.2",
     "helmet": "^3.20.0",
     "morgan": "^1.9.1",
-    "permit": "^0.2.4",
     "pg": "^7.12.1",
     "redis": "^2.8.0",
+    "secure-remote-password": "^0.3.1",
     "ts-node": "^8.4.1",
     "typescript": "^3.6.3",
     "uuid": "^3.3.2"

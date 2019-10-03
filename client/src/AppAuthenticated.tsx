@@ -218,7 +218,7 @@ class App extends Component<AppProps, AppState> {
     }
 
     goToLogin = () => {
-        CurrentUser.clearId()
+        CurrentUser.clear()
         this.props.history.push('/login')
     }
 
