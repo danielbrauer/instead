@@ -66,7 +66,16 @@ router.post('/finishLogin', async function(req, res) {
 })
 
 router.get('/startSignup', async function (req, res) {
-    const username = generateCombination(1, '', true)
+    let username = ''
+    while (true) {
+        username = generateCombination(1, '', true)
+        const count = await db.count(
+            'SELECT COUNT(*) FROM users WHERE username = $1',
+            [username]
+        )
+        if (count === 0)
+            break
+    }
     req.session.signupInfo = { username }
     return res.send({ username })
 })
