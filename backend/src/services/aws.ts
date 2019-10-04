@@ -1,4 +1,4 @@
-import config from './config'
+import config from '../config/config'
 import aws from 'aws-sdk'
 
 export default class AWSManager {

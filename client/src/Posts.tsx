@@ -16,7 +16,7 @@ export default function (props : PostsProps) {
     return (
         <div>
             {props.posts.length === 0 ?
-            <Message>Your posts will appear hear, along with those of the people you follow.
+            <Message>Your posts will appear here, along with those of the people you follow.
                 <br/><br/>
                 To post a photo or follow people, use the menu in the upper-right.</Message>
             :

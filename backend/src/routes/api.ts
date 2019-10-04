@@ -1,6 +1,6 @@
 import Router from 'express-promise-router'
-import db from '../database'
-import awsManager from '../aws'
+import db from '../services/database'
+import awsManager from '../services/aws'
 import uuidv1 from 'uuid/v1'
 
 const router = Router()

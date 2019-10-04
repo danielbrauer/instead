@@ -1,5 +1,5 @@
 import { Pool, ClientBase } from 'pg'
-import config from './config'
+import config from '../config/config'
 
 const pool = (config.databaseUrl === undefined) ? new Pool() : new Pool({connectionString: config.databaseUrl})
 

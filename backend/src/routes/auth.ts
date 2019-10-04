@@ -1,9 +1,9 @@
 import Router from 'express-promise-router'
-import db from '../database'
+import db from '../services/database'
 import srp from 'secure-remote-password/server'
 import { generateCombination } from '../util/animalGenerator'
-import crypto from '../crypto-promise'
-import config from '../config'
+import crypto from '../util/crypto-promise'
+import config from '../config/config'
 
 const router = Router()
 

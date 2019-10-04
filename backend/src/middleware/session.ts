@@ -1,6 +1,6 @@
 import session from 'express-session'
 import redis from 'redis'
-import config from './config'
+import config from '../config/config'
 
 const RedisStore = require('connect-redis')(session)
 const client = redis.createClient({

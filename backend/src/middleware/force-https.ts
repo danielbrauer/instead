@@ -1,4 +1,4 @@
-import config from './config'
+import config from '../config/config'
 import { Request, Response, NextFunction } from 'express-serve-static-core'
 
 export default function requireHTTPS(req: Request, res: Response, next: NextFunction) {
