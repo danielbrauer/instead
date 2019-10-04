@@ -38,18 +38,17 @@ export default function NewUserForm(props: NewUserFormProps) {
         try {
             const passwordBreachCount = await cleanupPromise(pwnedPassword(password))
             setPasswordBreached(passwordBreachCount)
-            if (passwordBreachCount > 0)
+            if (passwordBreachCount > 0) {
+                setLoadingStatus(false)
                 return
+            }
             setServerStatus('')
             await cleanupPromise(props.onSubmit({ displayName, password }))
         } catch (error) {
             if (error.isCanceled)
                 return
-            let message = 'Please try again'
-            if (error.response)
-                message = error.response.data
-            if (message)
-                setServerStatus(message)
+            let message = error.response ? error.response.data : 'Please try again'
+            setServerStatus(message)
             setLoadingStatus(false)
             resetPassword()
             resetRepeatPassword()
