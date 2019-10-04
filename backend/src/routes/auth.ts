@@ -16,11 +16,15 @@ router.post('/startLogin', async function(req, res) {
         'SELECT id, username, srp_salt, verifier, display_name FROM users WHERE username = $1',
         [username]
     )
-    if (!user) {
+    if (user) {
         user.srpSalt = user.srp_salt
         user.displayName = user.display_name
         const serverEphemeral = srp.generateEphemeral(user.verifier)
-        session.loginFake = true
+        session.loginInfo = {
+            user,
+            clientEphemeralPublic,
+            serverEphemeralSecret: serverEphemeral.secret
+        }
         return res.send({
             srpSalt: user.srpSalt,
             serverEphemeralPublic: serverEphemeral.public,
@@ -28,6 +32,7 @@ router.post('/startLogin', async function(req, res) {
     } else {
         const bytes = await crypto.randomBytes(256)
         const hash = crypto.createHash('sha256').update(username).update(config.garbageSeed)
+        session.loginFake = true
         return res.send({
             srpSalt: hash.digest('hex').substring(32),
             serverEphemeralPublic: bytes.toString('hex'),
