@@ -31,6 +31,7 @@ declare global {
     namespace Express {
         interface Session {
             loginInfo?: LoginInfo,
+            loginFake?: boolean,
             signupInfo?: SignupInfo,
         }
     }

@@ -17,6 +17,15 @@ router.post('/startLogin', async function(req, res) {
         [username]
     )
     if (!user) {
+        user.srpSalt = user.srp_salt
+        user.displayName = user.display_name
+        const serverEphemeral = srp.generateEphemeral(user.verifier)
+        session.loginFake = true
+        return res.send({
+            srpSalt: user.srpSalt,
+            serverEphemeralPublic: serverEphemeral.public,
+        })
+    } else {
         const bytes = await crypto.randomBytes(256)
         const hash = crypto.createHash('sha256').update(username).update(config.garbageSeed)
         return res.send({
@@ -24,22 +33,12 @@ router.post('/startLogin', async function(req, res) {
             serverEphemeralPublic: bytes.toString('hex'),
         })
     }
-    user.srpSalt = user.srp_salt
-    user.displayName = user.display_name
-    const serverEphemeral = srp.generateEphemeral(user.verifier)
-    session.loginInfo = {
-        user,
-        clientEphemeralPublic,
-        serverEphemeralSecret: serverEphemeral.secret
-    }
-    return res.send({
-        srpSalt: user.srpSalt,
-        serverEphemeralPublic: serverEphemeral.public,
-    })
 })
 
 router.post('/finishLogin', async function(req, res) {
     const session = req.session
+    if (session.loginFake)
+        throw new Error('No such user')
     if (!session.loginInfo)
         throw new Error('Missing info from startLogin')
     const { clientSessionProof } = req.body
