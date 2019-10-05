@@ -2,7 +2,6 @@ import React from 'react'
 import { Menu, Segment, Header, Button, Message, Icon, Label } from "semantic-ui-react"
 import { History } from 'history'
 import CurrentUser from './CurrentUser'
-import UserCache from './UserCache'
 
 export interface AppProps {
     history: History,
@@ -24,7 +23,8 @@ export default function AppWelcome(props : AppProps) {
             <br />
             <br />
             <Segment>
-                Welcome to Instead, {CurrentUser.getDisplayName()}!
+                Hi {CurrentUser.getDisplayName()}, welcome to Instead!
+                <br/>
                 <br/>
                 Here is your login information:
             </Segment>

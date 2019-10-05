@@ -7,7 +7,7 @@ import config from '../config/config'
 
 const router = Router()
 
-router.post('/startLogin', async function(req, res) {
+router.post('/startLogin', async function (req, res) {
     const session = req.session
     if (session.user)
         return res.status(401).send('Session already started logging in')
@@ -40,7 +40,7 @@ router.post('/startLogin', async function(req, res) {
     }
 })
 
-router.post('/finishLogin', async function(req, res) {
+router.post('/finishLogin', async function (req, res) {
     const session = req.session
     if (session.loginFake)
         throw new Error('No such user')
@@ -67,17 +67,18 @@ router.post('/finishLogin', async function(req, res) {
 
 router.get('/startSignup', async function (req, res) {
     let username = ''
-    while (true) {
+    for (let i = 0; i < 5; ++i) {
         username = generateCombination(1, '', true)
         const count = await db.count(
             'SELECT COUNT(*) FROM users WHERE username = $1',
             [username]
         )
-        if (count === 0)
-            break
+        if (count === 0) {
+            req.session.signupInfo = { username }
+            return res.send({ username })
+        }
     }
-    req.session.signupInfo = { username }
-    return res.send({ username })
+    throw new Error('Too many user name collisions!')
 })
 
 router.post('/finishSignup', async function (req, res) {
@@ -85,7 +86,7 @@ router.post('/finishSignup', async function (req, res) {
     if (!session.signupInfo)
         return res.status(405).send('Session hasn\'t started signing in')
     const user = await db.queryOne(
-        'INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key, private_key_iv) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id', 
+        'INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key, private_key_iv) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
         [
             session.signupInfo.username,
             req.body.displayName,
@@ -99,7 +100,7 @@ router.post('/finishSignup', async function (req, res) {
     )
     session.user = { id: user.id }
     delete session.signupInfo
-    return res.send({ user: { id: user.id} })
+    return res.send({ user: { id: user.id } })
 })
 
 router.use(function hangupHandler(err: any, req: any, res: any, next: any) {
