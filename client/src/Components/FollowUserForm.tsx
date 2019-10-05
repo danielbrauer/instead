@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useInput } from './useInput'
-import { Form, Message } from 'semantic-ui-react'
+import { Form, Message, Segment } from 'semantic-ui-react'
 
 interface FollowUserFormProps {
     callback : (username : string) => Promise<any>,
@@ -29,11 +29,14 @@ export default function FollowUserForm(props : FollowUserFormProps) {
     }
 
     return (
-        <div>
+        <Segment>
+            To follow a user, send a request using their username
+            <br/>
+            <br/>
             <Form error={error} success={success} onSubmit={handleSubmit}>
                 <Form.Group>
-                    <Form.Input placeholder='Follow' name='username' {...bindUsername} />
-                    <Form.Button content='Request' />
+                    <Form.Input placeholder='Username to follow' name='username' {...bindUsername} />
+                    <Form.Button content='Request' disabled={username === ''} />
                 </Form.Group>
                 <Message
                     error
@@ -47,6 +50,6 @@ export default function FollowUserForm(props : FollowUserFormProps) {
                 />
             </Form>
 
-        </div>
+        </Segment>
     )
 }

@@ -6,12 +6,11 @@ import UserCache from './UserCache'
 import FollowerPage, { FollowerPageProps } from './FollowerPage'
 import Posts, { PostsProps } from './Posts'
 import NewPost from './NewPost'
-import { Route, Switch, Redirect } from 'react-router-dom'
+import { Route, Switch, Redirect, RouteComponentProps } from 'react-router-dom'
 import { readAsArrayBuffer } from 'promise-file-reader'
 
 import { Menu, Dropdown } from 'semantic-ui-react'
 import { User, Post } from './Interfaces'
-import { History } from 'history'
 import config from './config'
 
 const serverUrl = `${config.serverUrl}/api`
@@ -23,10 +22,6 @@ const Crypto = window.crypto
 
 const kBinaryContentType = 'application/octet-stream'
 
-export interface AppProps {
-    history: History,
-}
-
 interface AppState {
     posts: Post[],
     followers: never[],
@@ -37,11 +32,11 @@ interface AppState {
     contentUrl: string,
 }
 
-class App extends Component<AppProps, AppState> {
+class App extends Component<RouteComponentProps<any>, AppState> {
     authorizedAxios: AxiosInstance
     userCache: UserCache
     // initialize our state
-    constructor(props: AppProps) {
+    constructor(props: RouteComponentProps<any>) {
         super(props)
         this.state = {
             posts: [],
@@ -265,6 +260,8 @@ class App extends Component<AppProps, AppState> {
                 <br />
                 <Switch>
                     <Route path='/followers' render={props => <FollowerPage {...props} {...followProps} />} />
+                    <Route path='/following' render={props => <FollowerPage {...props} {...followProps} />} />
+                    <Route path='/requests' render={props => <FollowerPage {...props} {...followProps} />} />
                     <Route path='/home' render={props => <Posts {...props} {...postsProps} />} />
                     <Route path='/new' render={props => <NewPost {...props} onSubmit={this.handleUpload} />} />
                 </Switch>

@@ -17,6 +17,8 @@ const routing = (
             <Route path="/user/:username" component={AppAuthenticated} />
             <Route path="/post/:postid" component={AppAuthenticated} />
             <Route path="/followers" component={AppAuthenticated} />
+            <Route path="/following" component={AppAuthenticated} />
+            <Route path="/requests" component={AppAuthenticated} />
             <Route path="/new" component={AppAuthenticated} />
 
             <Route path="/welcome" component={AppWelcome} />
