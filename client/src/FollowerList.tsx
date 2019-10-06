@@ -1,7 +1,8 @@
 import React from 'react'
-import { List, Icon, Message } from 'semantic-ui-react'
+import { List, Message } from 'semantic-ui-react'
 import { User } from './Interfaces'
 import SafetyButton from './SafetyButton'
+import UserInList from './UserInList'
 
 export interface FollowerListProps {
     followers: number[],
@@ -21,10 +22,7 @@ export default function FollowerList(props: FollowerListProps) {
                             <List.Content floated='right'>
                                 <SafetyButton size='mini' onClick={() => props.removeFollower(follower)}>Remove</SafetyButton>
                             </List.Content>
-                            <List.Content>
-                                <Icon size='big' name='user' />
-                                {props.getUser(follower).username}
-                            </List.Content>
+                            <UserInList id={follower} getUser={props.getUser} />
                         </List.Item>
                     ))}
                 </List>

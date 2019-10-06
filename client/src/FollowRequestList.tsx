@@ -1,6 +1,7 @@
 import React from 'react'
-import { List, Icon, Button, Message } from 'semantic-ui-react'
+import { List, Button, Message } from 'semantic-ui-react'
 import { User, FollowRequest } from './Interfaces'
+import UserInList from './UserInList'
 
 export interface FollowRequestListProps {
     requests: FollowRequest[],
@@ -24,10 +25,7 @@ export default function FollowerList(props: FollowRequestListProps) {
                                     <Button negative onClick={() => props.reject(request.requester_id)}>Reject</Button>
                                 </Button.Group>
                             </List.Content>
-                            <List.Content>
-                                <Icon size='big' name='user' />
-                                {props.getUser(request.requester_id).username}
-                            </List.Content>
+                            <UserInList id={request.requester_id} getUser={props.getUser} />
                         </List.Item>
                     ))}
                 </List>}
