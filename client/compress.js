@@ -6,7 +6,7 @@ const zlib = require('zlib');
 
 function gzipFile(src, callback) {
   console.log(`Compressing ${src}`);
-  const dst = `${src}.gz`;
+  const dst = `${src}.br`;
   fs.createReadStream(src)
     .on("error", callback)
     .pipe(
