@@ -2,11 +2,10 @@ import { Express } from 'express'
 import path from 'path'
 import expressStaticGzip from 'express-static-gzip'
 
-export default (app : Express) => {
+export default (app : Express, reactPath : string) => {
     // Statically host React app
-    const relativePathToReact = '/../../client/build'
     const server = expressStaticGzip(
-        path.join(__dirname, relativePathToReact),
+        reactPath,
         {
             enableBrotli: true,
             orderPreference: ['br']
@@ -15,6 +14,6 @@ export default (app : Express) => {
     app.use(server)
     
     app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, relativePathToReact, '/index.html'))
+        res.sendFile(path.join(reactPath, '/index.html'))
     })
 }

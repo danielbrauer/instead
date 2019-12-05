@@ -9,6 +9,7 @@ import forceHttps from './middleware/force-https'
 import session from './middleware/session'
 import auth from './routes/auth'
 import api from './routes/api'
+import path from 'path'
 import httpServer from './middleware/http-server'
 
 const app = express()
@@ -27,7 +28,9 @@ app.use('/auth', auth)
 app.use('/api', authManager.authenticateSession, api)
 
 if (!config.localDev) {
-    httpServer(app)
+    const relativePathToReact = '/../../client/build'
+    const reactPath = path.join(__dirname, relativePathToReact)
+    httpServer(app, reactPath)
 }
 
 app.listen(config.webPort, () => console.log(`Server listening on ${config.webPort}`))
