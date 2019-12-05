@@ -1,24 +1,24 @@
 // adapted from https://gist.github.com/heyimalex/db6e734d1c4e0ac50e0dc8f2abeeae4e
 
-import { createReadStream, createWriteStream, statSync } from 'fs'
-import { sync } from 'glob'
-import { eachSeries } from 'async'
-import { createBrotliCompress } from 'zlib'
+const fs = require('fs')
+const glob = require('glob')
+const async = require('async')
+const zlib = require('zlib')
 
 function compressAsBrotli(src, callback) {
     console.log(`Compressing ${src}`)
     const dst = `${src}.br`
-    createReadStream(src)
+    fs.createReadStream(src)
         .on('error', callback)
         .pipe(
-            createBrotliCompress()
+            zlib.createBrotliCompress()
         )
         .on('error', callback)
-        .pipe(createWriteStream(dst))
+        .pipe(fs.createWriteStream(dst))
         .on('error', callback)
         .on('close', () => {
-            const srcSize = statSync(src).size;
-            const dstSize = statSync(dst).size;
+            const srcSize = fs.statSync(src).size;
+            const dstSize = fs.statSync(dst).size;
             console.log(`  Saved ${srcSize - dstSize} bytes`);
             console.log(`  ${Math.floor((100 * dstSize) / srcSize)}% of original`);
             callback()
@@ -26,13 +26,13 @@ function compressAsBrotli(src, callback) {
 }
 
 function compressBuildArtifacts(callback) {
-    const assets = sync('./build/**/*.@(js|css|html)')
-    eachSeries(assets, compressAsBrotli, callback)
+    const assets = glob.sync('./build/**/*.@(js|css|html)')
+    async.eachSeries(assets, compressAsBrotli, callback)
 }
 
 compressBuildArtifacts(err => {
     if (err) {
         throw err
     }
-    console.log('Compression completed sucessfully')
+    console.log('Compression completed successfully')
 })
