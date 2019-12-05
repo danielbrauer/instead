@@ -9,6 +9,7 @@ export default (app : Express) => {
         path.join(__dirname, relativePathToReact),
         {
             enableBrotli: true,
+            orderPreference: ['br']
         }
     )
     app.use(server)
