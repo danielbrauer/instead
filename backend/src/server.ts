@@ -3,13 +3,14 @@ import cors from './middleware/cors'
 import bodyParser from 'body-parser'
 import morgan from 'morgan'
 import helmet from 'helmet'
-import path from 'path'
 import authManager from './middleware/auth-strategies'
 import config from './config/config'
 import forceHttps from './middleware/force-https'
 import session from './middleware/session'
 import auth from './routes/auth'
 import api from './routes/api'
+import path from 'path'
+import httpServer from './middleware/http-server'
 
 const app = express()
 app.use(forceHttps)
@@ -27,13 +28,9 @@ app.use('/auth', auth)
 app.use('/api', authManager.authenticateSession, api)
 
 if (!config.localDev) {
-    // Statically host React app
     const relativePathToReact = '/../../client/build'
-    app.use(express.static(path.join(__dirname, relativePathToReact)))
-
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, relativePathToReact, '/index.html'))
-    })
+    const reactPath = path.join(__dirname, relativePathToReact)
+    httpServer(app, reactPath)
 }
 
 app.listen(config.webPort, () => console.log(`Server listening on ${config.webPort}`))
