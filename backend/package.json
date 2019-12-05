@@ -42,7 +42,7 @@
     "redis": "^2.8.0",
     "secure-remote-password": "^0.3.1",
     "ts-node": "^8.4.1",
-    "typescript": "^3.6.3",
+    "typescript": "3.7.3",
     "uuid": "^3.3.2"
   },
   "devDependencies": {

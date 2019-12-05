@@ -23,14 +23,14 @@
     "react-dom": "^16.8.6",
     "react-dropzone": "^10.1.9",
     "react-router-dom": "^5.0.1",
-    "react-scripts": "3.0.1",
+    "react-scripts": "3.3.0",
     "scrypt-async-modern": "^3.0.7",
     "secure-remote-password": "^0.3.1",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^0.88.1",
     "setimmediate": "^1.0.5",
     "typedarray-to-buffer": "^3.1.5",
-    "typescript": "^3.5.3",
+    "typescript": "^3.7.3",
     "unorm": "^1.6.0"
   },
   "scripts": {
