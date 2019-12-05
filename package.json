@@ -1,6 +1,10 @@
 {
   "name": "instead",
   "version": "0.1.0",
+  "engines": {
+    "node": "12.13.1",
+    "yarn": "1.17.3"
+  },
   "description": "",
   "main": "index.js",
   "scripts": {
