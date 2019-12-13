@@ -17,7 +17,7 @@
     "fileapi": "^2.1.1",
     "futoin-hkdf": "^1.2.1",
     "hibp": "^8.0.0",
-    "npm": "^6.13.2",
+    "npm": "^6.13.4",
     "promise-file-reader": "https://github.com/jahredhope/promise-file-reader.git#98d38d0965605ee80208d8a66f913b2279b5852b",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
