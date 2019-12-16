@@ -145,7 +145,6 @@ class App extends Component<RouteComponentProps<any>, AppState> {
         )
         const iv = Crypto.getRandomValues(new Uint8Array(12))
         const [result, key] = await Promise.all([filePromise, keyPromise])
-        // const fileType = Path.extname(file.name).substr(1) // ext includes . separator
         const ivBuffer = toBuffer(iv)
         const encryptedPromise = Crypto.subtle.encrypt(
             {
