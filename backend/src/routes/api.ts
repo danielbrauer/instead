@@ -53,7 +53,7 @@ router.get('/getFollowees', async (req, res) => {
 router.get('/getUserById', async (req, res) => {
     const user = await db.queryOne(
         'SELECT id, username FROM users WHERE id = $1',
-        [req.query.userid]
+        [req.query.userid as string]
     )
     if (!user)
         return res.status(400).send('User does not exist')
@@ -136,12 +136,12 @@ router.post('/acceptFollowRequest', async (req, res) => {
     return res.json({ success: true })
 })
 
-// removes existing data in our database, and 
+// removes existing data in our database, and
 // deletes the associated s3 object
 router.delete('/deletePost', async (req, res) => {
     const deleted = await db.query(
         'DELETE FROM posts WHERE id = $1 AND author_id = $2 RETURNING *',
-        [req.query.id, req.user.id]
+        [req.query.id as string, req.user.id]
     )
     if (!deleted)
         return res.status(400).send('Post not found')

@@ -114,7 +114,7 @@ class App extends Component<AppProps, {}> {
             keyParams,
             true,
             ["encrypt", "decrypt"]
-        )
+        ) as CryptoKeyPair
         const exportedPublic = await Crypto.subtle.exportKey(
             'jwk',
             accountKeys.publicKey
