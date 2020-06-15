@@ -4,7 +4,7 @@ import srp from 'secure-remote-password/server'
 import { generateCombination } from '../util/animalGenerator'
 import crypto from '../util/crypto-promise'
 import config from '../config/config'
-import * as Queries from '../queries/queries.gen'
+import * as Users from '../queries/users.gen'
 
 const router = Router()
 
@@ -14,7 +14,7 @@ router.post('/startLogin', async function (req, res) {
         return res.status(401).send('Session already started logging in')
     const { username, clientEphemeralPublic } = req.body
     const user = await db.queryOne(
-        Queries.getUserLoginInfoByName,
+        Users.getLoginInfoByName,
         { username }
     )
     if (user) {
@@ -69,7 +69,7 @@ router.get('/startSignup', async function (req, res) {
     for (let i = 0; i < 5; ++i) {
         username = generateCombination(1, '', true)
         const count = await db.count(
-            Queries.countUsersByName,
+            Users.countByName,
             { username }
         )
         if (count === 0) {
@@ -85,7 +85,7 @@ router.post('/finishSignup', async function (req, res) {
     if (!session.signupInfo)
         return res.status(405).send('Session hasn\'t started signing in')
     const user = await db.queryOne(
-        Queries.createUser,
+        Users.create,
         {
             username: session.signupInfo.username,
             display_name: req.body.displayName,

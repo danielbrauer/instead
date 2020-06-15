@@ -1,7 +1,10 @@
 import Router from 'express-promise-router'
 import db from '../services/database'
 import awsManager from '../services/aws'
-import * as Queries from '../queries/queries.gen'
+import * as Users from '../queries/users.gen'
+import * as Followers from '../queries/followers.gen'
+import * as Posts from '../queries/posts.gen'
+import * as FollowRequests from '../queries/follow_requests.gen'
 import uuidv1 from 'uuid/v1'
 
 const router = Router()
@@ -17,7 +20,7 @@ router.get('/getConfig', (req, res) => {
 
 router.get('/getPosts', async (req, res) => {
     const posts = await db.query(
-        Queries.getPostsByAuthorId,
+        Posts.getByAuthorId,
         { authorId: req.user.id }
     )
     return res.json({ success: true, posts })
@@ -25,7 +28,7 @@ router.get('/getPosts', async (req, res) => {
 
 router.get('/getFollowRequests', async (req, res) => {
     const requests = await db.query(
-        Queries.getFollowRequestsByRequesteeId,
+        FollowRequests.getByRequesteeId,
         { requesteeId: req.user.id }
     )
     return res.json({ success: true, requests })
@@ -33,7 +36,7 @@ router.get('/getFollowRequests', async (req, res) => {
 
 router.get('/getFollowerIds', async (req, res) => {
     const following = await db.query(
-        Queries.getFollowersByFolloweeId,
+        Followers.getByFolloweeId,
         { followeeId: req.user.id }
     )
     return res.json({ success: true, followers: following.map(r => r.follower_id) })
@@ -41,7 +44,7 @@ router.get('/getFollowerIds', async (req, res) => {
 
 router.get('/getFollowees', async (req, res) => {
     const following = await db.query(
-        Queries.getFolloweesByFollowerId,
+        Followers.getByFollowerId,
         { followerId: req.user.id }
     )
     return res.json({ success: true, followees: following.map(r => r.followee_id) })
@@ -49,7 +52,7 @@ router.get('/getFollowees', async (req, res) => {
 
 router.get('/getUserById', async (req, res) => {
     const user = await db.queryOne(
-        Queries.findUserById,
+        Users.getById,
         { userId : parseInt(req.query.userid as string)}
     )
     if (!user)
@@ -61,7 +64,7 @@ router.post('/sendFollowRequest', async (req, res) => {
     const error = await db.transaction(async(db) => {
         const requesteeName = req.body.username
         const requestee = await db.queryOne(
-            Queries.findUserByName,
+            Users.getByName,
             { username: requesteeName }
         )
         if (!requestee)
@@ -70,19 +73,19 @@ router.post('/sendFollowRequest', async (req, res) => {
         if (requestee.id === requesterId)
             return [400, 'You don\'t need to follow yourself']
         const followCount = await db.count(
-            Queries.countFollowersById,
+            Followers.count,
             { followerId: requesterId, followeeId: requestee.id }
         )
         if (followCount > 0)
             return [400, 'Already following user']
         const requestCount = await db.count(
-            Queries.countFollowRequestsById,
+            FollowRequests.count,
             { requesterId: requesterId, requesteeId: requestee.id }
         )
         if (requestCount > 0)
             return [400, 'Request already exists']
         await db.query(
-            Queries.insertFollowRequest,
+            FollowRequests.create,
             { requesterId: requesterId, requesteeId: requestee.id }
         )
     })
@@ -93,7 +96,7 @@ router.post('/sendFollowRequest', async (req, res) => {
 
 router.post('/rejectFollowRequest', async (req, res) => {
     await db.query(
-        Queries.deleteFollowRequest,
+        FollowRequests.destroy,
         {requesterId: req.body.userid, requesteeId: req.user.id}
     )
     return res.json({ success: true })
@@ -101,7 +104,7 @@ router.post('/rejectFollowRequest', async (req, res) => {
 
 router.post('/unfollow', async (req, res) => {
     await db.query(
-        Queries.deleteFollower,
+        Followers.destroy,
         { followerId: req.user.id, followeeId: req.body.userid}
     )
     return res.json({ success: true })
@@ -109,7 +112,7 @@ router.post('/unfollow', async (req, res) => {
 
 router.post('/removeFollower', async (req, res) => {
     await db.query(
-        Queries.deleteFollower,
+        Followers.destroy,
         { followerId: req.body.userid, followeeId: req.user.id }
     )
     return res.json({ success: true })
@@ -118,13 +121,13 @@ router.post('/removeFollower', async (req, res) => {
 router.post('/acceptFollowRequest', async (req, res) => {
     const error = await db.transaction(async(client) => {
         const request = await client.queryOne(
-            Queries.deleteFollowRequestAndReturn,
+            FollowRequests.destroyAndReturn,
             { requesterId: req.body.userid, requesteeId: req.user.id}
         )
         if (!request)
             return { status:400, message:'No such follow request' }
         await client.query(
-            Queries.addFollower,
+            Followers.create,
             { followerId: request.requester_id, followeeId: request.requestee_id}
         )
     })
@@ -137,7 +140,7 @@ router.post('/acceptFollowRequest', async (req, res) => {
 // deletes the associated s3 object
 router.delete('/deletePost', async (req, res) => {
     const deleted = await db.queryOne(
-        Queries.deletePostAndReturn,
+        Posts.destroyAndReturn,
         { postId: parseInt(req.query.id as string), authorId: req.user.id}
     )
     if (!deleted)
@@ -149,7 +152,7 @@ router.delete('/deletePost', async (req, res) => {
 router.post('/createPost', async (req, res) => {
     const fileName = uuidv1()
     const postPromise = db.queryOne(
-        Queries.createPost,
+        Posts.create,
         { fileName, authorId: req.user.id, iv: req.body.iv, key: req.body.key }
     )
     const requestPromise = awsManager.s3GetSignedUploadUrl(fileName, req.body.fileType)
