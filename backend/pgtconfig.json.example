@@ -1,0 +1,17 @@
+{
+    "transforms": [
+      {
+        "mode": "sql",
+        "include": "**/*.sql",
+        "emitTemplate": "{{dir}}/{{name}}.gen.ts"
+      }
+    ],
+    "srcDir": "./src/",
+    "failOnError": false,
+    "db": {
+      "host": "localhost",
+      "user": "",
+      "dbName": "",
+      "password": ""
+    }
+  }

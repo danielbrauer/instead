@@ -4,6 +4,7 @@ import srp from 'secure-remote-password/server'
 import { generateCombination } from '../util/animalGenerator'
 import crypto from '../util/crypto-promise'
 import config from '../config/config'
+import * as Queries from '../queries/queries.gen'
 
 const router = Router()
 
@@ -13,12 +14,10 @@ router.post('/startLogin', async function (req, res) {
         return res.status(401).send('Session already started logging in')
     const { username, clientEphemeralPublic } = req.body
     const user = await db.queryOne(
-        'SELECT id, username, srp_salt, verifier, display_name FROM users WHERE username = $1',
-        [username]
+        Queries.getUserLoginInfoByName,
+        { username }
     )
     if (user) {
-        user.srpSalt = user.srp_salt
-        user.displayName = user.display_name
         const serverEphemeral = srp.generateEphemeral(user.verifier)
         session.loginInfo = {
             user,
@@ -26,7 +25,7 @@ router.post('/startLogin', async function (req, res) {
             serverEphemeralSecret: serverEphemeral.secret
         }
         return res.send({
-            srpSalt: user.srpSalt,
+            srpSalt: user.srp_salt,
             serverEphemeralPublic: serverEphemeral.public,
         })
     } else {
@@ -51,7 +50,7 @@ router.post('/finishLogin', async function (req, res) {
     const serverSession = srp.deriveSession(
         loginInfo.serverEphemeralSecret,
         loginInfo.clientEphemeralPublic,
-        loginInfo.user.srpSalt,
+        loginInfo.user.srp_salt,
         loginInfo.user.username,
         loginInfo.user.verifier,
         clientSessionProof
@@ -70,8 +69,8 @@ router.get('/startSignup', async function (req, res) {
     for (let i = 0; i < 5; ++i) {
         username = generateCombination(1, '', true)
         const count = await db.count(
-            'SELECT COUNT(*) FROM users WHERE username = $1',
-            [username]
+            Queries.countUsersByName,
+            { username }
         )
         if (count === 0) {
             req.session.signupInfo = { username }
@@ -86,17 +85,17 @@ router.post('/finishSignup', async function (req, res) {
     if (!session.signupInfo)
         return res.status(405).send('Session hasn\'t started signing in')
     const user = await db.queryOne(
-        'INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key, private_key_iv) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
-        [
-            session.signupInfo.username,
-            req.body.displayName,
-            req.body.verifier,
-            req.body.srpSalt,
-            req.body.mukSalt,
-            req.body.publicKey,
-            req.body.privateKey,
-            req.body.privateKeyIv
-        ]
+        Queries.createUser,
+        {
+            username: session.signupInfo.username,
+            display_name: req.body.displayName,
+            verifier: req.body.verifier,
+            srp_salt: req.body.srpSalt,
+            muk_salt: req.body.mukSalt,
+            public_key: req.body.publicKey,
+            private_key: req.body.privateKey,
+            private_key_iv: req.body.privateKeyIv
+        }
     )
     session.user = { id: user.id }
     delete session.signupInfo

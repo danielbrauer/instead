@@ -1,14 +1,14 @@
 export interface User {
-    id: string,
+    id: number,
     username: string,
 }
 
 export interface LoginUser {
-    id: string,
-    username: string,
-    srpSalt: string,
-    verifier: string,
-    displayName: string,
+    id: number;
+    username: string;
+    srp_salt: string;
+    verifier: string;
+    display_name: string;
 }
 
 export interface LoginInfo {

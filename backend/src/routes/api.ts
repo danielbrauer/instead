@@ -1,6 +1,7 @@
 import Router from 'express-promise-router'
 import db from '../services/database'
 import awsManager from '../services/aws'
+import * as Queries from '../queries/queries.gen'
 import uuidv1 from 'uuid/v1'
 
 const router = Router()
@@ -15,45 +16,41 @@ router.get('/getConfig', (req, res) => {
 })
 
 router.get('/getPosts', async (req, res) => {
-    const { rows } = await db.query(
-        `SELECT * FROM posts WHERE author_id = $1 OR author_id IN (
-            SELECT followee_id
-            FROM followers
-            WHERE followers.follower_id = $1
-        ) ORDER BY timestamp DESC`,
-        [req.user.id]
+    const posts = await db.query(
+        Queries.getPostsByAuthorId,
+        { authorId: req.user.id }
     )
-    return res.json({ success: true, posts: rows })
+    return res.json({ success: true, posts })
 })
 
 router.get('/getFollowRequests', async (req, res) => {
-    const { rows } = await db.query(
-        'SELECT requester_id FROM follow_requests WHERE requestee_id = $1',
-        [req.user.id]
+    const requests = await db.query(
+        Queries.getFollowRequestsByRequesteeId,
+        { requesteeId: req.user.id }
     )
-    return res.json({ success: true, requests: rows })
+    return res.json({ success: true, requests })
 })
 
-router.get('/getFollowers', async (req, res) => {
-    const { rows } = await db.query(
-        'SELECT follower_id FROM followers WHERE followee_id = $1',
-        [req.user.id]
+router.get('/getFollowerIds', async (req, res) => {
+    const following = await db.query(
+        Queries.getFollowersByFolloweeId,
+        { followeeId: req.user.id }
     )
-    return res.json({ success: true, followers: rows.map(r => r.follower_id) })
+    return res.json({ success: true, followers: following.map(r => r.follower_id) })
 })
 
 router.get('/getFollowees', async (req, res) => {
-    const { rows } = await db.query(
-        'SELECT followee_id FROM followers WHERE follower_id = $1',
-        [req.user.id]
+    const following = await db.query(
+        Queries.getFolloweesByFollowerId,
+        { followerId: req.user.id }
     )
-    return res.json({ success: true, followees: rows.map(r => r.followee_id) })
+    return res.json({ success: true, followees: following.map(r => r.followee_id) })
 })
 
 router.get('/getUserById', async (req, res) => {
     const user = await db.queryOne(
-        'SELECT id, username FROM users WHERE id = $1',
-        [req.query.userid as string]
+        Queries.findUserById,
+        { userId : parseInt(req.query.userid as string)}
     )
     if (!user)
         return res.status(400).send('User does not exist')
@@ -64,8 +61,8 @@ router.post('/sendFollowRequest', async (req, res) => {
     const error = await db.transaction(async(db) => {
         const requesteeName = req.body.username
         const requestee = await db.queryOne(
-            'SELECT id FROM users WHERE username = $1',
-            [requesteeName]
+            Queries.findUserByName,
+            { username: requesteeName }
         )
         if (!requestee)
             return [400, 'User does not exist']
@@ -73,20 +70,20 @@ router.post('/sendFollowRequest', async (req, res) => {
         if (requestee.id === requesterId)
             return [400, 'You don\'t need to follow yourself']
         const followCount = await db.count(
-            'SELECT COUNT(*) FROM followers WHERE follower_id = $1 AND followee_id = $2',
-            [requesterId, requestee.id]
+            Queries.countFollowersById,
+            { followerId: requesterId, followeeId: requestee.id }
         )
         if (followCount > 0)
             return [400, 'Already following user']
         const requestCount = await db.count(
-            'SELECT COUNT(*) FROM follow_requests WHERE requester_id = $1 AND requestee_id = $2',
-            [requesterId, requestee.id]
+            Queries.countFollowRequestsById,
+            { requesterId: requesterId, requesteeId: requestee.id }
         )
         if (requestCount > 0)
             return [400, 'Request already exists']
         await db.query(
-            'INSERT INTO follow_requests (requester_id, requestee_id) VALUES ($1, $2)',
-            [requesterId, requestee.id]
+            Queries.insertFollowRequest,
+            { requesterId: requesterId, requesteeId: requestee.id }
         )
     })
     if (error)
@@ -96,24 +93,24 @@ router.post('/sendFollowRequest', async (req, res) => {
 
 router.post('/rejectFollowRequest', async (req, res) => {
     await db.query(
-        'DELETE FROM follow_requests WHERE requester_id = $1 AND requestee_id = $2',
-        [req.body.userid, req.user.id]
+        Queries.deleteFollowRequest,
+        {requesterId: req.body.userid, requesteeId: req.user.id}
     )
     return res.json({ success: true })
 })
 
 router.post('/unfollow', async (req, res) => {
     await db.query(
-        'DELETE FROM followers WHERE follower_id = $1 AND followee_id = $2',
-        [req.user.id, req.body.userid]
+        Queries.deleteFollower,
+        { followerId: req.user.id, followeeId: req.body.userid}
     )
     return res.json({ success: true })
 })
 
 router.post('/removeFollower', async (req, res) => {
     await db.query(
-        'DELETE FROM followers WHERE follower_id = $1 AND followee_id = $2',
-        [req.body.userid, req.user.id]
+        Queries.deleteFollower,
+        { followerId: req.body.userid, followeeId: req.user.id }
     )
     return res.json({ success: true })
 })
@@ -121,14 +118,14 @@ router.post('/removeFollower', async (req, res) => {
 router.post('/acceptFollowRequest', async (req, res) => {
     const error = await db.transaction(async(client) => {
         const request = await client.queryOne(
-            'DELETE FROM follow_requests WHERE requester_id = $1 AND requestee_id = $2 RETURNING *',
-            [req.body.userid, req.user.id]
+            Queries.deleteFollowRequestAndReturn,
+            { requesterId: req.body.userid, requesteeId: req.user.id}
         )
         if (!request)
             return { status:400, message:'No such follow request' }
         await client.query(
-            'INSERT INTO followers (follower_id, followee_id) VALUES ($1, $2)',
-            [request.requester_id, request.requestee_id]
+            Queries.addFollower,
+            { followerId: request.requester_id, followeeId: request.requestee_id}
         )
     })
     if (error)
@@ -139,9 +136,9 @@ router.post('/acceptFollowRequest', async (req, res) => {
 // removes existing data in our database, and
 // deletes the associated s3 object
 router.delete('/deletePost', async (req, res) => {
-    const deleted = await db.query(
-        'DELETE FROM posts WHERE id = $1 AND author_id = $2 RETURNING *',
-        [req.query.id as string, req.user.id]
+    const deleted = await db.queryOne(
+        Queries.deletePostAndReturn,
+        { postId: parseInt(req.query.id as string), authorId: req.user.id}
     )
     if (!deleted)
         return res.status(400).send('Post not found')
@@ -152,8 +149,8 @@ router.delete('/deletePost', async (req, res) => {
 router.post('/createPost', async (req, res) => {
     const fileName = uuidv1()
     const postPromise = db.queryOne(
-        'INSERT INTO posts (filename, author_id, iv, key) VALUES ($1, $2, $3, $4)',
-        [fileName, req.user.id, req.body.iv, req.body.key]
+        Queries.createPost,
+        { fileName, authorId: req.user.id, iv: req.body.iv, key: req.body.key }
     )
     const requestPromise = awsManager.s3GetSignedUploadUrl(fileName, req.body.fileType)
     const [signedRequest, ] = await Promise.all([requestPromise, postPromise])

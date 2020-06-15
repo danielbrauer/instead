@@ -27,3 +27,4 @@ yarn-error.log*
 
 *.code-workspace
 .env
+backend/pgtconfig.json

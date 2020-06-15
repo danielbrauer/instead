@@ -1,4 +1,5 @@
 import { Pool, ClientBase } from 'pg'
+import { PreparedQuery } from '@pgtyped/query'
 import config from '../config/config'
 
 const pool = (config.databaseUrl === undefined) ? new Pool() : new Pool({connectionString: config.databaseUrl})
@@ -9,18 +10,18 @@ export class PromiseClient {
         this.client = client
     }
 
-    async query(text: string, params: string[]) {
-        return this.client.query(text, params)
+    async query<TParam, TResult>(query: PreparedQuery<TParam, TResult>, params: TParam) : Promise<TResult[]> {
+        return query.run(params, this.client)
     }
 
-    async queryOne(text: string, params: string[]) {
-        const { rows: [one = null] } = await this.client.query(text, params)
+    async queryOne<TParam, TResult>(query: PreparedQuery<TParam, TResult>, params: TParam) : Promise<TResult> {
+        const [one = null] = await query.run(params, this.client)
         return one
     }
 
-    async count(text: string, params: string[]) : Promise<number> {
-        const { rows: [{ count }] } = await this.client.query(text, params)
-        return parseInt(count)
+    async count<TParam, TResult extends CountResult>(query: PreparedQuery<TParam, TResult>, params: TParam) : Promise<number> {
+        const result = await query.run(params, this.client)
+        return result[0].count
     }
 }
 
@@ -43,5 +44,9 @@ export class PoolPromiseClient extends PromiseClient {
 }
 
 type TransactionContents = (client: PromiseClient) => Promise<any>
+
+interface CountResult {
+    count : number
+}
 
 export default new PoolPromiseClient(pool)
