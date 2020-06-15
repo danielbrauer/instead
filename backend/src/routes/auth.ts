@@ -13,9 +13,9 @@ router.post('/startLogin', async function (req, res) {
     if (session.user)
         return res.status(401).send('Session already started logging in')
     const { username, clientEphemeralPublic } = req.body
-    const user = await db.queryOne(
-        Users.getLoginInfoByName,
-        { username }
+    const [user] = await Users.getLoginInfoByName.run(
+        { username },
+        db
     )
     if (user) {
         const serverEphemeral = srp.generateEphemeral(user.verifier)
@@ -68,9 +68,9 @@ router.get('/startSignup', async function (req, res) {
     let username = ''
     for (let i = 0; i < 5; ++i) {
         username = generateCombination(1, '', true)
-        const count = await db.count(
-            Users.countByName,
-            { username }
+        const [{count}] = await Users.countByName.run(
+            { username },
+            db
         )
         if (count === 0) {
             req.session.signupInfo = { username }
@@ -84,8 +84,7 @@ router.post('/finishSignup', async function (req, res) {
     const session = req.session
     if (!session.signupInfo)
         return res.status(405).send('Session hasn\'t started signing in')
-    const user = await db.queryOne(
-        Users.create,
+    const [user] = await Users.create.run(
         {
             username: session.signupInfo.username,
             display_name: req.body.displayName,
@@ -95,7 +94,8 @@ router.post('/finishSignup', async function (req, res) {
             public_key: req.body.publicKey,
             private_key: req.body.privateKey,
             private_key_iv: req.body.privateKeyIv
-        }
+        },
+        db
     )
     session.user = { id: user.id }
     delete session.signupInfo
