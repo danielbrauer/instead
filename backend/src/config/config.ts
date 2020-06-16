@@ -1,4 +1,4 @@
-function split(input : string) {
+function split(input: string) {
     if (input === null || input === undefined)
         return []
     else
