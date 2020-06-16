@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-dev": "tsc && eslint \"**/*.{js,ts}\" --quiet --fix",
+    "build-dev": "tsc && eslint \"**/*.{js,ts}\" --quiet --fix --ignore-pattern \"src/queries\"",
     "build": "tsc",
-    "watch-debug": "concurrently -k \"tsc -w\" \"yarn pgtyped -w -c pgtconfig.json\" \"nodemon --require dotenv/config --inspect dist/server.js\""
+    "watch-debug": "concurrently -k \"tsc -w\" \"yarn pgtyped -w -c pgtconfig.json\" \"nodemon --require dotenv/config --inspect dist/server.js\"",
+    "dump-schema": "node --require dotenv/config dist/dumpSchema.js"
   },
   "author": "Daniel Brauer",
   "license": "MIT",
