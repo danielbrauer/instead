@@ -145,6 +145,8 @@ router.delete('/deletePost', async (req, res) => {
     )
     if (!deleted)
         return res.status(400).send('Post not found')
+    else
+        await awsManager.s3DeleteObject(deleted.filename)
     return res.json({ success: true })
 })
 
