@@ -1,24 +1,34 @@
 import { Pool, ClientBase } from 'pg'
 import config from '../config/config'
+import { Service } from 'typedi'
 
 type TransactionContents = (client: ClientBase) => Promise<any>
 
-const pool = (config.databaseUrl === undefined) ? new Pool() : new Pool({connectionString: config.databaseUrl})
+@Service()
+export default class Database {
 
-export const transaction = async(commands: TransactionContents) => {
-    const client = await pool.connect()
-    let result = null
-    try {
-        await client.query('BEGIN')
-        result = await commands(client)
-        await client.query('COMMIT')
-    } catch (e) {
-        await client.query('ROLLBACK')
-        throw e
-    } finally {
-        client.release()
+    pool: Pool
+
+    constructor() {
+        this.pool = (config.databaseUrl === undefined) ? new Pool() : new Pool({connectionString: config.databaseUrl})
     }
-    return result
-}
 
-export default pool
+    isCountZero(count: any) {
+        return BigInt(count) == BigInt(0)
+    }
+
+    async transaction(commands: TransactionContents) {
+        const client = await this.pool.connect()
+        try {
+            await client.query('BEGIN')
+            await commands(client)
+            await client.query('COMMIT')
+        } catch (e) {
+            await client.query('ROLLBACK')
+            throw e
+        } finally {
+            client.release()
+        }
+    }
+
+}
