@@ -1,4 +1,6 @@
 import Router from 'express-promise-router'
+import {Container} from "typedi"
+import userService from "../services/UserService"
 import db, { transaction } from '../services/database'
 import awsManager from '../services/aws'
 import * as Users from '../queries/users.gen'
@@ -103,18 +105,12 @@ router.post('/rejectFollowRequest', async (req, res) => {
 })
 
 router.post('/unfollow', async (req, res) => {
-    await Followers.destroy.run(
-        { followerId: req.user.id, followeeId: req.body.userid},
-        db
-    )
+    await Container.get(userService).removeFollower(req.user.id, req.body.userid)
     return res.json({ success: true })
 })
 
 router.post('/removeFollower', async (req, res) => {
-    await Followers.destroy.run(
-        { followerId: req.body.userid, followeeId: req.user.id },
-        db
-    )
+    await Container.get(userService).removeFollower(req.body.userid, req.user.id)
     return res.json({ success: true })
 })
 

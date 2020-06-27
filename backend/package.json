@@ -43,8 +43,10 @@
     "morgan": "^1.9.1",
     "pg": "^7.12.1",
     "redis": "^2.8.0",
+    "reflect-metadata": "^0.1.13",
     "secure-remote-password": "^0.3.1",
     "ts-node": "^8.4.1",
+    "typedi": "^0.8.0",
     "typescript": "3.7.3",
     "uuid": "^3.3.2"
   },
