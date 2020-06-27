@@ -75,7 +75,7 @@ router.delete('/deletePost', async (req, res) => {
 
 // get URL for uploading
 router.post('/createPost', async (req, res) => {
-    const data = postService.createPost(req.user.id, req.body.iv, req.body.key, req.body.fileType)
+    const data = await postService.createPost(req.user.id, req.body.iv, req.body.key, req.body.fileType)
     return res.json({ success: true, data })
 })
 
