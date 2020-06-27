@@ -72,7 +72,7 @@ router.get('/startSignup', async function (req, res) {
             { username },
             db
         )
-        if (count === 0) {
+        if (count == 0) {
             req.session.signupInfo = { username }
             return res.send({ username })
         }
