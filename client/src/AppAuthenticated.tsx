@@ -95,7 +95,7 @@ class App extends Component<RouteComponentProps<any>, AppState> {
     }
 
     async getFollowers() {
-        const response = await this.authorizedAxios.get(serverUrl + '/getFollowers')
+        const response = await this.authorizedAxios.get(serverUrl + '/getFollowerIds')
         this.setState({ followers: response.data.followers })
     }
 
