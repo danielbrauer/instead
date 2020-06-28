@@ -3,10 +3,9 @@ import config from '../config/config'
 import aws from 'aws-sdk'
 
 @Service()
-export default class AWSManager {
-    static _instance: AWSManager
-    bucket: string
-    s3: aws.S3
+export default class AWSService {
+    private bucket: string
+    private s3: aws.S3
 
     constructor() {
         const awsConfig = config.aws

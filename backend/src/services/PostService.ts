@@ -1,6 +1,6 @@
 import { Service, Inject } from "typedi"
-import Database from '../services/database'
-import AWSService from '../services/aws'
+import Database from './DatabaseService'
+import AWSService from './AWSService'
 import * as Posts from '../queries/posts.gen'
 import uuidv1 from 'uuid/v1'
 
@@ -8,10 +8,10 @@ import uuidv1 from 'uuid/v1'
 export default class PostService {
 
     @Inject()
-    db: Database
+    private db: Database
 
     @Inject()
-    aws: AWSService
+    private aws: AWSService
 
     getS3ContentUrl() {
         return this.aws.s3ContentUrl()

@@ -5,7 +5,7 @@ INSERT INTO followers (follower_id, followee_id) VALUES (:followerId, :followeeI
 DELETE FROM followers WHERE follower_id = :followerId AND followee_id = :followeeId;
 
 /* @name Count */
-SELECT COUNT(*) FROM followers WHERE follower_id = :followerId AND followee_id = :followeeId;
+SELECT COUNT(*)::int FROM followers WHERE follower_id = :followerId AND followee_id = :followeeId;
 
 /* @name GetByFolloweeId */
 SELECT follower_id FROM followers WHERE followee_id = :followeeId;

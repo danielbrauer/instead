@@ -1,21 +1,20 @@
 import { Service, Inject } from "typedi"
-import Database from '../services/database'
 import srp from 'secure-remote-password/server'
 import crypto from '../util/crypto-promise'
 import { generateCombination } from '../util/animalGenerator'
 import config from '../config/config'
-import * as Users from '../queries/users.gen'
+import UserService from "./UserService"
 
 @Service()
 export default class AuthService {
 
     @Inject()
-    db: Database
+    private userService: UserService
 
     async startLogin(session: Express.Session, username: string, clientEphemeralPublic : string) {
         if (session.user)
             throw new Error('Session already started logging in')
-        const [user] = await Users.getLoginInfoByName.run({ username }, this.db.pool)
+        const user = await this.userService.getLoginInfo(username)
         if (user) {
             const serverEphemeral = srp.generateEphemeral(user.verifier)
             session.loginInfo = {
@@ -65,11 +64,8 @@ export default class AuthService {
         let username = ''
         for (let i = 0; i < 5; ++i) {
             username = generateCombination(1, '', true)
-            const [{count}] = await Users.countByName.run(
-                { username },
-                this.db.pool
-            )
-            if (this.db.isCountZero(count)) {
+            const count = await this.userService.countByName(username)
+            if (count == 0) {
                 session.signupInfo = { username }
                 return username
             }
@@ -90,18 +86,15 @@ export default class AuthService {
 
         if (!session.signupInfo)
             throw new Error('Session hasn\'t started signing in')
-        const [user] = await Users.create.run(
-            {
-                username: session.signupInfo.username,
-                display_name,
-                verifier,
-                srp_salt,
-                muk_salt,
-                public_key,
-                private_key,
-                private_key_iv
-            },
-            this.db.pool
+        const user = await this.userService.create(
+            session.signupInfo.username,
+            display_name,
+            verifier,
+            srp_salt,
+            muk_salt,
+            public_key,
+            private_key,
+            private_key_iv
         )
         session.user = { id: user.id }
         delete session.signupInfo

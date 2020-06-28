@@ -5,16 +5,12 @@ import { Service } from 'typedi'
 type TransactionContents = (client: ClientBase) => Promise<any>
 
 @Service()
-export default class Database {
+export default class DatabaseService {
 
-    pool: Pool
+    readonly pool: Pool
 
     constructor() {
         this.pool = (config.databaseUrl === undefined) ? new Pool() : new Pool({connectionString: config.databaseUrl})
-    }
-
-    isCountZero(count: any) {
-        return BigInt(count) == BigInt(0)
     }
 
     async transaction(commands: TransactionContents) {
