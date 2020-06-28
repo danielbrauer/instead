@@ -39,6 +39,7 @@
     "express-promise-router": "^3.0.3",
     "express-session": "^1.16.2",
     "express-static-gzip": "^2.0.5",
+    "express-validator": "^6.6.0",
     "helmet": "^3.21.1",
     "morgan": "^1.9.1",
     "pg": "^7.12.1",
