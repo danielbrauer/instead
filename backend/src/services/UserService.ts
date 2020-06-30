@@ -3,12 +3,20 @@ import Database from './DatabaseService'
 import * as Users from '../queries/users.gen'
 import * as Followers from '../queries/followers.gen'
 import * as FollowRequests from '../queries/follow_requests.gen'
+import { EventDispatcher } from 'event-dispatch'
+import Events from '../types/events'
 
 @Service()
 export default class UserService {
 
     @Inject()
     private db: Database
+
+    private dispatcher: EventDispatcher
+
+    constructor() {
+        this.dispatcher = new EventDispatcher()
+    }
 
     async getUserById(userId: number) {
         const [user] = await Users.getById.run({ userId }, this.db.pool)
@@ -50,6 +58,7 @@ export default class UserService {
             },
             this.db.pool
         )
+        this.dispatcher.dispatch(Events.user.created, user.id)
         return user
     }
 
@@ -86,6 +95,7 @@ export default class UserService {
                 client
             )
         })
+        this.dispatcher.dispatch(Events.user.addedFollower, { followerId: requesterId, followeeId: requesteeId })
     }
 
     async removeFollowRequest(requesterId: number, requesteeId: number) {
@@ -108,6 +118,7 @@ export default class UserService {
 
     async removeFollower(followerId: number, followeeId: number) {
         await Followers.destroy.run({ followerId, followeeId }, this.db.pool)
+        this.dispatcher.dispatch(Events.user.lostFollower, { followerId, followeeId })
     }
 }
 

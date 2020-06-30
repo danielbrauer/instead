@@ -35,6 +35,7 @@
     "connect-redis": "^4.0.2",
     "cors": "^2.8.5",
     "eslint": "^6.4.0",
+    "event-dispatch": "^0.4.1",
     "express": "^4.17.0",
     "express-promise-router": "^3.0.3",
     "express-session": "^1.16.2",

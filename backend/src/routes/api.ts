@@ -1,8 +1,10 @@
 import { Container } from 'typedi'
 import Router from 'express-promise-router'
-import { query, body, validationResult } from 'express-validator'
+import validate from '../middleware/validate'
+// import schema from '../types/routeSchema'
 import UserService from "../services/UserService"
 import PostService from "../services/PostService"
+import { checkSchema } from 'express-validator'
 
 const router = Router()
 const userService = Container.get(UserService)
@@ -37,56 +39,94 @@ router.get('/getFollowees', async (req, res) => {
     return res.json({ success: true, followees })
 })
 
-const queryUseridValidator = query('userid').isInt().toInt()
+router.get(
+    '/getUserById',
+    validate({
+        userid: { in: ['query'], isInt: true, toInt: true}
+    }),
+    async (req, res) => {
+        const user = await userService.getUserById(req.query.userid as unknown as number)
+        return res.json({ success: true, user: user })
+    }
+)
 
-router.get('/getUserById', queryUseridValidator, async (req, res) => {
-    const user = await userService.getUserById(req.query.userid)
-    return res.json({ success: true, user: user })
-})
+router.post(
+    '/sendFollowRequest',
+    validate({
+        username: { in: ['body'], isAlpha: true }
+    }),
+    async (req, res) => {
+        await userService.addFollowRequest(req.user.id, req.body.username)
+        return res.json({ success: true })
+    }
+)
 
-const bodyUsernameValidator = body('username').isString()
+router.post(
+    '/rejectFollowRequest',
+    validate({
+        userid: { in: ['body'], isInt: true, toInt: true, }
+    }),
+    async (req, res) => {
+        await userService.removeFollowRequest(req.body.userid, req.user.id)
+        return res.json({ success: true })
+    }
+)
 
-router.post('/sendFollowRequest', bodyUsernameValidator, async (req, res) => {
-    await userService.addFollowRequest(req.user.id, req.body.username)
-    return res.json({ success: true })
-})
+router.post(
+    '/unfollow',
+    validate({
+        userid: { in: ['body'], isInt: true, toInt: true, }
+    }),
+    async (req, res) => {
+        await userService.removeFollower(req.user.id, req.body.userid)
+        return res.json({ success: true })
+    }
+)
 
-const bodyUseridValidator = body('userid').isInt().toInt()
+router.post(
+    '/removeFollower',
+    validate({
+        userid: { in: ['body'], isInt: true, toInt: true, }
+    }),
+    async (req, res) => {
+        await userService.removeFollower(req.body.userid, req.user.id)
+        return res.json({ success: true })
+    }
+)
 
-router.post('/rejectFollowRequest', bodyUseridValidator, async (req, res) => {
-    await userService.removeFollowRequest(req.body.userid, req.user.id)
-    return res.json({ success: true })
-})
+router.post(
+    '/acceptFollowRequest',
+    validate({
+        userid: { in: ['body'], isInt: true, toInt: true, }
+    }),
+    async (req, res) => {
+        await userService.acceptFollowRequest(req.body.userid, req.user.id)
+        return res.json({ success: true })
+    }
+)
 
-router.post('/unfollow', bodyUseridValidator, async (req, res) => {
-    await userService.removeFollower(req.user.id, req.body.userid)
-    return res.json({ success: true })
-})
-
-router.post('/removeFollower', bodyUseridValidator, async (req, res) => {
-    await userService.removeFollower(req.body.userid, req.user.id)
-    return res.json({ success: true })
-})
-
-router.post('/acceptFollowRequest', bodyUseridValidator, async (req, res) => {
-    await userService.acceptFollowRequest(req.body.userid, req.user.id)
-    return res.json({ success: true })
-})
-
-const queryIdValidator = query('id').isInt().toInt()
 // removes existing data in our database, and
 // deletes the associated s3 object
-router.delete('/deletePost', queryIdValidator, async (req, res) => {
-    await postService.deletePost(parseInt(req.query.id as string), req.user.id)
-    return res.json({ success: true })
-})
+router.delete(
+    '/deletePost',
+    validate({
+        id: { in: ['query'], isInt: true, toInt: true, }
+    }),
+    async (req, res) => {
+        await postService.deletePost(parseInt(req.query.id as string), req.user.id)
+        return res.json({ success: true })
+    }
+)
 
 // get URL for uploading
 router.post(
     '/createPost',
-    body('fileType').equals('application/octet-stream'),
+    validate({
+        iv: { in: ['body'], isBase64: true },
+    }),
     async (req, res) => {
-        const data = await postService.createPost(req.user.id, req.body.iv, req.body.key, req.body.fileType)
+        console.log(req.body.fileType)
+        const data = await postService.createPost(req.user.id, req.body.iv, req.body.key)
         return res.json({ success: true, data })
     }
 )
