@@ -2,7 +2,7 @@ import { Express } from 'express'
 import path from 'path'
 import expressStaticGzip from 'express-static-gzip'
 
-export default (app : Express, reactPath : string) => {
+export default (app: Express, reactPath: string) => {
     // Statically host React app
     const server = expressStaticGzip(
         reactPath,

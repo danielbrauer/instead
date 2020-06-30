@@ -95,7 +95,7 @@ class App extends Component<RouteComponentProps<any>, AppState> {
     }
 
     async getFollowers() {
-        const response = await this.authorizedAxios.get(serverUrl + '/getFollowers')
+        const response = await this.authorizedAxios.get(serverUrl + '/getFollowerIds')
         this.setState({ followers: response.data.followers })
     }
 
@@ -128,7 +128,6 @@ class App extends Component<RouteComponentProps<any>, AppState> {
         return this.authorizedAxios.post(serverUrl + '/createPost', {
             key: exportedKey,
             iv: ivBuffer.toString('base64'),
-            fileType: kBinaryContentType,
         })
     }
 
@@ -162,7 +161,6 @@ class App extends Component<RouteComponentProps<any>, AppState> {
         const options = {
             headers: {
                 'Content-Type': kBinaryContentType,
-                'Accept': '*/*',
             },
         }
         await Axios.put(signedRequest, encrypted, options)

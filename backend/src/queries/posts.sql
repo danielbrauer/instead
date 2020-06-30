@@ -1,5 +1,5 @@
-/* @name Create */
-INSERT INTO posts (filename, author_id, iv, key) VALUES (:fileName, :authorId, :iv, :key);
+/* @name CreateAndReturn */
+INSERT INTO posts (filename, author_id, iv, key) VALUES (:fileName, :authorId, :iv, :key) RETURNING id;
 
 /* @name DestroyAndReturn */
 DELETE FROM posts WHERE id = :postId AND author_id = :authorId RETURNING *;

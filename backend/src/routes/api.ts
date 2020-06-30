@@ -1,17 +1,16 @@
+import { Container } from 'typedi'
 import Router from 'express-promise-router'
-import db, { transaction } from '../services/database'
-import awsManager from '../services/aws'
-import * as Users from '../queries/users.gen'
-import * as Followers from '../queries/followers.gen'
-import * as Posts from '../queries/posts.gen'
-import * as FollowRequests from '../queries/follow_requests.gen'
-import uuidv1 from 'uuid/v1'
+import validate from '../middleware/validate'
+import UserService from "../services/UserService"
+import PostService from "../services/PostService"
 
 const router = Router()
+const userService = Container.get(UserService)
+const postService = Container.get(PostService)
 
 // get the URL where images are hosted
 router.get('/getConfig', (req, res) => {
-    const contentUrl = awsManager.s3ContentUrl()
+    const contentUrl = postService.getContentUrl()
     const config = {
         contentUrl: contentUrl,
     }
@@ -19,146 +18,113 @@ router.get('/getConfig', (req, res) => {
 })
 
 router.get('/getPosts', async (req, res) => {
-    const posts = await Posts.getByAuthorId.run(
-        { authorId: req.user.id },
-        db
-    )
+    const posts = await postService.getPostsByAuthor(req.user.id)
     return res.json({ success: true, posts })
 })
 
 router.get('/getFollowRequests', async (req, res) => {
-    const requests = await FollowRequests.getByRequesteeId.run(
-        { requesteeId: req.user.id },
-        db
-    )
+    const requests = await userService.getFollowRequests(req.user.id)
     return res.json({ success: true, requests })
 })
 
 router.get('/getFollowerIds', async (req, res) => {
-    const following = await Followers.getByFolloweeId.run(
-        { followeeId: req.user.id },
-        db
-    )
-    return res.json({ success: true, followers: following.map(r => r.follower_id) })
+    const followers = await userService.getFollowers(req.user.id)
+    return res.json({ success: true, followers })
 })
 
 router.get('/getFollowees', async (req, res) => {
-    const following = await Followers.getByFollowerId.run(
-        { followerId: req.user.id },
-        db
-    )
-    return res.json({ success: true, followees: following.map(r => r.followee_id) })
+    const followees = await userService.getFollowees(req.user.id)
+    return res.json({ success: true, followees })
 })
 
-router.get('/getUserById', async (req, res) => {
-    const [user] = await Users.getById.run(
-        { userId : parseInt(req.query.userid as string)},
-        db
-    )
-    if (!user)
-        return res.status(400).send('User does not exist')
-    return res.json({ success: true, user: user })
-})
+router.get(
+    '/getUserById',
+    validate({
+        userid: { in: ['query'], isInt: true, toInt: true}
+    }),
+    async (req, res) => {
+        const user = await userService.getUserById(req.query.userid as unknown as number)
+        return res.json({ success: true, user: user })
+    }
+)
 
-router.post('/sendFollowRequest', async (req, res) => {
-    const error = await transaction(async(db) => {
-        const requesteeName = req.body.username
-        const [requestee] = await Users.getByName.run(
-            { username: requesteeName },
-            db
-        )
-        if (!requestee)
-            return [400, 'User does not exist']
-        const requesterId = req.user.id
-        if (requestee.id === requesterId)
-            return [400, 'You don\'t need to follow yourself']
-        const [{count: followCount}] = await Followers.count.run(
-            { followerId: requesterId, followeeId: requestee.id },
-            db
-        )
-        if (followCount > 0)
-            return [400, 'Already following user']
-        const [{count: requestCount}] = await FollowRequests.count.run(
-            { requesterId: requesterId, requesteeId: requestee.id },
-            db
-        )
-        if (requestCount > 0)
-            return [400, 'Request already exists']
-        await FollowRequests.create.run(
-            { requesterId: requesterId, requesteeId: requestee.id },
-            db
-        )
-    })
-    if (error)
-        return res.status(error[0]).send(error[1])
-    return res.json({ success: true })
-})
+router.post(
+    '/sendFollowRequest',
+    validate({
+        username: { in: ['body'], isAlpha: true }
+    }),
+    async (req, res) => {
+        await userService.addFollowRequest(req.user.id, req.body.username)
+        return res.json({ success: true })
+    }
+)
 
-router.post('/rejectFollowRequest', async (req, res) => {
-    await FollowRequests.destroy.run(
-        {requesterId: req.body.userid, requesteeId: req.user.id},
-        db
-    )
-    return res.json({ success: true })
-})
+router.post(
+    '/rejectFollowRequest',
+    validate({
+        userid: { in: ['body'], isInt: true, toInt: true, }
+    }),
+    async (req, res) => {
+        await userService.removeFollowRequest(req.body.userid, req.user.id)
+        return res.json({ success: true })
+    }
+)
 
-router.post('/unfollow', async (req, res) => {
-    await Followers.destroy.run(
-        { followerId: req.user.id, followeeId: req.body.userid},
-        db
-    )
-    return res.json({ success: true })
-})
+router.post(
+    '/unfollow',
+    validate({
+        userid: { in: ['body'], isInt: true, toInt: true, }
+    }),
+    async (req, res) => {
+        await userService.removeFollower(req.user.id, req.body.userid)
+        return res.json({ success: true })
+    }
+)
 
-router.post('/removeFollower', async (req, res) => {
-    await Followers.destroy.run(
-        { followerId: req.body.userid, followeeId: req.user.id },
-        db
-    )
-    return res.json({ success: true })
-})
+router.post(
+    '/removeFollower',
+    validate({
+        userid: { in: ['body'], isInt: true, toInt: true, }
+    }),
+    async (req, res) => {
+        await userService.removeFollower(req.body.userid, req.user.id)
+        return res.json({ success: true })
+    }
+)
 
-router.post('/acceptFollowRequest', async (req, res) => {
-    const error = await transaction(async(db) => {
-        const [request] = await FollowRequests.destroyAndReturn.run(
-            { requesterId: req.body.userid, requesteeId: req.user.id},
-            db
-        )
-        if (!request)
-            return { status:400, message:'No such follow request' }
-        await Followers.create.run(
-            { followerId: request.requester_id, followeeId: request.requestee_id},
-            db
-        )
-    })
-    if (error)
-        return res.status(error.status).send(error.message)
-    return res.json({ success: true })
-})
+router.post(
+    '/acceptFollowRequest',
+    validate({
+        userid: { in: ['body'], isInt: true, toInt: true, }
+    }),
+    async (req, res) => {
+        await userService.acceptFollowRequest(req.body.userid, req.user.id)
+        return res.json({ success: true })
+    }
+)
 
-// removes existing data in our database, and
-// deletes the associated s3 object
-router.delete('/deletePost', async (req, res) => {
-    const [deleted] = await Posts.destroyAndReturn.run(
-        { postId: parseInt(req.query.id as string), authorId: req.user.id},
-        db
-    )
-    if (!deleted)
-        return res.status(400).send('Post not found')
-    return res.json({ success: true })
-})
+router.delete(
+    '/deletePost',
+    validate({
+        id: { in: ['query'], isInt: true, toInt: true, }
+    }),
+    async (req, res) => {
+        await postService.deletePost(req.query.id as unknown as number, req.user.id)
+        return res.json({ success: true })
+    }
+)
 
-// get URL for uploading
-router.post('/createPost', async (req, res) => {
-    const fileName = uuidv1()
-    const postPromise = Posts.create.run(
-        { fileName, authorId: req.user.id, iv: req.body.iv, key: req.body.key },
-        db
-    )
-    const requestPromise = awsManager.s3GetSignedUploadUrl(fileName, req.body.fileType)
-    const [signedRequest, ] = await Promise.all([requestPromise, postPromise])
-    return res.json({ success: true, data: { signedRequest, fileName } })
-})
+router.post(
+    '/createPost',
+    validate({
+        iv: { in: ['body'], isBase64: true },
+    }),
+    async (req, res) => {
+        console.log(req.body.fileType)
+        const data = await postService.createPost(req.user.id, req.body.iv, req.body.key)
+        return res.json({ success: true, data })
+    }
+)
 
 router.get('/logout', async function (req, res) {
     req.session.destroy(err => {

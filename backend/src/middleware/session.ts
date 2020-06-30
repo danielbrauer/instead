@@ -7,7 +7,7 @@ const client = redis.createClient({
     url: config.redisUrl,
 })
 
-let sessionConfig = {
+const sessionConfig = {
     secret: config.sessionSecret,
     name: 'instead-photos',
     store: new RedisStore({ client }),

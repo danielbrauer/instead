@@ -100,12 +100,12 @@ export interface ICountQuery {
   result: ICountResult;
 }
 
-const countIR: any = {"name":"Count","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":444,"b":454,"line":11,"col":59}]}},{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":476,"b":486,"line":11,"col":91}]}}],"usedParamSet":{"requesterId":true,"requesteeId":true},"statement":{"body":"SELECT COUNT(*) FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId","loc":{"a":385,"b":486,"line":11,"col":0}}};
+const countIR: any = {"name":"Count","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":449,"b":459,"line":11,"col":64}]}},{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":481,"b":491,"line":11,"col":96}]}}],"usedParamSet":{"requesterId":true,"requesteeId":true},"statement":{"body":"SELECT COUNT(*)::int FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId","loc":{"a":385,"b":491,"line":11,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT COUNT(*) FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId
+ * SELECT COUNT(*)::int FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId
  * ```
  */
 export const count = new PreparedQuery<ICountParams,ICountResult>(countIR);
@@ -127,7 +127,7 @@ export interface IGetByRequesteeIdQuery {
   result: IGetByRequesteeIdResult;
 }
 
-const getByRequesteeIdIR: any = {"name":"GetByRequesteeId","params":[{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":582,"b":592,"line":14,"col":63}]}}],"usedParamSet":{"requesteeId":true},"statement":{"body":"SELECT requester_id FROM follow_requests WHERE requestee_id = :requesteeId","loc":{"a":519,"b":592,"line":14,"col":0}}};
+const getByRequesteeIdIR: any = {"name":"GetByRequesteeId","params":[{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":587,"b":597,"line":14,"col":63}]}}],"usedParamSet":{"requesteeId":true},"statement":{"body":"SELECT requester_id FROM follow_requests WHERE requestee_id = :requesteeId","loc":{"a":524,"b":597,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:

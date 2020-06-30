@@ -1,7 +1,7 @@
 import cors, { CorsOptions } from 'cors'
 import config from '../config/config'
 
-let settings : CorsOptions = {
+const settings: CorsOptions = {
     origin: function (origin, callback) {
         if (config.clientOrigin.some(x => x === origin) || !origin) {
             callback(null, true)
