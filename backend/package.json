@@ -7,7 +7,9 @@
     "build-dev": "tsc && eslint \"**/*.{js,ts}\" --quiet --fix",
     "build": "tsc",
     "watch-debug": "concurrently -k \"tsc -w\" \"yarn pgtyped -w -c pgtconfig.json\" \"nodemon --require dotenv/config --inspect dist/server.js\"",
-    "dump-schema": "node --require dotenv/config dist/dumpSchema.js"
+    "dump-schema": "node --require dotenv/config dist/dumpSchema.js",
+    "snyk-protect": "snyk protect",
+    "prepare": "yarn run snyk-protect"
   },
   "author": "Daniel Brauer",
   "license": "MIT",
@@ -50,7 +52,8 @@
     "ts-node": "^8.4.1",
     "typedi": "^0.8.0",
     "typescript": "3.7.3",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "snyk": "^1.355.0"
   },
   "devDependencies": {
     "concurrently": "^4.1.2",
@@ -63,5 +66,6 @@
       "node-modules/"
     ],
     "delay": "1000"
-  }
+  },
+  "snyk": true
 }
