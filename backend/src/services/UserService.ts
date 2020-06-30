@@ -58,7 +58,7 @@ export default class UserService {
             },
             this.db.pool
         )
-        this.dispatcher.dispatch(Events.user.created, user.id)
+        this.dispatcher.dispatch(Events.user.created, { userid: user.id })
         return user
     }
 

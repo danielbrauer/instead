@@ -1,10 +1,8 @@
 import { Container } from 'typedi'
 import Router from 'express-promise-router'
 import validate from '../middleware/validate'
-// import schema from '../types/routeSchema'
 import UserService from "../services/UserService"
 import PostService from "../services/PostService"
-import { checkSchema } from 'express-validator'
 
 const router = Router()
 const userService = Container.get(UserService)
@@ -12,7 +10,7 @@ const postService = Container.get(PostService)
 
 // get the URL where images are hosted
 router.get('/getConfig', (req, res) => {
-    const contentUrl = postService.getS3ContentUrl()
+    const contentUrl = postService.getContentUrl()
     const config = {
         contentUrl: contentUrl,
     }
@@ -105,20 +103,17 @@ router.post(
     }
 )
 
-// removes existing data in our database, and
-// deletes the associated s3 object
 router.delete(
     '/deletePost',
     validate({
         id: { in: ['query'], isInt: true, toInt: true, }
     }),
     async (req, res) => {
-        await postService.deletePost(parseInt(req.query.id as string), req.user.id)
+        await postService.deletePost(req.query.id as unknown as number, req.user.id)
         return res.json({ success: true })
     }
 )
 
-// get URL for uploading
 router.post(
     '/createPost',
     validate({

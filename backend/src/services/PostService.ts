@@ -21,7 +21,7 @@ export default class PostService {
         this.dispatcher = new EventDispatcher()
     }
 
-    getS3ContentUrl() {
+    getContentUrl() {
         return this.aws.s3ContentUrl()
     }
 
@@ -34,7 +34,7 @@ export default class PostService {
         const postPromise = Posts.createAndReturn.run({ fileName, authorId, iv, key }, this.db.pool)
         const requestPromise = this.aws.s3GetSignedUploadUrl(fileName, 'application/octet-stream')
         const [signedRequest, [post]] = await Promise.all([requestPromise, postPromise])
-        this.dispatcher.dispatch(Events.post.created, post.id)
+        this.dispatcher.dispatch(Events.post.created, { postId: post.id })
         return { signedRequest, fileName }
     }
 
@@ -43,8 +43,8 @@ export default class PostService {
         if (!deleted) {
             throw new Error('Post not found')
         } else {
-            this.dispatcher.dispatch(Events.post.created, deleted.id)
             await this.aws.s3DeleteObject(deleted.filename)
+            this.dispatcher.dispatch(Events.post.created, { postId: deleted.id })
         }
     }
 }
