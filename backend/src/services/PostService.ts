@@ -29,10 +29,10 @@ export default class PostService {
         return await Posts.getByAuthorId.run({ authorId }, this.db.pool)
     }
 
-    async createPost(authorId: number, iv: string, key: string) {
+    async createPost(authorId: number, iv: string, key: string, md5: string) {
         const fileName = uuidv1()
         const postPromise = Posts.createAndReturn.run({ fileName, authorId, iv, key }, this.db.pool)
-        const requestPromise = this.aws.s3GetSignedUploadUrl(fileName, 'application/octet-stream')
+        const requestPromise = this.aws.s3GetSignedUploadUrl(fileName, 'application/octet-stream', md5)
         const [signedRequest, [post]] = await Promise.all([requestPromise, postPromise])
         this.dispatcher.dispatch(Events.post.created, { postId: post.id })
         return { signedRequest, fileName }

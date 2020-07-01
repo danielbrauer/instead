@@ -118,10 +118,11 @@ router.post(
     '/createPost',
     validate({
         iv: { in: ['body'], isBase64: true },
+        md5: { in: ['body'], isBase64: true }
     }),
     async (req, res) => {
         console.log(req.body.fileType)
-        const data = await postService.createPost(req.user.id, req.body.iv, req.body.key)
+        const data = await postService.createPost(req.user.id, req.body.iv, req.body.key, req.body.md5)
         return res.json({ success: true, data })
     }
 )

@@ -27,13 +27,14 @@ export default class AWSService {
         return `https://${this.bucket}.s3.amazonaws.com/`
     }
 
-    async s3GetSignedUploadUrl(fileName: string, fileType: string) {
+    async s3GetSignedUploadUrl(fileName: string, fileType: string, md5: string) {
         // Set up the payload of what we are sending to the S3 api
         const s3Params = {
             Bucket: this.bucket,
             Key: fileName,
             Expires: 300,
             ContentType: fileType,
+            ContentMD5: md5,
             ACL: 'public-read',
         }
         // Make a request to the S3 API to get a signed URL which we can use to upload our file

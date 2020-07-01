@@ -17,6 +17,7 @@ const serverUrl = `${config.serverUrl}/api`
 
 const toBuffer = require('typedarray-to-buffer')
 require('buffer')
+const md5 = require('js-md5')
 
 const Crypto = window.crypto
 
@@ -120,7 +121,7 @@ class App extends Component<RouteComponentProps<any>, AppState> {
         this.getPosts()
     }
 
-    async postWithKeys(key: CryptoKey, ivBuffer: Buffer) {
+    async postWithKeys(key: CryptoKey, ivBuffer: Buffer, contentMd5: string) {
         const exportedKey = await Crypto.subtle.exportKey(
             "jwk",
             key
@@ -128,6 +129,7 @@ class App extends Component<RouteComponentProps<any>, AppState> {
         return this.authorizedAxios.post(serverUrl + '/createPost', {
             key: exportedKey,
             iv: ivBuffer.toString('base64'),
+            md5: contentMd5
         })
     }
 
@@ -145,7 +147,7 @@ class App extends Component<RouteComponentProps<any>, AppState> {
         const iv = Crypto.getRandomValues(new Uint8Array(12))
         const [result, key] = await Promise.all([filePromise, keyPromise])
         const ivBuffer = toBuffer(iv)
-        const encryptedPromise = Crypto.subtle.encrypt(
+        const encrypted = await Crypto.subtle.encrypt(
             {
                 name: "AES-GCM",
                 iv,
@@ -153,14 +155,15 @@ class App extends Component<RouteComponentProps<any>, AppState> {
             key,
             result
         )
-        const responsePromise = this.postWithKeys(key, ivBuffer)
-        const [encrypted, response] = await Promise.all([encryptedPromise, responsePromise])
+        const contentMD5 = md5.base64(encrypted)
+        const response = await this.postWithKeys(key, ivBuffer, contentMD5)
         const signedRequest = response.data.data.signedRequest
 
         // Put the fileType in the headers for the upload
         const options = {
             headers: {
                 'Content-Type': kBinaryContentType,
+                'Content-MD5': contentMD5,
             },
         }
         await Axios.put(signedRequest, encrypted, options)
