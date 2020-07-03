@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { Image, Button, Loader, Segment, Dimmer, Menu } from 'semantic-ui-react'
+import { Image, Button, Loader, Segment, Dimmer, Menu, Message } from 'semantic-ui-react'
 import { History } from 'history'
 import { useDropzone } from 'react-dropzone'
 
@@ -17,17 +17,22 @@ let blobUrl = (blob: Blob) => {
 
 interface NewPostProps {
     history: History,
-    onSubmit: (file: File) => void,
+    onSubmit: (file: File) => Promise<boolean>,
 }
 
 export default function NewPost(props: NewPostProps) {
     const [uploadInput, setUploadInput] = useState<File | null>(null)
     const [uploading, setUploading] = useState(false)
+    const [error, setError] = useState(false)
 
     async function onSubmit() {
         setUploading(true)
-        await props.onSubmit(uploadInput!)
-        props.history.push('/home')
+        const success = await props.onSubmit(uploadInput!)
+        setUploading(false)
+        if (success)
+            props.history.push('/home')
+        else
+            setError(true)
     }
 
     function onCancel() {
@@ -45,6 +50,13 @@ export default function NewPost(props: NewPostProps) {
 
     return (
         <div>
+            {error ?
+                <Message negative>
+                    <Message.Header>Sorry, there was an error uploading your post</Message.Header>
+                </Message>
+                :
+                null
+            }
             {uploadInput !== null ?
                 <div>
                     <Dimmer inverted active={uploading} >

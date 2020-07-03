@@ -165,12 +165,18 @@ class App extends Component<RouteComponentProps<any>, AppState> {
                 'Content-MD5': contentMD5,
             },
         }
-        await Axios.put(signedRequest, encrypted, options)
+        let success = true
+        try {
+            await Axios.put(signedRequest, encrypted, options)
+        } catch (error) {
+            success = false
+        }
         await this.authorizedAxios.post(serverUrl + '/finishPost', {
             postId: postResponse.data.postId,
-            success: true
+            success
         })
         this.getPosts()
+        return success
     }
 
     follow = async (username: string) => {
