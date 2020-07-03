@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 11.8 (Ubuntu 11.8-1.pgdg16.04+1)
+-- Dumped from database version 12.1
 -- Dumped by pg_dump version 12.1
 
 SET statement_timeout = 0;
@@ -17,6 +17,8 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 SET default_tablespace = '';
+
+SET default_table_access_method = heap;
 
 --
 -- Name: follow_requests; Type: TABLE; Schema: public; Owner: -
@@ -61,7 +63,8 @@ CREATE TABLE public.posts (
     key jsonb NOT NULL,
     iv text NOT NULL,
     author_id integer NOT NULL,
-    filename text NOT NULL
+    filename text NOT NULL,
+    published boolean DEFAULT false NOT NULL
 );
 
 

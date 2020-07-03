@@ -115,15 +115,30 @@ router.delete(
 )
 
 router.post(
-    '/createPost',
+    '/startPost',
     validate({
         iv: { in: ['body'], isBase64: true },
         md5: { in: ['body'], isBase64: true }
     }),
     async (req, res) => {
-        console.log(req.body.fileType)
-        const data = await postService.createPost(req.user.id, req.body.iv, req.body.key, req.body.md5)
-        return res.json({ success: true, data })
+        const postInfo = await postService.createPost(req.user.id, req.body.iv, req.body.key, req.body.md5)
+        return res.json({ success: true, ...postInfo })
+    }
+)
+
+router.post(
+    '/finishPost',
+    validate({
+        success: { in: ['body'], isBoolean: true, toBoolean: true },
+        postId: { in: ['body'], isInt: true, toInt: true },
+    }),
+    async (req, res) => {
+        if (req.body.success) {
+            await postService.publishPost(req.body.postId)
+        } else {
+            await postService.deletePost(req.body.postId, req.user.id)
+        }
+        return res.json({ success: true})
     }
 )
 

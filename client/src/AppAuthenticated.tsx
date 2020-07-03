@@ -126,7 +126,7 @@ class App extends Component<RouteComponentProps<any>, AppState> {
             "jwk",
             key
         )
-        return this.authorizedAxios.post(serverUrl + '/createPost', {
+        return this.authorizedAxios.post(serverUrl + '/startPost', {
             key: exportedKey,
             iv: ivBuffer.toString('base64'),
             md5: contentMd5
@@ -156,10 +156,9 @@ class App extends Component<RouteComponentProps<any>, AppState> {
             result
         )
         const contentMD5 = md5.base64(encrypted)
-        const response = await this.postWithKeys(key, ivBuffer, contentMD5)
-        const signedRequest = response.data.data.signedRequest
+        const postResponse = await this.postWithKeys(key, ivBuffer, contentMD5)
+        const signedRequest = postResponse.data.signedRequest
 
-        // Put the fileType in the headers for the upload
         const options = {
             headers: {
                 'Content-Type': kBinaryContentType,
@@ -167,6 +166,10 @@ class App extends Component<RouteComponentProps<any>, AppState> {
             },
         }
         await Axios.put(signedRequest, encrypted, options)
+        await this.authorizedAxios.post(serverUrl + '/finishPost', {
+            postId: postResponse.data.postId,
+            success: true
+        })
         this.getPosts()
     }
 

@@ -33,6 +33,31 @@ const createAndReturnIR: any = {"name":"CreateAndReturn","params":[{"name":"file
 export const createAndReturn = new PreparedQuery<ICreateAndReturnParams,ICreateAndReturnResult>(createAndReturnIR);
 
 
+/** 'Publish' parameters type */
+export interface IPublishParams {
+  postId: number | null | void;
+}
+
+/** 'Publish' return type */
+export type IPublishResult = void;
+
+/** 'Publish' query type */
+export interface IPublishQuery {
+  params: IPublishParams;
+  result: IPublishResult;
+}
+
+const publishIR: any = {"name":"Publish","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":199,"b":204,"line":5,"col":46}]}}],"usedParamSet":{"postId":true},"statement":{"body":"UPDATE posts SET published = true WHERE id = :postId","loc":{"a":153,"b":204,"line":5,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * UPDATE posts SET published = true WHERE id = :postId
+ * ```
+ */
+export const publish = new PreparedQuery<IPublishParams,IPublishResult>(publishIR);
+
+
 /** 'DestroyAndReturn' parameters type */
 export interface IDestroyAndReturnParams {
   postId: number | null | void;
@@ -47,6 +72,7 @@ export interface IDestroyAndReturnResult {
   iv: string;
   author_id: number;
   filename: string;
+  published: boolean;
 }
 
 /** 'DestroyAndReturn' query type */
@@ -55,7 +81,7 @@ export interface IDestroyAndReturnQuery {
   result: IDestroyAndReturnResult;
 }
 
-const destroyAndReturnIR: any = {"name":"DestroyAndReturn","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":192,"b":197,"line":5,"col":30}]}},{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":216,"b":223,"line":5,"col":54}]}}],"usedParamSet":{"postId":true,"authorId":true},"statement":{"body":"DELETE FROM posts WHERE id = :postId AND author_id = :authorId RETURNING *","loc":{"a":162,"b":235,"line":5,"col":0}}};
+const destroyAndReturnIR: any = {"name":"DestroyAndReturn","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":267,"b":272,"line":8,"col":30}]}},{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":291,"b":298,"line":8,"col":54}]}}],"usedParamSet":{"postId":true,"authorId":true},"statement":{"body":"DELETE FROM posts WHERE id = :postId AND author_id = :authorId RETURNING *","loc":{"a":237,"b":310,"line":8,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -79,6 +105,7 @@ export interface IGetByAuthorIdResult {
   iv: string;
   author_id: number;
   filename: string;
+  published: boolean;
 }
 
 /** 'GetByAuthorId' query type */
@@ -87,16 +114,16 @@ export interface IGetByAuthorIdQuery {
   result: IGetByAuthorIdResult;
 }
 
-const getByAuthorIdIR: any = {"name":"GetByAuthorId","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":304,"b":311,"line":8,"col":39},{"a":408,"b":415,"line":11,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT * FROM posts WHERE author_id = :authorId OR author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n) ORDER BY timestamp DESC","loc":{"a":265,"b":441,"line":8,"col":0}}};
+const getByAuthorIdIR: any = {"name":"GetByAuthorId","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":401,"b":408,"line":11,"col":61},{"a":505,"b":512,"line":14,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT * FROM posts WHERE published = true AND (author_id = :authorId OR author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n)) ORDER BY timestamp DESC","loc":{"a":340,"b":539,"line":11,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT * FROM posts WHERE author_id = :authorId OR author_id IN (
+ * SELECT * FROM posts WHERE published = true AND (author_id = :authorId OR author_id IN (
  *     SELECT followee_id
  *     FROM followers
  *     WHERE followers.follower_id = :authorId
- * ) ORDER BY timestamp DESC
+ * )) ORDER BY timestamp DESC
  * ```
  */
 export const getByAuthorId = new PreparedQuery<IGetByAuthorIdParams,IGetByAuthorIdResult>(getByAuthorIdIR);
