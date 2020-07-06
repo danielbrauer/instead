@@ -92,6 +92,39 @@ const destroyAndReturnIR: any = {"name":"DestroyAndReturn","params":[{"name":"po
 export const destroyAndReturn = new PreparedQuery<IDestroyAndReturnParams,IDestroyAndReturnResult>(destroyAndReturnIR);
 
 
+/** 'DestroyIfUnpublished' parameters type */
+export interface IDestroyIfUnpublishedParams {
+  postId: number | null | void;
+}
+
+/** 'DestroyIfUnpublished' return type */
+export interface IDestroyIfUnpublishedResult {
+  id: number;
+  timestamp: Date;
+  key: Json;
+  iv: string;
+  author_id: number;
+  filename: string;
+  published: boolean;
+}
+
+/** 'DestroyIfUnpublished' query type */
+export interface IDestroyIfUnpublishedQuery {
+  params: IDestroyIfUnpublishedParams;
+  result: IDestroyIfUnpublishedResult;
+}
+
+const destroyIfUnpublishedIR: any = {"name":"DestroyIfUnpublished","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":377,"b":382,"line":11,"col":30}]}}],"usedParamSet":{"postId":true},"statement":{"body":"DELETE FROM posts WHERE id = :postId AND published = false RETURNING *","loc":{"a":347,"b":416,"line":11,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * DELETE FROM posts WHERE id = :postId AND published = false RETURNING *
+ * ```
+ */
+export const destroyIfUnpublished = new PreparedQuery<IDestroyIfUnpublishedParams,IDestroyIfUnpublishedResult>(destroyIfUnpublishedIR);
+
+
 /** 'GetByAuthorId' parameters type */
 export interface IGetByAuthorIdParams {
   authorId: number | null | void;
@@ -114,7 +147,7 @@ export interface IGetByAuthorIdQuery {
   result: IGetByAuthorIdResult;
 }
 
-const getByAuthorIdIR: any = {"name":"GetByAuthorId","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":401,"b":408,"line":11,"col":61},{"a":505,"b":512,"line":14,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT * FROM posts WHERE published = true AND (author_id = :authorId OR author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n)) ORDER BY timestamp DESC","loc":{"a":340,"b":539,"line":11,"col":0}}};
+const getByAuthorIdIR: any = {"name":"GetByAuthorId","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":507,"b":514,"line":14,"col":61},{"a":611,"b":618,"line":17,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT * FROM posts WHERE published = true AND (author_id = :authorId OR author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n)) ORDER BY timestamp DESC","loc":{"a":446,"b":645,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:

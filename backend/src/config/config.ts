@@ -15,6 +15,7 @@ export default {
         region: process.env.AWS_REGION,
         s3Bucket: process.env.AWS_S3_BUCKET,
     },
+    uploadTime: parseInt(process.env.UPLOAD_TIME),
     databaseUrl: process.env.DATABASE_URL,
     redisUrl: process.env.REDIS_URL,
     sessionSecret: split(process.env.SECURE_KEY),

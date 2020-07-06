@@ -1,12 +1,14 @@
-import { Service, Inject } from "typedi"
+import Container, { Service, Inject } from "typedi"
 import Database from './DatabaseService'
 import AWSService from './AWSService'
 import * as Posts from '../queries/posts.gen'
 import uuidv1 from 'uuid/v1'
-import { EventDispatcher } from 'event-dispatch'
+import { EventDispatcher, EventSubscriber, On } from 'event-dispatch'
 import Events from '../types/events'
+import config from '../config/config'
 
 @Service()
+@EventSubscriber()
 export default class PostService {
 
     @Inject()
@@ -23,6 +25,15 @@ export default class PostService {
 
     getContentUrl() {
         return this.aws.s3ContentUrl()
+    }
+
+    async removePostIfNotPublished(postId: number) {
+        await Posts.destroyIfUnpublished.run({ postId }, this.db.pool)
+    }
+
+    @On(Events.post.created)
+    onPostCreated(params: any) {
+        setTimeout(() => Container.get(PostService).removePostIfNotPublished(params.postId), (config.uploadTime + 1)*1000)
     }
 
     async getPostsByAuthor(authorId: number) {
