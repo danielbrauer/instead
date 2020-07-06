@@ -3,12 +3,10 @@ import Database from './DatabaseService'
 import AWSService from './AWSService'
 import * as Posts from '../queries/posts.gen'
 import uuidv1 from 'uuid/v1'
-import { EventDispatcher, EventSubscriber, On } from 'event-dispatch'
-import Events from '../types/events'
+import { SimpleEventDispatcher } from 'strongly-typed-events'
 import config from '../config/config'
 
 @Service()
-@EventSubscriber()
 export default class PostService {
 
     @Inject()
@@ -17,10 +15,14 @@ export default class PostService {
     @Inject()
     private aws: AWSService
 
-    private dispatcher : EventDispatcher
+    private _onCreate = new SimpleEventDispatcher<number>()
+    private _onDelete = new SimpleEventDispatcher<number>()
+
+    public get onCreate() { return this._onCreate.asEvent() }
+    public get onDelete() { return this._onDelete.asEvent() }
 
     constructor() {
-        this.dispatcher = new EventDispatcher()
+        this.onCreate.subscribe(this.onPostCreated)
     }
 
     getContentUrl() {
@@ -31,9 +33,8 @@ export default class PostService {
         await Posts.destroyIfUnpublished.run({ postId }, this.db.pool)
     }
 
-    @On(Events.post.created)
-    onPostCreated(params: any) {
-        setTimeout(() => Container.get(PostService).removePostIfNotPublished(params.postId), (config.uploadTime + 1)*1000)
+    onPostCreated(postId: number) {
+        setTimeout(() => Container.get(PostService).removePostIfNotPublished(postId), (config.uploadTime + 1)*1000)
     }
 
     async getPostsByAuthor(authorId: number) {
@@ -45,7 +46,7 @@ export default class PostService {
         const postPromise = Posts.createAndReturn.run({ fileName, authorId, iv, key }, this.db.pool)
         const requestPromise = this.aws.s3GetSignedUploadUrl(fileName, 'application/octet-stream', md5)
         const [signedRequest, [{id: postId}]] = await Promise.all([requestPromise, postPromise])
-        this.dispatcher.dispatch(Events.post.created, { postId })
+        this._onCreate.dispatchAsync(postId)
         return { signedRequest, postId }
     }
 
@@ -59,7 +60,7 @@ export default class PostService {
             throw new Error('Post not found')
         } else {
             await this.aws.s3DeleteObject(deleted.filename)
-            this.dispatcher.dispatch(Events.post.created, { postId: deleted.id })
+            this._onDelete.dispatchAsync(deleted.id)
         }
     }
 }

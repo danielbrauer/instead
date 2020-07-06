@@ -21,6 +21,11 @@ export interface SignupInfo {
     username: string,
 }
 
+export interface FollowRelationship {
+    followerId: number,
+    followeeId: number,
+}
+
 declare module 'express-serve-static-core' {
     interface Request {
         user?: User,
