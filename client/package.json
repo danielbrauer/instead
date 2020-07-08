@@ -24,6 +24,7 @@
     "react-dom": "^16.8.6",
     "react-dropzone": "^11.0.1",
     "react-query": "^2.4.13",
+    "react-query-devtools": "^2.2.1",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.4.1",
     "scrypt-async-modern": "^3.0.7",
