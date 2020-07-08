@@ -75,7 +75,7 @@ class App extends Component<RouteComponentProps<any>, AppState> {
     async componentDidMount() {
         if (!CurrentUser.loggedIn()) return
         try {
-            await Promise.all([this.getConfig(), this.getPosts(), this.updateFollowerList()])
+            await Promise.all([this.getConfig(), this.updateFollowerList()])
         } catch (error) {
             AxiosHelper.logError(error)
         }
@@ -88,11 +88,6 @@ class App extends Component<RouteComponentProps<any>, AppState> {
     async getConfig() {
         const response = await this.authorizedAxios.get(serverUrl + '/getConfig')
         this.setState({ contentUrl: response.data.config.contentUrl })
-    }
-
-    async getPosts() {
-        const response = await this.authorizedAxios.get(serverUrl + '/getPosts')
-        this.setState({ posts: response.data.posts })
     }
 
     async getFollowers() {
@@ -118,7 +113,7 @@ class App extends Component<RouteComponentProps<any>, AppState> {
                 id: idTodelete,
             },
         })
-        this.getPosts()
+        // this.getPosts()
     }
 
     async postWithKeys(key: CryptoKey, ivBuffer: Buffer, contentMd5: string) {
@@ -175,7 +170,7 @@ class App extends Component<RouteComponentProps<any>, AppState> {
             postId: postResponse.data.postId,
             success
         })
-        this.getPosts()
+        // this.getPosts()
         return success
     }
 
@@ -231,7 +226,7 @@ class App extends Component<RouteComponentProps<any>, AppState> {
             return (<Redirect to='/login' />)
         const { posts, followers, followees, followRequests, contentUrl } = this.state
         const postsProps: PostsProps = {
-            posts: posts,
+            // posts: posts,
             contentUrl: contentUrl,
             delete: this.deleteFromDB,
             getUser: this.userCache.getUser,
