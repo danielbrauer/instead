@@ -119,7 +119,7 @@ router.post(
     }),
     async (req, res) => {
         const postInfo = await postService.createPost(req.user.id, req.body.iv, req.body.key, req.body.md5)
-        return res.json({ success: true, ...postInfo })
+        return res.json(postInfo)
     }
 )
 

@@ -19,6 +19,10 @@ authorizedAxios.interceptors.response.use(response => {
     Promise.reject(error)
 })
 
+export const logOut = async() => {
+    await authorizedAxios.get(serverUrl + '/logout')
+}
+
 export const getContentUrl = async() => {
     const response = await authorizedAxios.get<string>(serverUrl + '/getContentUrl')
     return response.data
@@ -94,4 +98,20 @@ export const getFollowees = async() => {
 export const getFollowRequests = async() => {
     const response = await authorizedAxios.get<FollowRequest[]>(serverUrl + '/getFollowRequests')
     return response.data
+}
+
+export const startPost = async(exportedKey: JsonWebKey, ivBase64: string, contentMD5Base64: string) => {
+    const postResponse = await authorizedAxios.post(serverUrl + '/startPost', {
+        key: exportedKey,
+        iv: ivBase64,
+        md5: contentMD5Base64
+    })
+    return postResponse.data
+}
+
+export const finishPost = async(postId: number, success: boolean) => {
+    await authorizedAxios.post(serverUrl + '/finishPost', {
+        postId,
+        success
+    })
 }

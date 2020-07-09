@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react'
 import { Image, Button, Loader, Segment, Dimmer, Menu, Message } from 'semantic-ui-react'
 import { History } from 'history'
 import { useDropzone } from 'react-dropzone'
+import { handleUpload } from './UploadPost'
 
 let urls = new WeakMap()
 
@@ -17,7 +18,6 @@ let blobUrl = (blob: Blob) => {
 
 interface NewPostProps {
     history: History,
-    onSubmit: (file: File) => Promise<boolean>,
 }
 
 export default function NewPost(props: NewPostProps) {
@@ -27,7 +27,7 @@ export default function NewPost(props: NewPostProps) {
 
     async function onSubmit() {
         setUploading(true)
-        const success = await props.onSubmit(uploadInput!)
+        const success = await handleUpload(uploadInput!)
         setUploading(false)
         if (success)
             props.history.push('/home')

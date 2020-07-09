@@ -1,119 +1,24 @@
 import React, { Component } from 'react'
-import Axios, { AxiosInstance } from 'axios'
 import CurrentUser from './CurrentUser'
 import FollowerPage from './FollowerPage'
 import Posts from './Posts'
 import NewPost from './NewPost'
 import { Route, Switch, Redirect, RouteComponentProps } from 'react-router-dom'
-import { readAsArrayBuffer } from 'promise-file-reader'
 
 import { Menu, Dropdown } from 'semantic-ui-react'
-import config from './config'
 import { queryCache } from 'react-query'
+import { logOut } from './RoutesAuthenticated'
 
-const serverUrl = `${config.serverUrl}/api`
+class App extends Component<RouteComponentProps<any>> {
 
-const toBuffer = require('typedarray-to-buffer')
-require('buffer')
-const md5 = require('js-md5')
-
-const Crypto = window.crypto
-
-const kBinaryContentType = 'application/octet-stream'
-
-interface AppState {
-    decryptedPostUrls: { [id: string]: string },
-}
-
-class App extends Component<RouteComponentProps<any>, AppState> {
-    authorizedAxios: AxiosInstance
-    // initialize our state
-    constructor(props: RouteComponentProps<any>) {
-        super(props)
-        this.state = {
-            decryptedPostUrls: {},
-        }
-        this.authorizedAxios = Axios.create({ withCredentials: true })
-        this.authorizedAxios.interceptors.response.use(response => {
-            return response
-        }, error => {
-            if (error.response?.status === 401) {
-                console.log('Not logged in')
-                this.goToLogin()
-            }
-            return Promise.reject(error)
-        })
-    }
-
-    async postWithKeys(key: CryptoKey, ivBuffer: Buffer, contentMd5: string) {
-        const exportedKey = await Crypto.subtle.exportKey(
-            "jwk",
-            key
-        )
-        return this.authorizedAxios.post(serverUrl + '/startPost', {
-            key: exportedKey,
-            iv: ivBuffer.toString('base64'),
-            md5: contentMd5
-        })
-    }
-
-    // Perform the upload
-    handleUpload = async (file: File) => {
-        const filePromise = readAsArrayBuffer(file)
-        const keyPromise = Crypto.subtle.generateKey(
-            {
-                name: "AES-GCM",
-                length: 256
-            },
-            true,
-            ["encrypt", "decrypt"]
-        )
-        const iv = Crypto.getRandomValues(new Uint8Array(12))
-        const [result, key] = await Promise.all([filePromise, keyPromise])
-        const ivBuffer = toBuffer(iv)
-        const encrypted = await Crypto.subtle.encrypt(
-            {
-                name: "AES-GCM",
-                iv,
-            },
-            key,
-            result
-        )
-        const contentMD5 = md5.base64(encrypted)
-        const postResponse = await this.postWithKeys(key, ivBuffer, contentMD5)
-        const signedRequest = postResponse.data.signedRequest
-
-        const options = {
-            headers: {
-                'Content-Type': kBinaryContentType,
-                'Content-MD5': contentMD5,
-            },
-        }
-        let success = true
+    logOutAndClear = async () => {
         try {
-            await Axios.put(signedRequest, encrypted, options)
-        } catch (error) {
-            success = false
-        }
-        await this.authorizedAxios.post(serverUrl + '/finishPost', {
-            postId: postResponse.data.postId,
-            success
-        })
-        return success
-    }
-
-    logOut = async () => {
-        try {
-            await this.authorizedAxios.get(serverUrl + '/logout')
+            await logOut()
         } finally {
             queryCache.clear()
-            this.goToLogin()
+            CurrentUser.clear()
+            this.props.history.push('/login')
         }
-    }
-
-    goToLogin = () => {
-        CurrentUser.clear()
-        this.props.history.push('/login')
     }
 
     render() {
@@ -133,7 +38,7 @@ class App extends Component<RouteComponentProps<any>, AppState> {
                                 <Dropdown.Item icon='image' text='New Post' onClick={() => this.props.history.push('/new')}/>
                                 <Dropdown.Item icon='user' text='Followers' onClick={() => this.props.history.push('/followers')}/>
                                 <Dropdown.Divider />
-                                <Dropdown.Item icon='sign-out' text='Log Out' onClick={this.logOut}/>
+                                <Dropdown.Item icon='sign-out' text='Log Out' onClick={this.logOutAndClear}/>
                             </Dropdown.Menu>
                         </Dropdown>
                     </Menu.Item>
@@ -145,7 +50,7 @@ class App extends Component<RouteComponentProps<any>, AppState> {
                     <Route path='/following' render={props => <FollowerPage {...props} />} />
                     <Route path='/requests' render={props => <FollowerPage {...props} />} />
                     <Route path='/home'><Posts /></Route>
-                    <Route path='/new' render={props => <NewPost {...props} onSubmit={this.handleUpload} />} />
+                    <Route path='/new' render={props => <NewPost {...props} />} />
                 </Switch>
             </div>
         )

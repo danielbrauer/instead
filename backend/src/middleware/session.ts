@@ -1,4 +1,4 @@
-import session from 'express-session'
+import session, { SessionOptions } from 'express-session'
 import redis from 'redis'
 import config from '../config/config'
 
@@ -7,12 +7,13 @@ const client = redis.createClient({
     url: config.redisUrl,
 })
 
-const sessionConfig = {
+const sessionConfig : SessionOptions = {
     secret: config.sessionSecret,
     name: 'instead-photos',
     store: new RedisStore({ client }),
     resave: false,
     saveUninitialized: false,
+    unset: 'destroy',
     cookie: {
         httpOnly: true,
         secure: false,
