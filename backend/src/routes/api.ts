@@ -19,22 +19,22 @@ router.get('/getConfig', (req, res) => {
 
 router.get('/getPosts', async (req, res) => {
     const posts = await postService.getPostsByAuthor(req.user.id)
-    return res.json({ success: true, posts })
+    return res.json(posts)
 })
 
 router.get('/getFollowRequests', async (req, res) => {
     const requests = await userService.getFollowRequests(req.user.id)
-    return res.json({ success: true, requests })
+    return res.json(requests)
 })
 
 router.get('/getFollowerIds', async (req, res) => {
     const followers = await userService.getFollowers(req.user.id)
-    return res.json({ success: true, followers })
+    return res.json(followers)
 })
 
 router.get('/getFollowees', async (req, res) => {
     const followees = await userService.getFollowees(req.user.id)
-    return res.json({ success: true, followees })
+    return res.json(followees)
 })
 
 router.get(
@@ -44,7 +44,7 @@ router.get(
     }),
     async (req, res) => {
         const user = await userService.getUserById(req.query.userid as unknown as number)
-        return res.json({ success: true, user: user })
+        return res.json(user)
     }
 )
 
@@ -55,7 +55,7 @@ router.post(
     }),
     async (req, res) => {
         await userService.addFollowRequest(req.user.id, req.body.username)
-        return res.json({ success: true })
+        return res.send(`Sent request to ${req.body.username}`)
     }
 )
 

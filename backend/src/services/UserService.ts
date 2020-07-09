@@ -5,6 +5,7 @@ import * as Followers from '../queries/followers.gen'
 import * as FollowRequests from '../queries/follow_requests.gen'
 import { SimpleEventDispatcher } from "strongly-typed-events"
 import { FollowRelationship } from "interfaces"
+import { ServerError } from '../middleware/errors'
 
 @Service()
 export default class UserService {
@@ -23,7 +24,7 @@ export default class UserService {
     async getUserById(userId: number) {
         const [user] = await Users.getById.run({ userId }, this.db.pool)
         if (!user)
-            throw new Error('User does not exist')
+            throw new ServerError('User does not exist')
         return user
     }
 
@@ -68,21 +69,21 @@ export default class UserService {
         const error = await this.db.transaction(async(client) => {
             const [requestee] = await Users.getByName.run({ username: requesteeName }, client)
             if (!requestee)
-                throw new Error('User does not exist')
+                throw new ServerError('User does not exist')
             if (requestee.id === requesterId)
-                throw new Error('You don\'t need to follow yourself')
+                throw new ServerError('You don\'t need to follow yourself')
             const [{count: followCount}] = await Followers.count.run(
                 { followerId: requesterId, followeeId: requestee.id },
                 client
             )
             if (followCount !== 0)
-                throw new Error('Already following user')
+                throw new ServerError('Already following user')
             const [{count: requestCount}] = await FollowRequests.count.run(
                 { requesterId: requesterId, requesteeId: requestee.id },
                 client
             )
             if (requestCount !== 0)
-                throw new Error('Request already exists')
+                throw new ServerError('Request already exists')
             await FollowRequests.create.run({ requesterId, requesteeId: requestee.id }, client)
         })
     }
@@ -91,7 +92,7 @@ export default class UserService {
         await this.db.transaction(async(client) => {
             const [request] = await FollowRequests.destroyAndReturn.run({ requesterId, requesteeId}, client)
             if (!request)
-                throw new Error('No such follow request')
+                throw new ServerError('No such follow request')
             await Followers.create.run(
                 { followerId: request.requester_id, followeeId: request.requestee_id},
                 client

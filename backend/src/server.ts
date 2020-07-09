@@ -10,6 +10,7 @@ import forceHttps from './middleware/force-https'
 import session from './middleware/session'
 import auth from './routes/auth'
 import api from './routes/api'
+import { forwardErrors } from './middleware/errors'
 import path from 'path'
 import httpServer from './middleware/http-server'
 
@@ -26,7 +27,7 @@ app.use(bodyParser.json())
 app.use(morgan('dev'))
 
 app.use('/auth', auth)
-app.use('/api', authManager.authenticateSession, api)
+app.use('/api', authManager.authenticateSession, api, forwardErrors)
 
 if (!config.localDev) {
     const relativePathToReact = '/../../client/build'

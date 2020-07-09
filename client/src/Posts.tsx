@@ -1,17 +1,12 @@
 import React from 'react'
 import { useQuery } from 'react-query'
-import CurrentUser from './CurrentUser'
 import { List, Message, Loader } from 'semantic-ui-react'
-import { User } from './Interfaces'
 import EncryptedImage from './EncryptedImage'
-import SafetyButton from './SafetyButton'
 import { getPosts } from './RoutesAuthenticated'
+import PostHeader from './PostHeader'
 
 export interface PostsProps {
-    // posts: Post[],
     contentUrl: string,
-    delete: (id : number) => void,
-    getUser: (userid : number) => User,
 }
 
 export default function (props : PostsProps) {
@@ -38,14 +33,7 @@ export default function (props : PostsProps) {
             <List>
                 {posts.data!.map(post => (
                     <List.Item key={post.id}>
-                        {CurrentUser.getId() === post.author_id ?
-                            <List.Content floated='right'>
-                                <SafetyButton size='mini' onClick={() => props.delete(post.id)}>Delete</SafetyButton>
-                            </List.Content>
-                            :
-                            null}
-                        <List.Icon name='user' />
-                        <List.Content>{props.getUser(post.author_id).username}</List.Content>
+                        <PostHeader post={post} />
                         <EncryptedImage encryptedUrl={props.contentUrl + post.filename} iv={post.iv} decKey={post.key} />
                     </List.Item>
                 ))}

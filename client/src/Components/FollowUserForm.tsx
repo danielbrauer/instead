@@ -1,31 +1,17 @@
 import React, { useState } from 'react'
 import { useInput } from './useInput'
 import { Form, Message, Segment } from 'semantic-ui-react'
+import { useMutation } from 'react-query'
+import { sendFollowRequest } from '../RoutesAuthenticated'
 
-interface FollowUserFormProps {
-    callback : (username : string) => Promise<any>,
-}
-
-export default function FollowUserForm(props : FollowUserFormProps) {
+export default function FollowUserForm() {
     const { value: username, bind: bindUsername, reset: resetUsername } = useInput('')
-    const [success, setSuccess] = useState(false)
-    const [error, setError] = useState(false)
-    const [message, setMessage] = useState('')
+    const [sendFollowRequestMutation, { error, reset, isSuccess }] = useMutation(sendFollowRequest)
 
     async function handleSubmit() {
+        reset()
+        await sendFollowRequestMutation(username)
         resetUsername()
-        try {
-            await props.callback(username)
-            responseCallback(true, "Request sent")
-        } catch (error) {
-            responseCallback(false, error.response.data)
-        }
-    }
-    
-    function responseCallback(success : boolean, message : string) {
-        setSuccess(success)
-        setError(!success)
-        setMessage(message)
     }
 
     return (
@@ -33,7 +19,7 @@ export default function FollowUserForm(props : FollowUserFormProps) {
             To follow a user, send a request using their username
             <br/>
             <br/>
-            <Form error={error} success={success} onSubmit={handleSubmit}>
+            <Form error={error != null} success={isSuccess} onSubmit={handleSubmit}>
                 <Form.Group>
                     <Form.Input placeholder='Username to follow' name='username' {...bindUsername} />
                     <Form.Button content='Request' disabled={username === ''} />
@@ -41,12 +27,12 @@ export default function FollowUserForm(props : FollowUserFormProps) {
                 <Message
                     error
                     header={`Can't follow`}
-                    content={message}
+                    content={error ? error.message : ``}
                 />
                 <Message
                     success
                     header={`Success`}
-                    content={message}
+                    content={`Follow request sent`}
                 />
             </Form>
 
