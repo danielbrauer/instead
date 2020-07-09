@@ -31,7 +31,7 @@ router.post('/finishSignup', async function (req, res) {
         req.body.privateKey,
         req.body.privateKeyIv
     )
-    return res.send({ user: req.session.user })
+    return res.send({ userid: req.session.user.id })
 })
 
 router.use(function hangupHandler(err: any, req: any, res: any, next: any) {

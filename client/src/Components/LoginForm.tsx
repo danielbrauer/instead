@@ -2,14 +2,10 @@ import React, {useState} from 'react'
 import { useInput } from './useInput'
 import { Button, Form, Message, Header, Segment } from 'semantic-ui-react'
 import { RouterProps } from 'react-router'
-import { LoginInfo } from '../Interfaces'
 import CurrentUser from '../CurrentUser'
+import { login } from '../login'
 
-interface LoginFormProps extends RouterProps {
-    onSubmit : (userPassword : LoginInfo) => Promise<void>
-}
-
-export default function LoginForm(props : LoginFormProps) {
+export default function LoginForm(props: RouterProps) {
     const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: secretKey, bind: bindSecretKey } = useInput(CurrentUser.getSecretKey() || '')
@@ -22,7 +18,9 @@ export default function LoginForm(props : LoginFormProps) {
         evt.preventDefault()
         setErrorStatus(false)
         try {
-            await props.onSubmit({ username, password, secretKey })
+            const { userid, displayName } = await login({ username, password, secretKey })
+            CurrentUser.set(userid, username, secretKey, displayName)
+            props.history.push('/home')
         } catch (error) {
             let message = 'Please try again'
             if (error.response)
