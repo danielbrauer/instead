@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
 import Axios, { AxiosInstance } from 'axios'
-import AxiosHelper from './AxiosHelper'
 import CurrentUser from './CurrentUser'
 import FollowerPage from './FollowerPage'
-import Posts, { PostsProps } from './Posts'
+import Posts from './Posts'
 import NewPost from './NewPost'
 import { Route, Switch, Redirect, RouteComponentProps } from 'react-router-dom'
 import { readAsArrayBuffer } from 'promise-file-reader'
@@ -24,7 +23,6 @@ const kBinaryContentType = 'application/octet-stream'
 
 interface AppState {
     decryptedPostUrls: { [id: string]: string },
-    contentUrl: string,
 }
 
 class App extends Component<RouteComponentProps<any>, AppState> {
@@ -34,7 +32,6 @@ class App extends Component<RouteComponentProps<any>, AppState> {
         super(props)
         this.state = {
             decryptedPostUrls: {},
-            contentUrl: "",
         }
         this.authorizedAxios = Axios.create({ withCredentials: true })
         this.authorizedAxios.interceptors.response.use(response => {
@@ -46,21 +43,6 @@ class App extends Component<RouteComponentProps<any>, AppState> {
             }
             return Promise.reject(error)
         })
-    }
-
-    // when component mounts, first thing it does is fetch all existing data in our db
-    async componentDidMount() {
-        if (!CurrentUser.loggedIn()) return
-        try {
-            await Promise.all([this.getConfig()])
-        } catch (error) {
-            AxiosHelper.logError(error)
-        }
-    }
-
-    async getConfig() {
-        const response = await this.authorizedAxios.get(serverUrl + '/getConfig')
-        this.setState({ contentUrl: response.data.config.contentUrl })
     }
 
     async postWithKeys(key: CryptoKey, ivBuffer: Buffer, contentMd5: string) {
@@ -117,7 +99,6 @@ class App extends Component<RouteComponentProps<any>, AppState> {
             postId: postResponse.data.postId,
             success
         })
-        // this.getPosts()
         return success
     }
 
@@ -139,10 +120,6 @@ class App extends Component<RouteComponentProps<any>, AppState> {
         if (!CurrentUser.loggedIn())
             return (<Redirect to='/login' />)
         // const currentUser = useQuery(['user', CurrentUser.getId()], Routes.getUser)
-        const { contentUrl } = this.state
-        const postsProps: PostsProps = {
-            contentUrl: contentUrl,
-        }
         return (
             <div>
                 <Menu inverted fixed='top' size='small'>
@@ -167,7 +144,7 @@ class App extends Component<RouteComponentProps<any>, AppState> {
                     <Route path='/followers' render={props => <FollowerPage {...props}/>} />
                     <Route path='/following' render={props => <FollowerPage {...props} />} />
                     <Route path='/requests' render={props => <FollowerPage {...props} />} />
-                    <Route path='/home' render={props => <Posts {...props} {...postsProps} />} />
+                    <Route path='/home'><Posts /></Route>
                     <Route path='/new' render={props => <NewPost {...props} onSubmit={this.handleUpload} />} />
                 </Switch>
             </div>

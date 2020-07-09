@@ -9,12 +9,9 @@ const userService = Container.get(UserService)
 const postService = Container.get(PostService)
 
 // get the URL where images are hosted
-router.get('/getConfig', (req, res) => {
+router.get('/getContentUrl', (req, res) => {
     const contentUrl = postService.getContentUrl()
-    const config = {
-        contentUrl: contentUrl,
-    }
-    res.json({ success: true, config })
+    res.json(contentUrl)
 })
 
 router.get('/getPosts', async (req, res) => {

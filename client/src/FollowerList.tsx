@@ -1,6 +1,5 @@
 import React from 'react'
 import { List, Message, Loader } from 'semantic-ui-react'
-import { User } from './Interfaces'
 import SafetyButton from './SafetyButton'
 import UserInList from './UserInList'
 import { useQuery, useMutation } from 'react-query'

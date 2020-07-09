@@ -2,23 +2,20 @@ import React from 'react'
 import { useQuery } from 'react-query'
 import { List, Message, Loader } from 'semantic-ui-react'
 import EncryptedImage from './EncryptedImage'
-import { getPosts } from './RoutesAuthenticated'
+import { getPosts, getContentUrl } from './RoutesAuthenticated'
 import PostHeader from './PostHeader'
 
-export interface PostsProps {
-    contentUrl: string,
-}
-
-export default function (props : PostsProps) {
+export default function () {
     const posts = useQuery('posts', getPosts)
-    if (posts.isError) return (
+    const contentUrl = useQuery('contentUrl', getContentUrl)
+    if (posts.isError || contentUrl.isError) return (
         <div>
             <Message negative>
                 <Message.Header>Error fetching posts</Message.Header>
             </Message>
         </div>
     )
-    if (posts.isLoading) return (
+    if (posts.isLoading || contentUrl.isLoading) return (
         <div>
             <Loader active></Loader>
         </div>
@@ -34,7 +31,7 @@ export default function (props : PostsProps) {
                 {posts.data!.map(post => (
                     <List.Item key={post.id}>
                         <PostHeader post={post} />
-                        <EncryptedImage encryptedUrl={props.contentUrl + post.filename} iv={post.iv} decKey={post.key} />
+                        <EncryptedImage encryptedUrl={contentUrl.data + post.filename} iv={post.iv} decKey={post.key} />
                     </List.Item>
                 ))}
             </List>

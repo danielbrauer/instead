@@ -19,6 +19,11 @@ authorizedAxios.interceptors.response.use(response => {
     Promise.reject(error)
 })
 
+export const getContentUrl = async() => {
+    const response = await authorizedAxios.get<string>(serverUrl + '/getContentUrl')
+    return response.data
+}
+
 export const getPosts = async() => {
     const response = await authorizedAxios.get<Post[]>(serverUrl + '/getPosts')
     return response.data
@@ -42,7 +47,7 @@ export const getUser = async(key: string, userid: number) => {
 }
 
 export const sendFollowRequest = async (username: string) => {
-    const response = await authorizedAxios.post(serverUrl + '/sendFollowRequest', {
+    await authorizedAxios.post(serverUrl + '/sendFollowRequest', {
         username: username,
     })
 }
