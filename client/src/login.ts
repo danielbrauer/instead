@@ -53,7 +53,7 @@ const createSecretKey = () => {
 
 export const signup = async(info : NewUserInfo) => {
     console.log('creating user')
-    const username = await startSignup()
+    const { username } = await startSignup()
 
     const srpSalt = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
     const secretKey = createSecretKey()
@@ -94,6 +94,6 @@ export const signup = async(info : NewUserInfo) => {
         // @ts-ignore
         { name: 'AES-GCM', iv: accountPrivateIv}
     )
-    const {userid} = await finishSignup(info.displayName, srpSalt, verifier, mukSalt, exportedPublic, Buffer.from(wrappedPrivate).toString('hex'), Buffer.from(accountPrivateIv).toString('hex'))
+    const {id: userid} = await finishSignup(info.displayName, srpSalt, verifier, mukSalt, exportedPublic, Buffer.from(wrappedPrivate).toString('hex'), Buffer.from(accountPrivateIv).toString('hex'))
     return {userid, username, secretKey}
 }

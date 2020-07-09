@@ -4,6 +4,7 @@ import crypto from '../util/crypto-promise'
 import { generateCombination } from '../util/animalGenerator'
 import config from '../config/config'
 import UserService from "./UserService"
+import { StartLoginResult, FinishLoginResult, StartSignupResult } from "auth"
 
 @Service()
 export default class AuthService {
@@ -11,7 +12,7 @@ export default class AuthService {
     @Inject()
     private userService: UserService
 
-    async startLogin(session: Express.Session, username: string, clientEphemeralPublic : string) {
+    async startLogin(session: Express.Session, username: string, clientEphemeralPublic : string) : Promise<StartLoginResult> {
         if (session.user)
             throw new Error('Session already started logging in')
         const user = await this.userService.getLoginInfo(username)
@@ -37,7 +38,7 @@ export default class AuthService {
         }
     }
 
-    async finishLogin(session: Express.Session, clientSessionProof: string) {
+    async finishLogin(session: Express.Session, clientSessionProof: string) : Promise<FinishLoginResult> {
         if (session.loginFake)
             throw new Error('No such user')
         if (!session.loginInfo)
@@ -51,23 +52,23 @@ export default class AuthService {
             loginInfo.user.verifier,
             clientSessionProof
         )
-        session.user = { id: loginInfo.user.id }
+        session.user = { id: loginInfo.user.id, username: loginInfo.user.username }
         delete session.loginInfo
         return {
             userid: session.user.id,
             serverSessionProof: serverSession.proof,
-            displayName: session.user.displayName,
+            displayName: loginInfo.user.display_name,
         }
     }
 
-    async startSignup(session: Express.Session) {
+    async startSignup(session: Express.Session) : Promise<StartSignupResult>{
         let username = ''
         for (let i = 0; i < 5; ++i) {
             username = generateCombination(1, '', true)
             const count = await this.userService.countByName(username)
             if (count == 0) {
                 session.signupInfo = { username }
-                return username
+                return { username }
             }
         }
         throw new Error('Too many user name collisions!')
@@ -96,7 +97,7 @@ export default class AuthService {
             private_key,
             private_key_iv
         )
-        session.user = { id: user.id }
+        session.user = { username: session.signupInfo.username, id: user.id }
         delete session.signupInfo
     }
 }

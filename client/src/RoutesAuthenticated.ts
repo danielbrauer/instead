@@ -1,7 +1,8 @@
 
 import config from './config'
 import Axios from 'axios'
-import { Post, User, FollowRequest } from './Interfaces'
+import { FollowRequest } from './Interfaces'
+import { User, Post, DeletePostResult } from '../../backend/src/types/api'
 import { queryCache } from 'react-query'
 
 const serverUrl = `${config.serverUrl}/api`
@@ -34,7 +35,7 @@ export const getPosts = async() => {
 }
 
 export const deletePost = async (idTodelete: number) => {
-    const response = await authorizedAxios.delete(serverUrl + '/deletePost', {
+    const response = await authorizedAxios.delete<DeletePostResult>(serverUrl + '/deletePost', {
         params: {
             id: idTodelete,
         },

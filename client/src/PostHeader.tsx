@@ -1,6 +1,6 @@
 import React from 'react'
 import CurrentUser from "./CurrentUser";
-import { Post } from "./Interfaces"
+import { Post } from '../../backend/src/types/api'
 import { useMutation, useQuery } from "react-query"
 import { getUser, deletePost } from './RoutesAuthenticated'
 import { List } from "semantic-ui-react";

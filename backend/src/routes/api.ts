@@ -8,7 +8,6 @@ const router = Router()
 const userService = Container.get(UserService)
 const postService = Container.get(PostService)
 
-// get the URL where images are hosted
 router.get('/getContentUrl', (req, res) => {
     const contentUrl = postService.getContentUrl()
     res.json(contentUrl)
@@ -18,6 +17,45 @@ router.get('/getPosts', async (req, res) => {
     const posts = await postService.getPostsByAuthor(req.user.id)
     return res.json(posts)
 })
+
+router.delete(
+    '/deletePost',
+    validate({
+        id: { in: ['query'], isInt: true, toInt: true, }
+    }),
+    async (req, res) => {
+        const result = await postService.deletePost(req.query.id as unknown as number, req.user.id)
+        return res.json(result)
+    }
+)
+
+router.post(
+    '/startPost',
+    validate({
+        iv: { in: ['body'], isBase64: true },
+        md5: { in: ['body'], isBase64: true }
+    }),
+    async (req, res) => {
+        const postInfo = await postService.createPost(req.user.id, req.body.iv, req.body.key, req.body.md5)
+        return res.json(postInfo)
+    }
+)
+
+router.post(
+    '/finishPost',
+    validate({
+        success: { in: ['body'], isBoolean: true, toBoolean: true },
+        postId: { in: ['body'], isInt: true, toInt: true },
+    }),
+    async (req, res) => {
+        if (req.body.success) {
+            await postService.publishPost(req.body.postId)
+        } else {
+            await postService.deletePost(req.body.postId, req.user.id)
+        }
+        return res.json({ success: true})
+    }
+)
 
 router.get('/getFollowRequests', async (req, res) => {
     const requests = await userService.getFollowRequests(req.user.id)
@@ -97,45 +135,6 @@ router.post(
     async (req, res) => {
         await userService.acceptFollowRequest(req.body.userid, req.user.id)
         return res.json({ success: true })
-    }
-)
-
-router.delete(
-    '/deletePost',
-    validate({
-        id: { in: ['query'], isInt: true, toInt: true, }
-    }),
-    async (req, res) => {
-        await postService.deletePost(req.query.id as unknown as number, req.user.id)
-        return res.json({ success: true })
-    }
-)
-
-router.post(
-    '/startPost',
-    validate({
-        iv: { in: ['body'], isBase64: true },
-        md5: { in: ['body'], isBase64: true }
-    }),
-    async (req, res) => {
-        const postInfo = await postService.createPost(req.user.id, req.body.iv, req.body.key, req.body.md5)
-        return res.json(postInfo)
-    }
-)
-
-router.post(
-    '/finishPost',
-    validate({
-        success: { in: ['body'], isBoolean: true, toBoolean: true },
-        postId: { in: ['body'], isInt: true, toInt: true },
-    }),
-    async (req, res) => {
-        if (req.body.success) {
-            await postService.publishPost(req.body.postId)
-        } else {
-            await postService.deletePost(req.body.postId, req.user.id)
-        }
-        return res.json({ success: true})
     }
 )
 

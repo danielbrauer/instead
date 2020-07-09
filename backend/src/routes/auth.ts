@@ -16,8 +16,8 @@ router.post('/finishLogin', async function (req, res) {
 })
 
 router.get('/startSignup', async function (req, res) {
-    const username = await authService.startSignup(req.session)
-    return res.send({ username })
+    const responseData = await authService.startSignup(req.session)
+    return res.send(responseData)
 })
 
 router.post('/finishSignup', async function (req, res) {
@@ -31,7 +31,7 @@ router.post('/finishSignup', async function (req, res) {
         req.body.privateKey,
         req.body.privateKeyIv
     )
-    return res.send({ userid: req.session.user.id })
+    return res.send(req.session.user)
 })
 
 router.use(function hangupHandler(err: any, req: any, res: any, next: any) {

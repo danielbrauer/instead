@@ -1,6 +1,8 @@
 
 import config from './config'
 import Axios from 'axios'
+import { StartLoginResult, FinishLoginResult, StartSignupResult } from '../../backend/src/types/auth'
+import { User } from '../../backend/src/types/api'
 
 const serverUrl = `${config.serverUrl}/auth`
 
@@ -15,7 +17,7 @@ authorizedAxios.interceptors.response.use(response => {
 })
 
 export const startLogin = async(username: string, clientEphemeralPublic: string) => {
-    const startRes = await authorizedAxios.post(serverUrl + '/startLogin', {
+    const startRes = await authorizedAxios.post<StartLoginResult>(serverUrl + '/startLogin', {
         username,
         clientEphemeralPublic,
     })
@@ -23,19 +25,19 @@ export const startLogin = async(username: string, clientEphemeralPublic: string)
 }
 
 export const finishLogin = async(clientSessionProof: string) => {
-    const finishRes = await authorizedAxios.post(serverUrl + '/finishLogin', {
+    const finishRes = await authorizedAxios.post<FinishLoginResult>(serverUrl + '/finishLogin', {
         clientSessionProof,
     })
     return finishRes.data
 }
 
 export const startSignup = async() => {
-    const startRes = await authorizedAxios.get<string>(serverUrl + '/startSignup')
+    const startRes = await authorizedAxios.get<StartSignupResult>(serverUrl + '/startSignup')
     return startRes.data
 }
 
 export const finishSignup = async(displayName: string, srpSalt: string, verifier: string, mukSalt: string, publicKey: JsonWebKey, privateKey: string, privateKeyIv: string) => {
-    const finishRes = await authorizedAxios.post(serverUrl + '/finishSignup', {
+    const finishRes = await authorizedAxios.post<User>(serverUrl + '/finishSignup', {
         displayName,
         srpSalt,
         verifier,

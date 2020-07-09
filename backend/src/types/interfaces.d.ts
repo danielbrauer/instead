@@ -1,7 +1,4 @@
-export interface User {
-    id: number,
-    username: string,
-}
+import { User } from "api"
 
 export interface LoginUser {
     id: number;
@@ -21,11 +18,6 @@ export interface SignupInfo {
     username: string,
 }
 
-export interface FollowRelationship {
-    followerId: number,
-    followeeId: number,
-}
-
 declare module 'express-serve-static-core' {
     interface Request {
         user?: User,
@@ -35,9 +27,10 @@ declare module 'express-serve-static-core' {
 declare global {
     namespace Express {
         interface Session {
-            loginInfo?: LoginInfo,
-            loginFake?: boolean,
-            signupInfo?: SignupInfo,
+            loginInfo?: LoginInfo
+            loginFake?: boolean
+            signupInfo?: SignupInfo
+            user?: User
         }
     }
 }
