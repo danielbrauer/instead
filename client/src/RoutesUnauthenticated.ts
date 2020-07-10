@@ -9,7 +9,7 @@ const authorizedAxios = Axios.create({ withCredentials: true })
 authorizedAxios.interceptors.response.use(response => {
     return response
 }, error => {
-    if (error.response?.status === 400) {
+    if (error.response?.status >= 400) {
         throw new Error(error.response.data)
     }
     Promise.reject(error)
