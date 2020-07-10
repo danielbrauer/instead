@@ -1,3 +1,5 @@
+import { User } from './api'
+
 export type StartLoginResult = {
     srpSalt: string
     serverEphemeralPublic: string
@@ -11,4 +13,8 @@ export type FinishLoginResult = {
 
 export type StartSignupResult = {
     username: string
+}
+
+export type FinishSignupResult = {
+    user: User
 }

@@ -11,8 +11,4 @@ export interface NewUserInfo {
     password: string
 }
 
-export interface FollowRequest {
-    requester_id : number
-}
-
 export type ButtonCallback = (event: React.MouseEvent<HTMLButtonElement>, data: ButtonProps) => void

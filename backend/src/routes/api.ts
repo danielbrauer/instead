@@ -8,6 +8,15 @@ const router = Router()
 const userService = Container.get(UserService)
 const postService = Container.get(PostService)
 
+router.get('/logout', async function (req, res) {
+    req.session.destroy(err => {
+        if (err)
+            res.status(500).send('Could not end session')
+        else
+            res.send('Logged out')
+    })
+})
+
 router.get('/getContentUrl', (req, res) => {
     const contentUrl = postService.getContentUrl()
     res.json(contentUrl)
@@ -56,21 +65,6 @@ router.post(
         return res.json({ success: true})
     }
 )
-
-router.get('/getFollowRequests', async (req, res) => {
-    const requests = await userService.getFollowRequests(req.user.id)
-    return res.json(requests)
-})
-
-router.get('/getFollowerIds', async (req, res) => {
-    const followers = await userService.getFollowers(req.user.id)
-    return res.json(followers)
-})
-
-router.get('/getFollowees', async (req, res) => {
-    const followees = await userService.getFollowees(req.user.id)
-    return res.json(followees)
-})
 
 router.get(
     '/getUserById',
@@ -138,13 +132,19 @@ router.post(
     }
 )
 
-router.get('/logout', async function (req, res) {
-    req.session.destroy(err => {
-        if (err)
-            res.status(500).send('Could not end session')
-        else
-            res.send('Logged out')
-    })
+router.get('/getFollowRequests', async (req, res) => {
+    const requests = await userService.getFollowRequests(req.user.id)
+    return res.json(requests)
+})
+
+router.get('/getFollowerIds', async (req, res) => {
+    const followers = await userService.getFollowers(req.user.id)
+    return res.json(followers)
+})
+
+router.get('/getFollowees', async (req, res) => {
+    const followees = await userService.getFollowees(req.user.id)
+    return res.json(followees)
 })
 
 export default router

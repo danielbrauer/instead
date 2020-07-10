@@ -4,7 +4,7 @@ import * as Users from '../queries/users.gen'
 import * as Followers from '../queries/followers.gen'
 import * as FollowRequests from '../queries/follow_requests.gen'
 import { SimpleEventDispatcher } from "strongly-typed-events"
-import { FollowRelationship } from "interfaces"
+import { FollowRelationship } from '../types/api'
 import { ServerError } from '../middleware/errors'
 
 @Service()
@@ -106,7 +106,8 @@ export default class UserService {
     }
 
     async getFollowRequests(requesteeId: number) {
-        return await FollowRequests.getByRequesteeId.run({ requesteeId }, this.db.pool)
+        const requests = await FollowRequests.getByRequesteeId.run({ requesteeId }, this.db.pool)
+        return requests.map(r => r.requester_id)
     }
 
     async getFollowers(followeeId: number) {

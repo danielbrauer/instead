@@ -94,6 +94,14 @@ export const signup = async(info : NewUserInfo) => {
         // @ts-ignore
         { name: 'AES-GCM', iv: accountPrivateIv}
     )
-    const {id: userid} = await finishSignup(info.displayName, srpSalt, verifier, mukSalt, exportedPublic, Buffer.from(wrappedPrivate).toString('hex'), Buffer.from(accountPrivateIv).toString('hex'))
+    const { user: {id: userid} } = await finishSignup(
+        info.displayName,
+        srpSalt,
+        verifier,
+        mukSalt,
+        exportedPublic,
+        Buffer.from(wrappedPrivate).toString('hex'),
+        Buffer.from(accountPrivateIv).toString('hex')
+    )
     return {userid, username, secretKey}
 }

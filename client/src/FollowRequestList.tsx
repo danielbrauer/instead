@@ -26,15 +26,15 @@ export default function FollowerList() {
                 <Message>You don't have any follow requests</Message>
                 :
                 <List verticalAlign='middle'>
-                    {requests.data!.map((request) => (
-                        <List.Item key={request.requester_id}>
+                    {requests.data!.map((requester) => (
+                        <List.Item key={requester}>
                             <List.Content floated='right'>
                                 <Button.Group size='mini'>
-                                    <Button positive onClick={() => acceptMutation(request.requester_id)}>Accept</Button>
-                                    <Button negative onClick={() => rejectMutation(request.requester_id)}>Reject</Button>
+                                    <Button positive onClick={() => acceptMutation(requester)}>Accept</Button>
+                                    <Button negative onClick={() => rejectMutation(requester)}>Reject</Button>
                                 </Button.Group>
                             </List.Content>
-                            <UserInList id={request.requester_id} />
+                            <UserInList id={requester} />
                         </List.Item>
                     ))}
                 </List>}

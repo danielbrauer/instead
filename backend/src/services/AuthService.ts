@@ -4,7 +4,7 @@ import crypto from '../util/crypto-promise'
 import { generateCombination } from '../util/animalGenerator'
 import config from '../config/config'
 import UserService from "./UserService"
-import { StartLoginResult, FinishLoginResult, StartSignupResult } from "auth"
+import { StartLoginResult, FinishLoginResult, StartSignupResult, FinishSignupResult } from "auth"
 
 @Service()
 export default class AuthService {
@@ -83,11 +83,10 @@ export default class AuthService {
         public_key: string,
         private_key: string,
         private_key_iv: string
-    ) {
-
+    ) : Promise<FinishSignupResult> {
         if (!session.signupInfo)
             throw new Error('Session hasn\'t started signing in')
-        const user = await this.userService.create(
+        const newUserResult = await this.userService.create(
             session.signupInfo.username,
             display_name,
             verifier,
@@ -97,7 +96,8 @@ export default class AuthService {
             private_key,
             private_key_iv
         )
-        session.user = { username: session.signupInfo.username, id: user.id }
+        session.user = { username: session.signupInfo.username, id: newUserResult.id }
         delete session.signupInfo
+        return { user: session.user }
     }
 }

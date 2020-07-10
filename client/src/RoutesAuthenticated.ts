@@ -1,8 +1,7 @@
 
 import config from './config'
 import Axios from 'axios'
-import { FollowRequest } from './Interfaces'
-import { User, Post, DeletePostResult } from '../../backend/src/types/api'
+import { User, Post, DeletePostResult, StartPostResult, FinishPostResult } from '../../backend/src/types/api'
 import { queryCache } from 'react-query'
 
 const serverUrl = `${config.serverUrl}/api`
@@ -42,6 +41,22 @@ export const deletePost = async (idTodelete: number) => {
     })
     queryCache.invalidateQueries('posts')
     return response.data
+}
+
+export const startPost = async(exportedKey: JsonWebKey, ivBase64: string, contentMD5Base64: string) => {
+    const postResponse = await authorizedAxios.post<StartPostResult>(serverUrl + '/startPost', {
+        key: exportedKey,
+        iv: ivBase64,
+        md5: contentMD5Base64
+    })
+    return postResponse.data
+}
+
+export const finishPost = async(postId: number, success: boolean) => {
+    await authorizedAxios.post<FinishPostResult>(serverUrl + '/finishPost', {
+        postId,
+        success
+    })
 }
 
 export const getUser = async(key: string, userid: number) => {
@@ -97,22 +112,6 @@ export const getFollowees = async() => {
 }
 
 export const getFollowRequests = async() => {
-    const response = await authorizedAxios.get<FollowRequest[]>(serverUrl + '/getFollowRequests')
+    const response = await authorizedAxios.get<number[]>(serverUrl + '/getFollowRequests')
     return response.data
-}
-
-export const startPost = async(exportedKey: JsonWebKey, ivBase64: string, contentMD5Base64: string) => {
-    const postResponse = await authorizedAxios.post(serverUrl + '/startPost', {
-        key: exportedKey,
-        iv: ivBase64,
-        md5: contentMD5Base64
-    })
-    return postResponse.data
-}
-
-export const finishPost = async(postId: number, success: boolean) => {
-    await authorizedAxios.post(serverUrl + '/finishPost', {
-        postId,
-        success
-    })
 }

@@ -1,8 +1,7 @@
 
 import config from './config'
 import Axios from 'axios'
-import { StartLoginResult, FinishLoginResult, StartSignupResult } from '../../backend/src/types/auth'
-import { User } from '../../backend/src/types/api'
+import { StartLoginResult, FinishLoginResult, StartSignupResult, FinishSignupResult } from '../../backend/src/types/auth'
 
 const serverUrl = `${config.serverUrl}/auth`
 
@@ -37,7 +36,7 @@ export const startSignup = async() => {
 }
 
 export const finishSignup = async(displayName: string, srpSalt: string, verifier: string, mukSalt: string, publicKey: JsonWebKey, privateKey: string, privateKeyIv: string) => {
-    const finishRes = await authorizedAxios.post<User>(serverUrl + '/finishSignup', {
+    const finishRes = await authorizedAxios.post<FinishSignupResult>(serverUrl + '/finishSignup', {
         displayName,
         srpSalt,
         verifier,
