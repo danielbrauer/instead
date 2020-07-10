@@ -12,13 +12,14 @@ export default class AuthService {
     @Inject()
     private userService: UserService
 
-    async startLogin(session: Express.Session, username: string, clientEphemeralPublic : string) : Promise<StartLoginResult> {
+    async startLogin(session: Express.Session, username: string, clientEphemeralPublic: string): Promise<StartLoginResult> {
         if (session.user)
             throw new Error('Session already started logging in')
         const user = await this.userService.getLoginInfo(username)
         if (user) {
             const serverEphemeral = srp.generateEphemeral(user.verifier)
             session.loginInfo = {
+                loginFake: false,
                 user,
                 clientEphemeralPublic,
                 serverEphemeralSecret: serverEphemeral.secret
@@ -30,7 +31,9 @@ export default class AuthService {
         } else {
             const bytes = await crypto.randomBytes(256)
             const hash = crypto.createHash('sha256').update(username).update(config.garbageSeed)
-            session.loginFake = true
+            session.loginInfo = {
+                loginFake: true,
+            }
             return {
                 srpSalt: hash.digest('hex').substring(32),
                 serverEphemeralPublic: bytes.toString('hex'),
@@ -38,11 +41,11 @@ export default class AuthService {
         }
     }
 
-    async finishLogin(session: Express.Session, clientSessionProof: string) : Promise<FinishLoginResult> {
-        if (session.loginFake)
-            throw new Error('No such user')
+    async finishLogin(session: Express.Session, clientSessionProof: string): Promise<FinishLoginResult> {
         if (!session.loginInfo)
             throw new Error('Missing startLogin')
+        if (session.loginInfo.loginFake)
+            throw new Error('No such user')
         const loginInfo = session.loginInfo
         const serverSession = srp.deriveSession(
             loginInfo.serverEphemeralSecret,

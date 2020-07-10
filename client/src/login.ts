@@ -4,6 +4,7 @@ import { LoginInfo } from './Interfaces'
 import { startLogin, finishLogin, finishSignup } from './RoutesUnauthenticated'
 import { NewUserInfo } from "./Interfaces"
 import { startSignup } from "./RoutesUnauthenticated"
+import { pwnedPassword } from 'hibp'
 const toBuffer = require('typedarray-to-buffer') as (x: any) => Buffer
 const hkdf = require('futoin-hkdf') as (ikm: string, length: number, { salt, info, hash} : {salt : string, info: string, hash : string}) => Buffer
 const xor = require('buffer-xor') as (a: Buffer, b: Buffer) => Buffer
@@ -104,4 +105,10 @@ export const signup = async(info : NewUserInfo) => {
         Buffer.from(accountPrivateIv).toString('hex')
     )
     return {userid, username, secretKey}
+}
+
+export const passwordCheck = async(password: string) => {
+    const breachCount = await pwnedPassword(password)
+    if (breachCount > 0)
+        throw new Error('This password is well-known, and you can\'t use it here. If it is your password, you should change it.')
 }

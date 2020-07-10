@@ -9,9 +9,10 @@ export interface LoginUser {
 }
 
 export interface LoginInfo {
-    user: LoginUser,
-    clientEphemeralPublic: string,
-    serverEphemeralSecret: string,
+    loginFake: boolean,
+    user?: LoginUser,
+    clientEphemeralPublic?: string,
+    serverEphemeralSecret?: string,
 }
 
 export interface SignupInfo {
@@ -28,7 +29,6 @@ declare global {
     namespace Express {
         interface Session {
             loginInfo?: LoginInfo
-            loginFake?: boolean
             signupInfo?: SignupInfo
             user?: User
         }

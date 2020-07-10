@@ -6,7 +6,7 @@ export default class AuthStrategies {
 
         const user = req.session.user
 
-        if (!user || user.salt) {
+        if (!user || req.session.loginInfo) {
             return res.status(401).send('Unauthenticated session')
         }
 
