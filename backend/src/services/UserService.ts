@@ -1,9 +1,9 @@
-import { Service, Inject } from "typedi"
+import { Service, Inject } from 'typedi'
 import Database from './DatabaseService'
 import * as Users from '../queries/users.gen'
 import * as Followers from '../queries/followers.gen'
 import * as FollowRequests from '../queries/follow_requests.gen'
-import { SimpleEventDispatcher } from "strongly-typed-events"
+import { SimpleEventDispatcher } from 'strongly-typed-events'
 import { FollowRelationship } from '../types/api'
 import { ServerError } from '../middleware/errors'
 

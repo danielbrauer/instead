@@ -1,4 +1,4 @@
-import { Service } from "typedi"
+import { Service } from 'typedi'
 import config from '../config/config'
 import aws from 'aws-sdk'
 

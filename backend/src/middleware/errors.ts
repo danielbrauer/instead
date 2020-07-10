@@ -3,9 +3,9 @@ import { Response, Request, NextFunction } from 'express'
 export class ServerError extends Error {
     clientVisible: boolean
     constructor(message: string) {
-        super();
+        super()
         this.clientVisible = true
-        this.message = message;
+        this.message = message
     }
 }
 

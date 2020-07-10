@@ -1,8 +1,8 @@
 import { Container } from 'typedi'
 import Router from 'express-promise-router'
 import validate from '../middleware/validate'
-import UserService from "../services/UserService"
-import PostService from "../services/PostService"
+import UserService from '../services/UserService'
+import PostService from '../services/PostService'
 
 const router = Router()
 const userService = Container.get(UserService)

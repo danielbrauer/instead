@@ -1,7 +1,6 @@
 import Router from 'express-promise-router'
 import Container from 'typedi'
 import AuthService from '../services/AuthService'
-import { response } from 'express'
 
 const router = Router()
 const authService = Container.get(AuthService)

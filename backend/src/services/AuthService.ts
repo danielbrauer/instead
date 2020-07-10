@@ -1,10 +1,10 @@
-import { Service, Inject } from "typedi"
+import { Service, Inject } from 'typedi'
 import srp from 'secure-remote-password/server'
 import crypto from '../util/crypto-promise'
 import { generateCombination } from '../util/animalGenerator'
 import config from '../config/config'
-import UserService from "./UserService"
-import { StartLoginResult, FinishLoginResult, StartSignupResult, FinishSignupResult } from "auth"
+import UserService from './UserService'
+import { StartLoginResult, FinishLoginResult, StartSignupResult, FinishSignupResult } from 'auth'
 
 @Service()
 export default class AuthService {
@@ -64,7 +64,7 @@ export default class AuthService {
         }
     }
 
-    async startSignup(session: Express.Session) : Promise<StartSignupResult>{
+    async startSignup(session: Express.Session): Promise<StartSignupResult>{
         let username = ''
         for (let i = 0; i < 5; ++i) {
             username = generateCombination(1, '', true)
@@ -86,7 +86,7 @@ export default class AuthService {
         public_key: string,
         private_key: string,
         private_key_iv: string
-    ) : Promise<FinishSignupResult> {
+    ): Promise<FinishSignupResult> {
         if (!session.signupInfo)
             throw new Error('Session hasn\'t started signing in')
         const newUserResult = await this.userService.create(
