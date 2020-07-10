@@ -1,9 +1,10 @@
-import { Service, Inject } from "typedi"
+import { Service, Inject } from 'typedi'
 import srp from 'secure-remote-password/server'
 import crypto from '../util/crypto-promise'
 import { generateCombination } from '../util/animalGenerator'
 import config from '../config/config'
-import UserService from "./UserService"
+import UserService from './UserService'
+import { StartLoginResult, FinishLoginResult, StartSignupResult, FinishSignupResult } from 'auth'
 
 @Service()
 export default class AuthService {
@@ -11,13 +12,14 @@ export default class AuthService {
     @Inject()
     private userService: UserService
 
-    async startLogin(session: Express.Session, username: string, clientEphemeralPublic : string) {
+    async startLogin(session: Express.Session, username: string, clientEphemeralPublic: string): Promise<StartLoginResult> {
         if (session.user)
             throw new Error('Session already started logging in')
         const user = await this.userService.getLoginInfo(username)
         if (user) {
             const serverEphemeral = srp.generateEphemeral(user.verifier)
             session.loginInfo = {
+                loginFake: false,
                 user,
                 clientEphemeralPublic,
                 serverEphemeralSecret: serverEphemeral.secret
@@ -29,7 +31,9 @@ export default class AuthService {
         } else {
             const bytes = await crypto.randomBytes(256)
             const hash = crypto.createHash('sha256').update(username).update(config.garbageSeed)
-            session.loginFake = true
+            session.loginInfo = {
+                loginFake: true,
+            }
             return {
                 srpSalt: hash.digest('hex').substring(32),
                 serverEphemeralPublic: bytes.toString('hex'),
@@ -37,11 +41,11 @@ export default class AuthService {
         }
     }
 
-    async finishLogin(session: Express.Session, clientSessionProof: string) {
-        if (session.loginFake)
-            throw new Error('No such user')
+    async finishLogin(session: Express.Session, clientSessionProof: string): Promise<FinishLoginResult> {
         if (!session.loginInfo)
             throw new Error('Missing startLogin')
+        if (session.loginInfo.loginFake)
+            throw new Error('No such user')
         const loginInfo = session.loginInfo
         const serverSession = srp.deriveSession(
             loginInfo.serverEphemeralSecret,
@@ -51,23 +55,23 @@ export default class AuthService {
             loginInfo.user.verifier,
             clientSessionProof
         )
-        session.user = { id: loginInfo.user.id }
+        session.user = { id: loginInfo.user.id, username: loginInfo.user.username }
         delete session.loginInfo
         return {
             userid: session.user.id,
             serverSessionProof: serverSession.proof,
-            displayName: session.user.displayName,
+            displayName: loginInfo.user.display_name,
         }
     }
 
-    async startSignup(session: Express.Session) {
+    async startSignup(session: Express.Session): Promise<StartSignupResult>{
         let username = ''
         for (let i = 0; i < 5; ++i) {
             username = generateCombination(1, '', true)
             const count = await this.userService.countByName(username)
             if (count == 0) {
                 session.signupInfo = { username }
-                return username
+                return { username }
             }
         }
         throw new Error('Too many user name collisions!')
@@ -82,11 +86,10 @@ export default class AuthService {
         public_key: string,
         private_key: string,
         private_key_iv: string
-    ) {
-
+    ): Promise<FinishSignupResult> {
         if (!session.signupInfo)
             throw new Error('Session hasn\'t started signing in')
-        const user = await this.userService.create(
+        const newUserResult = await this.userService.create(
             session.signupInfo.username,
             display_name,
             verifier,
@@ -96,7 +99,8 @@ export default class AuthService {
             private_key,
             private_key_iv
         )
-        session.user = { id: user.id }
+        session.user = { username: session.signupInfo.username, id: newUserResult.id }
         delete session.signupInfo
+        return { user: session.user }
     }
 }

@@ -1,31 +1,40 @@
 import React from 'react'
-import { List, Button, Message } from 'semantic-ui-react'
-import { User, FollowRequest } from './Interfaces'
+import { List, Button, Message, Loader } from 'semantic-ui-react'
 import UserInList from './UserInList'
+import { useQuery, useMutation } from 'react-query'
+import { getFollowRequests, acceptFollowRequest, rejectFollowRequest } from './RoutesAuthenticated'
 
-export interface FollowRequestListProps {
-    requests: FollowRequest[],
-    accept: (userid: number) => void,
-    reject: (userid: number) => void,
-    getUser: (userid: number) => User,
-}
-
-export default function FollowerList(props: FollowRequestListProps) {
+export default function FollowerList() {
+    const requests = useQuery('followRequests', getFollowRequests)
+    const [acceptMutation] = useMutation(acceptFollowRequest)
+    const [rejectMutation] = useMutation(rejectFollowRequest)
+    if (requests.isError) return (
+        <div>
+            <Message negative>
+                <Message.Header>Error fetching followers</Message.Header>
+            </Message>
+        </div>
+    )
+    if (requests.isLoading) return (
+        <div>
+            <Loader active></Loader>
+        </div>
+    )
     return (
         <div>
-            {props.requests.length === 0 ?
+            {requests.data!.length === 0 ?
                 <Message>You don't have any follow requests</Message>
                 :
                 <List verticalAlign='middle'>
-                    {props.requests.map((request) => (
-                        <List.Item key={request.requester_id}>
+                    {requests.data!.map((requester) => (
+                        <List.Item key={requester}>
                             <List.Content floated='right'>
                                 <Button.Group size='mini'>
-                                    <Button positive onClick={() => props.accept(request.requester_id)}>Accept</Button>
-                                    <Button negative onClick={() => props.reject(request.requester_id)}>Reject</Button>
+                                    <Button positive onClick={() => acceptMutation(requester)}>Accept</Button>
+                                    <Button negative onClick={() => rejectMutation(requester)}>Reject</Button>
                                 </Button.Group>
                             </List.Content>
-                            <UserInList id={request.requester_id} getUser={props.getUser} />
+                            <UserInList id={requester} />
                         </List.Item>
                     ))}
                 </List>}

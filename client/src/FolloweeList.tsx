@@ -3,35 +3,35 @@ import { List, Message, Loader } from 'semantic-ui-react'
 import SafetyButton from './SafetyButton'
 import UserInList from './UserInList'
 import { useQuery, useMutation } from 'react-query'
-import { getFollowers, removeFollower } from './RoutesAuthenticated'
+import { getFollowees, unfollow } from './RoutesAuthenticated'
 
-export default function FollowerList() {
-    const followers = useQuery('followers', getFollowers)
-    const [removeFollowerMutation] = useMutation(removeFollower)
-    if (followers.isError) return (
+export default function FolloweeList() {
+    const following = useQuery('followees', getFollowees)
+    const [unfollowMutation] = useMutation(unfollow)
+    if (following.isError) return (
         <div>
             <Message negative>
                 <Message.Header>Error fetching followers</Message.Header>
             </Message>
         </div>
     )
-    if (followers.isLoading) return (
+    if (following.isLoading) return (
         <div>
             <Loader active></Loader>
         </div>
     )
     return (
         <div>
-            {followers.data!.length === 0 ?
-                <Message>You don't have any followers yet</Message>
+            {following.data!.length === 0 ?
+                <Message>You aren't following anyone yet</Message>
                 :
                 <List verticalAlign='middle'>
-                    {followers.data!.map(follower => (
-                        <List.Item key={follower}>
+                    {following.data!.map(followee => (
+                        <List.Item key={followee}>
                             <List.Content floated='right'>
-                                <SafetyButton size='mini' onClick={() => removeFollowerMutation(follower)}>Remove</SafetyButton>
+                                <SafetyButton size='mini' onClick={() => unfollowMutation(followee)}>Unfollow</SafetyButton>
                             </List.Content>
-                            <UserInList id={follower} />
+                            <UserInList id={followee} />
                         </List.Item>
                     ))}
                 </List>

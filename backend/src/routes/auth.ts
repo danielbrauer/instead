@@ -7,21 +7,21 @@ const authService = Container.get(AuthService)
 
 router.post('/startLogin', async function (req, res) {
     const responseData = await authService.startLogin(req.session, req.body.username, req.body.clientEphemeralPublic)
-    return res.send(responseData)
+    return res.json(responseData)
 })
 
 router.post('/finishLogin', async function (req, res) {
     const responseData = await authService.finishLogin(req.session, req.body.clientSessionProof)
-    return res.send(responseData)
+    return res.json(responseData)
 })
 
 router.get('/startSignup', async function (req, res) {
-    const username = await authService.startSignup(req.session)
-    return res.send({ username })
+    const responseData = await authService.startSignup(req.session)
+    return res.json(responseData)
 })
 
 router.post('/finishSignup', async function (req, res) {
-    await authService.finishSignup(
+    const responseData = await authService.finishSignup(
         req.session,
         req.body.displayName,
         req.body.verifier,
@@ -31,7 +31,7 @@ router.post('/finishSignup', async function (req, res) {
         req.body.privateKey,
         req.body.privateKeyIv
     )
-    return res.send({ user: req.session.user })
+    return res.json(responseData)
 })
 
 router.use(function hangupHandler(err: any, req: any, res: any, next: any) {

@@ -1,42 +1,32 @@
-import React, {useState} from 'react'
+import React from 'react'
 import { useInput } from './useInput'
 import { Button, Form, Message, Header, Segment } from 'semantic-ui-react'
 import { RouterProps } from 'react-router'
-import { LoginInfo } from '../Interfaces'
 import CurrentUser from '../CurrentUser'
+import { login } from '../login'
+import { useMutation } from 'react-query'
 
-interface LoginFormProps extends RouterProps {
-    onSubmit : (userPassword : LoginInfo) => Promise<void>
-}
-
-export default function LoginForm(props : LoginFormProps) {
+export default function LoginForm(props: RouterProps) {
     const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: secretKey, bind: bindSecretKey } = useInput(CurrentUser.getSecretKey() || '')
-    const [errorStatus, setErrorStatus] = useState(false)
-    const [statusMessage, setStatusMessage] = useState('')
-    const [loadingStatus, setLoadingStatus] = useState(false)
+    const [loginMutation, { error, reset, isLoading, isSuccess, isError }] = useMutation(login)
 
     async function handleSubmit(evt : React.FormEvent<HTMLFormElement>) {
-        setLoadingStatus(true)
+        reset()
         evt.preventDefault()
-        setErrorStatus(false)
         try {
-            await props.onSubmit({ username, password, secretKey })
+            const { userid, displayName } = await loginMutation({ username, password, secretKey })
+            CurrentUser.set(userid, username, secretKey, displayName)
+            props.history.push('/home')
         } catch (error) {
-            let message = 'Please try again'
-            if (error.response)
-                message = error.response.data
-            setLoadingStatus(false)
             resetPassword()
-            setErrorStatus(true)
-            setStatusMessage(message)
         }
     }
 
     return (
         <div>
-            <Form error={errorStatus} loading={loadingStatus} onSubmit={handleSubmit} size='large'>
+            <Form error={isError} loading={isLoading || isSuccess} onSubmit={handleSubmit} size='large'>
                 <Segment inverted stacked>
                     <Header as='h2' textAlign='center' content='Instead'/>
                     <Form.Input
@@ -67,7 +57,7 @@ export default function LoginForm(props : LoginFormProps) {
                     <Message
                       error
                       header='Could not log in'
-                      content={statusMessage}
+                      content={error?.message}
                     />
                     <Button size='large' content='Log in'/>
                 </Segment>
