@@ -6,7 +6,7 @@ import CurrentUser from '../CurrentUser'
 import { signup, passwordCheck } from '../login'
 import { useMutation } from 'react-query'
 
-export default function NewUserForm(props: RouterProps) {
+export default function SignupForm(props: RouterProps) {
     const { value: displayName, bind: bindDisplayName } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: repeatPassword, bind: bindRepeatPassword, reset: resetRepeatPassword } = useInput('')

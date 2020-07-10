@@ -1,7 +1,7 @@
 import React from 'react'
 import CurrentUser from './CurrentUser'
 import LoginForm from './Components/LoginForm'
-import NewUserForm from './Components/NewUserForm'
+import SignupForm from './Components/SignupForm'
 import { Grid } from 'semantic-ui-react'
 import { Route, Switch, Redirect } from 'react-router-dom'
 
@@ -14,7 +14,7 @@ export default function() {
             <Grid.Column style={{ maxWidth: 450 }}>
                 <Switch>
                     <Route exact path="/" render={props => <Redirect {...props} to="/login" />} />
-                    <Route exact path="/signup" render={props => <NewUserForm {...props} />} />
+                    <Route exact path="/signup" render={props => <SignupForm {...props} />} />
                     <Route exact path="/login" render={props => <LoginForm {...props} />} />
                 </Switch>
             </Grid.Column>
