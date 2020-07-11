@@ -16,8 +16,8 @@ export default function LoginForm(props: RouterProps) {
         reset()
         evt.preventDefault()
         try {
-            const { userid, displayName } = await loginMutation({ username, password, secretKey })
-            CurrentUser.set(userid, username, secretKey, displayName)
+            const userInfo = await loginMutation({ username, password, secretKey })
+            CurrentUser.set(userInfo)
             props.history.push('/home')
         } catch (error) {
             resetPassword()

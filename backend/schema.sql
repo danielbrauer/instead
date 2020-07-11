@@ -42,6 +42,66 @@ CREATE TABLE public.followers (
 
 
 --
+-- Name: key_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.key_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: key_id_sequence; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.key_id_sequence
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: key_set_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.key_set_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: key_sets; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.key_sets (
+    id integer DEFAULT nextval('public.key_set_id_seq'::regclass) NOT NULL,
+    valid_start timestamp without time zone DEFAULT now() NOT NULL,
+    valid_end timestamp without time zone,
+    owner_id integer NOT NULL
+);
+
+
+--
+-- Name: keys; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.keys (
+    jwk text NOT NULL,
+    iv text NOT NULL,
+    user_id integer NOT NULL,
+    key_set_id integer NOT NULL
+);
+
+
+--
 -- Name: post_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -60,11 +120,11 @@ CREATE SEQUENCE public.post_id_seq
 CREATE TABLE public.posts (
     id integer DEFAULT nextval('public.post_id_seq'::regclass) NOT NULL,
     "timestamp" timestamp without time zone DEFAULT now() NOT NULL,
-    key jsonb NOT NULL,
-    iv text NOT NULL,
     author_id integer NOT NULL,
     filename text NOT NULL,
-    published boolean DEFAULT false NOT NULL
+    published boolean DEFAULT false NOT NULL,
+    key_set_id integer NOT NULL,
+    iv text NOT NULL
 );
 
 
@@ -91,10 +151,18 @@ CREATE TABLE public.users (
     srp_salt text NOT NULL,
     display_name text NOT NULL,
     muk_salt text NOT NULL,
-    private_key_iv text NOT NULL,
     private_key text NOT NULL,
-    public_key jsonb NOT NULL
+    public_key jsonb NOT NULL,
+    current_post_key_set integer
 );
+
+
+--
+-- Name: key_sets key_sets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.key_sets
+    ADD CONSTRAINT key_sets_pkey PRIMARY KEY (id);
 
 
 --
@@ -125,6 +193,13 @@ CREATE INDEX follow_requests_idx ON public.follow_requests USING btree (requeste
 --
 
 CREATE INDEX followers_idx ON public.followers USING btree (follower_id, followee_id);
+
+
+--
+-- Name: keys_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX keys_idx ON public.keys USING btree (user_id, key_set_id);
 
 
 --
@@ -174,11 +249,51 @@ ALTER TABLE ONLY public.followers
 
 
 --
+-- Name: keys key_key_set_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.keys
+    ADD CONSTRAINT key_key_set_fkey FOREIGN KEY (key_set_id) REFERENCES public.key_sets(id) ON DELETE CASCADE;
+
+
+--
+-- Name: key_sets key_set_owner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.key_sets
+    ADD CONSTRAINT key_set_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: keys key_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.keys
+    ADD CONSTRAINT key_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: posts posts_author_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.posts
     ADD CONSTRAINT posts_author_id_fkey FOREIGN KEY (author_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: posts posts_key_set_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.posts
+    ADD CONSTRAINT posts_key_set_id_fkey FOREIGN KEY (key_set_id) REFERENCES public.key_sets(id) ON DELETE CASCADE;
+
+
+--
+-- Name: users users_current_post_key_set_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_current_post_key_set_fkey FOREIGN KEY (current_post_key_set) REFERENCES public.key_sets(id);
 
 
 --

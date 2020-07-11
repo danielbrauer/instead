@@ -32,8 +32,8 @@ export default function SignupForm(props: RouterProps) {
             return
         try {
             await passwordCheckMutation(password)
-            const {userid, username, secretKey} = await signupMutation({ displayName, password })
-            CurrentUser.set(userid, username, secretKey, displayName)
+            const userInfo = await signupMutation({ displayName, password })
+            CurrentUser.set(userInfo)
             props.history.push('/welcome')
         } catch (error) {
             resetPassword()

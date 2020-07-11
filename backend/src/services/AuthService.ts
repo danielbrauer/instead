@@ -56,11 +56,15 @@ export default class AuthService {
             clientSessionProof
         )
         session.user = { id: loginInfo.user.id, username: loginInfo.user.username }
+        const { private_key: privateKey, public_key : publicKey, muk_salt: mukSalt } = await this.userService.getUserInfo(session.user.id)
         delete session.loginInfo
         return {
             userid: session.user.id,
             serverSessionProof: serverSession.proof,
             displayName: loginInfo.user.display_name,
+            privateKey,
+            publicKey: publicKey as JsonWebKey,
+            mukSalt,
         }
     }
 
@@ -85,7 +89,6 @@ export default class AuthService {
         muk_salt: string,
         public_key: string,
         private_key: string,
-        private_key_iv: string
     ): Promise<FinishSignupResult> {
         if (!session.signupInfo)
             throw new Error('Session hasn\'t started signing in')
@@ -97,7 +100,6 @@ export default class AuthService {
             muk_salt,
             public_key,
             private_key,
-            private_key_iv
         )
         session.user = { username: session.signupInfo.username, id: newUserResult.id }
         delete session.signupInfo

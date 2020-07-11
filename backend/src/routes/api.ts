@@ -3,10 +3,13 @@ import Router from 'express-promise-router'
 import validate from '../middleware/validate'
 import UserService from '../services/UserService'
 import PostService from '../services/PostService'
+import KeyService from '../services/KeyService'
+import { ServerError } from 'src/middleware/errors'
 
 const router = Router()
 const userService = Container.get(UserService)
 const postService = Container.get(PostService)
+const keyService = Container.get(KeyService)
 
 router.get('/logout', async function (req, res) {
     req.session.destroy(err => {
@@ -38,14 +41,25 @@ router.delete(
     }
 )
 
+router.get('/getCurrentKey', async (req, res) => {
+    const [currentKey] = await keyService.getCurrentKey(req.user.id)
+    return res.json(currentKey)
+})
+
 router.post(
     '/startPost',
     validate({
+        keyId: { in: ['body'], isInt: true, toInt: true, },
         iv: { in: ['body'], isBase64: true },
-        md5: { in: ['body'], isBase64: true }
+        md5: { in: ['body'], isBase64: true },
     }),
     async (req, res) => {
-        const postInfo = await postService.createPost(req.user.id, req.body.iv, req.body.key, req.body.md5)
+        const currentKey = await keyService.getCurrentKeySetId(req.user.id)
+        if (currentKey == null)
+            throw new ServerError('No current key')
+        if (currentKey !== req.body.keyId)
+            throw new ServerError('Post key does not match current key')
+        const postInfo = await postService.createPost(req.user.id, req.body.keyId, req.body.iv, req.body.md5)
         return res.json(postInfo)
     }
 )

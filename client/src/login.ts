@@ -1,6 +1,6 @@
 import scrypt, { ScryptOptions } from 'scrypt-async-modern'
 import srp from 'secure-remote-password/client'
-import { LoginInfo } from './Interfaces'
+import { LoginInfo, CurrentUserInfo } from './Interfaces'
 import { startLogin, finishLogin, finishSignup } from './RoutesUnauthenticated'
 import { NewUserInfo } from "./Interfaces"
 import { startSignup } from "./RoutesUnauthenticated"
@@ -31,6 +31,16 @@ const derivePrivateKey = async (salt : string, password : string, secretKey : st
     return xor(hashedPassword, saltedKey).toString('hex')
 }
 
+const importKeyFromHex = async (keyAsHex: string) => {
+    return await Crypto.subtle.importKey(
+        'raw',
+        Buffer.from(keyAsHex, 'hex'),
+        { name: 'AES-GCM'},
+        false,
+        ["encrypt", "decrypt", 'wrapKey', 'unwrapKey']
+    )
+}
+
 export const login = async(info : LoginInfo) => {
     console.log('logging in')
     const clientEphemeral = srp.generateEphemeral()
@@ -38,10 +48,32 @@ export const login = async(info : LoginInfo) => {
     const { srpSalt, serverEphemeralPublic } = startResponse
     const srpKey = await derivePrivateKey(srpSalt, info.password, info.secretKey, info.username)
     const clientSession = srp.deriveSession(clientEphemeral.secret, serverEphemeralPublic, srpSalt, info.username, srpKey)
-    const finishResponse = await finishLogin(clientSession.proof)
-    const { serverSessionProof, userid, displayName } = finishResponse
+    const userInfo = await finishLogin(clientSession.proof)
+    const { serverSessionProof, userid, displayName, privateKey: privateKeyEnc, publicKey, mukSalt } = userInfo
     srp.verifySession(clientEphemeral.public, clientSession, serverSessionProof)
-    return { userid, displayName }
+
+    const mukHex = await derivePrivateKey(mukSalt, info.password, info.secretKey, info.username)
+    const muk = await importKeyFromHex(mukHex)
+    const privateKey = await Crypto.subtle.unwrapKey(
+        'jwk',
+        Buffer.from(privateKeyEnc, 'base64'),
+        muk,
+        { name: 'AES-KW'},
+        'AES-GCM',
+        false,
+        ['decrypt']
+    )
+    const importedPublicKey = await Crypto.subtle.importKey(
+        'jwk',
+        publicKey,
+        { name: 'AES-GCM'},
+        false,
+        ['encrypt']
+    )
+    const accountKeys = new CryptoKeyPair()
+    accountKeys.privateKey = privateKey
+    accountKeys.publicKey = importedPublicKey
+    return { id: userid, username: info.username, displayName, secretKey: info.secretKey, accountKeys }
 }
 
 const createSecretKey = () => {
@@ -62,16 +94,8 @@ export const signup = async(info : NewUserInfo) => {
     const verifier = srp.deriveVerifier(srpKey)
 
     const mukSalt = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
-    const muk = await derivePrivateKey(mukSalt, info.password, secretKey, username)
-    // @ts-ignore
-    const mukJwk = await Crypto.subtle.importKey(
-        'raw',
-        Buffer.from(muk, 'hex'),
-        // @ts-ignore
-        { name: 'AES-GCM'},
-        false,
-        ["encrypt", "decrypt", 'wrapKey', 'unwrapKey']
-    )
+    const mukHex = await derivePrivateKey(mukSalt, info.password, secretKey, username)
+    const muk = await importKeyFromHex(mukHex)
     const keyParams: RsaHashedKeyGenParams = {
         name: 'RSA-OAEP',
         modulusLength: 4096,
@@ -87,13 +111,11 @@ export const signup = async(info : NewUserInfo) => {
         'jwk',
         accountKeys.publicKey
     )
-    const accountPrivateIv = Crypto.getRandomValues(new Uint8Array(12))
     const wrappedPrivate = await Crypto.subtle.wrapKey(
         'jwk',
         accountKeys.privateKey,
-        mukJwk,
-        // @ts-ignore
-        { name: 'AES-GCM', iv: accountPrivateIv}
+        muk,
+        { name: 'AES-KW' }
     )
     const { user: {id: userid} } = await finishSignup(
         info.displayName,
@@ -101,10 +123,15 @@ export const signup = async(info : NewUserInfo) => {
         verifier,
         mukSalt,
         exportedPublic,
-        Buffer.from(wrappedPrivate).toString('hex'),
-        Buffer.from(accountPrivateIv).toString('hex')
+        Buffer.from(wrappedPrivate).toString('base64'),
     )
-    return {userid, username, secretKey}
+    return {
+        id: userid,
+        username,
+        secretKey,
+        displayName: info.displayName,
+        accountKeys,
+    }
 }
 
 export const passwordCheck = async(password: string) => {

@@ -29,7 +29,6 @@ router.post('/finishSignup', async function (req, res) {
         req.body.mukSalt,
         req.body.publicKey,
         req.body.privateKey,
-        req.body.privateKeyIv
     )
     return res.json(responseData)
 })

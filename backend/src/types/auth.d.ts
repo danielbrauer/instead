@@ -9,6 +9,9 @@ export type FinishLoginResult = {
     userid: number
     serverSessionProof: string
     displayName: string
+    privateKey: string
+    publicKey: JsonWebKey
+    mukSalt: string
 }
 
 export type StartSignupResult = {

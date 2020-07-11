@@ -1,39 +1,38 @@
+import { CurrentUserInfo } from "./Interfaces"
 
-const kIdKey = 'userId'
-const kUsernameKey = 'username'
 const kSecretKeyKey = 'secretKey'
-const kDisplayNameKey = 'displayName'
 
 class CurrentUser {
 
+    private static info: CurrentUserInfo
+
     static getId() : number {
-        return parseInt(localStorage.getItem(kIdKey)!, 10)
+        return CurrentUser.info.id
     }
 
     static getUsername() : string {
-        return localStorage.getItem(kUsernameKey)!
+        return CurrentUser.info.username
     }
 
     static getDisplayName() : string {
-        return localStorage.getItem(kDisplayNameKey)!
+        return CurrentUser.info.displayName
     }
 
     static getSecretKey() : string | null {
-        return localStorage.getItem(kSecretKeyKey)
+        return CurrentUser.info.secretKey || localStorage.getItem(kSecretKeyKey)
     }
 
-    static set(id : number, username : string, secretKey : string, displayName : string) {
-        localStorage.setItem(kIdKey, id.toString())
-        localStorage.setItem(kUsernameKey, username)
-        localStorage.setItem(kDisplayNameKey, displayName)
+    static getAccountKeys() : CryptoKeyPair {
+        return CurrentUser.info.accountKeys
+    }
 
-        localStorage.setItem(kSecretKeyKey, secretKey)
+    static set(info: CurrentUserInfo) {
+        CurrentUser.info = info
+        localStorage.setItem(kSecretKeyKey, info.secretKey)
     }
 
     static clear() {
-        localStorage.removeItem(kIdKey)
-        localStorage.removeItem(kUsernameKey)
-        localStorage.removeItem(kDisplayNameKey)
+        delete CurrentUser.info
     }
 
     static clearSecretKey() {
@@ -41,7 +40,7 @@ class CurrentUser {
     }
 
     static loggedIn() {
-        return localStorage.getItem(kIdKey) !== null
+        return CurrentUser.info !== null
     }
 }
 

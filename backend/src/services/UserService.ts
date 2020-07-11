@@ -33,6 +33,11 @@ export default class UserService {
         return loginInfo
     }
 
+    async getUserInfo(userId: number) {
+        const [info] = await Users.getUserInfo.run({ userId }, this.db.pool)
+        return info
+    }
+
     async countByName(username: string) {
         const [{count}] = await Users.countByName.run({ username }, this.db.pool)
         return count
@@ -46,7 +51,6 @@ export default class UserService {
         muk_salt: string,
         public_key: string,
         private_key: string,
-        private_key_iv: string
     ) {
         const [user] = await Users.create.run(
             {
@@ -57,7 +61,6 @@ export default class UserService {
                 muk_salt,
                 public_key,
                 private_key,
-                private_key_iv
             },
             this.db.pool
         )

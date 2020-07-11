@@ -1,12 +1,12 @@
 
 import config from './config'
 import Axios from 'axios'
-import { User, Post, DeletePostResult, StartPostResult, FinishPostResult } from '../../backend/src/types/api'
+import { User, Post, DeletePostResult, StartPostResult, FinishPostResult, EncryptedPostKey } from '../../backend/src/types/api'
 import { queryCache } from 'react-query'
 
-const serverUrl = `${config.serverUrl}/api`
+const baseURL = `${config.serverUrl}/api`
 
-const authorizedAxios = Axios.create({ withCredentials: true })
+const authorizedAxios = Axios.create({ withCredentials: true, baseURL })
 authorizedAxios.interceptors.response.use(response => {
     return response
 }, error => {
@@ -20,21 +20,21 @@ authorizedAxios.interceptors.response.use(response => {
 })
 
 export const logOut = async() => {
-    await authorizedAxios.get(serverUrl + '/logout')
+    await authorizedAxios.get('/logout')
 }
 
 export const getContentUrl = async() => {
-    const response = await authorizedAxios.get<string>(serverUrl + '/getContentUrl')
+    const response = await authorizedAxios.get<string>('/getContentUrl')
     return response.data
 }
 
 export const getPosts = async() => {
-    const response = await authorizedAxios.get<Post[]>(serverUrl + '/getPosts')
+    const response = await authorizedAxios.get<Post[]>('/getPosts')
     return response.data
 }
 
 export const deletePost = async (idTodelete: number) => {
-    const response = await authorizedAxios.delete<DeletePostResult>(serverUrl + '/deletePost', {
+    const response = await authorizedAxios.delete<DeletePostResult>('/deletePost', {
         params: {
             id: idTodelete,
         },
@@ -43,8 +43,13 @@ export const deletePost = async (idTodelete: number) => {
     return response.data
 }
 
+export const getCurrentKey = async () => {
+    const response = await authorizedAxios.get<EncryptedPostKey>('/getCurrentKey')
+    return response.data
+}
+
 export const startPost = async(exportedKey: JsonWebKey, ivBase64: string, contentMD5Base64: string) => {
-    const postResponse = await authorizedAxios.post<StartPostResult>(serverUrl + '/startPost', {
+    const postResponse = await authorizedAxios.post<StartPostResult>('/startPost', {
         key: exportedKey,
         iv: ivBase64,
         md5: contentMD5Base64
@@ -53,48 +58,48 @@ export const startPost = async(exportedKey: JsonWebKey, ivBase64: string, conten
 }
 
 export const finishPost = async(postId: number, success: boolean) => {
-    await authorizedAxios.post<FinishPostResult>(serverUrl + '/finishPost', {
+    await authorizedAxios.post<FinishPostResult>('/finishPost', {
         postId,
         success
     })
 }
 
 export const getUser = async(key: string, userid: number) => {
-    const response = await authorizedAxios.get<User>(serverUrl + '/getUserById', {
+    const response = await authorizedAxios.get<User>('/getUserById', {
         params: {userid: userid}
     })
     return response.data
 }
 
 export const sendFollowRequest = async (username: string) => {
-    await authorizedAxios.post(serverUrl + '/sendFollowRequest', {
+    await authorizedAxios.post('/sendFollowRequest', {
         username: username,
     })
 }
 
 export const rejectFollowRequest = async (userid: number) => {
-    await authorizedAxios.post(serverUrl + '/rejectFollowRequest', {
+    await authorizedAxios.post('/rejectFollowRequest', {
         userid: userid
     })
     queryCache.invalidateQueries('followRequests')
 }
 
 export const unfollow = async (userid: number) => {
-    await authorizedAxios.post(serverUrl + '/unfollow', {
+    await authorizedAxios.post('/unfollow', {
         userid: userid
     })
     queryCache.invalidateQueries('followees')
 }
 
 export const removeFollower = async (userid: number) => {
-    await authorizedAxios.post(serverUrl + '/removeFollower', {
+    await authorizedAxios.post('/removeFollower', {
         userid: userid
     })
     queryCache.invalidateQueries('followers')
 }
 
 export const acceptFollowRequest = async (userid: number) => {
-    await authorizedAxios.post(serverUrl + '/acceptFollowRequest', {
+    await authorizedAxios.post('/acceptFollowRequest', {
         userid: userid
     })
     queryCache.invalidateQueries('followers')
@@ -102,16 +107,16 @@ export const acceptFollowRequest = async (userid: number) => {
 }
 
 export const getFollowers = async() => {
-    const response = await authorizedAxios.get<number[]>(serverUrl + '/getFollowerIds')
+    const response = await authorizedAxios.get<number[]>('/getFollowerIds')
     return response.data
 }
 
 export const getFollowees = async() => {
-    const response = await authorizedAxios.get<number[]>(serverUrl + '/getFollowees')
+    const response = await authorizedAxios.get<number[]>('/getFollowees')
     return response.data
 }
 
 export const getFollowRequests = async() => {
-    const response = await authorizedAxios.get<number[]>(serverUrl + '/getFollowRequests')
+    const response = await authorizedAxios.get<number[]>('/getFollowRequests')
     return response.data
 }

@@ -1,5 +1,5 @@
 /* @name CreateAndReturn */
-INSERT INTO posts (filename, author_id, iv, key) VALUES (:fileName, :authorId, :iv, :key) RETURNING id;
+INSERT INTO posts (filename, author_id, key_set_id, iv) VALUES (:fileName, :authorId, :keySetId, :iv) RETURNING id;
 
 /* @name Publish */
 UPDATE posts SET published = true WHERE id = :postId;

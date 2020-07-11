@@ -12,7 +12,6 @@ export interface ICreateParams {
   muk_salt: string | null | void;
   public_key: Json | null | void;
   private_key: string | null | void;
-  private_key_iv: string | null | void;
 }
 
 /** 'Create' return type */
@@ -26,15 +25,44 @@ export interface ICreateQuery {
   result: ICreateResult;
 }
 
-const createIR: any = {"name":"Create","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":142,"b":149,"line":2,"col":123}]}},{"name":"display_name","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":153,"b":164,"line":2,"col":134}]}},{"name":"verifier","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":168,"b":175,"line":2,"col":149}]}},{"name":"srp_salt","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":179,"b":186,"line":2,"col":160}]}},{"name":"muk_salt","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":190,"b":197,"line":2,"col":171}]}},{"name":"public_key","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":201,"b":210,"line":2,"col":182}]}},{"name":"private_key","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":214,"b":224,"line":2,"col":195}]}},{"name":"private_key_iv","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":228,"b":241,"line":2,"col":209}]}}],"usedParamSet":{"username":true,"display_name":true,"verifier":true,"srp_salt":true,"muk_salt":true,"public_key":true,"private_key":true,"private_key_iv":true},"statement":{"body":"INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key, private_key_iv) VALUES (:username, :display_name, :verifier, :srp_salt, :muk_salt, :public_key, :private_key, :private_key_iv) RETURNING id","loc":{"a":19,"b":255,"line":2,"col":0}}};
+const createIR: any = {"name":"Create","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":126,"b":133,"line":2,"col":107}]}},{"name":"display_name","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":137,"b":148,"line":2,"col":118}]}},{"name":"verifier","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":152,"b":159,"line":2,"col":133}]}},{"name":"srp_salt","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":163,"b":170,"line":2,"col":144}]}},{"name":"muk_salt","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":174,"b":181,"line":2,"col":155}]}},{"name":"public_key","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":185,"b":194,"line":2,"col":166}]}},{"name":"private_key","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":198,"b":208,"line":2,"col":179}]}}],"usedParamSet":{"username":true,"display_name":true,"verifier":true,"srp_salt":true,"muk_salt":true,"public_key":true,"private_key":true},"statement":{"body":"INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key) VALUES (:username, :display_name, :verifier, :srp_salt, :muk_salt, :public_key, :private_key) RETURNING id","loc":{"a":19,"b":222,"line":2,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key, private_key_iv) VALUES (:username, :display_name, :verifier, :srp_salt, :muk_salt, :public_key, :private_key, :private_key_iv) RETURNING id
+ * INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key) VALUES (:username, :display_name, :verifier, :srp_salt, :muk_salt, :public_key, :private_key) RETURNING id
  * ```
  */
 export const create = new PreparedQuery<ICreateParams,ICreateResult>(createIR);
+
+
+/** 'GetUserInfo' parameters type */
+export interface IGetUserInfoParams {
+  userId: number | null | void;
+}
+
+/** 'GetUserInfo' return type */
+export interface IGetUserInfoResult {
+  private_key: string;
+  public_key: Json;
+  muk_salt: string;
+}
+
+/** 'GetUserInfo' query type */
+export interface IGetUserInfoQuery {
+  params: IGetUserInfoParams;
+  result: IGetUserInfoResult;
+}
+
+const getUserInfoIR: any = {"name":"GetUserInfo","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":314,"b":319,"line":5,"col":64}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT private_key, public_key, muk_salt FROM users WHERE id = :userId","loc":{"a":250,"b":319,"line":5,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT private_key, public_key, muk_salt FROM users WHERE id = :userId
+ * ```
+ */
+export const getUserInfo = new PreparedQuery<IGetUserInfoParams,IGetUserInfoResult>(getUserInfoIR);
 
 
 /** 'CountByName' parameters type */
@@ -53,7 +81,7 @@ export interface ICountByNameQuery {
   result: ICountByNameResult;
 }
 
-const countByNameIR: any = {"name":"CountByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":333,"b":340,"line":5,"col":50}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT COUNT(*)::int FROM users WHERE username = :username","loc":{"a":283,"b":340,"line":5,"col":0}}};
+const countByNameIR: any = {"name":"CountByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":397,"b":404,"line":8,"col":50}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT COUNT(*)::int FROM users WHERE username = :username","loc":{"a":347,"b":404,"line":8,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -81,7 +109,7 @@ export interface IGetByIdQuery {
   result: IGetByIdResult;
 }
 
-const getByIdIR: any = {"name":"GetById","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":407,"b":412,"line":8,"col":43}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, username FROM users WHERE id = :userId","loc":{"a":364,"b":412,"line":8,"col":0}}};
+const getByIdIR: any = {"name":"GetById","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":471,"b":476,"line":11,"col":43}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, username FROM users WHERE id = :userId","loc":{"a":428,"b":476,"line":11,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -108,7 +136,7 @@ export interface IGetByNameQuery {
   result: IGetByNameResult;
 }
 
-const getByNameIR: any = {"name":"GetByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":477,"b":484,"line":11,"col":39}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT id FROM users WHERE username = :username","loc":{"a":438,"b":484,"line":11,"col":0}}};
+const getByNameIR: any = {"name":"GetByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":541,"b":548,"line":14,"col":39}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT id FROM users WHERE username = :username","loc":{"a":502,"b":548,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -139,7 +167,7 @@ export interface IGetLoginInfoByNameQuery {
   result: IGetLoginInfoByNameResult;
 }
 
-const getLoginInfoByNameIR: any = {"name":"GetLoginInfoByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":602,"b":609,"line":14,"col":83}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT id, username, srp_salt, verifier, display_name FROM users WHERE username = :username","loc":{"a":519,"b":609,"line":14,"col":0}}};
+const getLoginInfoByNameIR: any = {"name":"GetLoginInfoByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":666,"b":673,"line":17,"col":83}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT id, username, srp_salt, verifier, display_name FROM users WHERE username = :username","loc":{"a":583,"b":673,"line":17,"col":0}}};
 
 /**
  * Query generated from SQL:

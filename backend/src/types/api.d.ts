@@ -1,4 +1,5 @@
 import { IGetByAuthorIdResult } from "../queries/posts.gen"
+import { IGetFollowerPublicKeysResult, IGetCurrentKeyResult} from "../queries/keys.gen"
 
 export interface User {
     id: number
@@ -27,6 +28,8 @@ export interface StartPostResult {
 
 export interface FinishPostResult extends ActionResult {}
 
-export interface Post extends IGetByAuthorIdResult {
+export interface Post extends IGetByAuthorIdResult {}
 
-}
+export interface EncryptedPostKey extends IGetCurrentKeyResult {}
+
+export interface PublicKey extends IGetFollowerPublicKeysResult {}
