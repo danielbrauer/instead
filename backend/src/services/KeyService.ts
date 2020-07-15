@@ -2,7 +2,7 @@ import { Service, Inject } from "typedi"
 import Database from './DatabaseService'
 import * as Keys from '../queries/keys.gen'
 import UserService from '../services/UserService'
-import { FollowRelationship } from '../types/api'
+import { FollowRelationship, EncryptedPostKey } from '../types/api'
 
 @Service()
 export default class KeyService {
@@ -45,18 +45,18 @@ export default class KeyService {
         })
     }
 
-    async createKeySet(userId: number, jwk: string, iv: string) {
+    async createKeySet(userId: number, jwk: string) {
         let returnKeySetId: number = null
         await this.db.transaction(async client => {
             const [{ id: keySetId }] = await Keys.createKeySet.run({ ownerId: userId }, client)
             await Keys.setCurrentKeySetId.run({ userId, keySetId }, client)
-            await Keys.addKey.run({ userId, jwk, iv, keySetId }, client)
+            await Keys.addKeys.run({ keys: [{user_id: userId, jwk, key_set_id: keySetId}] }, client)
             returnKeySetId = keySetId
         })
         return returnKeySetId
     }
 
-    async createKey(userId: number, keySetId: number, jwk: string, iv: string) {
-        await Keys.addKey.run({ userId, keySetId, jwk, iv }, this.db.pool)
+    async addKeys(keys: EncryptedPostKey[]) {
+        await Keys.addKeys.run({ keys }, this.db.pool)
     }
 }

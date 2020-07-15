@@ -95,7 +95,6 @@ CREATE TABLE public.key_sets (
 
 CREATE TABLE public.keys (
     jwk text NOT NULL,
-    iv text NOT NULL,
     user_id integer NOT NULL,
     key_set_id integer NOT NULL
 );

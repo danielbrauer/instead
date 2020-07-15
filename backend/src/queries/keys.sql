@@ -24,5 +24,9 @@ UPDATE key_sets SET valid_end = now() WHERE id = :keySetId;
 /* @name CreateKeySet */
 INSERT INTO key_sets (owner_id) VALUES (:ownerId) RETURNING id;
 
-/* @name AddKey */
-INSERT INTO keys (user_id, key_set_id, jwk, iv) VALUES (:userId, :keySetId, :jwk, :iv);
+/*
+    @name AddKeys
+    @param keys -> ((user_id, key_set_id, jwk)...)
+*/
+INSERT INTO keys (user_id, key_set_id, jwk)
+VALUES :keys;

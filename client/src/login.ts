@@ -5,7 +5,7 @@ import { startLogin, finishLogin, finishSignup } from './RoutesUnauthenticated'
 import { NewUserInfo } from "./Interfaces"
 import { startSignup } from "./RoutesUnauthenticated"
 import { pwnedPassword } from 'hibp'
-const toBuffer = require('typedarray-to-buffer') as (x: any) => Buffer
+const toBuffer = require('typedarray-to-buffer') as (x: Uint8Array) => Buffer
 const hkdf = require('futoin-hkdf') as (ikm: string, length: number, { salt, info, hash} : {salt : string, info: string, hash : string}) => Buffer
 const xor = require('buffer-xor') as (a: Buffer, b: Buffer) => Buffer
 const Crypto = window.crypto

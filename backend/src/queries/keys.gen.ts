@@ -64,7 +64,6 @@ export interface IGetCurrentKeyParams {
 /** 'GetCurrentKey' return type */
 export interface IGetCurrentKeyResult {
   jwk: string;
-  iv: string;
   user_id: number;
   key_set_id: number;
 }
@@ -174,31 +173,33 @@ const createKeySetIR: any = {"name":"CreateKeySet","params":[{"name":"ownerId","
 export const createKeySet = new PreparedQuery<ICreateKeySetParams,ICreateKeySetResult>(createKeySetIR);
 
 
-/** 'AddKey' parameters type */
-export interface IAddKeyParams {
-  userId: number | null | void;
-  keySetId: number | null | void;
-  jwk: string | null | void;
-  iv: string | null | void;
+/** 'AddKeys' parameters type */
+export interface IAddKeysParams {
+  keys: Array<{
+    user_id: number,
+    key_set_id: number,
+    jwk: string
+  }>;
 }
 
-/** 'AddKey' return type */
-export type IAddKeyResult = void;
+/** 'AddKeys' return type */
+export type IAddKeysResult = void;
 
-/** 'AddKey' query type */
-export interface IAddKeyQuery {
-  params: IAddKeyParams;
-  result: IAddKeyResult;
+/** 'AddKeys' query type */
+export interface IAddKeysQuery {
+  params: IAddKeysParams;
+  result: IAddKeysResult;
 }
 
-const addKeyIR: any = {"name":"AddKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":772,"b":777,"line":28,"col":57}]}},{"name":"keySetId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":781,"b":788,"line":28,"col":66}]}},{"name":"jwk","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":792,"b":794,"line":28,"col":77}]}},{"name":"iv","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":798,"b":799,"line":28,"col":83}]}}],"usedParamSet":{"userId":true,"keySetId":true,"jwk":true,"iv":true},"statement":{"body":"INSERT INTO keys (user_id, key_set_id, jwk, iv) VALUES (:userId, :keySetId, :jwk, :iv)","loc":{"a":715,"b":800,"line":28,"col":0}}};
+const addKeysIR: any = {"name":"AddKeys","params":[{"name":"keys","codeRefs":{"defined":{"a":728,"b":731,"line":29,"col":11},"used":[{"a":823,"b":826,"line":32,"col":8}]},"transform":{"type":"pick_array_spread","keys":["user_id","key_set_id","jwk"]}}],"usedParamSet":{"keys":true},"statement":{"body":"INSERT INTO keys (user_id, key_set_id, jwk)\nVALUES :keys","loc":{"a":771,"b":826,"line":31,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * INSERT INTO keys (user_id, key_set_id, jwk, iv) VALUES (:userId, :keySetId, :jwk, :iv)
+ * INSERT INTO keys (user_id, key_set_id, jwk)
+ * VALUES :keys
  * ```
  */
-export const addKey = new PreparedQuery<IAddKeyParams,IAddKeyResult>(addKeyIR);
+export const addKeys = new PreparedQuery<IAddKeysParams,IAddKeysResult>(addKeysIR);
 
 

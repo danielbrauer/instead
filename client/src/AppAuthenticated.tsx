@@ -7,7 +7,7 @@ import { Route, Switch, Redirect, RouteComponentProps } from 'react-router-dom'
 
 import { Menu, Dropdown } from 'semantic-ui-react'
 import { queryCache, useQuery } from 'react-query'
-import { logOut, getUser } from './RoutesAuthenticated'
+import { logout, getUser } from './RoutesAuthenticated'
 
 export default function(props: RouteComponentProps<any>) {
     if (!CurrentUser.loggedIn())
@@ -17,7 +17,7 @@ export default function(props: RouteComponentProps<any>) {
 
     const logOutAndClear = async () => {
         try {
-            await logOut()
+            await logout()
         } finally {
             queryCache.clear()
             CurrentUser.clear()

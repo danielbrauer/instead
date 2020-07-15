@@ -4,7 +4,7 @@ import validate from '../middleware/validate'
 import UserService from '../services/UserService'
 import PostService from '../services/PostService'
 import KeyService from '../services/KeyService'
-import { ServerError } from 'src/middleware/errors'
+import { ServerError } from '../middleware/errors'
 
 const router = Router()
 const userService = Container.get(UserService)
@@ -44,6 +44,21 @@ router.delete(
 router.get('/getCurrentKey', async (req, res) => {
     const currentKey = await keyService.getCurrentKey(req.user.id)
     return res.json(currentKey)
+})
+
+router.post('/createCurrentKey',
+    validate({
+        jwk: { in: ['body'], isBase64: true },
+    }),
+    async (req, res) => {
+        const keySetId = keyService.createKeySet(req.user.id, req.body.iv)
+        return res.json(keySetId)
+    }
+)
+
+router.post('/addKeys', async (req, res) => {
+    keyService.addKeys(req.body.keys)
+    return res.json({ success: true})
 })
 
 router.post(
@@ -154,6 +169,11 @@ router.get('/getFollowRequests', async (req, res) => {
 router.get('/getFollowerIds', async (req, res) => {
     const followers = await userService.getFollowers(req.user.id)
     return res.json(followers)
+})
+
+router.get('/getFollowerPublicKeys', async (req, res) => {
+    const keys = await keyService.getFollowerPublicKeys(req.user.id)
+    return res.json(keys)
 })
 
 router.get('/getFollowees', async (req, res) => {

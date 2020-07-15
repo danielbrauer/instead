@@ -1,7 +1,7 @@
 
 import config from './config'
 import Axios from 'axios'
-import { User, Post, DeletePostResult, StartPostResult, FinishPostResult, EncryptedPostKey } from '../../backend/src/types/api'
+import { User, Post, DeletePostResult, StartPostResult, FinishPostResult, EncryptedPostKey, PublicKey } from '../../backend/src/types/api'
 import { queryCache } from 'react-query'
 
 const baseURL = `${config.serverUrl}/api`
@@ -48,9 +48,22 @@ export async function getCurrentKey() {
     return response.data
 }
 
-export async function startPost(exportedKey: JsonWebKey, ivBase64: string, contentMD5Base64: string) {
+export async function createCurrentKey(jwkBase64: string) {
+    const response = await authorizedAxios.post<number>('/createCurrentKey', {
+        jwk: jwkBase64,
+    })
+    return response.data
+}
+
+export async function addKeys(keys: EncryptedPostKey[]) {
+    await authorizedAxios.post('/addKeys', {
+        keys
+    })
+}
+
+export async function startPost(keyId: number, ivBase64: string, contentMD5Base64: string) {
     const postResponse = await authorizedAxios.post<StartPostResult>('/startPost', {
-        key: exportedKey,
+        keyId,
         iv: ivBase64,
         md5: contentMD5Base64
     })
@@ -108,6 +121,11 @@ export async function acceptFollowRequest(userid: number) {
 
 export async function getFollowers() {
     const response = await authorizedAxios.get<number[]>('/getFollowerIds')
+    return response.data
+}
+
+export async function getFollowerPublicKeys() {
+    const response = await authorizedAxios.get<PublicKey[]>('/getFollowerPublicKeys')
     return response.data
 }
 
