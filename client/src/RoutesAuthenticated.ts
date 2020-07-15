@@ -19,21 +19,21 @@ authorizedAxios.interceptors.response.use(response => {
     Promise.reject(error)
 })
 
-export const logOut = async() => {
+export async function logout() {
     await authorizedAxios.get('/logout')
 }
 
-export const getContentUrl = async() => {
+export async function getContentUrl() {
     const response = await authorizedAxios.get<string>('/getContentUrl')
     return response.data
 }
 
-export const getPosts = async() => {
+export async function getPosts() {
     const response = await authorizedAxios.get<Post[]>('/getPosts')
     return response.data
 }
 
-export const deletePost = async (idTodelete: number) => {
+export async function deletePost(idTodelete: number) {
     const response = await authorizedAxios.delete<DeletePostResult>('/deletePost', {
         params: {
             id: idTodelete,
@@ -43,12 +43,12 @@ export const deletePost = async (idTodelete: number) => {
     return response.data
 }
 
-export const getCurrentKey = async () => {
+export async function getCurrentKey() {
     const response = await authorizedAxios.get<EncryptedPostKey>('/getCurrentKey')
     return response.data
 }
 
-export const startPost = async(exportedKey: JsonWebKey, ivBase64: string, contentMD5Base64: string) => {
+export async function startPost(exportedKey: JsonWebKey, ivBase64: string, contentMD5Base64: string) {
     const postResponse = await authorizedAxios.post<StartPostResult>('/startPost', {
         key: exportedKey,
         iv: ivBase64,
@@ -57,48 +57,48 @@ export const startPost = async(exportedKey: JsonWebKey, ivBase64: string, conten
     return postResponse.data
 }
 
-export const finishPost = async(postId: number, success: boolean) => {
+export async function finishPost(postId: number, success: boolean) {
     await authorizedAxios.post<FinishPostResult>('/finishPost', {
         postId,
         success
     })
 }
 
-export const getUser = async(key: string, userid: number) => {
+export async function getUser(key: string, userid: number) {
     const response = await authorizedAxios.get<User>('/getUserById', {
         params: {userid: userid}
     })
     return response.data
 }
 
-export const sendFollowRequest = async (username: string) => {
+export async function sendFollowRequest(username: string) {
     await authorizedAxios.post('/sendFollowRequest', {
         username: username,
     })
 }
 
-export const rejectFollowRequest = async (userid: number) => {
+export async function rejectFollowRequest(userid: number) {
     await authorizedAxios.post('/rejectFollowRequest', {
         userid: userid
     })
     queryCache.invalidateQueries('followRequests')
 }
 
-export const unfollow = async (userid: number) => {
+export async function unfollow(userid: number) {
     await authorizedAxios.post('/unfollow', {
         userid: userid
     })
     queryCache.invalidateQueries('followees')
 }
 
-export const removeFollower = async (userid: number) => {
+export async function removeFollower(userid: number) {
     await authorizedAxios.post('/removeFollower', {
         userid: userid
     })
     queryCache.invalidateQueries('followers')
 }
 
-export const acceptFollowRequest = async (userid: number) => {
+export async function acceptFollowRequest(userid: number) {
     await authorizedAxios.post('/acceptFollowRequest', {
         userid: userid
     })
@@ -106,17 +106,17 @@ export const acceptFollowRequest = async (userid: number) => {
     queryCache.invalidateQueries('followRequests')
 }
 
-export const getFollowers = async() => {
+export async function getFollowers() {
     const response = await authorizedAxios.get<number[]>('/getFollowerIds')
     return response.data
 }
 
-export const getFollowees = async() => {
+export async function getFollowees() {
     const response = await authorizedAxios.get<number[]>('/getFollowees')
     return response.data
 }
 
-export const getFollowRequests = async() => {
+export async function getFollowRequests() {
     const response = await authorizedAxios.get<number[]>('/getFollowRequests')
     return response.data
 }

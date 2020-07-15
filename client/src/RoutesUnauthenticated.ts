@@ -15,7 +15,7 @@ authorizedAxios.interceptors.response.use(response => {
     Promise.reject(error)
 })
 
-export const startLogin = async(username: string, clientEphemeralPublic: string) => {
+export async function startLogin(username: string, clientEphemeralPublic: string) {
     const startRes = await authorizedAxios.post<StartLoginResult>('/startLogin', {
         username,
         clientEphemeralPublic,
@@ -23,19 +23,19 @@ export const startLogin = async(username: string, clientEphemeralPublic: string)
     return startRes.data
 }
 
-export const finishLogin = async(clientSessionProof: string) => {
+export async function finishLogin(clientSessionProof: string) {
     const finishRes = await authorizedAxios.post<FinishLoginResult>('/finishLogin', {
         clientSessionProof,
     })
     return finishRes.data
 }
 
-export const startSignup = async() => {
+export async function startSignup() {
     const startRes = await authorizedAxios.get<StartSignupResult>('/startSignup')
     return startRes.data
 }
 
-export const finishSignup = async(displayName: string, srpSalt: string, verifier: string, mukSalt: string, publicKey: JsonWebKey, privateKey: string) => {
+export async function finishSignup(displayName: string, srpSalt: string, verifier: string, mukSalt: string, publicKey: JsonWebKey, privateKey: string) {
     const finishRes = await authorizedAxios.post<FinishSignupResult>('/finishSignup', {
         displayName,
         srpSalt,

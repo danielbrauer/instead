@@ -42,7 +42,7 @@ router.delete(
 )
 
 router.get('/getCurrentKey', async (req, res) => {
-    const [currentKey] = await keyService.getCurrentKey(req.user.id)
+    const currentKey = await keyService.getCurrentKey(req.user.id)
     return res.json(currentKey)
 })
 

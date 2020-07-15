@@ -24,7 +24,7 @@ export default class KeyService {
     }
 
     async getCurrentKey(userId: number) {
-        const key = await Keys.getCurrentKey.run({ userId }, this.db.pool)
+        const [key] = await Keys.getCurrentKey.run({ userId }, this.db.pool)
         return key
     }
 
