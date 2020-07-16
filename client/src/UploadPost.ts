@@ -3,6 +3,7 @@ import { readAsArrayBuffer } from 'promise-file-reader'
 import Axios from "axios"
 import CurrentUser from "./CurrentUser"
 import md5 from 'js-md5'
+import { useRef, useReducer, useEffect } from "react"
 const toBuffer = require('typedarray-to-buffer') as (typedArray: Uint8Array) => Buffer
 require('buffer')
 const Crypto = window.crypto
@@ -119,4 +120,86 @@ export async function handleUpload(file: File) {
     }
     await finishPost(postInfo.postId, success)
     return success
+}
+
+type EncryptedImageState = {
+    decryptedUrl?: string
+    isLoading: boolean
+    error?: string
+}
+
+type EncryptedImageAction =
+    | { type: 'request' }
+    | { type: 'success', results: string }
+    | { type: 'failure', error: string }
+
+export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, encryptedUrl: string) {
+
+    function reducer(state: EncryptedImageState, action: EncryptedImageAction): EncryptedImageState {
+        switch (action.type) {
+            case 'request':
+                return { isLoading: true };
+            case 'success':
+                return { isLoading: false, decryptedUrl: action.results };
+            case 'failure':
+                return { isLoading: false, error: action.error };
+        }
+    }
+    const [state, dispatch] = useReducer(reducer, { isLoading: false })
+
+    useEffect(() => {
+        let cancelRequest = false
+        if (!encryptedUrl)
+            return
+
+        const decrypt = async() => {
+            dispatch({ type: 'request' })
+            try {
+                const [cryptoKey, encryptedImage] = await Promise.all([
+                    Crypto.subtle.unwrapKey(
+                        'jwk',
+                        Buffer.from(wrappedKeyBase64, 'base64'),
+                        CurrentUser.getAccountKeys().privateKey,
+                        { name: 'RSA-OAEP' },
+                        { name: 'AES-GCM' },
+                        false,
+                        ['encrypt', 'decrypt'],
+                    ),
+                    Axios.get(
+                        encryptedUrl,
+                        { responseType: 'arraybuffer' }
+                    )
+                ])
+                if (cancelRequest)
+                    return
+                const decrypted = await Crypto.subtle.decrypt(
+                    {
+                        name: 'AES-GCM',
+                        iv: Buffer.from(ivBase64, 'base64'),
+                    },
+                    cryptoKey,
+                    encryptedImage.data,
+                )
+                if (cancelRequest)
+                    return
+                const blob = new Blob([decrypted], { type: 'image/jpeg' })
+                const decryptedUrl = URL.createObjectURL(blob)
+                dispatch({ type: 'success', results: decryptedUrl })
+                return
+            } catch (error) {
+                dispatch({ type: 'failure', error })
+            }
+        }
+
+        decrypt()
+
+        return () => {
+            cancelRequest = true
+            if (state.decryptedUrl)
+                URL.revokeObjectURL(state.decryptedUrl)
+        }
+
+    }, [encryptedUrl])
+
+    return state
 }

@@ -61,14 +61,14 @@ export async function login(info : LoginInfo) {
         { name: 'AES-GCM', iv: Buffer.from(privateKeyIv, 'base64') },
         { name: 'RSA-OAEP', hash: 'SHA-256' },
         false,
-        ['decrypt']
+        ['decrypt', 'unwrapKey']
     )
     const publicKey = await Crypto.subtle.importKey(
         'jwk',
         publicKeyJwk,
         { name: 'RSA-OAEP', hash: 'SHA-256' },
         false,
-        ['encrypt']
+        ['encrypt', 'wrapKey']
     )
     const accountKeys = {
         privateKey,
@@ -106,7 +106,7 @@ export async function signup(info : NewUserInfo) {
     const accountKeys = await Crypto.subtle.generateKey(
         keyParams,
         true,
-        ["encrypt", "decrypt"]
+        ['encrypt', 'decrypt', 'wrapKey', 'unwrapKey']
     ) as CryptoKeyPair
     const exportedPublic = await Crypto.subtle.exportKey(
         'jwk',

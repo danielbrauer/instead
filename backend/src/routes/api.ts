@@ -51,7 +51,7 @@ router.post('/createCurrentKey',
         jwk: { in: ['body'], isBase64: true },
     }),
     async (req, res) => {
-        const keySetId = keyService.createKeySet(req.user.id, req.body.iv)
+        const keySetId = keyService.createKeySet(req.user.id, req.body.jwk)
         return res.json(keySetId)
     }
 )
