@@ -1,6 +1,6 @@
 import scrypt, { ScryptOptions } from 'scrypt-async-modern'
 import srp from 'secure-remote-password/client'
-import { LoginInfo, CurrentUserInfo } from './Interfaces'
+import { LoginInfo } from './Interfaces'
 import { startLogin, finishLogin, finishSignup } from './RoutesUnauthenticated'
 import { NewUserInfo } from "./Interfaces"
 import { startSignup } from "./RoutesUnauthenticated"
@@ -37,7 +37,7 @@ const importKeyFromHex = async (keyAsHex: string) => {
         Buffer.from(keyAsHex, 'hex'),
         { name: 'AES-GCM'},
         false,
-        ["encrypt", "decrypt", 'wrapKey', 'unwrapKey']
+        ['wrapKey', 'unwrapKey']
     )
 }
 
@@ -49,7 +49,7 @@ export const login = async(info : LoginInfo) => {
     const srpKey = await derivePrivateKey(srpSalt, info.password, info.secretKey, info.username)
     const clientSession = srp.deriveSession(clientEphemeral.secret, serverEphemeralPublic, srpSalt, info.username, srpKey)
     const userInfo = await finishLogin(clientSession.proof)
-    const { serverSessionProof, userid, displayName, privateKey: privateKeyEnc, publicKey, mukSalt } = userInfo
+    const { serverSessionProof, userid, displayName, privateKey: privateKeyEnc, privateKeyIv, publicKey, mukSalt } = userInfo
     srp.verifySession(clientEphemeral.public, clientSession, serverSessionProof)
 
     const mukHex = await derivePrivateKey(mukSalt, info.password, info.secretKey, info.username)
@@ -58,7 +58,7 @@ export const login = async(info : LoginInfo) => {
         'jwk',
         Buffer.from(privateKeyEnc, 'base64'),
         muk,
-        { name: 'AES-KW'},
+        { name: 'AES-GCM', iv: Buffer.from(privateKeyIv, 'base64') },
         'AES-GCM',
         false,
         ['decrypt']
@@ -111,11 +111,12 @@ export const signup = async(info : NewUserInfo) => {
         'jwk',
         accountKeys.publicKey
     )
+    const accountPrivateIv = Crypto.getRandomValues(new Uint8Array(12))
     const wrappedPrivate = await Crypto.subtle.wrapKey(
         'jwk',
         accountKeys.privateKey,
         muk,
-        { name: 'AES-KW' }
+        { name: 'AES-GCM', iv: accountPrivateIv}
     )
     const { user: {id: userid} } = await finishSignup(
         info.displayName,
@@ -124,6 +125,7 @@ export const signup = async(info : NewUserInfo) => {
         mukSalt,
         exportedPublic,
         Buffer.from(wrappedPrivate).toString('base64'),
+        Buffer.from(accountPrivateIv).toString('base64')
     )
     return {
         id: userid,

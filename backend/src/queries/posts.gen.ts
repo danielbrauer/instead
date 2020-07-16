@@ -134,9 +134,8 @@ export interface IGetByAuthorIdResult {
   timestamp: Date;
   author_id: number;
   filename: string;
-  published: boolean;
-  key_set_id: number;
   iv: string;
+  jwk: string;
 }
 
 /** 'GetByAuthorId' query type */
@@ -145,12 +144,15 @@ export interface IGetByAuthorIdQuery {
   result: IGetByAuthorIdResult;
 }
 
-const getByAuthorIdIR: any = {"name":"GetByAuthorId","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":519,"b":526,"line":14,"col":61},{"a":623,"b":630,"line":17,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT * FROM posts WHERE published = true AND (author_id = :authorId OR author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n)) ORDER BY timestamp DESC","loc":{"a":458,"b":657,"line":14,"col":0}}};
+const getByAuthorIdIR: any = {"name":"GetByAuthorId","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":660,"b":667,"line":17,"col":92},{"a":770,"b":777,"line":20,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT posts.id, posts.timestamp, posts.author_id, posts.filename, posts.iv,\n       keys.jwk\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id AND posts.published = true AND (posts.author_id = :authorId OR posts.author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n)) ORDER BY timestamp DESC","loc":{"a":458,"b":804,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT * FROM posts WHERE published = true AND (author_id = :authorId OR author_id IN (
+ * SELECT posts.id, posts.timestamp, posts.author_id, posts.filename, posts.iv,
+ *        keys.jwk
+ * FROM posts, keys
+ * WHERE posts.key_set_id = keys.key_set_id AND posts.published = true AND (posts.author_id = :authorId OR posts.author_id IN (
  *     SELECT followee_id
  *     FROM followers
  *     WHERE followers.follower_id = :authorId

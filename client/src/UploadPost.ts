@@ -102,10 +102,6 @@ export async function handleUpload(file: File) {
         result
     )
     const contentMD5 = md5.base64(encrypted)
-    const exportedKey = await Crypto.subtle.exportKey(
-        "jwk",
-        postKey.key
-    )
     const postInfo = await startPost(postKey.id, ivBuffer.toString('base64'), contentMD5)
     const signedRequest = postInfo.signedRequest
 

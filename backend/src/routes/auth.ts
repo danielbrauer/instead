@@ -1,6 +1,7 @@
 import Router from 'express-promise-router'
 import Container from 'typedi'
 import AuthService from '../services/AuthService'
+import validate from '../middleware/validate'
 
 const router = Router()
 const authService = Container.get(AuthService)
@@ -20,18 +21,25 @@ router.get('/startSignup', async function (req, res) {
     return res.json(responseData)
 })
 
-router.post('/finishSignup', async function (req, res) {
-    const responseData = await authService.finishSignup(
-        req.session,
-        req.body.displayName,
-        req.body.verifier,
-        req.body.srpSalt,
-        req.body.mukSalt,
-        req.body.publicKey,
-        req.body.privateKey,
-    )
-    return res.json(responseData)
-})
+router.post('/finishSignup',
+    validate({
+        privateKey: { in: ['body'], isBase64: true, },
+        privateKeyIv: { in: ['body'], isBase64: true, },
+    }),
+    async function (req, res) {
+        const responseData = await authService.finishSignup(
+            req.session,
+            req.body.displayName,
+            req.body.verifier,
+            req.body.srpSalt,
+            req.body.mukSalt,
+            req.body.publicKey,
+            req.body.privateKey,
+            req.body.privateKeyIv,
+        )
+        return res.json(responseData)
+    }
+)
 
 router.use(function hangupHandler(err: any, req: any, res: any, next: any) {
     delete req.session

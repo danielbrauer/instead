@@ -19,7 +19,7 @@ class CurrentUser {
     }
 
     static getSecretKey() : string | null {
-        return CurrentUser.info.secretKey || localStorage.getItem(kSecretKeyKey)
+        return (CurrentUser.info && CurrentUser.info.secretKey) || localStorage.getItem(kSecretKeyKey)
     }
 
     static getAccountKeys() : CryptoKeyPair {
@@ -40,7 +40,7 @@ class CurrentUser {
     }
 
     static loggedIn() {
-        return CurrentUser.info !== null
+        return CurrentUser.info !== undefined
     }
 }
 

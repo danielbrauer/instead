@@ -10,6 +10,7 @@ export type FinishLoginResult = {
     serverSessionProof: string
     displayName: string
     privateKey: string
+    privateKeyIv: string
     publicKey: JsonWebKey
     mukSalt: string
 }

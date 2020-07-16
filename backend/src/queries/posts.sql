@@ -11,7 +11,10 @@ DELETE FROM posts WHERE id = :postId AND author_id = :authorId RETURNING *;
 DELETE FROM posts WHERE id = :postId AND published = false RETURNING *;
 
 /* @name GetByAuthorId */
-SELECT * FROM posts WHERE published = true AND (author_id = :authorId OR author_id IN (
+SELECT posts.id, posts.timestamp, posts.author_id, posts.filename, posts.iv,
+       keys.jwk
+FROM posts, keys
+WHERE posts.key_set_id = keys.key_set_id AND posts.published = true AND (posts.author_id = :authorId OR posts.author_id IN (
     SELECT followee_id
     FROM followers
     WHERE followers.follower_id = :authorId

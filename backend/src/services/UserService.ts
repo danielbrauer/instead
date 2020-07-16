@@ -51,6 +51,7 @@ export default class UserService {
         muk_salt: string,
         public_key: string,
         private_key: string,
+        private_key_iv: string,
     ) {
         const [user] = await Users.create.run(
             {
@@ -61,6 +62,7 @@ export default class UserService {
                 muk_salt,
                 public_key,
                 private_key,
+                private_key_iv,
             },
             this.db.pool
         )

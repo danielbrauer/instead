@@ -10,10 +10,7 @@ export default class KeyService {
     @Inject()
     private db: Database
 
-    @Inject()
-    private userService: UserService
-
-    constructor() {
+    constructor(private userService: UserService) {
         this.userService.onUserAddedFollower.subscribe(this.onFollowerChanged)
         this.userService.onUserLostFollower.subscribe(this.onFollowerChanged)
     }
