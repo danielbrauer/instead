@@ -44,7 +44,9 @@ export async function deletePost(idTodelete: number) {
 }
 
 export async function getCurrentKey() {
-    const response = await authorizedAxios.get<EncryptedPostKey>('/getCurrentKey')
+    const response = await authorizedAxios.get<EncryptedPostKey | "">('/getCurrentKey')
+    if (response.data === "")
+        return null
     return response.data
 }
 

@@ -47,3 +47,7 @@ export async function finishSignup(displayName: string, srpSalt: string, verifie
     })
     return finishRes.data
 }
+
+export async function cancelAuth() {
+    await authorizedAxios.post('/cancel')
+}

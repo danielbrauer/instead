@@ -3,7 +3,7 @@ import { useInput } from './useInput'
 import { Button, Form, Message, Header, Segment } from 'semantic-ui-react'
 import { RouterProps } from 'react-router'
 import CurrentUser from '../CurrentUser'
-import { login } from '../login'
+import { login, cancel } from '../login'
 import { useMutation } from 'react-query'
 
 export default function LoginForm(props: RouterProps) {
@@ -11,6 +11,7 @@ export default function LoginForm(props: RouterProps) {
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: secretKey, bind: bindSecretKey } = useInput(CurrentUser.getSecretKey() || '')
     const [loginMutation, { error, reset, isLoading, isSuccess, isError }] = useMutation(login)
+    const [cancelMutation] = useMutation(cancel)
 
     async function handleSubmit(evt : React.FormEvent<HTMLFormElement>) {
         reset()
@@ -21,6 +22,7 @@ export default function LoginForm(props: RouterProps) {
             props.history.push('/home')
         } catch (error) {
             resetPassword()
+            await cancelMutation()
         }
     }
 

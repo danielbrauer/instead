@@ -1,7 +1,7 @@
 import scrypt, { ScryptOptions } from 'scrypt-async-modern'
 import srp from 'secure-remote-password/client'
 import { LoginInfo } from './Interfaces'
-import { startLogin, finishLogin, finishSignup } from './RoutesUnauthenticated'
+import { startLogin, finishLogin, finishSignup, cancelAuth } from './RoutesUnauthenticated'
 import { NewUserInfo } from "./Interfaces"
 import { startSignup } from "./RoutesUnauthenticated"
 import { pwnedPassword } from 'hibp'
@@ -10,7 +10,7 @@ const hkdf = require('futoin-hkdf') as (ikm: string, length: number, { salt, inf
 const xor = require('buffer-xor') as (a: Buffer, b: Buffer) => Buffer
 const Crypto = window.crypto
 
-const derivePrivateKey = async (salt : string, password : string, secretKey : string, username : string) => {
+async function derivePrivateKey(salt : string, password : string, secretKey : string, username : string) {
     const scryptOptions : ScryptOptions = {
         N: 16384,
         r: 8,
@@ -31,7 +31,7 @@ const derivePrivateKey = async (salt : string, password : string, secretKey : st
     return xor(hashedPassword, saltedKey).toString('hex')
 }
 
-const importKeyFromHex = async (keyAsHex: string) => {
+async function importKeyFromHex(keyAsHex: string) {
     return await Crypto.subtle.importKey(
         'raw',
         Buffer.from(keyAsHex, 'hex'),
@@ -41,7 +41,7 @@ const importKeyFromHex = async (keyAsHex: string) => {
     )
 }
 
-export const login = async(info : LoginInfo) => {
+export async function login(info : LoginInfo) {
     console.log('logging in')
     const clientEphemeral = srp.generateEphemeral()
     const startResponse = await startLogin(info.username, clientEphemeral.public)
@@ -76,7 +76,7 @@ export const login = async(info : LoginInfo) => {
     return { id: userid, username: info.username, displayName, secretKey: info.secretKey, accountKeys }
 }
 
-const createSecretKey = () => {
+function createSecretKey() {
     const characters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'
     const values = Crypto.getRandomValues(new Uint8Array(26))
     let output = ''
@@ -84,7 +84,7 @@ const createSecretKey = () => {
     return 'A1-' + output
 }
 
-export const signup = async(info : NewUserInfo) => {
+export async function signup(info : NewUserInfo) {
     console.log('creating user')
     const { username } = await startSignup()
 
@@ -136,8 +136,12 @@ export const signup = async(info : NewUserInfo) => {
     }
 }
 
-export const passwordCheck = async(password: string) => {
+export async function passwordCheck(password: string) {
     const breachCount = await pwnedPassword(password)
     if (breachCount > 0)
         throw new Error('This password is well-known, and you can\'t use it here. If it is your password, you should change it.')
+}
+
+export async function cancel() {
+    await cancelAuth()
 }
