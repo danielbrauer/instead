@@ -49,7 +49,7 @@ export async function login(info : LoginInfo) {
     const srpKey = await derivePrivateKey(srpSalt, info.password, info.secretKey, info.username)
     const clientSession = srp.deriveSession(clientEphemeral.secret, serverEphemeralPublic, srpSalt, info.username, srpKey)
     const userInfo = await finishLogin(clientSession.proof)
-    const { serverSessionProof, userid, displayName, privateKey: privateKeyEnc, privateKeyIv, publicKey, mukSalt } = userInfo
+    const { serverSessionProof, userid, displayName, privateKey: privateKeyEnc, privateKeyIv, publicKey: publicKeyJwk, mukSalt } = userInfo
     srp.verifySession(clientEphemeral.public, clientSession, serverSessionProof)
 
     const mukHex = await derivePrivateKey(mukSalt, info.password, info.secretKey, info.username)
@@ -59,20 +59,21 @@ export async function login(info : LoginInfo) {
         Buffer.from(privateKeyEnc, 'base64'),
         muk,
         { name: 'AES-GCM', iv: Buffer.from(privateKeyIv, 'base64') },
-        'AES-GCM',
+        { name: 'RSA-OAEP', hash: 'SHA-256' },
         false,
         ['decrypt']
     )
-    const importedPublicKey = await Crypto.subtle.importKey(
+    const publicKey = await Crypto.subtle.importKey(
         'jwk',
-        publicKey,
-        { name: 'AES-GCM'},
+        publicKeyJwk,
+        { name: 'RSA-OAEP', hash: 'SHA-256' },
         false,
         ['encrypt']
     )
-    const accountKeys = new CryptoKeyPair()
-    accountKeys.privateKey = privateKey
-    accountKeys.publicKey = importedPublicKey
+    const accountKeys = {
+        privateKey,
+        publicKey,
+    }
     return { id: userid, username: info.username, displayName, secretKey: info.secretKey, accountKeys }
 }
 
