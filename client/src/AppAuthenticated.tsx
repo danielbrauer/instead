@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import CurrentUser from './CurrentUser'
 import FollowerPage from './FollowerPage'
 import Posts from './Posts'
@@ -6,14 +6,10 @@ import NewPost from './NewPost'
 import { Route, Switch, Redirect, RouteComponentProps } from 'react-router-dom'
 
 import { Menu, Dropdown } from 'semantic-ui-react'
-import { queryCache, useQuery } from 'react-query'
-import { logout, getUser } from './RoutesAuthenticated'
+import { queryCache } from 'react-query'
+import { logout } from './RoutesAuthenticated'
 
 export default function(props: RouteComponentProps<any>) {
-    if (!CurrentUser.loggedIn())
-        return (<Redirect to='/login' />)
-
-    const currentUserName = useQuery(['user', CurrentUser.getId()], getUser)
 
     const logOutAndClear = async () => {
         try {
@@ -24,6 +20,16 @@ export default function(props: RouteComponentProps<any>) {
             props.history.push('/login')
         }
     }
+
+    useEffect(() => {
+        if (!CurrentUser.loggedIn())
+            logOutAndClear()
+    })
+
+    if (!CurrentUser.loggedIn()) {
+        return (<Redirect to='/login' />)
+    }
+
     return (
         <div>
             <Menu inverted fixed='top' size='small'>
@@ -31,7 +37,7 @@ export default function(props: RouteComponentProps<any>) {
                     Instead
                 </Menu.Item>
                 <Menu.Item fitted position='right'>
-                    <Dropdown item direction='left' text={currentUserName.isSuccess ? currentUserName.data.username : 'loading...'}>
+                    <Dropdown item direction='left' text={CurrentUser.getUsername()}>
                         <Dropdown.Menu>
                             <Dropdown.Item icon='list' text='Home' onClick={() => props.history.push('/home')}/>
                             <Dropdown.Item icon='image' text='New Post' onClick={() => props.history.push('/new')}/>

@@ -1,10 +1,20 @@
 import { CurrentUserInfo } from "./Interfaces"
 
+const kUserInfoKey = 'userInfoKey'
 const kSecretKeyKey = 'secretKey'
 
 class CurrentUser {
 
-    private static info: CurrentUserInfo
+    private static _info: CurrentUserInfo
+
+    private static get info() : CurrentUserInfo {
+        if (!CurrentUser._info) {
+            const sessionUser = sessionStorage.getItem(kUserInfoKey)
+            if (sessionUser)
+                CurrentUser._info = JSON.parse(sessionUser)
+        }
+        return CurrentUser._info
+    }
 
     static getId() : number {
         return CurrentUser.info.id
@@ -27,12 +37,14 @@ class CurrentUser {
     }
 
     static set(info: CurrentUserInfo) {
-        CurrentUser.info = info
+        CurrentUser._info = info
+        sessionStorage.setItem(kUserInfoKey, JSON.stringify(info))
         localStorage.setItem(kSecretKeyKey, info.secretKey)
     }
 
     static clear() {
-        delete CurrentUser.info
+        delete CurrentUser._info
+        sessionStorage.clear()
     }
 
     static clearSecretKey() {
