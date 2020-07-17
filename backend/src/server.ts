@@ -30,7 +30,7 @@ app.use('/auth', auth)
 app.use('/api', authManager.authenticateSession, api, forwardErrors)
 
 if (!config.localDev) {
-    const relativePathToReact = '/../../client/build'
+    const relativePathToReact = '/../../../client/build'
     const reactPath = path.join(__dirname, relativePathToReact)
     httpServer(app, reactPath)
 }
