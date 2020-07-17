@@ -8,7 +8,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node backend/dist/server.js",
+    "start": "node backend/dist/src/server.js",
     "build": "cd backend && yarn install && yarn build && cd ../client && yarn install && yarn build",
     "local": "concurrently \"cd backend && yarn watch-debug\" \"cd client && yarn start\""
   },
