@@ -1,4 +1,4 @@
-import { IGetByAuthorIdResult } from "../queries/posts.gen"
+import { IGetHomePostsWithKeysResult } from "../queries/posts.gen"
 import { IGetFollowerPublicKeysResult, IGetCurrentKeyResult} from "../queries/keys.gen"
 
 export interface User {
@@ -28,7 +28,7 @@ export interface StartPostResult {
 
 export interface FinishPostResult extends ActionResult {}
 
-export interface Post extends IGetByAuthorIdResult {}
+export interface Post extends IGetHomePostsWithKeysResult {}
 
 export interface EncryptedPostKey extends IGetCurrentKeyResult {}
 

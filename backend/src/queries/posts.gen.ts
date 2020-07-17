@@ -123,13 +123,13 @@ const destroyIfUnpublishedIR: any = {"name":"DestroyIfUnpublished","params":[{"n
 export const destroyIfUnpublished = new PreparedQuery<IDestroyIfUnpublishedParams,IDestroyIfUnpublishedResult>(destroyIfUnpublishedIR);
 
 
-/** 'GetByAuthorId' parameters type */
-export interface IGetByAuthorIdParams {
+/** 'GetHomePostsWithKeys' parameters type */
+export interface IGetHomePostsWithKeysParams {
   authorId: number | null | void;
 }
 
-/** 'GetByAuthorId' return type */
-export interface IGetByAuthorIdResult {
+/** 'GetHomePostsWithKeys' return type */
+export interface IGetHomePostsWithKeysResult {
   id: number;
   timestamp: Date;
   author_id: number;
@@ -138,13 +138,13 @@ export interface IGetByAuthorIdResult {
   jwk: string;
 }
 
-/** 'GetByAuthorId' query type */
-export interface IGetByAuthorIdQuery {
-  params: IGetByAuthorIdParams;
-  result: IGetByAuthorIdResult;
+/** 'GetHomePostsWithKeys' query type */
+export interface IGetHomePostsWithKeysQuery {
+  params: IGetHomePostsWithKeysParams;
+  result: IGetHomePostsWithKeysResult;
 }
 
-const getByAuthorIdIR: any = {"name":"GetByAuthorId","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":660,"b":667,"line":17,"col":92},{"a":770,"b":777,"line":20,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT posts.id, posts.timestamp, posts.author_id, posts.filename, posts.iv,\n       keys.jwk\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id AND posts.published = true AND (posts.author_id = :authorId OR posts.author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n)) ORDER BY timestamp DESC","loc":{"a":458,"b":804,"line":14,"col":0}}};
+const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":636,"b":643,"line":18,"col":20},{"a":696,"b":703,"line":20,"col":24},{"a":806,"b":813,"line":23,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT posts.id, posts.timestamp, posts.author_id, posts.filename, posts.iv,\n       keys.jwk\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :authorId\nAND posts.published = true\nAND (posts.author_id = :authorId OR posts.author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n)) ORDER BY timestamp DESC","loc":{"a":465,"b":840,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -152,13 +152,16 @@ const getByAuthorIdIR: any = {"name":"GetByAuthorId","params":[{"name":"authorId
  * SELECT posts.id, posts.timestamp, posts.author_id, posts.filename, posts.iv,
  *        keys.jwk
  * FROM posts, keys
- * WHERE posts.key_set_id = keys.key_set_id AND posts.published = true AND (posts.author_id = :authorId OR posts.author_id IN (
+ * WHERE posts.key_set_id = keys.key_set_id
+ * AND keys.user_id = :authorId
+ * AND posts.published = true
+ * AND (posts.author_id = :authorId OR posts.author_id IN (
  *     SELECT followee_id
  *     FROM followers
  *     WHERE followers.follower_id = :authorId
  * )) ORDER BY timestamp DESC
  * ```
  */
-export const getByAuthorId = new PreparedQuery<IGetByAuthorIdParams,IGetByAuthorIdResult>(getByAuthorIdIR);
+export const getHomePostsWithKeys = new PreparedQuery<IGetHomePostsWithKeysParams,IGetHomePostsWithKeysResult>(getHomePostsWithKeysIR);
 
 

@@ -31,7 +31,7 @@ export default class PostService {
     }
 
     async getPostsByAuthor(authorId: number) {
-        return await Posts.getByAuthorId.run({ authorId }, this.db.pool)
+        return await Posts.getHomePostsWithKeys.run({ authorId }, this.db.pool)
     }
 
     async deletePost(postId: number, authorId: number): Promise<DeletePostResult> {
