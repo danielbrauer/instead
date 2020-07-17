@@ -82,9 +82,10 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
         }
     })
 
-    const encryptedKeys = await Promise.all(followerPostKeyPromises)
-
-    await addKeys(encryptedKeys)
+    if (followerPostKeyPromises.length > 0) {
+        const encryptedKeys = await Promise.all(followerPostKeyPromises)
+        await addKeys(encryptedKeys)
+    }
 
     return {
         key: postKey,
