@@ -23,7 +23,7 @@ export default function () {
     return (
         <div>
             {posts.data!.length === 0 ?
-            <Message>Your posts will appear here, along with those of the people you follow.
+            <Message>No posts yet!
                 <br/><br/>
                 To post a photo or follow people, use the menu in the upper-right.</Message>
             :

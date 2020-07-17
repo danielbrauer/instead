@@ -60,14 +60,14 @@ export async function login(info : LoginInfo) {
         muk,
         { name: 'AES-GCM', iv: Buffer.from(privateKeyIv, 'base64') },
         { name: 'RSA-OAEP', hash: 'SHA-256' },
-        false,
+        true,
         ['decrypt', 'unwrapKey']
     )
     const publicKey = await Crypto.subtle.importKey(
         'jwk',
         publicKeyJwk,
         { name: 'RSA-OAEP', hash: 'SHA-256' },
-        false,
+        true,
         ['encrypt', 'wrapKey']
     )
     const accountKeys = {

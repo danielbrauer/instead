@@ -1,9 +1,9 @@
-import { startPost, finishPost, getCurrentKey, getFollowerPublicKeys, createCurrentKey, addKeys } from "./RoutesAuthenticated"
+import { startPost, finishPost, getCurrentKey, getFollowerPublicKeys, createCurrentKey, addKeys } from './RoutesAuthenticated'
 import { readAsArrayBuffer } from 'promise-file-reader'
-import Axios from "axios"
-import CurrentUser from "./CurrentUser"
+import Axios from 'axios'
+import CurrentUser from './CurrentUser'
 import md5 from 'js-md5'
-import { useRef, useReducer, useEffect } from "react"
+import { useReducer, useEffect } from 'react'
 const toBuffer = require('typedarray-to-buffer') as (typedArray: Uint8Array) => Buffer
 require('buffer')
 const Crypto = window.crypto
@@ -18,10 +18,11 @@ async function getCurrentPostKey() : Promise<PostKey | null> {
     const encrypted = await getCurrentKey()
     if (encrypted === null)
         return null
+    const accountKeys = await CurrentUser.getAccountKeys()
     const key = await Crypto.subtle.unwrapKey(
         'jwk',
         Buffer.from(encrypted.jwk, 'base64'),
-        CurrentUser.getAccountKeys().privateKey,
+        accountKeys.privateKey,
         { name: 'RSA-OAEP'},
         'AES-GCM',
         true,
@@ -34,7 +35,7 @@ async function getCurrentPostKey() : Promise<PostKey | null> {
 }
 
 async function createNewCurrentPostKey() : Promise<PostKey> {
-    const key = await Crypto.subtle.generateKey(
+    const keyPromise = Crypto.subtle.generateKey(
         {
             name: "AES-GCM",
             length: 256
@@ -43,28 +44,34 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
         ["encrypt", "decrypt"]
     )
 
-    const userVersion = await Crypto.subtle.wrapKey(
+    const accountKeysPromise = CurrentUser.getAccountKeys()
+
+    const [postKey, accountKeys] = await Promise.all([keyPromise, accountKeysPromise])
+
+    const authorPostKeyPromise = Crypto.subtle.wrapKey(
         'jwk',
-        key,
-        CurrentUser.getAccountKeys().publicKey,
+        postKey,
+        accountKeys.publicKey,
         { name: 'RSA-OAEP' }
     )
 
-    const keySetId = await createCurrentKey(Buffer.from(userVersion).toString('base64'))
+    const followerPublicKeysPromise = getFollowerPublicKeys()
 
-    const followerKeys = await getFollowerPublicKeys()
+    const [authorPostKey, followerPublicKeys] = await Promise.all([authorPostKeyPromise, followerPublicKeysPromise])
 
-    const keyPromises = followerKeys.map(async(publicKey) => {
+    const keySetId = await createCurrentKey(Buffer.from(authorPostKey).toString('base64'))
+
+    const followerPostKeyPromises = followerPublicKeys.map(async(publicKey) => {
         const followerPublicKey = await Crypto.subtle.importKey(
             'jwk',
             publicKey.public_key as JsonWebKey,
             { name: "RSA-OAEP", hash: "SHA-256" },
             false,
-            ['encrypt']
+            ['encrypt', 'wrapKey']
         )
         const followerVersion = await Crypto.subtle.wrapKey(
             'jwk',
-            key,
+            postKey,
             followerPublicKey,
             { name: 'RSA-OAEP' }
         )
@@ -75,12 +82,12 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
         }
     })
 
-    const encryptedKeys = await Promise.all(keyPromises)
+    const encryptedKeys = await Promise.all(followerPostKeyPromises)
 
     await addKeys(encryptedKeys)
 
     return {
-        key,
+        key: postKey,
         id: keySetId,
     }
 }
@@ -155,11 +162,12 @@ export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, en
         const decrypt = async() => {
             dispatch({ type: 'request' })
             try {
+                const accountKeys = await CurrentUser.getAccountKeys()
                 const [cryptoKey, encryptedImage] = await Promise.all([
                     Crypto.subtle.unwrapKey(
                         'jwk',
                         Buffer.from(wrappedKeyBase64, 'base64'),
-                        CurrentUser.getAccountKeys().privateKey,
+                        accountKeys.privateKey,
                         { name: 'RSA-OAEP' },
                         { name: 'AES-GCM' },
                         false,
