@@ -1,4 +1,5 @@
 import { CurrentUserInfo } from "./Interfaces"
+const Crypto = window.crypto
 
 const kUserInfoKey = 'userInfoKey'
 const kSecretKeyKey = 'secretKey'
@@ -10,8 +11,9 @@ class CurrentUser {
     private static get info() : CurrentUserInfo {
         if (!CurrentUser._info) {
             const sessionUser = sessionStorage.getItem(kUserInfoKey)
-            if (sessionUser)
+            if (sessionUser) {
                 CurrentUser._info = JSON.parse(sessionUser)
+            }
         }
         return CurrentUser._info
     }
@@ -32,12 +34,40 @@ class CurrentUser {
         return (CurrentUser.info && CurrentUser.info.secretKey) || localStorage.getItem(kSecretKeyKey)
     }
 
-    static getAccountKeys() : CryptoKeyPair {
+    static async getAccountKeys() {
+        if ((CurrentUser.info.accountKeys.privateKey as any).kty === undefined) {
+            const privateKeyPromise = Crypto.subtle.importKey(
+                'jwk',
+                CurrentUser._info.accountKeyPrivate!,
+                { name: 'RSA-OAEP', hash: 'SHA-256' },
+                true,
+                ['decrypt', 'unwrapKey']
+            )
+            const publicKeyPromise = Crypto.subtle.importKey(
+                'jwk',
+                CurrentUser._info.accountKeyPublic!,
+                { name: 'RSA-OAEP', hash: 'SHA-256' },
+                true,
+                ['encrypt', 'wrapKey']
+            )
+            const [privateKey, publicKey] = await Promise.all([privateKeyPromise, publicKeyPromise])
+            CurrentUser._info.accountKeys = {
+                privateKey, publicKey
+            }
+        }
         return CurrentUser.info.accountKeys
     }
 
-    static set(info: CurrentUserInfo) {
+    static async set(info: CurrentUserInfo) {
         CurrentUser._info = info
+        info.accountKeyPrivate = await Crypto.subtle.exportKey(
+            'jwk',
+            info.accountKeys.privateKey
+        )
+        info.accountKeyPublic = await Crypto.subtle.exportKey(
+            'jwk',
+            info.accountKeys.publicKey
+        )
         sessionStorage.setItem(kUserInfoKey, JSON.stringify(info))
         localStorage.setItem(kSecretKeyKey, info.secretKey)
     }
