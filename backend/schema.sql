@@ -152,7 +152,8 @@ CREATE TABLE public.users (
     muk_salt text NOT NULL,
     private_key text NOT NULL,
     public_key jsonb NOT NULL,
-    current_post_key_set integer
+    current_post_key_set integer,
+    private_key_iv text NOT NULL
 );
 
 
