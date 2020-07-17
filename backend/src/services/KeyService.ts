@@ -1,4 +1,4 @@
-import { Service, Inject } from "typedi"
+import Container, { Service, Inject } from "typedi"
 import Database from './DatabaseService'
 import * as Keys from '../queries/keys.gen'
 import UserService from '../services/UserService'
@@ -11,8 +11,8 @@ export default class KeyService {
     private db: Database
 
     constructor(private userService: UserService) {
-        this.userService.onUserAddedFollower.subscribe(this.onFollowerChanged)
-        this.userService.onUserLostFollower.subscribe(this.onFollowerChanged)
+        this.userService.onUserAddedFollower.subscribe(KeyService.onFollowerChanged)
+        this.userService.onUserLostFollower.subscribe(KeyService.onFollowerChanged)
     }
 
     async getCurrentKeySetId(userId: number) {
@@ -30,8 +30,8 @@ export default class KeyService {
         return publicKeys
     }
 
-    async onFollowerChanged(followRelationship: FollowRelationship) {
-        await this.invalidateCurrentKeySet(followRelationship.followeeId)
+    private static async onFollowerChanged(followRelationship: FollowRelationship) {
+        await Container.get(KeyService).invalidateCurrentKeySet(followRelationship.followeeId)
     }
 
     async invalidateCurrentKeySet(userId: number) {
