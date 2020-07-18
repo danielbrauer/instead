@@ -11,7 +11,7 @@ export default function FolloweeList() {
     if (following.isError) return (
         <div>
             <Message negative>
-                <Message.Header>Error fetching followers</Message.Header>
+                <Message.Header>Error fetching followees</Message.Header>
             </Message>
         </div>
     )

@@ -1,7 +1,7 @@
 import React from 'react'
 import FollowUserForm from './Components/FollowUserForm'
 import FollowerList from './FollowerList'
-import FollowingList from './FolloweeList'
+import FolloweeList from './FolloweeList'
 import FollowRequestList from './FollowRequestList'
 import { Menu, MenuItem } from 'semantic-ui-react'
 import { Switch, Route, RouteComponentProps } from 'react-router'
@@ -28,7 +28,7 @@ export default function FollowerPage(props: RouteComponentProps<any>) {
             </Menu>
             <Switch>
                 <Route path='/followers' render={props => <FollowerList />} />
-                <Route path='/following' render={props => <FollowingList />} />
+                <Route path='/following' render={props => <FolloweeList />} />
                 <Route path='/requests' render={props => <FollowRequestList />} />
             </Switch>
         </div>
