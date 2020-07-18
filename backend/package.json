@@ -56,7 +56,6 @@
   "devDependencies": {
     "concurrently": "^4.1.2",
     "dotenv": "^8.1.0",
-    "nodemon": "^1.19.1",
     "tsc-watch": "^4.2.9"
   },
   "nodemonConfig": {
