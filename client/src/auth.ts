@@ -9,6 +9,7 @@ const toBuffer = require('typedarray-to-buffer') as (x: Uint8Array) => Buffer
 const hkdf = require('futoin-hkdf') as (ikm: string, length: number, { salt, info, hash} : {salt : string, info: string, hash : string}) => Buffer
 const xor = require('buffer-xor') as (a: Buffer, b: Buffer) => Buffer
 const Crypto = window.crypto
+const RSAOAEP_SHA256 : RsaHashedImportParams = { name: 'RSA-OAEP', hash: 'SHA-256' }
 
 async function derivePrivateKey(salt : string, password : string, secretKey : string, username : string) {
     const scryptOptions : ScryptOptions = {
@@ -31,7 +32,7 @@ async function derivePrivateKey(salt : string, password : string, secretKey : st
     return xor(hashedPassword, saltedKey).toString('hex')
 }
 
-async function importKeyFromHex(keyAsHex: string) {
+async function importMukFromHex(keyAsHex: string) {
     return await Crypto.subtle.importKey(
         'raw',
         Buffer.from(keyAsHex, 'hex'),
@@ -39,6 +40,29 @@ async function importKeyFromHex(keyAsHex: string) {
         false,
         ['wrapKey', 'unwrapKey']
     )
+}
+
+async function importExtractableRsaKeyFromJwk(jwk: JsonWebKey, usages: KeyUsage[]) {
+    return Crypto.subtle.importKey(
+        'jwk',
+        jwk,
+        RSAOAEP_SHA256,
+        true,
+        usages
+    )
+}
+
+export async function importAccountKeysFromJwks(privateJwk: JsonWebKey, publicJwk: JsonWebKey) {
+    const privateKeyPromise = importExtractableRsaKeyFromJwk(privateJwk, ['decrypt', 'unwrapKey'])
+    const publicKeyPromise = importExtractableRsaKeyFromJwk(publicJwk, ['encrypt', 'wrapKey'])
+    const [privateKey, publicKey] = await Promise.all([privateKeyPromise, publicKeyPromise])
+    return { privateKey, publicKey }
+}
+
+export async function exportAccountKeysToJwks(keys: CryptoKeyPair) {
+    const privateKeyPromise = Crypto.subtle.exportKey('jwk', keys.privateKey)
+    const publicKeyPromise = Crypto.subtle.exportKey('jwk', keys.publicKey)
+    return Promise.all([privateKeyPromise, publicKeyPromise])
 }
 
 export async function login(info : LoginInfo) {
@@ -53,23 +77,17 @@ export async function login(info : LoginInfo) {
     srp.verifySession(clientEphemeral.public, clientSession, serverSessionProof)
 
     const mukHex = await derivePrivateKey(mukSalt, info.password, info.secretKey, info.username)
-    const muk = await importKeyFromHex(mukHex)
+    const muk = await importMukFromHex(mukHex)
     const privateKey = await Crypto.subtle.unwrapKey(
         'jwk',
         Buffer.from(privateKeyEnc, 'base64'),
         muk,
         { name: 'AES-GCM', iv: Buffer.from(privateKeyIv, 'base64') },
-        { name: 'RSA-OAEP', hash: 'SHA-256' },
+        RSAOAEP_SHA256,
         true,
         ['decrypt', 'unwrapKey']
     )
-    const publicKey = await Crypto.subtle.importKey(
-        'jwk',
-        publicKeyJwk,
-        { name: 'RSA-OAEP', hash: 'SHA-256' },
-        true,
-        ['encrypt', 'wrapKey']
-    )
+    const publicKey = await importExtractableRsaKeyFromJwk(publicKeyJwk, ['encrypt', 'wrapKey'])
     const accountKeys = {
         privateKey,
         publicKey,
@@ -96,22 +114,18 @@ export async function signup(info : NewUserInfo) {
 
     const mukSalt = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
     const mukHex = await derivePrivateKey(mukSalt, info.password, secretKey, username)
-    const muk = await importKeyFromHex(mukHex)
+    const muk = await importMukFromHex(mukHex)
     const keyParams: RsaHashedKeyGenParams = {
-        name: 'RSA-OAEP',
+        ...RSAOAEP_SHA256,
         modulusLength: 4096,
         publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
-        hash: 'SHA-256',
     }
     const accountKeys = await Crypto.subtle.generateKey(
         keyParams,
         true,
         ['encrypt', 'decrypt', 'wrapKey', 'unwrapKey']
     ) as CryptoKeyPair
-    const exportedPublic = await Crypto.subtle.exportKey(
-        'jwk',
-        accountKeys.publicKey
-    )
+    const exportedPublic = await Crypto.subtle.exportKey('jwk', accountKeys.publicKey)
     const accountPrivateIv = Crypto.getRandomValues(new Uint8Array(12))
     const wrappedPrivate = await Crypto.subtle.wrapKey(
         'jwk',

@@ -1,5 +1,5 @@
-import { CurrentUserInfo } from "./Interfaces"
-const Crypto = window.crypto
+import { CurrentUserInfo } from './Interfaces'
+import { importAccountKeysFromJwks, exportAccountKeysToJwks } from './auth'
 
 const kUserInfoKey = 'userInfoKey'
 const kSecretKeyKey = 'secretKey'
@@ -36,38 +36,16 @@ class CurrentUser {
 
     static async getAccountKeys() {
         if ((CurrentUser.info.accountKeys.privateKey as any).kty === undefined) {
-            const privateKeyPromise = Crypto.subtle.importKey(
-                'jwk',
-                CurrentUser._info.accountKeyPrivate!,
-                { name: 'RSA-OAEP', hash: 'SHA-256' },
-                true,
-                ['decrypt', 'unwrapKey']
-            )
-            const publicKeyPromise = Crypto.subtle.importKey(
-                'jwk',
-                CurrentUser._info.accountKeyPublic!,
-                { name: 'RSA-OAEP', hash: 'SHA-256' },
-                true,
-                ['encrypt', 'wrapKey']
-            )
-            const [privateKey, publicKey] = await Promise.all([privateKeyPromise, publicKeyPromise])
-            CurrentUser._info.accountKeys = {
-                privateKey, publicKey
-            }
+            CurrentUser._info.accountKeys = await importAccountKeysFromJwks(CurrentUser._info.accountKeyPrivate!, CurrentUser._info.accountKeyPublic!)
         }
         return CurrentUser.info.accountKeys
     }
 
     static async set(info: CurrentUserInfo) {
         CurrentUser._info = info
-        info.accountKeyPrivate = await Crypto.subtle.exportKey(
-            'jwk',
-            info.accountKeys.privateKey
-        )
-        info.accountKeyPublic = await Crypto.subtle.exportKey(
-            'jwk',
-            info.accountKeys.publicKey
-        )
+        const [privateJwk, publicJwk] = await exportAccountKeysToJwks(info.accountKeys)
+        CurrentUser._info.accountKeyPrivate = privateJwk
+        CurrentUser._info.accountKeyPublic = publicJwk
         sessionStorage.setItem(kUserInfoKey, JSON.stringify(info))
         localStorage.setItem(kSecretKeyKey, info.secretKey)
     }

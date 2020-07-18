@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react'
 import { Image, Button, Loader, Segment, Dimmer, Menu, Message } from 'semantic-ui-react'
 import { History } from 'history'
 import { useDropzone } from 'react-dropzone'
-import { handleUpload } from './UploadPost'
+import { handleUpload } from './postCrypto'
 import { useMutation } from 'react-query'
 import { Redirect } from 'react-router-dom'
 

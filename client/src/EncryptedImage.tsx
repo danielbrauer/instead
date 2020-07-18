@@ -1,6 +1,6 @@
 import React from 'react'
 import { Placeholder, Image } from 'semantic-ui-react'
-import { useEncryptedImage } from './UploadPost'
+import { useEncryptedImage } from './postCrypto'
 
 interface EncryptedImageProps {
     encryptedUrl: string,
