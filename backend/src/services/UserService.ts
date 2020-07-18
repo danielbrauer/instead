@@ -6,6 +6,7 @@ import * as FollowRequests from '../queries/follow_requests.gen'
 import { SimpleEventDispatcher } from 'strongly-typed-events'
 import { FollowRelationship } from '../types/api'
 import { ServerError } from '../middleware/errors'
+import { NewUser } from 'auth'
 
 @Service()
 export default class UserService {
@@ -43,29 +44,8 @@ export default class UserService {
         return count
     }
 
-    async create(
-        username: string,
-        display_name: string,
-        verifier: string,
-        srp_salt: string,
-        muk_salt: string,
-        public_key: string,
-        private_key: string,
-        private_key_iv: string,
-    ) {
-        const [user] = await Users.create.run(
-            {
-                username,
-                display_name,
-                verifier,
-                srp_salt,
-                muk_salt,
-                public_key,
-                private_key,
-                private_key_iv,
-            },
-            this.db.pool
-        )
+    async create(newUser: NewUser) {
+        const [user] = await Users.create.run(newUser, this.db.pool)
         this._onUserCreated.dispatchAsync(user.id)
         return user
     }

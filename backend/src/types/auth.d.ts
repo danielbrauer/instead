@@ -1,4 +1,5 @@
 import { User } from './api'
+import { ICreateParams } from '../queries/users.gen'
 
 export type StartLoginResult = {
     srpSalt: string
@@ -22,3 +23,5 @@ export type StartSignupResult = {
 export type FinishSignupResult = {
     user: User
 }
+
+export interface NewUser extends ICreateParams {}

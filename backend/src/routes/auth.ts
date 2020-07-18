@@ -2,6 +2,7 @@ import Router from 'express-promise-router'
 import Container from 'typedi'
 import AuthService from '../services/AuthService'
 import validate from '../middleware/validate'
+import { NewUser } from 'auth'
 
 const router = Router()
 const authService = Container.get(AuthService)
@@ -27,16 +28,17 @@ router.post('/finishSignup',
         privateKeyIv: { in: ['body'], isBase64: true, },
     }),
     async function (req, res) {
-        const responseData = await authService.finishSignup(
-            req.session,
-            req.body.displayName,
-            req.body.verifier,
-            req.body.srpSalt,
-            req.body.mukSalt,
-            req.body.publicKey,
-            req.body.privateKey,
-            req.body.privateKeyIv,
-        )
+        const newUser : NewUser = {
+            username: req.session.signupInfo.username,
+            display_name: req.body.displayName,
+            verifier: req.body.verifier,
+            srp_salt: req.body.srpSalt,
+            muk_salt: req.body.mukSalt,
+            public_key: req.body.publicKey,
+            private_key: req.body.privateKey,
+            private_key_iv: req.body.privateKeyIv,
+        }
+        const responseData = await authService.finishSignup(req.session, newUser)
         return res.json(responseData)
     }
 )

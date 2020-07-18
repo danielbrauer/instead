@@ -92,7 +92,13 @@ export async function login(info : LoginInfo) {
         privateKey,
         publicKey,
     }
-    return { id: userid, username: info.username, displayName, secretKey: info.secretKey, accountKeys }
+    return {
+        id: userid,
+        username: info.username,
+        displayName,
+        secretKey: info.secretKey,
+        accountKeys
+    }
 }
 
 function createSecretKey() {
@@ -147,7 +153,7 @@ export async function signup(info : NewUserInfo) {
         username,
         secretKey,
         displayName: info.displayName,
-        accountKeys,
+        accountKeys
     }
 }
 
