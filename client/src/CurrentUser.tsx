@@ -1,5 +1,14 @@
-import { CurrentUserInfo } from './Interfaces'
 import { importAccountKeysFromJwks, exportAccountKeysToJwks } from './auth'
+
+interface CurrentUserInfo {
+    id: number
+    username: string
+    displayName: string
+    secretKey: string
+    accountKeys: CryptoKeyPair
+    accountKeyPrivate?: JsonWebKey
+    accountKeyPublic?: JsonWebKey
+}
 
 const kUserInfoKey = 'userInfoKey'
 const kSecretKeyKey = 'secretKey'

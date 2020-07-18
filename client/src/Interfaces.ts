@@ -11,14 +11,4 @@ export interface NewUserInfo {
     password: string
 }
 
-export interface CurrentUserInfo {
-    id: number
-    username: string
-    displayName: string
-    secretKey: string
-    accountKeys: CryptoKeyPair
-    accountKeyPrivate?: JsonWebKey
-    accountKeyPublic?: JsonWebKey
-}
-
 export type ButtonCallback = (event: React.MouseEvent<HTMLButtonElement>, data: ButtonProps) => void
