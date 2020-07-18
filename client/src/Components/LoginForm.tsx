@@ -3,7 +3,7 @@ import { useInput } from './useInput'
 import { Button, Form, Message, Header, Segment } from 'semantic-ui-react'
 import { RouterProps } from 'react-router'
 import CurrentUser from '../CurrentUser'
-import { login, cancel } from '../login'
+import { login, cancel } from '../auth'
 import { useMutation } from 'react-query'
 
 export default function LoginForm(props: RouterProps) {
