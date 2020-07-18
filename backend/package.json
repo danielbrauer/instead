@@ -6,7 +6,8 @@
   "scripts": {
     "build-dev": "tsc && eslint \"**/*.{js,ts}\" --quiet --fix",
     "build": "tsc",
-    "watch-debug": "concurrently -k \"tsc -w\" \"yarn pgtyped -w -c pgtconfig.json\" \"nodemon --require dotenv/config --inspect dist/server.js\"",
+    "watch": "tsc-watch --onSuccess \"node --require dotenv/config --inspect dist/src/server.js\" --onFailure \"echo Beep! Compilation Failed\"",
+    "watch-debug": "concurrently -k \"yarn watch\" \"pgtyped -w -c pgtconfig.json\"",
     "dump-schema": "node --require dotenv/config dist/dumpSchema.js"
   },
   "author": "Daniel Brauer",
@@ -35,7 +36,6 @@
     "connect-redis": "^4.0.2",
     "cors": "^2.8.5",
     "eslint": "^6.4.0",
-    "event-dispatch": "^0.4.1",
     "express": "^4.17.0",
     "express-promise-router": "^3.0.3",
     "express-session": "^1.16.2",
@@ -47,6 +47,7 @@
     "redis": "^2.8.0",
     "reflect-metadata": "^0.1.13",
     "secure-remote-password": "^0.3.1",
+    "strongly-typed-events": "^1.6.13",
     "ts-node": "^8.4.1",
     "typedi": "^0.8.0",
     "typescript": "3.7.3",
@@ -55,7 +56,7 @@
   "devDependencies": {
     "concurrently": "^4.1.2",
     "dotenv": "^8.1.0",
-    "nodemon": "^1.19.1"
+    "tsc-watch": "^4.2.9"
   },
   "nodemonConfig": {
     "watch": [

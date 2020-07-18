@@ -8,9 +8,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node backend/dist/server.js",
-    "build": "cd client && yarn install && yarn run build && cd ../backend && yarn install && yarn run build",
-    "local": "concurrently \"cd backend && yarn run watch-debug\" \"cd client && yarn start\""
+    "start": "node backend/dist/src/server.js",
+    "build": "cd backend && yarn install && yarn build && cd ../client && yarn install && yarn build",
+    "local": "concurrently \"cd backend && yarn watch-debug\" \"cd client && yarn start\""
   },
   "keywords": [],
   "author": "Daniel Brauer",

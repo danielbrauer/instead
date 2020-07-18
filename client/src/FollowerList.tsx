@@ -1,28 +1,37 @@
 import React from 'react'
-import { List, Message } from 'semantic-ui-react'
-import { User } from './Interfaces'
+import { List, Message, Loader } from 'semantic-ui-react'
 import SafetyButton from './SafetyButton'
 import UserInList from './UserInList'
+import { useQuery, useMutation } from 'react-query'
+import { getFollowers, removeFollower } from './RoutesAuthenticated'
 
-export interface FollowerListProps {
-    followers: number[],
-    removeFollower: (userid: number) => void,
-    getUser: (userid: number) => User,
-}
-
-export default function FollowerList(props: FollowerListProps) {
+export default function FollowerList() {
+    const followers = useQuery('followers', getFollowers)
+    const [removeFollowerMutation] = useMutation(removeFollower)
+    if (followers.isError) return (
+        <div>
+            <Message negative>
+                <Message.Header>Error fetching followers</Message.Header>
+            </Message>
+        </div>
+    )
+    if (followers.isLoading) return (
+        <div>
+            <Loader active></Loader>
+        </div>
+    )
     return (
         <div>
-            {props.followers.length === 0 ?
+            {followers.data!.length === 0 ?
                 <Message>You don't have any followers yet</Message>
                 :
                 <List verticalAlign='middle'>
-                    {props.followers.map(follower => (
+                    {followers.data!.map(follower => (
                         <List.Item key={follower}>
                             <List.Content floated='right'>
-                                <SafetyButton size='mini' onClick={() => props.removeFollower(follower)}>Remove</SafetyButton>
+                                <SafetyButton size='mini' onClick={() => removeFollowerMutation(follower)}>Remove</SafetyButton>
                             </List.Content>
-                            <UserInList id={follower} getUser={props.getUser} />
+                            <UserInList id={follower} />
                         </List.Item>
                     ))}
                 </List>

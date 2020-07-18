@@ -1,4 +1,4 @@
-import { Service } from "typedi"
+import { Service } from 'typedi'
 import config from '../config/config'
 import aws from 'aws-sdk'
 
@@ -32,7 +32,7 @@ export default class AWSService {
         const s3Params = {
             Bucket: this.bucket,
             Key: fileName,
-            Expires: 300,
+            Expires: config.uploadTime,
             ContentType: fileType,
             ContentMD5: md5,
             ACL: 'public-read',

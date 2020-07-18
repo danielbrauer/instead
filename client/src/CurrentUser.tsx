@@ -1,39 +1,67 @@
+import { importAccountKeysFromJwks, exportAccountKeysToJwks } from './auth'
 
-const kIdKey = 'userId'
-const kUsernameKey = 'username'
+interface CurrentUserInfo {
+    id: number
+    username: string
+    displayName: string
+    secretKey: string
+    accountKeys: CryptoKeyPair
+    accountKeyPrivate?: JsonWebKey
+    accountKeyPublic?: JsonWebKey
+}
+
+const kUserInfoKey = 'userInfoKey'
 const kSecretKeyKey = 'secretKey'
-const kDisplayNameKey = 'displayName'
 
 class CurrentUser {
 
+    private static _info: CurrentUserInfo
+
+    private static get info() : CurrentUserInfo {
+        if (!CurrentUser._info) {
+            const sessionUser = sessionStorage.getItem(kUserInfoKey)
+            if (sessionUser) {
+                CurrentUser._info = JSON.parse(sessionUser)
+            }
+        }
+        return CurrentUser._info
+    }
+
     static getId() : number {
-        return parseInt(localStorage.getItem(kIdKey)!, 10)
+        return CurrentUser.info.id
     }
 
     static getUsername() : string {
-        return localStorage.getItem(kUsernameKey)!
+        return CurrentUser.info.username
     }
 
     static getDisplayName() : string {
-        return localStorage.getItem(kDisplayNameKey)!
+        return CurrentUser.info.displayName
     }
 
     static getSecretKey() : string | null {
-        return localStorage.getItem(kSecretKeyKey)
+        return (CurrentUser.info && CurrentUser.info.secretKey) || localStorage.getItem(kSecretKeyKey)
     }
 
-    static set(id : number, username : string, secretKey : string, displayName : string) {
-        localStorage.setItem(kIdKey, id.toString())
-        localStorage.setItem(kUsernameKey, username)
-        localStorage.setItem(kDisplayNameKey, displayName)
+    static async getAccountKeys() {
+        if ((CurrentUser.info.accountKeys.privateKey as any).kty === undefined) {
+            CurrentUser._info.accountKeys = await importAccountKeysFromJwks(CurrentUser._info.accountKeyPrivate!, CurrentUser._info.accountKeyPublic!)
+        }
+        return CurrentUser.info.accountKeys
+    }
 
-        localStorage.setItem(kSecretKeyKey, secretKey)
+    static async set(info: CurrentUserInfo) {
+        CurrentUser._info = info
+        const [privateJwk, publicJwk] = await exportAccountKeysToJwks(info.accountKeys)
+        CurrentUser._info.accountKeyPrivate = privateJwk
+        CurrentUser._info.accountKeyPublic = publicJwk
+        sessionStorage.setItem(kUserInfoKey, JSON.stringify(info))
+        localStorage.setItem(kSecretKeyKey, info.secretKey)
     }
 
     static clear() {
-        localStorage.removeItem(kIdKey)
-        localStorage.removeItem(kUsernameKey)
-        localStorage.removeItem(kDisplayNameKey)
+        delete CurrentUser._info
+        sessionStorage.clear()
     }
 
     static clearSecretKey() {
@@ -41,7 +69,7 @@ class CurrentUser {
     }
 
     static loggedIn() {
-        return localStorage.getItem(kIdKey) !== null
+        return CurrentUser.info !== undefined
     }
 }
 

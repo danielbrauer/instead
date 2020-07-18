@@ -1,7 +1,10 @@
 import React, { useCallback, useState } from 'react'
-import { Image, Button, Loader, Segment, Dimmer, Menu } from 'semantic-ui-react'
+import { Image, Button, Loader, Segment, Dimmer, Menu, Message } from 'semantic-ui-react'
 import { History } from 'history'
 import { useDropzone } from 'react-dropzone'
+import { handleUpload } from './postCrypto'
+import { useMutation } from 'react-query'
+import { Redirect } from 'react-router-dom'
 
 let urls = new WeakMap()
 
@@ -17,17 +20,14 @@ let blobUrl = (blob: Blob) => {
 
 interface NewPostProps {
     history: History,
-    onSubmit: (file: File) => void,
 }
 
 export default function NewPost(props: NewPostProps) {
     const [uploadInput, setUploadInput] = useState<File | null>(null)
-    const [uploading, setUploading] = useState(false)
+    const [uploadMutation, uploadStatus] = useMutation(handleUpload)
 
     async function onSubmit() {
-        setUploading(true)
-        await props.onSubmit(uploadInput!)
-        props.history.push('/home')
+        await uploadMutation(uploadInput!)
     }
 
     function onCancel() {
@@ -43,11 +43,21 @@ export default function NewPost(props: NewPostProps) {
         accept: ['image/jpeg', 'image/png'],
     })
 
+    if (uploadStatus.isSuccess)
+        return (<Redirect to='/home' />)
+
     return (
         <div>
+            {uploadStatus.error ?
+                <Message negative>
+                    <Message.Header>Sorry, there was an error uploading your post</Message.Header>
+                </Message>
+                :
+                null
+            }
             {uploadInput !== null ?
                 <div>
-                    <Dimmer inverted active={uploading} >
+                    <Dimmer inverted active={uploadStatus.isLoading} >
                         <Loader inverted />
                     </Dimmer>
                     <Image fluid src={blobUrl(uploadInput!)} alt={uploadInput.name} />
@@ -65,7 +75,7 @@ export default function NewPost(props: NewPostProps) {
                     </div>
                 </Segment>
             }
-            {uploadInput !== null && !uploading ?
+            {uploadInput !== null && !uploadStatus.isLoading ?
                 <Menu secondary fluid fixed='bottom'>
                     <Menu.Item>
                         <Button negative onClick={onCancel}>Cancel</Button>

@@ -5,9 +5,11 @@ import AppAuthenticated from './AppAuthenticated'
 import AppUnauthenticated from './AppUnauthenticated'
 import AppWelcome from './AppWelcome'
 import 'semantic-ui-css/semantic.min.css'
+import { ReactQueryDevtools } from 'react-query-devtools'
 
 const routing = (
     <BrowserRouter>
+        <ReactQueryDevtools initialIsOpen={false} />
         <Switch>
             <Route exact path="/" component={AppUnauthenticated} />
             <Route path="/signup" component={AppUnauthenticated} />

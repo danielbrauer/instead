@@ -37,6 +37,36 @@ const createIR: any = {"name":"Create","params":[{"name":"username","transform":
 export const create = new PreparedQuery<ICreateParams,ICreateResult>(createIR);
 
 
+/** 'GetUserInfo' parameters type */
+export interface IGetUserInfoParams {
+  userId: number | null | void;
+}
+
+/** 'GetUserInfo' return type */
+export interface IGetUserInfoResult {
+  private_key: string;
+  private_key_iv: string;
+  public_key: Json;
+  muk_salt: string;
+}
+
+/** 'GetUserInfo' query type */
+export interface IGetUserInfoQuery {
+  params: IGetUserInfoParams;
+  result: IGetUserInfoResult;
+}
+
+const getUserInfoIR: any = {"name":"GetUserInfo","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":363,"b":368,"line":5,"col":80}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT private_key, private_key_iv, public_key, muk_salt FROM users WHERE id = :userId","loc":{"a":283,"b":368,"line":5,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT private_key, private_key_iv, public_key, muk_salt FROM users WHERE id = :userId
+ * ```
+ */
+export const getUserInfo = new PreparedQuery<IGetUserInfoParams,IGetUserInfoResult>(getUserInfoIR);
+
+
 /** 'CountByName' parameters type */
 export interface ICountByNameParams {
   username: string | null | void;
@@ -53,7 +83,7 @@ export interface ICountByNameQuery {
   result: ICountByNameResult;
 }
 
-const countByNameIR: any = {"name":"CountByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":333,"b":340,"line":5,"col":50}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT COUNT(*)::int FROM users WHERE username = :username","loc":{"a":283,"b":340,"line":5,"col":0}}};
+const countByNameIR: any = {"name":"CountByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":446,"b":453,"line":8,"col":50}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT COUNT(*)::int FROM users WHERE username = :username","loc":{"a":396,"b":453,"line":8,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -81,7 +111,7 @@ export interface IGetByIdQuery {
   result: IGetByIdResult;
 }
 
-const getByIdIR: any = {"name":"GetById","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":407,"b":412,"line":8,"col":43}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, username FROM users WHERE id = :userId","loc":{"a":364,"b":412,"line":8,"col":0}}};
+const getByIdIR: any = {"name":"GetById","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":520,"b":525,"line":11,"col":43}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, username FROM users WHERE id = :userId","loc":{"a":477,"b":525,"line":11,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -108,7 +138,7 @@ export interface IGetByNameQuery {
   result: IGetByNameResult;
 }
 
-const getByNameIR: any = {"name":"GetByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":477,"b":484,"line":11,"col":39}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT id FROM users WHERE username = :username","loc":{"a":438,"b":484,"line":11,"col":0}}};
+const getByNameIR: any = {"name":"GetByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":590,"b":597,"line":14,"col":39}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT id FROM users WHERE username = :username","loc":{"a":551,"b":597,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -139,7 +169,7 @@ export interface IGetLoginInfoByNameQuery {
   result: IGetLoginInfoByNameResult;
 }
 
-const getLoginInfoByNameIR: any = {"name":"GetLoginInfoByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":602,"b":609,"line":14,"col":83}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT id, username, srp_salt, verifier, display_name FROM users WHERE username = :username","loc":{"a":519,"b":609,"line":14,"col":0}}};
+const getLoginInfoByNameIR: any = {"name":"GetLoginInfoByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":715,"b":722,"line":17,"col":83}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT id, username, srp_salt, verifier, display_name FROM users WHERE username = :username","loc":{"a":632,"b":722,"line":17,"col":0}}};
 
 /**
  * Query generated from SQL:

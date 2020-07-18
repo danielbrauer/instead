@@ -6,7 +6,7 @@ export default function(schema: Schema) {
         const validations = checkSchema(schema)
         await Promise.all(validations.map(validation => validation.run(req)))
 
-        const errors = validationResult(req);
+        const errors = validationResult(req)
         if (errors.isEmpty()) {
             return next()
         }
