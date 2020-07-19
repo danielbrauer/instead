@@ -208,7 +208,7 @@ export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, en
                 URL.revokeObjectURL(state.decryptedUrl)
         }
 
-    }, [encryptedUrl])
+    }, [encryptedUrl, ivBase64, wrappedKeyBase64, state.decryptedUrl])
 
     return state
 }
