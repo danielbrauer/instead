@@ -93,7 +93,7 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
     }
 }
 
-export async function handleUpload(file: File) {
+export async function handleUpload({file, aspect} : {file: File, aspect: number}) {
     const filePromise = readAsArrayBuffer(file)
     const keyPromise = getCurrentPostKey()
     const iv = Crypto.getRandomValues(new Uint8Array(12))
@@ -111,7 +111,7 @@ export async function handleUpload(file: File) {
         result
     )
     const contentMD5 = md5.base64(encrypted)
-    const postInfo = await startPost(postKey.id, ivBuffer.toString('base64'), contentMD5)
+    const postInfo = await startPost(postKey.id, ivBuffer.toString('base64'), contentMD5, aspect)
     const signedRequest = postInfo.signedRequest
 
     const options = {

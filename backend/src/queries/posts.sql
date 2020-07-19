@@ -1,5 +1,5 @@
 /* @name CreateAndReturn */
-INSERT INTO posts (filename, author_id, key_set_id, iv) VALUES (:fileName, :authorId, :keySetId, :iv) RETURNING id;
+INSERT INTO posts (filename, author_id, key_set_id, iv, aspect) VALUES (:fileName, :authorId, :keySetId, :iv, :aspect) RETURNING id;
 
 /* @name Publish */
 UPDATE posts SET published = true WHERE id = :postId;
@@ -11,7 +11,7 @@ DELETE FROM posts WHERE id = :postId AND author_id = :authorId RETURNING *;
 DELETE FROM posts WHERE id = :postId AND published = false RETURNING *;
 
 /* @name GetHomePostsWithKeys */
-SELECT posts.id, posts.timestamp, posts.author_id, posts.filename, posts.iv,
+SELECT posts.id, posts.timestamp, posts.author_id, posts.filename, posts.iv, posts.aspect,
        keys.jwk
 FROM posts, keys
 WHERE posts.key_set_id = keys.key_set_id
