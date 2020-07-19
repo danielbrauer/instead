@@ -157,6 +157,7 @@ export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, en
 
     useEffect(() => {
         let cancelRequest = false
+        let decryptedUrl = ''
         if (!encryptedUrl)
             return
 
@@ -164,6 +165,8 @@ export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, en
             dispatch({ type: 'request' })
             try {
                 const accountKeys = await CurrentUser.getAccountKeys()
+                if (cancelRequest)
+                    return
                 const [cryptoKey, encryptedImage] = await Promise.all([
                     Crypto.subtle.unwrapKey(
                         'jwk',
@@ -192,7 +195,7 @@ export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, en
                 if (cancelRequest)
                     return
                 const blob = new Blob([decrypted], { type: 'image/jpeg' })
-                const decryptedUrl = URL.createObjectURL(blob)
+                decryptedUrl = URL.createObjectURL(blob)
                 dispatch({ type: 'success', results: decryptedUrl })
                 return
             } catch (error) {
@@ -204,11 +207,11 @@ export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, en
 
         return () => {
             cancelRequest = true
-            if (state.decryptedUrl)
-                URL.revokeObjectURL(state.decryptedUrl)
+            if (decryptedUrl)
+                URL.revokeObjectURL(decryptedUrl)
         }
 
-    }, [encryptedUrl])
+    }, [encryptedUrl, ivBase64, wrappedKeyBase64])
 
     return state
 }
