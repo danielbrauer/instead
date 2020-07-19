@@ -158,11 +158,35 @@ CREATE TABLE public.users (
 
 
 --
+-- Name: follow_requests follow_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.follow_requests
+    ADD CONSTRAINT follow_requests_pkey PRIMARY KEY (requester_id, requestee_id);
+
+
+--
+-- Name: followers followers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.followers
+    ADD CONSTRAINT followers_pkey PRIMARY KEY (follower_id, followee_id);
+
+
+--
 -- Name: key_sets key_sets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.key_sets
     ADD CONSTRAINT key_sets_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: keys keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.keys
+    ADD CONSTRAINT keys_pkey PRIMARY KEY (user_id, key_set_id);
 
 
 --
@@ -179,27 +203,6 @@ ALTER TABLE ONLY public.posts
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
-
-
---
--- Name: follow_requests_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX follow_requests_idx ON public.follow_requests USING btree (requester_id, requestee_id);
-
-
---
--- Name: followers_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX followers_idx ON public.followers USING btree (follower_id, followee_id);
-
-
---
--- Name: keys_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX keys_idx ON public.keys USING btree (user_id, key_set_id);
 
 
 --
