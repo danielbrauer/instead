@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.production.json",
     "lint": "eslint \"**/*.{js,ts}\" --quiet --fix",
-    "watch": "yarn lint && tsc-watch --project tsconfig.dev.json --onSuccess \"node --require dotenv/config --inspect dist/src/server.js\" --onFailure \"echo Compilation Failed\"",
+    "watch": "yarn lint && tsc-watch --onSuccess \"node --require dotenv/config --inspect dist/src/server.js\" --onFailure \"echo Compilation Failed\"",
     "watch-debug": "concurrently --kill-others \"yarn watch\" \"pgtyped -w -c pgtconfig.json\"",
     "dump-schema": "node --require dotenv/config dist/dumpSchema.js"
   },
