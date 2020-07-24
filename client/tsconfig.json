@@ -23,6 +23,6 @@
     "src"
   ],
   "references": [
-      { "path": "../backend" }
+      { "path": "../backend/tsconfig.production.json" }
   ]
 }

@@ -2,7 +2,7 @@ import Router from 'express-promise-router'
 import Container from 'typedi'
 import AuthService from '../services/AuthService'
 import validate from '../middleware/validate'
-import { NewUser } from 'auth'
+import { NewUser } from '../types/auth'
 
 const router = Router()
 const authService = Container.get(AuthService)
@@ -28,7 +28,7 @@ router.post('/finishSignup',
         privateKeyIv: { in: ['body'], isBase64: true, },
     }),
     async function (req, res) {
-        const newUser : NewUser = {
+        const newUser: NewUser = {
             username: req.session.signupInfo.username,
             display_name: req.body.displayName,
             verifier: req.body.verifier,

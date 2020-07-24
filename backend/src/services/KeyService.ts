@@ -1,4 +1,4 @@
-import Container, { Service, Inject } from "typedi"
+import Container, { Service, Inject } from 'typedi'
 import Database from './DatabaseService'
 import * as Keys from '../queries/keys.gen'
 import UserService from '../services/UserService'
