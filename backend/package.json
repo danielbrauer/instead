@@ -18,8 +18,8 @@
     "directory": "backend"
   },
   "dependencies": {
-    "@pgtyped/cli": "^0.7.3",
-    "@pgtyped/query": "^0.7.3",
+    "@pgtyped/cli": "^0.8.1",
+    "@pgtyped/query": "^0.8.1",
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.1",
     "@types/express-session": "^1.15.14",

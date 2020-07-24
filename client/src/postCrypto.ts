@@ -4,6 +4,7 @@ import Axios from 'axios'
 import CurrentUser from './CurrentUser'
 import md5 from 'js-md5'
 import { useReducer, useEffect } from 'react'
+import { EncryptedPostKey } from '../../backend/src/types/api'
 const toBuffer = require('typedarray-to-buffer') as (typedArray: Uint8Array) => Buffer
 require('buffer')
 const Crypto = window.crypto
@@ -30,7 +31,7 @@ async function getCurrentPostKey() : Promise<PostKey | null> {
     )
     return {
         key,
-        id: encrypted.key_set_id,
+        id: encrypted.keySetId,
     }
 }
 
@@ -64,7 +65,7 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
     const followerPostKeyPromises = followerPublicKeys.map(async(publicKey) => {
         const followerPublicKey = await Crypto.subtle.importKey(
             'jwk',
-            publicKey.public_key as JsonWebKey,
+            publicKey.publicKey as JsonWebKey,
             { name: "RSA-OAEP", hash: "SHA-256" },
             false,
             ['encrypt', 'wrapKey']
@@ -75,11 +76,12 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
             followerPublicKey,
             { name: 'RSA-OAEP' }
         )
-        return {
+        const encryptedKey: EncryptedPostKey = {
             jwk: Buffer.from(followerVersion).toString('base64'),
-            user_id: publicKey.id,
-            key_set_id: keySetId,
+            userId: publicKey.id,
+            keySetId: keySetId,
         }
+        return encryptedKey
     })
 
     if (followerPostKeyPromises.length > 0) {

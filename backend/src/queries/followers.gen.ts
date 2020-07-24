@@ -88,7 +88,7 @@ export interface IGetByFolloweeIdParams {
 
 /** 'GetByFolloweeId' return type */
 export interface IGetByFolloweeIdResult {
-  follower_id: number;
+  followerId: number;
 }
 
 /** 'GetByFolloweeId' query type */
@@ -115,7 +115,7 @@ export interface IGetByFollowerIdParams {
 
 /** 'GetByFollowerId' return type */
 export interface IGetByFollowerIdResult {
-  followee_id: number;
+  followeeId: number;
 }
 
 /** 'GetByFollowerId' query type */

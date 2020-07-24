@@ -25,7 +25,7 @@ export default class AuthService {
                 serverEphemeralSecret: serverEphemeral.secret
             }
             return {
-                srpSalt: user.srp_salt,
+                srpSalt: user.srpSalt,
                 serverEphemeralPublic: serverEphemeral.public,
             }
         } else {
@@ -50,18 +50,18 @@ export default class AuthService {
         const serverSession = srp.deriveSession(
             loginInfo.serverEphemeralSecret,
             loginInfo.clientEphemeralPublic,
-            loginInfo.user.srp_salt,
+            loginInfo.user.srpSalt,
             loginInfo.user.username,
             loginInfo.user.verifier,
             clientSessionProof
         )
         session.user = { id: loginInfo.user.id, username: loginInfo.user.username }
-        const { private_key: privateKey, private_key_iv: privateKeyIv, public_key : publicKey, muk_salt: mukSalt } = await this.userService.getUserInfo(session.user.id)
+        const { privateKey, privateKeyIv, publicKey, mukSalt } = await this.userService.getUserInfo(session.user.id)
         delete session.loginInfo
         return {
             userid: session.user.id,
             serverSessionProof: serverSession.proof,
-            displayName: loginInfo.user.display_name,
+            displayName: loginInfo.user.displayName,
             privateKey,
             privateKeyIv,
             publicKey: publicKey as JsonWebKey,

@@ -61,8 +61,8 @@ export interface IDestroyAndReturnParams {
 
 /** 'DestroyAndReturn' return type */
 export interface IDestroyAndReturnResult {
-  requester_id: number;
-  requestee_id: number;
+  requesterId: number;
+  requesteeId: number;
   timestamp: Date;
 }
 
@@ -118,7 +118,7 @@ export interface IGetByRequesteeIdParams {
 
 /** 'GetByRequesteeId' return type */
 export interface IGetByRequesteeIdResult {
-  requester_id: number;
+  requesterId: number;
 }
 
 /** 'GetByRequesteeId' query type */

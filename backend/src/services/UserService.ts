@@ -79,7 +79,7 @@ export default class UserService {
             if (!request)
                 throw new ServerError('No such follow request')
             await Followers.create.run(
-                { followerId: request.requester_id, followeeId: request.requestee_id},
+                { followerId: request.requesterId, followeeId: request.requesteeId},
                 client
             )
         })
@@ -92,17 +92,17 @@ export default class UserService {
 
     async getFollowRequests(requesteeId: number) {
         const requests = await FollowRequests.getByRequesteeId.run({ requesteeId }, this.db.pool)
-        return requests.map(r => r.requester_id)
+        return requests.map(r => r.requesterId)
     }
 
     async getFollowers(followeeId: number) {
         const follows = await Followers.getByFolloweeId.run({ followeeId }, this.db.pool)
-        return follows.map(r => r.follower_id)
+        return follows.map(r => r.followerId)
     }
 
     async getFollowees(followerId: number) {
         const follows = await Followers.getByFollowerId.run({ followerId }, this.db.pool)
-        return follows.map(r => r.followee_id)
+        return follows.map(r => r.followeeId)
     }
 
     async removeFollower(followerId: number, followeeId: number) {

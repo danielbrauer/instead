@@ -1,5 +1,5 @@
 /* @name Create */
-INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key, private_key_iv) VALUES (:username, :display_name, :verifier, :srp_salt, :muk_salt, :public_key, :private_key, :private_key_iv) RETURNING id;
+INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key, private_key_iv) VALUES (:username, :displayName, :verifier, :srpSalt, :mukSalt, :publicKey, :privateKey, :privateKeyIv) RETURNING id;
 
 /* @name GetUserInfo */
 SELECT private_key, private_key_iv, public_key, muk_salt FROM users WHERE id = :userId;

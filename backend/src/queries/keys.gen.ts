@@ -36,7 +36,7 @@ export interface IGetCurrentKeySetIdParams {
 
 /** 'GetCurrentKeySetId' return type */
 export interface IGetCurrentKeySetIdResult {
-  current_post_key_set: number | null;
+  currentPostKeySet: number | null;
 }
 
 /** 'GetCurrentKeySetId' query type */
@@ -64,8 +64,8 @@ export interface IGetCurrentKeyParams {
 /** 'GetCurrentKey' return type */
 export interface IGetCurrentKeyResult {
   jwk: string;
-  user_id: number;
-  key_set_id: number;
+  userId: number;
+  keySetId: number;
 }
 
 /** 'GetCurrentKey' query type */
@@ -97,7 +97,7 @@ export interface IGetFollowerPublicKeysParams {
 /** 'GetFollowerPublicKeys' return type */
 export interface IGetFollowerPublicKeysResult {
   id: number;
-  public_key: Json;
+  publicKey: Json;
 }
 
 /** 'GetFollowerPublicKeys' query type */
@@ -176,9 +176,9 @@ export const createKeySet = new PreparedQuery<ICreateKeySetParams,ICreateKeySetR
 /** 'AddKeys' parameters type */
 export interface IAddKeysParams {
   keys: Array<{
-    user_id: number,
-    key_set_id: number,
-    jwk: string
+    userId: number | null | void,
+    keySetId: number | null | void,
+    jwk: string | null | void
   }>;
 }
 
@@ -191,7 +191,7 @@ export interface IAddKeysQuery {
   result: IAddKeysResult;
 }
 
-const addKeysIR: any = {"name":"AddKeys","params":[{"name":"keys","codeRefs":{"defined":{"a":728,"b":731,"line":29,"col":11},"used":[{"a":823,"b":826,"line":32,"col":8}]},"transform":{"type":"pick_array_spread","keys":["user_id","key_set_id","jwk"]}}],"usedParamSet":{"keys":true},"statement":{"body":"INSERT INTO keys (user_id, key_set_id, jwk)\nVALUES :keys","loc":{"a":771,"b":826,"line":31,"col":0}}};
+const addKeysIR: any = {"name":"AddKeys","params":[{"name":"keys","codeRefs":{"defined":{"a":728,"b":731,"line":29,"col":11},"used":[{"a":820,"b":823,"line":32,"col":8}]},"transform":{"type":"pick_array_spread","keys":["userId","keySetId","jwk"]}}],"usedParamSet":{"keys":true},"statement":{"body":"INSERT INTO keys (user_id, key_set_id, jwk)\nVALUES :keys","loc":{"a":768,"b":823,"line":31,"col":0}}};
 
 /**
  * Query generated from SQL:
