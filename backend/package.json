@@ -57,12 +57,5 @@
     "concurrently": "^4.1.2",
     "dotenv": "^8.1.0",
     "tsc-watch": "^4.2.9"
-  },
-  "nodemonConfig": {
-    "watch": [
-      "dist/",
-      "node-modules/"
-    ],
-    "delay": "1000"
   }
 }
