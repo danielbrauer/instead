@@ -1,4 +1,4 @@
-import { Service, Inject } from 'typedi'
+import { Service } from 'typedi'
 import Database from './DatabaseService'
 import * as Users from '../queries/users.gen'
 import * as Followers from '../queries/followers.gen'
@@ -11,12 +11,11 @@ import { NewUser } from 'auth'
 @Service()
 export default class UserService {
 
-    @Inject()
-    private db: Database
-
     private _onUserCreated = new SimpleEventDispatcher<number>()
     private _onUserAddedFollower = new SimpleEventDispatcher<FollowRelationship>()
     private _onUserLostFollower = new SimpleEventDispatcher<FollowRelationship>()
+
+    constructor(private db: Database) {}
 
     public get onUserCreated() { return this._onUserCreated.asEvent() }
     public get onUserAddedFollower() { return this._onUserAddedFollower.asEvent() }
