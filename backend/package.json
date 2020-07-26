@@ -7,8 +7,8 @@
     "build-dev": "tsc && eslint \"**/*.{js,ts}\" --quiet --fix",
     "build": "tsc",
     "watch": "tsc-watch --onSuccess \"node --require dotenv/config --inspect dist/src/server.js\" --onFailure \"echo Beep! Compilation Failed\"",
-    "watch-debug": "concurrently -k \"yarn watch\" \"pgtyped -w -c pgtconfig.json\"",
-    "migrate": "ts-node --compiler-options '{\"module\":\"commonjs\"}' node_modules/node-pg-migrate/bin/node-pg-migrate --migration-file-language ts"
+    "watch-debug": "concurrently -k \"yarn watch\" \"yarn migrate && pgtyped -w -c pgtconfig.json\"",
+    "migrate": "ts-node --compiler-options '{\"module\":\"commonjs\"}' node_modules/node-pg-migrate/bin/node-pg-migrate --migration-file-language ts up"
   },
   "author": "Daniel Brauer",
   "license": "MIT",
