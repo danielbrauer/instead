@@ -28,9 +28,9 @@ export default function LoginForm(props: RouterProps) {
 
     return (
         <div>
-            <Form error={isError} loading={isLoading || isSuccess} onSubmit={handleSubmit} size='large'>
-                <Segment inverted stacked>
-                    <Header as='h2' textAlign='center' content='Instead'/>
+            <Form error={isError} loading={isLoading || isSuccess} onSubmit={handleSubmit}>
+                <Segment inverted stacked size='large'>
+                    <Header textAlign='center' content='Instead'/>
                     <Form.Input
                         fluid
                         icon='paw'

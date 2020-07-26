@@ -54,9 +54,9 @@ export default function SignupForm(props: RouterProps) {
 
     return (
         <div>
-            <Form error={signupQuery.isError} loading={passwordCheckQuery.isLoading || signupQuery.isLoading || signupQuery.isSuccess} onSubmit={handleSubmit} size='large'>
-                <Segment inverted stacked>
-                    <Header as='h2' textAlign='center' content='Instead' />
+            <Form error={signupQuery.isError} loading={passwordCheckQuery.isLoading || signupQuery.isLoading || signupQuery.isSuccess} onSubmit={handleSubmit}>
+                <Segment inverted stacked size='large'>
+                    <Header textAlign='center' content='Instead' />
                     <Form.Input
                         fluid
                         icon='user'
