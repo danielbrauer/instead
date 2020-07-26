@@ -11,10 +11,6 @@ export interface FollowRelationship {
     followeeId: number
 }
 
-export interface ContentUrl {
-    contentUrl: string
-}
-
 export interface ActionResult {
     success: boolean
 }

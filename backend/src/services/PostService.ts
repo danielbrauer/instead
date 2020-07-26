@@ -5,7 +5,7 @@ import * as Posts from '../queries/posts.gen'
 import uuidv1 from 'uuid/v1'
 import { SimpleEventDispatcher } from 'strongly-typed-events'
 import config from '../config/config'
-import { ContentUrl, DeletePostResult, StartPostResult } from 'api'
+import { DeletePostResult, StartPostResult } from 'api'
 
 @Service()
 export default class PostService {
