@@ -23,9 +23,7 @@ export default function () {
     return (
         <div>
             {posts.data!.length === 0 ?
-            <Message>No posts yet!
-                <br/><br/>
-                To post a photo or follow people, use the menu in the upper-right.</Message>
+            <Message>To post a photo or follow people, use the menu ➚</Message>
             :
             <List>
                 {posts.data!.map(post => (
