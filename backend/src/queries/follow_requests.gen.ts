@@ -63,7 +63,6 @@ export interface IDestroyAndReturnParams {
 export interface IDestroyAndReturnResult {
   requester_id: number;
   requestee_id: number;
-  timestamp: Date;
 }
 
 /** 'DestroyAndReturn' query type */

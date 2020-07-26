@@ -46,12 +46,12 @@ export interface IPublishQuery {
   result: IPublishResult;
 }
 
-const publishIR: any = {"name":"Publish","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":228,"b":233,"line":5,"col":46}]}}],"usedParamSet":{"postId":true},"statement":{"body":"UPDATE posts SET published = true WHERE id = :postId","loc":{"a":182,"b":233,"line":5,"col":0}}};
+const publishIR: any = {"name":"Publish","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":229,"b":234,"line":5,"col":47}]}}],"usedParamSet":{"postId":true},"statement":{"body":"UPDATE posts SET published = NOW() WHERE id = :postId","loc":{"a":182,"b":234,"line":5,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * UPDATE posts SET published = true WHERE id = :postId
+ * UPDATE posts SET published = NOW() WHERE id = :postId
  * ```
  */
 export const publish = new PreparedQuery<IPublishParams,IPublishResult>(publishIR);
@@ -66,10 +66,9 @@ export interface IDestroyAndReturnParams {
 /** 'DestroyAndReturn' return type */
 export interface IDestroyAndReturnResult {
   id: number;
-  timestamp: Date;
+  published: Date | null;
   author_id: number;
   filename: string;
-  published: boolean;
   key_set_id: number;
   iv: string;
   aspect: number;
@@ -81,7 +80,7 @@ export interface IDestroyAndReturnQuery {
   result: IDestroyAndReturnResult;
 }
 
-const destroyAndReturnIR: any = {"name":"DestroyAndReturn","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":296,"b":301,"line":8,"col":30}]}},{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":320,"b":327,"line":8,"col":54}]}}],"usedParamSet":{"postId":true,"authorId":true},"statement":{"body":"DELETE FROM posts WHERE id = :postId AND author_id = :authorId RETURNING *","loc":{"a":266,"b":339,"line":8,"col":0}}};
+const destroyAndReturnIR: any = {"name":"DestroyAndReturn","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":297,"b":302,"line":8,"col":30}]}},{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":321,"b":328,"line":8,"col":54}]}}],"usedParamSet":{"postId":true,"authorId":true},"statement":{"body":"DELETE FROM posts WHERE id = :postId AND author_id = :authorId RETURNING *","loc":{"a":267,"b":340,"line":8,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -100,10 +99,9 @@ export interface IDestroyIfUnpublishedParams {
 /** 'DestroyIfUnpublished' return type */
 export interface IDestroyIfUnpublishedResult {
   id: number;
-  timestamp: Date;
+  published: Date | null;
   author_id: number;
   filename: string;
-  published: boolean;
   key_set_id: number;
   iv: string;
   aspect: number;
@@ -115,12 +113,12 @@ export interface IDestroyIfUnpublishedQuery {
   result: IDestroyIfUnpublishedResult;
 }
 
-const destroyIfUnpublishedIR: any = {"name":"DestroyIfUnpublished","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":406,"b":411,"line":11,"col":30}]}}],"usedParamSet":{"postId":true},"statement":{"body":"DELETE FROM posts WHERE id = :postId AND published = false RETURNING *","loc":{"a":376,"b":445,"line":11,"col":0}}};
+const destroyIfUnpublishedIR: any = {"name":"DestroyIfUnpublished","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":407,"b":412,"line":11,"col":30}]}}],"usedParamSet":{"postId":true},"statement":{"body":"DELETE FROM posts WHERE id = :postId AND published IS NULL RETURNING *","loc":{"a":377,"b":446,"line":11,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * DELETE FROM posts WHERE id = :postId AND published = false RETURNING *
+ * DELETE FROM posts WHERE id = :postId AND published IS NULL RETURNING *
  * ```
  */
 export const destroyIfUnpublished = new PreparedQuery<IDestroyIfUnpublishedParams,IDestroyIfUnpublishedResult>(destroyIfUnpublishedIR);
@@ -134,12 +132,12 @@ export interface IGetHomePostsWithKeysParams {
 /** 'GetHomePostsWithKeys' return type */
 export interface IGetHomePostsWithKeysResult {
   id: number;
-  timestamp: Date;
+  published: Date | null;
   author_id: number;
   filename: string;
   iv: string;
   aspect: number;
-  jwk: string;
+  key: string;
 }
 
 /** 'GetHomePostsWithKeys' query type */
@@ -148,22 +146,22 @@ export interface IGetHomePostsWithKeysQuery {
   result: IGetHomePostsWithKeysResult;
 }
 
-const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":667,"b":674,"line":18,"col":20},{"a":727,"b":734,"line":20,"col":24},{"a":837,"b":844,"line":23,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT posts.id, posts.timestamp, posts.author_id, posts.filename, posts.iv, posts.aspect,\n       keys.jwk\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :authorId\nAND posts.published = true\nAND (posts.author_id = :authorId OR posts.author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n)) ORDER BY timestamp DESC","loc":{"a":482,"b":871,"line":14,"col":0}}};
+const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":668,"b":675,"line":18,"col":20},{"a":733,"b":740,"line":20,"col":24},{"a":843,"b":850,"line":23,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :authorId\nAND posts.published IS NOT NULL\nAND (posts.author_id = :authorId OR posts.author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n)) ORDER BY published DESC","loc":{"a":483,"b":877,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT posts.id, posts.timestamp, posts.author_id, posts.filename, posts.iv, posts.aspect,
- *        keys.jwk
+ * SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect,
+ *        keys.key
  * FROM posts, keys
  * WHERE posts.key_set_id = keys.key_set_id
  * AND keys.user_id = :authorId
- * AND posts.published = true
+ * AND posts.published IS NOT NULL
  * AND (posts.author_id = :authorId OR posts.author_id IN (
  *     SELECT followee_id
  *     FROM followers
  *     WHERE followers.follower_id = :authorId
- * )) ORDER BY timestamp DESC
+ * )) ORDER BY published DESC
  * ```
  */
 export const getHomePostsWithKeys = new PreparedQuery<IGetHomePostsWithKeysParams,IGetHomePostsWithKeysResult>(getHomePostsWithKeysIR);

@@ -1,14 +1,11 @@
-/* @name SetCurrentKeySetId */
-UPDATE users SET current_post_key_set = :keySetId WHERE id = :userId;
-
 /* @name GetCurrentKeySetId */
-SELECT current_post_key_set FROM users WHERE id = :userId;
+SELECT id FROM key_sets WHERE owner_id = :userId AND valid_end IS NULL;
 
 /* @name GetCurrentKey */
 SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
-    SELECT current_post_key_set
-    FROM users
-    WHERE id = :userId
+    SELECT id
+    FROM key_sets
+    WHERE owner_id = :userId AND valid_end IS NULL
 );
 
 /* @name GetFollowerPublicKeys */
@@ -26,7 +23,7 @@ INSERT INTO key_sets (owner_id) VALUES (:ownerId) RETURNING id;
 
 /*
     @name AddKeys
-    @param keys -> ((user_id, key_set_id, jwk)...)
+    @param keys -> ((user_id, key_set_id, key)...)
 */
-INSERT INTO keys (user_id, key_set_id, jwk)
+INSERT INTO keys (user_id, key_set_id, key)
 VALUES :keys;
