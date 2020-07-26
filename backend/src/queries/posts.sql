@@ -1,24 +1,24 @@
 /* @name CreateAndReturn */
-INSERT INTO posts (filename, author_id, key_set_id, iv) VALUES (:fileName, :authorId, :keySetId, :iv) RETURNING id;
+INSERT INTO posts (filename, author_id, key_set_id, iv, aspect) VALUES (:fileName, :authorId, :keySetId, :iv, :aspect) RETURNING id;
 
 /* @name Publish */
-UPDATE posts SET published = true WHERE id = :postId;
+UPDATE posts SET published = NOW() WHERE id = :postId;
 
 /* @name DestroyAndReturn */
 DELETE FROM posts WHERE id = :postId AND author_id = :authorId RETURNING *;
 
 /* @name DestroyIfUnpublished */
-DELETE FROM posts WHERE id = :postId AND published = false RETURNING *;
+DELETE FROM posts WHERE id = :postId AND published IS NULL RETURNING *;
 
 /* @name GetHomePostsWithKeys */
-SELECT posts.id, posts.timestamp, posts.author_id, posts.filename, posts.iv,
-       keys.jwk
+SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect,
+       keys.key
 FROM posts, keys
 WHERE posts.key_set_id = keys.key_set_id
 AND keys.user_id = :authorId
-AND posts.published = true
+AND posts.published IS NOT NULL
 AND (posts.author_id = :authorId OR posts.author_id IN (
     SELECT followee_id
     FROM followers
     WHERE followers.follower_id = :authorId
-)) ORDER BY timestamp DESC;
+)) ORDER BY published DESC;

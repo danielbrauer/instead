@@ -67,6 +67,7 @@ router.post(
         keyId: { in: ['body'], isInt: true, toInt: true, },
         iv: { in: ['body'], isBase64: true },
         md5: { in: ['body'], isBase64: true },
+        aspect: { in: ['body'], isFloat: true, toFloat: true }
     }),
     async (req, res) => {
         const currentKey = await keyService.getCurrentKeySetId(req.user.id)
@@ -74,7 +75,7 @@ router.post(
             throw new ServerError('No current key')
         if (currentKey !== req.body.keyId)
             throw new ServerError('Post key does not match current key')
-        const postInfo = await postService.createPost(req.user.id, req.body.keyId, req.body.iv, req.body.md5)
+        const postInfo = await postService.createPost(req.user.id, req.body.keyId, req.body.iv, req.body.md5, req.body.aspect)
         return res.json(postInfo)
     }
 )

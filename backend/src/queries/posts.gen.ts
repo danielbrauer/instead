@@ -7,6 +7,7 @@ export interface ICreateAndReturnParams {
   authorId: number | null | void;
   keySetId: number | null | void;
   iv: string | null | void;
+  aspect: number | null | void;
 }
 
 /** 'CreateAndReturn' return type */
@@ -20,12 +21,12 @@ export interface ICreateAndReturnQuery {
   result: ICreateAndReturnResult;
 }
 
-const createAndReturnIR: any = {"name":"CreateAndReturn","params":[{"name":"fileName","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":93,"b":100,"line":2,"col":65}]}},{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":104,"b":111,"line":2,"col":76}]}},{"name":"keySetId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":115,"b":122,"line":2,"col":87}]}},{"name":"iv","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":126,"b":127,"line":2,"col":98}]}}],"usedParamSet":{"fileName":true,"authorId":true,"keySetId":true,"iv":true},"statement":{"body":"INSERT INTO posts (filename, author_id, key_set_id, iv) VALUES (:fileName, :authorId, :keySetId, :iv) RETURNING id","loc":{"a":28,"b":141,"line":2,"col":0}}};
+const createAndReturnIR: any = {"name":"CreateAndReturn","params":[{"name":"fileName","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":101,"b":108,"line":2,"col":73}]}},{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":112,"b":119,"line":2,"col":84}]}},{"name":"keySetId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":123,"b":130,"line":2,"col":95}]}},{"name":"iv","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":134,"b":135,"line":2,"col":106}]}},{"name":"aspect","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":139,"b":144,"line":2,"col":111}]}}],"usedParamSet":{"fileName":true,"authorId":true,"keySetId":true,"iv":true,"aspect":true},"statement":{"body":"INSERT INTO posts (filename, author_id, key_set_id, iv, aspect) VALUES (:fileName, :authorId, :keySetId, :iv, :aspect) RETURNING id","loc":{"a":28,"b":158,"line":2,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * INSERT INTO posts (filename, author_id, key_set_id, iv) VALUES (:fileName, :authorId, :keySetId, :iv) RETURNING id
+ * INSERT INTO posts (filename, author_id, key_set_id, iv, aspect) VALUES (:fileName, :authorId, :keySetId, :iv, :aspect) RETURNING id
  * ```
  */
 export const createAndReturn = new PreparedQuery<ICreateAndReturnParams,ICreateAndReturnResult>(createAndReturnIR);
@@ -45,12 +46,12 @@ export interface IPublishQuery {
   result: IPublishResult;
 }
 
-const publishIR: any = {"name":"Publish","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":211,"b":216,"line":5,"col":46}]}}],"usedParamSet":{"postId":true},"statement":{"body":"UPDATE posts SET published = true WHERE id = :postId","loc":{"a":165,"b":216,"line":5,"col":0}}};
+const publishIR: any = {"name":"Publish","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":229,"b":234,"line":5,"col":47}]}}],"usedParamSet":{"postId":true},"statement":{"body":"UPDATE posts SET published = NOW() WHERE id = :postId","loc":{"a":182,"b":234,"line":5,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * UPDATE posts SET published = true WHERE id = :postId
+ * UPDATE posts SET published = NOW() WHERE id = :postId
  * ```
  */
 export const publish = new PreparedQuery<IPublishParams,IPublishResult>(publishIR);
@@ -65,12 +66,12 @@ export interface IDestroyAndReturnParams {
 /** 'DestroyAndReturn' return type */
 export interface IDestroyAndReturnResult {
   id: number;
-  timestamp: Date;
+  published: Date | null;
   author_id: number;
   filename: string;
-  published: boolean;
   key_set_id: number;
   iv: string;
+  aspect: number;
 }
 
 /** 'DestroyAndReturn' query type */
@@ -79,7 +80,7 @@ export interface IDestroyAndReturnQuery {
   result: IDestroyAndReturnResult;
 }
 
-const destroyAndReturnIR: any = {"name":"DestroyAndReturn","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":279,"b":284,"line":8,"col":30}]}},{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":303,"b":310,"line":8,"col":54}]}}],"usedParamSet":{"postId":true,"authorId":true},"statement":{"body":"DELETE FROM posts WHERE id = :postId AND author_id = :authorId RETURNING *","loc":{"a":249,"b":322,"line":8,"col":0}}};
+const destroyAndReturnIR: any = {"name":"DestroyAndReturn","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":297,"b":302,"line":8,"col":30}]}},{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":321,"b":328,"line":8,"col":54}]}}],"usedParamSet":{"postId":true,"authorId":true},"statement":{"body":"DELETE FROM posts WHERE id = :postId AND author_id = :authorId RETURNING *","loc":{"a":267,"b":340,"line":8,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -98,12 +99,12 @@ export interface IDestroyIfUnpublishedParams {
 /** 'DestroyIfUnpublished' return type */
 export interface IDestroyIfUnpublishedResult {
   id: number;
-  timestamp: Date;
+  published: Date | null;
   author_id: number;
   filename: string;
-  published: boolean;
   key_set_id: number;
   iv: string;
+  aspect: number;
 }
 
 /** 'DestroyIfUnpublished' query type */
@@ -112,12 +113,12 @@ export interface IDestroyIfUnpublishedQuery {
   result: IDestroyIfUnpublishedResult;
 }
 
-const destroyIfUnpublishedIR: any = {"name":"DestroyIfUnpublished","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":389,"b":394,"line":11,"col":30}]}}],"usedParamSet":{"postId":true},"statement":{"body":"DELETE FROM posts WHERE id = :postId AND published = false RETURNING *","loc":{"a":359,"b":428,"line":11,"col":0}}};
+const destroyIfUnpublishedIR: any = {"name":"DestroyIfUnpublished","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":407,"b":412,"line":11,"col":30}]}}],"usedParamSet":{"postId":true},"statement":{"body":"DELETE FROM posts WHERE id = :postId AND published IS NULL RETURNING *","loc":{"a":377,"b":446,"line":11,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * DELETE FROM posts WHERE id = :postId AND published = false RETURNING *
+ * DELETE FROM posts WHERE id = :postId AND published IS NULL RETURNING *
  * ```
  */
 export const destroyIfUnpublished = new PreparedQuery<IDestroyIfUnpublishedParams,IDestroyIfUnpublishedResult>(destroyIfUnpublishedIR);
@@ -131,11 +132,12 @@ export interface IGetHomePostsWithKeysParams {
 /** 'GetHomePostsWithKeys' return type */
 export interface IGetHomePostsWithKeysResult {
   id: number;
-  timestamp: Date;
+  published: Date | null;
   author_id: number;
   filename: string;
   iv: string;
-  jwk: string;
+  aspect: number;
+  key: string;
 }
 
 /** 'GetHomePostsWithKeys' query type */
@@ -144,22 +146,22 @@ export interface IGetHomePostsWithKeysQuery {
   result: IGetHomePostsWithKeysResult;
 }
 
-const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":636,"b":643,"line":18,"col":20},{"a":696,"b":703,"line":20,"col":24},{"a":806,"b":813,"line":23,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT posts.id, posts.timestamp, posts.author_id, posts.filename, posts.iv,\n       keys.jwk\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :authorId\nAND posts.published = true\nAND (posts.author_id = :authorId OR posts.author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n)) ORDER BY timestamp DESC","loc":{"a":465,"b":840,"line":14,"col":0}}};
+const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":668,"b":675,"line":18,"col":20},{"a":733,"b":740,"line":20,"col":24},{"a":843,"b":850,"line":23,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :authorId\nAND posts.published IS NOT NULL\nAND (posts.author_id = :authorId OR posts.author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n)) ORDER BY published DESC","loc":{"a":483,"b":877,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT posts.id, posts.timestamp, posts.author_id, posts.filename, posts.iv,
- *        keys.jwk
+ * SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect,
+ *        keys.key
  * FROM posts, keys
  * WHERE posts.key_set_id = keys.key_set_id
  * AND keys.user_id = :authorId
- * AND posts.published = true
+ * AND posts.published IS NOT NULL
  * AND (posts.author_id = :authorId OR posts.author_id IN (
  *     SELECT followee_id
  *     FROM followers
  *     WHERE followers.follower_id = :authorId
- * )) ORDER BY timestamp DESC
+ * )) ORDER BY published DESC
  * ```
  */
 export const getHomePostsWithKeys = new PreparedQuery<IGetHomePostsWithKeysParams,IGetHomePostsWithKeysResult>(getHomePostsWithKeysIR);

@@ -16,8 +16,8 @@ export default class KeyService {
     }
 
     async getCurrentKeySetId(userId: number) {
-        const [{ current_post_key_set }] = await Keys.getCurrentKeySetId.run({ userId }, this.db.pool)
-        return current_post_key_set
+        const [{ id }] = await Keys.getCurrentKeySetId.run({ userId }, this.db.pool)
+        return id || null
     }
 
     async getCurrentKey(userId: number) {
@@ -36,18 +36,16 @@ export default class KeyService {
 
     async invalidateCurrentKeySet(userId: number) {
         await this.db.transaction(async client => {
-            const [{ current_post_key_set: currentKeySet }] = await Keys.getCurrentKeySetId.run({ userId }, client)
-            await Keys.setCurrentKeySetId.run({ userId, keySetId: null }, client)
+            const [{ id: currentKeySet }] = await Keys.getCurrentKeySetId.run({ userId }, client)
             await Keys.endKeySetValidity.run({ keySetId: currentKeySet }, client)
         })
     }
 
-    async createKeySet(userId: number, jwk: string) {
+    async createKeySet(userId: number, key: string) {
         let returnKeySetId: number = null
         await this.db.transaction(async client => {
             const [{ id: keySetId }] = await Keys.createKeySet.run({ ownerId: userId }, client)
-            await Keys.setCurrentKeySetId.run({ userId, keySetId }, client)
-            await Keys.addKeys.run({ keys: [{user_id: userId, jwk, key_set_id: keySetId}] }, client)
+            await Keys.addKeys.run({ keys: [{user_id: userId, key, key_set_id: keySetId}] }, client)
             returnKeySetId = keySetId
         })
         return returnKeySetId

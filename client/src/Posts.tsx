@@ -31,7 +31,7 @@ export default function () {
                 {posts.data!.map(post => (
                     <List.Item key={post.id}>
                         <PostHeader post={post} />
-                        <EncryptedImage encryptedUrl={contentUrl.data + post.filename} iv={post.iv} decKey={post.jwk} />
+                        <EncryptedImage encryptedUrl={contentUrl.data + post.filename} iv={post.iv} decKey={post.key} aspect={post.aspect} />
                     </List.Item>
                 ))}
             </List>

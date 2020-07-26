@@ -63,11 +63,12 @@ export async function addKeys(keys: EncryptedPostKey[]) {
     })
 }
 
-export async function startPost(keyId: number, ivBase64: string, contentMD5Base64: string) {
+export async function startPost(keyId: number, ivBase64: string, contentMD5Base64: string, aspect: number) {
     const postResponse = await authorizedAxios.post<StartPostResult>('/startPost', {
         keyId,
         iv: ivBase64,
-        md5: contentMD5Base64
+        md5: contentMD5Base64,
+        aspect,
     })
     return postResponse.data
 }
