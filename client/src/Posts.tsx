@@ -23,15 +23,13 @@ export default function () {
     return (
         <div>
             {posts.data!.length === 0 ?
-            <Message>No posts yet!
-                <br/><br/>
-                To post a photo or follow people, use the menu in the upper-right.</Message>
+            <Message>To post a photo or follow people, use the menu ➚</Message>
             :
             <List>
                 {posts.data!.map(post => (
                     <List.Item key={post.id}>
                         <PostHeader post={post} />
-                        <EncryptedImage encryptedUrl={contentUrl.data + post.filename} iv={post.iv} decKey={post.jwk} />
+                        <EncryptedImage encryptedUrl={contentUrl.data + post.filename} iv={post.iv} decKey={post.key} aspect={post.aspect} />
                     </List.Item>
                 ))}
             </List>

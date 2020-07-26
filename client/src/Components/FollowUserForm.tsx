@@ -16,13 +16,13 @@ export default function FollowUserForm() {
 
     return (
         <Segment>
-            To follow a user, send a request using their username
+            To follow a user, enter their username:
             <br/>
             <br/>
-            <Form error={error != null} success={isSuccess} onSubmit={handleSubmit}>
+            <Form error={error != null} success={isSuccess} onSubmit={handleSubmit} size='large'>
                 <Form.Group>
-                    <Form.Input placeholder='Username to follow' name='username' {...bindUsername} />
-                    <Form.Button content='Request' disabled={username === ''} />
+                    <Form.Input placeholder='AdjectiveAnimal' name='username' {...bindUsername} />
+                    <Form.Button size='large' content='Request' disabled={username === ''} />
                 </Form.Group>
                 <Message
                     error

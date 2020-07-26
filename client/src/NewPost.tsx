@@ -24,24 +24,27 @@ interface NewPostProps {
 
 export default function NewPost(props: NewPostProps) {
     const [uploadInput, setUploadInput] = useState<File | null>(null)
+    const [aspect, setAspect] = useState<number | null>(null)
     const [uploadMutation, uploadStatus] = useMutation(handleUpload)
+    const onDropAccepted = useCallback(acceptedFiles => {
+        setUploadInput(acceptedFiles[0])
+    }, [])
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDropAccepted,
+        accept: ['image/jpeg', 'image/png'],
+    })
 
     async function onSubmit() {
-        await uploadMutation(uploadInput!)
+        await uploadMutation({ file: uploadInput!, aspect: aspect! })
     }
 
     function onCancel() {
         setUploadInput(null)
     }
 
-    const onDropAccepted = useCallback(acceptedFiles => {
-        setUploadInput(acceptedFiles[0])
-    }, [])
-
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        onDropAccepted,
-        accept: ['image/jpeg', 'image/png'],
-    })
+    function storeImageDimensions({target}: any) {
+        setAspect(target.height/target.width)
+    }
 
     if (uploadStatus.isSuccess)
         return (<Redirect to='/home' />)
@@ -57,10 +60,10 @@ export default function NewPost(props: NewPostProps) {
             }
             {uploadInput !== null ?
                 <div>
-                    <Dimmer inverted active={uploadStatus.isLoading} >
+                    <Dimmer inverted active={uploadStatus.isLoading || uploadStatus.isSuccess} >
                         <Loader inverted />
                     </Dimmer>
-                    <Image fluid src={blobUrl(uploadInput!)} alt={uploadInput.name} />
+                    <Image fluid onLoad={storeImageDimensions} src={blobUrl(uploadInput!)} alt={uploadInput.name} />
                 </div>
                 :
                 <Segment>

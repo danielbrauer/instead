@@ -74,7 +74,7 @@ export interface ICountByNameParams {
 
 /** 'CountByName' return type */
 export interface ICountByNameResult {
-  count: number;
+  count: number | null;
 }
 
 /** 'CountByName' query type */

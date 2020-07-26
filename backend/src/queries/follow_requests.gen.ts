@@ -63,7 +63,6 @@ export interface IDestroyAndReturnParams {
 export interface IDestroyAndReturnResult {
   requesterId: number;
   requesteeId: number;
-  timestamp: Date;
 }
 
 /** 'DestroyAndReturn' query type */
@@ -91,7 +90,7 @@ export interface ICountParams {
 
 /** 'Count' return type */
 export interface ICountResult {
-  count: number;
+  count: number | null;
 }
 
 /** 'Count' query type */

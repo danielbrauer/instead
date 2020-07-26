@@ -61,7 +61,7 @@ export interface ICountParams {
 
 /** 'Count' return type */
 export interface ICountResult {
-  count: number;
+  count: number | null;
 }
 
 /** 'Count' query type */

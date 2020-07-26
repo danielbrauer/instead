@@ -22,7 +22,7 @@ async function getCurrentPostKey() : Promise<PostKey | null> {
     const accountKeys = await CurrentUser.getAccountKeys()
     const key = await Crypto.subtle.unwrapKey(
         'jwk',
-        Buffer.from(encrypted.jwk, 'base64'),
+        Buffer.from(encrypted.key, 'base64'),
         accountKeys.privateKey,
         { name: 'RSA-OAEP'},
         'AES-GCM',
@@ -62,7 +62,7 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
 
     const keySetId = await createCurrentKey(Buffer.from(authorPostKey).toString('base64'))
 
-    const followerPostKeyPromises = followerPublicKeys.map(async(publicKey) => {
+    const followerPostKeyPromises = followerPublicKeys.map(async(publicKey): Promise<EncryptedPostKey> => {
         const followerPublicKey = await Crypto.subtle.importKey(
             'jwk',
             publicKey.publicKey as JsonWebKey,
@@ -77,7 +77,7 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
             { name: 'RSA-OAEP' }
         )
         const encryptedKey: EncryptedPostKey = {
-            jwk: Buffer.from(followerVersion).toString('base64'),
+            key: Buffer.from(followerVersion).toString('base64'),
             userId: publicKey.id,
             keySetId: keySetId,
         }
@@ -95,7 +95,7 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
     }
 }
 
-export async function handleUpload(file: File) {
+export async function handleUpload({file, aspect} : {file: File, aspect: number}) {
     const filePromise = readAsArrayBuffer(file)
     const keyPromise = getCurrentPostKey()
     const iv = Crypto.getRandomValues(new Uint8Array(12))
@@ -113,7 +113,7 @@ export async function handleUpload(file: File) {
         result
     )
     const contentMD5 = md5.base64(encrypted)
-    const postInfo = await startPost(postKey.id, ivBuffer.toString('base64'), contentMD5)
+    const postInfo = await startPost(postKey.id, ivBuffer.toString('base64'), contentMD5, aspect)
     const signedRequest = postInfo.signedRequest
 
     const options = {

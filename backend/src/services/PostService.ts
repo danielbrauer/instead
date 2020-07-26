@@ -5,7 +5,7 @@ import * as Posts from '../queries/posts.gen'
 import uuidv1 from 'uuid/v1'
 import { SimpleEventDispatcher } from 'strongly-typed-events'
 import config from '../config/config'
-import { ContentUrl, DeletePostResult, StartPostResult } from 'api'
+import { DeletePostResult, StartPostResult } from 'api'
 
 @Service()
 export default class PostService {
@@ -45,9 +45,9 @@ export default class PostService {
         return { success: true }
     }
 
-    async createPost(authorId: number, keySetId: number, iv: string, md5: string): Promise<StartPostResult> {
+    async createPost(authorId: number, keySetId: number, iv: string, md5: string, aspect: number): Promise<StartPostResult> {
         const fileName = uuidv1()
-        const postPromise = Posts.createAndReturn.run({ fileName, authorId, keySetId, iv }, this.db.pool)
+        const postPromise = Posts.createAndReturn.run({ fileName, authorId, keySetId, iv, aspect }, this.db.pool)
         const requestPromise = this.aws.s3GetSignedUploadUrl(fileName, 'application/octet-stream', md5)
         const [signedRequest, [{id: postId}]] = await Promise.all([requestPromise, postPromise])
         this._onCreate.dispatchAsync(postId)
