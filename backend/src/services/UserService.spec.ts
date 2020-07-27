@@ -1,9 +1,10 @@
 import { mocked } from 'ts-jest/utils'
-import * as Users from '../../src/queries/users.gen'
-import DatabaseService from '../../src/services/DatabaseService'
-import UserService from '../../src/services/UserService'
+import * as Users from '../queries/users.gen'
+import DatabaseService from './DatabaseService'
+import UserService from './UserService'
 
-jest.unmock('UserService')
+jest.mock('../queries/users.gen')
+jest.mock('./DatabaseService')
 
 describe('User service unit tests', () => {
 
@@ -14,14 +15,20 @@ describe('User service unit tests', () => {
     })
 
     describe('getUserById', () => {
+
         test('Should get user who exists', async () => {
             const userInstance: Users.IGetByIdResult = {
                 id: 0,
                 username: 'AntisocialAardvark',
             }
             mocked(Users.getById.run).mockResolvedValueOnce([userInstance])
-            const user = userService.getUserById(0)
+            const user = await userService.getUserById(0)
             expect(user).toEqual(userInstance)
+        })
+
+        test('Should throw error if no such user', async () => {
+            mocked(Users.getById.run).mockResolvedValueOnce([])
+            await expect(userService.getUserById(0)).rejects.toThrow()
         })
     })
 })
