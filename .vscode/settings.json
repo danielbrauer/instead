@@ -1,4 +1,8 @@
 {
     "typescript.tsdk": "./client/node_modules/typescript/lib",
-    "jest.pathToConfig": "backend/jest.config.js"
+    "files.exclude": {
+        "backend": true,
+        "client": true
+    },
+    "jest.autoEnable": false
 }
