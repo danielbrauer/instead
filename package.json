@@ -9,7 +9,6 @@
   "main": "index.js",
   "scripts": {
     "start": "node backend/dist/src/server.js",
-    "test": "concurrently --kill-others \"cd backend && yarn test\" \"cd client && yarn test\"",
     "build": "cd backend && yarn install && yarn build && yarn migrate && cd ../client && yarn install && yarn build",
     "local": "concurrently --kill-others \"cd backend && yarn watch-debug\" \"cd client && yarn start\""
   },
