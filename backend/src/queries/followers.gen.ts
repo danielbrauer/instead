@@ -34,7 +34,10 @@ export interface IDestroyParams {
 }
 
 /** 'Destroy' return type */
-export type IDestroyResult = void;
+export interface IDestroyResult {
+  followerId: number;
+  followeeId: number;
+}
 
 /** 'Destroy' query type */
 export interface IDestroyQuery {
@@ -42,12 +45,12 @@ export interface IDestroyQuery {
   result: IDestroyResult;
 }
 
-const destroyIR: any = {"name":"Destroy","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":167,"b":176,"line":5,"col":43}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":197,"b":206,"line":5,"col":73}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"DELETE FROM followers WHERE follower_id = :followerId AND followee_id = :followeeId","loc":{"a":124,"b":206,"line":5,"col":0}}};
+const destroyIR: any = {"name":"Destroy","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":167,"b":176,"line":5,"col":43}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":197,"b":206,"line":5,"col":73}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"DELETE FROM followers WHERE follower_id = :followerId AND followee_id = :followeeId RETURNING follower_id, followee_id","loc":{"a":124,"b":241,"line":5,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * DELETE FROM followers WHERE follower_id = :followerId AND followee_id = :followeeId
+ * DELETE FROM followers WHERE follower_id = :followerId AND followee_id = :followeeId RETURNING follower_id, followee_id
  * ```
  */
 export const destroy = new PreparedQuery<IDestroyParams,IDestroyResult>(destroyIR);
@@ -70,7 +73,7 @@ export interface ICountQuery {
   result: ICountResult;
 }
 
-const countIR: any = {"name":"Count","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":285,"b":294,"line":8,"col":57}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":315,"b":324,"line":8,"col":87}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"SELECT COUNT(*)::int FROM followers WHERE follower_id = :followerId AND followee_id = :followeeId","loc":{"a":228,"b":324,"line":8,"col":0}}};
+const countIR: any = {"name":"Count","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":320,"b":329,"line":8,"col":57}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":350,"b":359,"line":8,"col":87}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"SELECT COUNT(*)::int FROM followers WHERE follower_id = :followerId AND followee_id = :followeeId","loc":{"a":263,"b":359,"line":8,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -97,7 +100,7 @@ export interface IGetByFolloweeIdQuery {
   result: IGetByFolloweeIdResult;
 }
 
-const getByFolloweeIdIR: any = {"name":"GetByFolloweeId","params":[{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":411,"b":420,"line":11,"col":55}]}}],"usedParamSet":{"followeeId":true},"statement":{"body":"SELECT follower_id FROM followers WHERE followee_id = :followeeId","loc":{"a":356,"b":420,"line":11,"col":0}}};
+const getByFolloweeIdIR: any = {"name":"GetByFolloweeId","params":[{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":446,"b":455,"line":11,"col":55}]}}],"usedParamSet":{"followeeId":true},"statement":{"body":"SELECT follower_id FROM followers WHERE followee_id = :followeeId","loc":{"a":391,"b":455,"line":11,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -124,7 +127,7 @@ export interface IGetByFollowerIdQuery {
   result: IGetByFollowerIdResult;
 }
 
-const getByFollowerIdIR: any = {"name":"GetByFollowerId","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":507,"b":516,"line":14,"col":55}]}}],"usedParamSet":{"followerId":true},"statement":{"body":"SELECT followee_id FROM followers WHERE follower_id = :followerId","loc":{"a":452,"b":516,"line":14,"col":0}}};
+const getByFollowerIdIR: any = {"name":"GetByFollowerId","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":542,"b":551,"line":14,"col":55}]}}],"usedParamSet":{"followerId":true},"statement":{"body":"SELECT followee_id FROM followers WHERE follower_id = :followerId","loc":{"a":487,"b":551,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:
