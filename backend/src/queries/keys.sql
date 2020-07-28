@@ -23,7 +23,7 @@ INSERT INTO key_sets (owner_id) VALUES (:ownerId) RETURNING id;
 
 /*
     @name AddKeys
-    @param keys -> ((user_id, key_set_id, key)...)
+    @param keys -> ((userId, keySetId, key)...)
 */
 INSERT INTO keys (user_id, key_set_id, key)
 VALUES :keys;

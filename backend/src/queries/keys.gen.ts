@@ -38,8 +38,8 @@ export interface IGetCurrentKeyParams {
 /** 'GetCurrentKey' return type */
 export interface IGetCurrentKeyResult {
   key: string;
-  user_id: number;
-  key_set_id: number;
+  userId: number;
+  keySetId: number;
 }
 
 /** 'GetCurrentKey' query type */
@@ -71,7 +71,7 @@ export interface IGetFollowerPublicKeysParams {
 /** 'GetFollowerPublicKeys' return type */
 export interface IGetFollowerPublicKeysResult {
   id: number;
-  public_key: Json;
+  publicKey: Json;
 }
 
 /** 'GetFollowerPublicKeys' query type */
@@ -150,9 +150,9 @@ export const createKeySet = new PreparedQuery<ICreateKeySetParams,ICreateKeySetR
 /** 'AddKeys' parameters type */
 export interface IAddKeysParams {
   keys: Array<{
-    user_id: number,
-    key_set_id: number,
-    key: string
+    userId: number | null | void,
+    keySetId: number | null | void,
+    key: string | null | void
   }>;
 }
 
@@ -165,7 +165,7 @@ export interface IAddKeysQuery {
   result: IAddKeysResult;
 }
 
-const addKeysIR: any = {"name":"AddKeys","params":[{"name":"keys","codeRefs":{"defined":{"a":652,"b":655,"line":26,"col":11},"used":[{"a":747,"b":750,"line":29,"col":8}]},"transform":{"type":"pick_array_spread","keys":["user_id","key_set_id","key"]}}],"usedParamSet":{"keys":true},"statement":{"body":"INSERT INTO keys (user_id, key_set_id, key)\nVALUES :keys","loc":{"a":695,"b":750,"line":28,"col":0}}};
+const addKeysIR: any = {"name":"AddKeys","params":[{"name":"keys","codeRefs":{"defined":{"a":652,"b":655,"line":26,"col":11},"used":[{"a":744,"b":747,"line":29,"col":8}]},"transform":{"type":"pick_array_spread","keys":["userId","keySetId","key"]}}],"usedParamSet":{"keys":true},"statement":{"body":"INSERT INTO keys (user_id, key_set_id, key)\nVALUES :keys","loc":{"a":692,"b":747,"line":28,"col":0}}};
 
 /**
  * Query generated from SQL:

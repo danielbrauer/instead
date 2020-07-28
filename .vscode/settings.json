@@ -1,0 +1,8 @@
+{
+    "typescript.tsdk": "./client/node_modules/typescript/lib",
+    "files.exclude": {
+        "backend": true,
+        "client": true
+    },
+    "jest.autoEnable": false
+}

@@ -64,5 +64,7 @@
     "url": "https://github.com/danielbrauer/instead.git",
     "directory": "client"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "react-test-renderer": "^16.13.1"
+  }
 }

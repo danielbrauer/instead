@@ -10,3 +10,5 @@ coverage/*
 /src/types/
 # queries
 /src/queries/
+# js-based config
+jest.config.js

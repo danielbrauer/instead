@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node backend/dist/src/server.js",
     "build": "cd backend && yarn install && yarn build && yarn migrate && cd ../client && yarn install && yarn build",
-    "local": "concurrently \"cd backend && yarn watch-debug\" \"cd client && yarn start\""
+    "local": "concurrently --kill-others \"cd backend && yarn watch-debug\" \"cd client && yarn start\""
   },
   "keywords": [],
   "author": "Daniel Brauer",

@@ -1,4 +1,4 @@
-import { Service, Inject } from 'typedi'
+import { Service } from 'typedi'
 import Database from './DatabaseService'
 import * as Users from '../queries/users.gen'
 import * as Followers from '../queries/followers.gen'
@@ -11,12 +11,11 @@ import { NewUser } from 'auth'
 @Service()
 export default class UserService {
 
-    @Inject()
-    private db: Database
-
     private _onUserCreated = new SimpleEventDispatcher<number>()
     private _onUserAddedFollower = new SimpleEventDispatcher<FollowRelationship>()
     private _onUserLostFollower = new SimpleEventDispatcher<FollowRelationship>()
+
+    constructor(private db: Database) {}
 
     public get onUserCreated() { return this._onUserCreated.asEvent() }
     public get onUserAddedFollower() { return this._onUserAddedFollower.asEvent() }
@@ -79,7 +78,7 @@ export default class UserService {
             if (!request)
                 throw new ServerError('No such follow request')
             await Followers.create.run(
-                { followerId: request.requester_id, followeeId: request.requestee_id},
+                { followerId: request.requesterId, followeeId: request.requesteeId},
                 client
             )
         })
@@ -92,17 +91,17 @@ export default class UserService {
 
     async getFollowRequests(requesteeId: number) {
         const requests = await FollowRequests.getByRequesteeId.run({ requesteeId }, this.db.pool)
-        return requests.map(r => r.requester_id)
+        return requests.map(r => r.requesterId)
     }
 
     async getFollowers(followeeId: number) {
         const follows = await Followers.getByFolloweeId.run({ followeeId }, this.db.pool)
-        return follows.map(r => r.follower_id)
+        return follows.map(r => r.followerId)
     }
 
     async getFollowees(followerId: number) {
         const follows = await Followers.getByFollowerId.run({ followerId }, this.db.pool)
-        return follows.map(r => r.followee_id)
+        return follows.map(r => r.followeeId)
     }
 
     async removeFollower(followerId: number, followeeId: number) {

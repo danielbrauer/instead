@@ -1,7 +1,7 @@
 import { Button, SemanticSIZES } from "semantic-ui-react"
 import React, { useState, ReactNode } from "react"
 import { ButtonCallback } from "./Interfaces"
-import {useCleanTimeout} from './UnmountCleanup'
+import { useCleanTimeout } from './UnmountCleanup'
 
  interface SafetyButtonProps {
      size? : SemanticSIZES,
@@ -30,6 +30,6 @@ export default function SafetyButton(props : SafetyButtonProps) {
                 <Button size={props.size} onClick={firstTap}>{props.children}</Button>
             }
         </div>
-        
+
     )
 }

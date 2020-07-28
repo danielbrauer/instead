@@ -3,9 +3,9 @@ import { User } from "api"
 export interface LoginUser {
     id: number;
     username: string;
-    srp_salt: string;
+    srpSalt: string;
     verifier: string;
-    display_name: string;
+    displayName: string;
 }
 
 export interface LoginInfo {

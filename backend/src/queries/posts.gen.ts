@@ -67,9 +67,9 @@ export interface IDestroyAndReturnParams {
 export interface IDestroyAndReturnResult {
   id: number;
   published: Date | null;
-  author_id: number;
+  authorId: number;
   filename: string;
-  key_set_id: number;
+  keySetId: number;
   iv: string;
   aspect: number;
 }
@@ -100,9 +100,9 @@ export interface IDestroyIfUnpublishedParams {
 export interface IDestroyIfUnpublishedResult {
   id: number;
   published: Date | null;
-  author_id: number;
+  authorId: number;
   filename: string;
-  key_set_id: number;
+  keySetId: number;
   iv: string;
   aspect: number;
 }
@@ -133,7 +133,7 @@ export interface IGetHomePostsWithKeysParams {
 export interface IGetHomePostsWithKeysResult {
   id: number;
   published: Date | null;
-  author_id: number;
+  authorId: number;
   filename: string;
   iv: string;
   aspect: number;

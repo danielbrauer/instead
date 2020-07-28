@@ -11,11 +11,11 @@ export interface Props {
 }
 
 export default function PostHeader({ post } : Props) {
-    const username = useQuery(['user', post.author_id], getUser)
+    const username = useQuery(['user', post.authorId], getUser)
     const [deletePostMutation] = useMutation(deletePost)
     return (
         <div>
-            {CurrentUser.getId() === post.author_id ?
+            {CurrentUser.getId() === post.authorId ?
                 <List.Content floated='right'>
                     <SafetyButton size='mini' onClick={() => deletePostMutation(post.id)}>Delete</SafetyButton>
                 </List.Content>

@@ -1,4 +1,4 @@
-/* eslint-disable camelcase */
+/* eslint-disable @typescript-eslint/camelcase */
 import { ColumnDefinitions, MigrationBuilder } from 'node-pg-migrate'
 
 export const shorthands: ColumnDefinitions = {}
@@ -101,4 +101,4 @@ export function up(pgm: MigrationBuilder): void {
     pgm.createIndex('posts', 'published')
 }
 
-export function down(pgm: MigrationBuilder): void {}
+export const down = false

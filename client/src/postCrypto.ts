@@ -31,7 +31,7 @@ async function getCurrentPostKey() : Promise<PostKey | null> {
     )
     return {
         key,
-        id: encrypted.key_set_id,
+        id: encrypted.keySetId,
     }
 }
 
@@ -65,7 +65,7 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
     const followerPostKeyPromises = followerPublicKeys.map(async(publicKey): Promise<EncryptedPostKey> => {
         const followerPublicKey = await Crypto.subtle.importKey(
             'jwk',
-            publicKey.public_key as JsonWebKey,
+            publicKey.publicKey as JsonWebKey,
             { name: "RSA-OAEP", hash: "SHA-256" },
             false,
             ['encrypt', 'wrapKey']
@@ -76,11 +76,12 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
             followerPublicKey,
             { name: 'RSA-OAEP' }
         )
-        return {
+        const encryptedKey: EncryptedPostKey = {
             key: Buffer.from(followerVersion).toString('base64'),
-            user_id: publicKey.id,
-            key_set_id: keySetId,
+            userId: publicKey.id,
+            keySetId: keySetId,
         }
+        return encryptedKey
     })
 
     if (followerPostKeyPromises.length > 0) {

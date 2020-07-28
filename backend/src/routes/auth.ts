@@ -28,15 +28,15 @@ router.post('/finishSignup',
         privateKeyIv: { in: ['body'], isBase64: true, },
     }),
     async function (req, res) {
-        const newUser : NewUser = {
+        const newUser: NewUser = {
             username: req.session.signupInfo.username,
-            display_name: req.body.displayName,
+            displayName: req.body.displayName,
             verifier: req.body.verifier,
-            srp_salt: req.body.srpSalt,
-            muk_salt: req.body.mukSalt,
-            public_key: req.body.publicKey,
-            private_key: req.body.privateKey,
-            private_key_iv: req.body.privateKeyIv,
+            srpSalt: req.body.srpSalt,
+            mukSalt: req.body.mukSalt,
+            publicKey: req.body.publicKey,
+            privateKey: req.body.privateKey,
+            privateKeyIv: req.body.privateKeyIv,
         }
         const responseData = await authService.finishSignup(req.session, newUser)
         return res.json(responseData)

@@ -1,6 +1,7 @@
-import { Pool, ClientBase } from 'pg'
+import pg, { Pool, ClientBase } from 'pg'
 import config from '../config/config'
 import { Service } from 'typedi'
+import { inject } from 'pg-camelcase'
 
 type TransactionContents = (client: ClientBase) => Promise<any>
 
@@ -10,6 +11,7 @@ export default class DatabaseService {
     readonly pool: Pool
 
     constructor() {
+        inject(pg)
         this.pool = (config.databaseUrl === undefined) ? new Pool() : new Pool({connectionString: config.databaseUrl})
     }
 

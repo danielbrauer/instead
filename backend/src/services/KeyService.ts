@@ -1,4 +1,4 @@
-import Container, { Service, Inject } from "typedi"
+import Container, { Service, Inject } from 'typedi'
 import Database from './DatabaseService'
 import * as Keys from '../queries/keys.gen'
 import UserService from '../services/UserService'
@@ -45,7 +45,7 @@ export default class KeyService {
         let returnKeySetId: number = null
         await this.db.transaction(async client => {
             const [{ id: keySetId }] = await Keys.createKeySet.run({ ownerId: userId }, client)
-            await Keys.addKeys.run({ keys: [{user_id: userId, key, key_set_id: keySetId}] }, client)
+            await Keys.addKeys.run({ keys: [{userId, key, keySetId}] }, client)
             returnKeySetId = keySetId
         })
         return returnKeySetId

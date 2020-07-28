@@ -61,8 +61,8 @@ export interface IDestroyAndReturnParams {
 
 /** 'DestroyAndReturn' return type */
 export interface IDestroyAndReturnResult {
-  requester_id: number;
-  requestee_id: number;
+  requesterId: number;
+  requesteeId: number;
 }
 
 /** 'DestroyAndReturn' query type */
@@ -90,7 +90,7 @@ export interface ICountParams {
 
 /** 'Count' return type */
 export interface ICountResult {
-  count: number;
+  count: number | null;
 }
 
 /** 'Count' query type */
@@ -117,7 +117,7 @@ export interface IGetByRequesteeIdParams {
 
 /** 'GetByRequesteeId' return type */
 export interface IGetByRequesteeIdResult {
-  requester_id: number;
+  requesterId: number;
 }
 
 /** 'GetByRequesteeId' query type */

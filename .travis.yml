@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+  - 12.13.1
+
+matrix:
+    include:
+        - env: TARGET=client
+        - env: TARGET=backend
+
+install: cd $TARGET && yarn --frozen-lockfile && yarn test
