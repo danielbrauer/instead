@@ -1,10 +1,13 @@
 import Router from 'express-promise-router'
 import Container from 'typedi'
 import AuthService from '../services/AuthService'
-import validate from '../middleware/validate'
 import { NewUser } from 'auth'
+import { ContainerTypes, ValidatedRequest, ValidatedRequestSchema, createValidator } from 'express-joi-validation'
+import * as Joi from '@hapi/joi'
+import 'joi-extract-type'
 
 const router = Router()
+const validator = createValidator()
 const authService = Container.get(AuthService)
 
 router.post('/startLogin', async function (req, res) {
@@ -22,13 +25,28 @@ router.get('/startSignup', async function (req, res) {
     return res.json(responseData)
 })
 
+export const useridQuery = Joi.object({
+    userid: Joi.number().integer().required()
+})
+
+const signupSchema = Joi.object({
+    displayName: Joi.string().required(),
+    verifier: Joi.string().hex().required(),
+    srpSalt: Joi.string().hex().required(),
+    mukSalt: Joi.string().hex().required(),
+    publicKey: Joi.object().required(),
+    privateKey: Joi.string().base64().required(),
+    privateKeyIv: Joi.string().base64().required(),
+})
+
+interface SignupRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Body]: Joi.extractType<typeof signupSchema>
+}
+
 router.post('/finishSignup',
-    validate({
-        privateKey: { in: ['body'], isBase64: true, },
-        privateKeyIv: { in: ['body'], isBase64: true, },
-    }),
-    async function (req, res) {
-        const newUser: NewUser = {
+    validator.body(signupSchema),
+    async function (req: ValidatedRequest<SignupRequest>, res) {
+        const newUser : NewUser = {
             username: req.session.signupInfo.username,
             displayName: req.body.displayName,
             verifier: req.body.verifier,
