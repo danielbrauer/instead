@@ -16,7 +16,8 @@ describe('DatabaseService', () => {
 
     describe('transaction', () => {
 
-        let dummyClient = {
+        const dummyClient = {
+            /* eslint-disable @typescript-eslint/no-empty-function */
             query: jest.fn((x: string) => {}),
             release: jest.fn(() => {}),
         }

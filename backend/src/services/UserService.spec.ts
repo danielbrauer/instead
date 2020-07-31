@@ -111,8 +111,8 @@ describe('UserService', () => {
     describe('create', () => {
 
         const newUser: NewUser = {
-            username: "AntisocialAardvark",
-            displayName: "Gerald",
+            username: 'AntisocialAardvark',
+            displayName: 'Gerald',
             mukSalt: '0FFFF',
             srpSalt: '0FFFF',
             verifier: '0FFFFF',
