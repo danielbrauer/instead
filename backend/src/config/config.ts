@@ -16,6 +16,8 @@ export default {
         s3Bucket: process.env.AWS_S3_BUCKET,
     },
     uploadTime: parseInt(process.env.UPLOAD_TIME),
+    minimumAuthTime: parseInt(process.env.MIN_AUTH_TIME),
+    maxAuthTime: parseInt(process.env.MAX_AUTH_TIME),
     databaseUrl: process.env.DATABASE_URL,
     redisUrl: process.env.REDIS_URL,
     sessionSecret: split(process.env.SECURE_KEY),
