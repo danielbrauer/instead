@@ -54,7 +54,7 @@
     "strongly-typed-events": "^1.6.13",
     "ts-node": "^8.4.1",
     "typedi": "^0.8.0",
-    "typescript": "^3.8",
+    "typescript": "^3.9.7",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
