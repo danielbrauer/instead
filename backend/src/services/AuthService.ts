@@ -2,7 +2,7 @@ import { Service, Inject } from 'typedi'
 import srp from 'secure-remote-password/server'
 import crypto from '../util/crypto-promise'
 import { generateCombination } from '../util/animalGenerator'
-import config from '../config/config'
+import * as config from '../config/config'
 import UserService from './UserService'
 import { StartLoginResult, FinishLoginResult, StartSignupResult, FinishSignupResult, NewUser } from 'auth'
 
@@ -30,7 +30,7 @@ export default class AuthService {
             }
         } else {
             const bytes = await crypto.randomBytes(256)
-            const hash = crypto.createHash('sha256').update(username).update(config.garbageSeed)
+            const hash = crypto.createHash('sha256').update(username).update(config.string('GARBAGE_SEED'))
             session.loginInfo = {
                 loginFake: true,
             }

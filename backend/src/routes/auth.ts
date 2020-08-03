@@ -2,10 +2,14 @@ import Router from 'express-promise-router'
 import Container from 'typedi'
 import AuthService from '../services/AuthService'
 import validate from '../middleware/validate'
+import delayResponse from '../middleware/delay-response'
 import { NewUser } from 'auth'
+import * as config from '../config/config'
 
 const router = Router()
 const authService = Container.get(AuthService)
+
+router.use(delayResponse(config.int('MIN_AUTH_TIME'), config.int('MAX_AUTH_TIME')))
 
 router.post('/startLogin', async function (req, res) {
     const responseData = await authService.startLogin(req.session, req.body.username, req.body.clientEphemeralPublic)

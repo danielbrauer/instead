@@ -1,5 +1,5 @@
 import { Service } from 'typedi'
-import config from '../config/config'
+import * as config from '../config/config'
 import aws from 'aws-sdk'
 
 @Service()
@@ -8,11 +8,10 @@ export default class AWSService {
     private s3: aws.S3
 
     constructor() {
-        const awsConfig = config.aws
-        const accessKeyId = awsConfig.accessKeyId
-        const secretKey = awsConfig.secretKey
-        const region = awsConfig.region
-        this.bucket = awsConfig.s3Bucket
+        const accessKeyId = config.string('AWS_ACCESS_KEY_ID')
+        const secretKey = config.string('AWS_SECRET_KEY')
+        const region = config.string('AWS_REGION')
+        this.bucket = config.string('AWS_S3_BUCKET')
 
         aws.config.update({
             region: region,
@@ -32,7 +31,7 @@ export default class AWSService {
         const s3Params = {
             Bucket: this.bucket,
             Key: fileName,
-            Expires: config.uploadTime,
+            Expires: config.int('UPLOAD_TIME'),
             ContentType: fileType,
             ContentMD5: md5,
             ACL: 'public-read',
