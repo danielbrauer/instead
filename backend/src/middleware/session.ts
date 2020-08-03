@@ -1,14 +1,14 @@
 import session, { SessionOptions } from 'express-session'
 import redis from 'redis'
-import { isLocalDev, requireStrings, requireString } from '../config/config'
+import * as config from '../config/config'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const RedisStore = require('connect-redis')(session)
 const client = redis.createClient({
-    url: requireString('REDIS_URL'),
+    url: config.string('REDIS_URL'),
 })
 
 const sessionConfig: SessionOptions = {
-    secret: requireStrings('SECURE_KEY'),
+    secret: config.strings('SECURE_KEY'),
     name: 'instead-photos',
     store: new RedisStore({ client }),
     resave: false,
@@ -21,7 +21,7 @@ const sessionConfig: SessionOptions = {
     },
 }
 
-if (!isLocalDev()) {
+if (!config.isLocalDev()) {
     sessionConfig.cookie.secure = true
 }
 

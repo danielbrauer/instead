@@ -5,19 +5,19 @@ function split(input: string) {
         return input.split(',')
 }
 
-export function requireString(name: string) {
+export function string(name: string) {
     const value = process.env[name]
     if (value === undefined)
         throw new Error(`Environment variable ${name} required, but not found`)
     return value
 }
 
-export function requireInt(name: string) {
-    return parseInt(requireString(name))
+export function int(name: string) {
+    return parseInt(string(name))
 }
 
-export function requireStrings(name: string) {
-    return split(requireString(name))
+export function strings(name: string) {
+    return split(string(name))
 }
 
 export function isLocalDev() {

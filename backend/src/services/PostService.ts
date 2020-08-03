@@ -4,7 +4,7 @@ import AWSService from './AWSService'
 import * as Posts from '../queries/posts.gen'
 import uuidv1 from 'uuid/v1'
 import { SimpleEventDispatcher } from 'strongly-typed-events'
-import { requireInt } from '../config/config'
+import * as config from '../config/config'
 import { DeletePostResult, StartPostResult } from 'api'
 
 @Service()
@@ -64,6 +64,6 @@ export default class PostService {
     }
 
     onPostCreated(postId: number) {
-        setTimeout(() => Container.get(PostService).removePostIfNotPublished(postId), (requireInt('UPLOAD_TIME') + 1)*1000)
+        setTimeout(() => Container.get(PostService).removePostIfNotPublished(postId), (config.int('UPLOAD_TIME') + 1)*1000)
     }
 }
