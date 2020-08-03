@@ -8,10 +8,10 @@ export default function delayResponse(min: number, max: number) {
 
         const send = res.send
         res.send = body => {
-            const minTime = Math.floor(Math.random()*range) + min
-            const scheduledFinish = req.startTime + minTime
+            const delay = Math.floor(Math.random()*range) + min
+            const scheduledFinish = req.startTime + delay
             const now = Date.now()
-            console.log(`delay-response delayed: ${minTime} actual: ${now - req.startTime}`)
+            console.log(`delay-response delayed: ${delay} actual: ${now - req.startTime}`)
             if (scheduledFinish > now)
                 setTimeout(() => send.call(res, body), scheduledFinish - now)
             else

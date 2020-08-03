@@ -7,12 +7,13 @@ describe('delay-response', () => {
         const next = jest.fn()
         const req = { send } as any
         const startTime = Date.now()
-        delayResponse(6, 10)({} as any, req, next as any)
+        delayResponse(500, 500)({} as any, req, next as any)
         expect(next).toBeCalled()
         req.send()
         expect(send).toBeCalledTimes(0)
-        jest.runAllTimers()
-        expect(Date.now() - startTime).toBeGreaterThan(5)
+        jest.advanceTimersByTime(450)
+        expect(send).toBeCalledTimes(0)
+        jest.advanceTimersByTime(100)
         expect(send).toBeCalled()
     })
 
@@ -20,7 +21,6 @@ describe('delay-response', () => {
         const send = jest.fn()
         const next = jest.fn()
         const req = { send } as any
-        const startTime = Date.now()
         delayResponse(0, 0)({} as any, req, next as any)
         expect(next).toBeCalled()
         req.send()
