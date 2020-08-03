@@ -5,7 +5,7 @@ import bodyParser from 'body-parser'
 import morgan from 'morgan'
 import helmet from 'helmet'
 import authManager from './middleware/auth-strategies'
-import config from './config/config'
+import { isLocalDev, requireInt } from './config/config'
 import forceHttps from './middleware/force-https'
 import session from './middleware/session'
 import auth from './routes/auth'
@@ -18,7 +18,7 @@ const app = express()
 app.use(forceHttps)
 app.use(helmet())
 app.use(cors)
-if (!config.localDev)
+if (!isLocalDev())
     app.set('trust proxy', 1) // trust first proxy
 app.use(session)
 
@@ -29,10 +29,11 @@ app.use(morgan('dev'))
 app.use('/auth', auth)
 app.use('/api', authManager.authenticateSession, api, forwardErrors)
 
-if (!config.localDev) {
+if (!isLocalDev()) {
     const relativePathToReact = '/../../../client/build'
     const reactPath = path.join(__dirname, relativePathToReact)
     httpServer(app, reactPath)
 }
 
-app.listen(config.webPort, () => console.log(`Server listening on ${config.webPort}`))
+const port = requireInt('PORT')
+app.listen(port, () => console.log(`Server listening on ${port}`))

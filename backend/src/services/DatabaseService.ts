@@ -1,5 +1,5 @@
 import pg, { Pool, ClientBase } from 'pg'
-import config from '../config/config'
+import { requireString } from '../config/config'
 import { Service } from 'typedi'
 import { inject } from 'pg-camelcase'
 
@@ -12,7 +12,7 @@ export default class DatabaseService {
 
     constructor() {
         inject(pg)
-        this.pool = (config.databaseUrl === undefined) ? new Pool() : new Pool({connectionString: config.databaseUrl})
+        this.pool = new Pool({connectionString: requireString('DATABASE_URL')})
     }
 
     async transaction(commands: TransactionContents) {

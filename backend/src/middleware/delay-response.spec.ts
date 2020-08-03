@@ -1,7 +1,4 @@
 import delayResponse from './delay-response'
-import config from '../config/config'
-
-jest.mock('../config/config')
 
 describe('delay-response', () => {
     test('records start time and delays call to next()', () => {
@@ -9,10 +6,8 @@ describe('delay-response', () => {
         const send = jest.fn()
         const next = jest.fn()
         const req = { send } as any
-        config.minimumAuthTime = 6
-        config.maxAuthTime = 10
         const startTime = Date.now()
-        delayResponse({} as any, req, next as any)
+        delayResponse(6, 10)({} as any, req, next as any)
         expect(next).toBeCalled()
         req.send()
         expect(send).toBeCalledTimes(0)
@@ -25,9 +20,8 @@ describe('delay-response', () => {
         const send = jest.fn()
         const next = jest.fn()
         const req = { send } as any
-        config.minimumAuthTime = config.maxAuthTime = 0
         const startTime = Date.now()
-        delayResponse({} as any, req, next as any)
+        delayResponse(0, 0)({} as any, req, next as any)
         expect(next).toBeCalled()
         req.send()
         expect(send).toBeCalled()
