@@ -1,7 +1,7 @@
 import { Response, Request, NextFunction } from 'express'
 import config from '../config/config'
 
-export function delayResponse(req: Request, res: Response, next: NextFunction) {
+export default function delayResponse(req: Request, res: Response, next: NextFunction) {
     req.startTime = Date.now()
 
     const send = res.send
