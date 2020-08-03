@@ -1,6 +1,5 @@
 import delayResponse from './delay-response'
 import config from '../config/config'
-import { Request, Response, NextFunction } from 'express'
 
 jest.mock('../config/config')
 

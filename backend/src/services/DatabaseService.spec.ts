@@ -1,6 +1,5 @@
 import { mocked } from 'ts-jest/utils'
 import DatabaseService from './DatabaseService'
-import pg, { PoolClient } from 'pg'
 
 jest.mock('pg')
 jest.mock('pg-camelcase')

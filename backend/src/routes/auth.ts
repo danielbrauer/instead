@@ -2,7 +2,7 @@ import Router from 'express-promise-router'
 import Container from 'typedi'
 import AuthService from '../services/AuthService'
 import validate from '../middleware/validate'
-import { delayResponse } from '../middleware/delay-response'
+import delayResponse from '../middleware/delay-response'
 import { NewUser } from 'auth'
 
 const router = Router()
