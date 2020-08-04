@@ -1,9 +1,8 @@
 import Router from 'express-promise-router'
 import Container from 'typedi'
 import AuthService from '../services/AuthService'
-import { ContainerTypes, ValidatedRequest, ValidatedRequestSchema, createValidator } from 'express-joi-validation'
-import * as Joi from '@hapi/joi'
-import 'joi-extract-type'
+import { createValidator, ValidatedRequest } from 'express-joi-validation'
+import * as Schema from './authSchema'
 import delayResponse from '../middleware/delay-response'
 import { NewUser } from 'auth'
 import * as config from '../config/config'
@@ -14,38 +13,37 @@ const authService = Container.get(AuthService)
 
 router.use(delayResponse(config.int('MIN_AUTH_TIME'), config.int('MAX_AUTH_TIME')))
 
-router.post('/startLogin', async function (req, res) {
-    const responseData = await authService.startLogin(req.session, req.body.username, req.body.clientEphemeralPublic)
-    return res.json(responseData)
-})
+router.post('/startLogin',
+    validator.query(Schema.empty),
+    validator.body(Schema.startLoginBody),
+    async function (req: ValidatedRequest<Schema.StartLoginRequest>, res) {
+        const responseData = await authService.startLogin(req.session, req.body.username, req.body.clientEphemeralPublic)
+        return res.json(responseData)
+    }
+)
 
-router.post('/finishLogin', async function (req, res) {
-    const responseData = await authService.finishLogin(req.session, req.body.clientSessionProof)
-    return res.json(responseData)
-})
+router.post('/finishLogin',
+    validator.query(Schema.empty),
+    validator.body(Schema.finishLoginBody),
+    async function (req: ValidatedRequest<Schema.FinishLoginRequest>, res) {
+        const responseData = await authService.finishLogin(req.session, req.body.clientSessionProof)
+        return res.json(responseData)
+    }
+)
 
-router.get('/startSignup', async function (req, res) {
-    const responseData = await authService.startSignup(req.session)
-    return res.json(responseData)
-})
-
-const signupSchema = Joi.object({
-    displayName: Joi.string().required(),
-    verifier: Joi.string().hex().required(),
-    srpSalt: Joi.string().hex().required(),
-    mukSalt: Joi.string().hex().required(),
-    publicKey: Joi.object().required(),
-    privateKey: Joi.string().base64().required(),
-    privateKeyIv: Joi.string().base64().required(),
-})
-
-interface SignupRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Body]: Joi.extractType<typeof signupSchema>;
-}
+router.get('/startSignup',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async function (req: ValidatedRequest<Schema.StartSignupRequest>, res) {
+        const responseData = await authService.startSignup(req.session)
+        return res.json(responseData)
+    }
+)
 
 router.post('/finishSignup',
-    validator.body(signupSchema),
-    async function (req: ValidatedRequest<SignupRequest>, res) {
+    validator.query(Schema.empty),
+    validator.body(Schema.finishSignupBody),
+    async function (req: ValidatedRequest<Schema.FinishSignupRequest>, res) {
         const newUser: NewUser = {
             username: req.session.signupInfo.username,
             ...req.body,

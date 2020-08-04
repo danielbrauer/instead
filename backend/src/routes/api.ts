@@ -5,8 +5,11 @@ import UserService from '../services/UserService'
 import PostService from '../services/PostService'
 import KeyService from '../services/KeyService'
 import { ServerError } from '../middleware/errors'
+import { ValidatedRequest, createValidator } from 'express-joi-validation'
+import * as Schema from './apiSchema'
 
 const router = Router()
+const validator = createValidator()
 const userService = Container.get(UserService)
 const postService = Container.get(PostService)
 const keyService = Container.get(KeyService)
@@ -30,13 +33,11 @@ router.get('/getPosts', async (req, res) => {
     return res.json(posts)
 })
 
-router.delete(
-    '/deletePost',
-    validate({
-        id: { in: ['query'], isInt: true, toInt: true, }
-    }),
-    async (req, res) => {
-        const result = await postService.deletePost(req.query.id as unknown as number, req.user.id)
+router.delete('/deletePost',
+    validator.query(Schema.deletePostQuery),
+    validator.body(Schema.empty),
+    async (req: ValidatedRequest<Schema.DeletePostRequest>, res) => {
+        const result = await postService.deletePost(req.query.id, req.user.id)
         return res.json(result)
     }
 )
@@ -47,29 +48,26 @@ router.get('/getCurrentKey', async (req, res) => {
 })
 
 router.post('/createCurrentKey',
-    validate({
-        jwk: { in: ['body'], isBase64: true },
-    }),
-    async (req, res) => {
-        const keySetId = await keyService.createKeySet(req.user.id, req.body.jwk)
+    validator.body(Schema.createCurrentKeyBody),
+    async (req: ValidatedRequest<Schema.CreateCurrentKeyRequest>, res) => {
+        const keySetId = await keyService.createKeySet(req.user.id, req.body.key)
         return res.json(keySetId)
     }
 )
 
-router.post('/addKeys', async (req, res) => {
-    keyService.addKeys(req.body.keys)
-    return res.json({ success: true})
-})
+router.post('/addKeys',
+    validator.query(Schema.empty),
+    validator.body(Schema.addKeysBody),
+    async (req: ValidatedRequest<Schema.AddKeysRequest>, res) => {
+        keyService.addKeys(req.body.keys)
+        return res.json({ success: true})
+    }
+)
 
-router.post(
-    '/startPost',
-    validate({
-        keyId: { in: ['body'], isInt: true, toInt: true, },
-        iv: { in: ['body'], isBase64: true },
-        md5: { in: ['body'], isBase64: true },
-        aspect: { in: ['body'], isFloat: true, toFloat: true }
-    }),
-    async (req, res) => {
+router.post('/startPost',
+    validator.query(Schema.empty),
+    validator.body(Schema.startPostBody),
+    async (req: ValidatedRequest<Schema.StartPostRequest>, res) => {
         const currentKey = await keyService.getCurrentKeySetId(req.user.id)
         if (currentKey == null)
             throw new ServerError('No current key')
@@ -80,13 +78,10 @@ router.post(
     }
 )
 
-router.post(
-    '/finishPost',
-    validate({
-        success: { in: ['body'], isBoolean: true, toBoolean: true },
-        postId: { in: ['body'], isInt: true, toInt: true },
-    }),
-    async (req, res) => {
+router.post('/finishPost',
+    validator.query(Schema.empty),
+    validator.body(Schema.finishPostBody),
+    async (req: ValidatedRequest<Schema.FinishPostRequest>, res) => {
         if (req.body.success) {
             await postService.publishPost(req.body.postId)
         } else {
@@ -96,13 +91,11 @@ router.post(
     }
 )
 
-router.get(
-    '/getUserById',
-    validate({
-        userid: { in: ['query'], isInt: true, toInt: true}
-    }),
-    async (req, res) => {
-        const user = await userService.getUserById(req.query.userid as unknown as number)
+router.get('/getUserById',
+    validator.query(Schema.getUserByIdQuery),
+    validator.body(Schema.empty),
+    async (req: ValidatedRequest<Schema.GetUserByIdRequest>, res) => {
+        const user = await userService.getUserById(req.query.userid)
         return res.json(user)
     }
 )
@@ -118,45 +111,37 @@ router.post(
     }
 )
 
-router.post(
-    '/rejectFollowRequest',
-    validate({
-        userid: { in: ['body'], isInt: true, toInt: true, }
-    }),
-    async (req, res) => {
+router.post('/rejectFollowRequest',
+    validator.query(Schema.empty),
+    validator.body(Schema.getByUserIdBody),
+    async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
         await userService.removeFollowRequest(req.body.userid, req.user.id)
         return res.json({ success: true })
     }
 )
 
-router.post(
-    '/unfollow',
-    validate({
-        userid: { in: ['body'], isInt: true, toInt: true, }
-    }),
-    async (req, res) => {
+router.post('/unfollow',
+    validator.query(Schema.empty),
+    validator.body(Schema.getByUserIdBody),
+    async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
         await userService.removeFollower(req.user.id, req.body.userid)
         return res.json({ success: true })
     }
 )
 
-router.post(
-    '/removeFollower',
-    validate({
-        userid: { in: ['body'], isInt: true, toInt: true, }
-    }),
-    async (req, res) => {
+router.post('/removeFollower',
+    validator.query(Schema.empty),
+    validator.body(Schema.getByUserIdBody),
+    async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
         await userService.removeFollower(req.body.userid, req.user.id)
         return res.json({ success: true })
     }
 )
 
-router.post(
-    '/acceptFollowRequest',
-    validate({
-        userid: { in: ['body'], isInt: true, toInt: true, }
-    }),
-    async (req, res) => {
+router.post('/acceptFollowRequest',
+    validator.query(Schema.empty),
+    validator.body(Schema.getByUserIdBody),
+    async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
         await userService.acceptFollowRequest(req.body.userid, req.user.id)
         return res.json({ success: true })
     }
