@@ -30,12 +30,12 @@ export default class UserService {
 
     async getLoginInfo(username: string) {
         const [loginInfo] = await Users.getLoginInfoByName.run({ username }, this.db.pool)
-        return loginInfo
+        return loginInfo || null
     }
 
     async getUserInfo(userId: number) {
         const [info] = await Users.getUserInfo.run({ userId }, this.db.pool)
-        return info
+        return info || null
     }
 
     async countByName(username: string) {
@@ -105,8 +105,9 @@ export default class UserService {
     }
 
     async removeFollower(followerId: number, followeeId: number) {
-        await Followers.destroy.run({ followerId, followeeId }, this.db.pool)
-        this._onUserLostFollower.dispatchAsync({ followerId, followeeId })
+        const [removed] = await Followers.destroy.run({ followerId, followeeId }, this.db.pool)
+        if (removed)
+            this._onUserLostFollower.dispatchAsync({ followerId, followeeId })
     }
 }
 

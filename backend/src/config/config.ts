@@ -5,19 +5,21 @@ function split(input: string) {
         return input.split(',')
 }
 
-export default {
-    localDev: process.env.NODE_ENV != 'production',
-    clientOrigin: split(process.env.CLIENT_ORIGIN),
-    webPort: process.env.PORT,
-    aws: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretKey: process.env.AWS_SECRET_KEY,
-        region: process.env.AWS_REGION,
-        s3Bucket: process.env.AWS_S3_BUCKET,
-    },
-    uploadTime: parseInt(process.env.UPLOAD_TIME),
-    databaseUrl: process.env.DATABASE_URL,
-    redisUrl: process.env.REDIS_URL,
-    sessionSecret: split(process.env.SECURE_KEY),
-    garbageSeed: process.env.GARBAGE_SEED,
+export function string(name: string) {
+    const value = process.env[name]
+    if (value === undefined)
+        throw new Error(`Environment variable ${name} required, but not found`)
+    return value
+}
+
+export function int(name: string) {
+    return parseInt(string(name))
+}
+
+export function strings(name: string) {
+    return split(string(name))
+}
+
+export function isLocalDev() {
+    return process.env.NODE_ENV != 'production'
 }
