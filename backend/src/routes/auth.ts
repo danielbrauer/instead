@@ -29,10 +29,6 @@ router.get('/startSignup', async function (req, res) {
     return res.json(responseData)
 })
 
-export const useridQuery = Joi.object({
-    userid: Joi.number().integer().required()
-})
-
 const signupSchema = Joi.object({
     displayName: Joi.string().required(),
     verifier: Joi.string().hex().required(),
@@ -44,21 +40,15 @@ const signupSchema = Joi.object({
 })
 
 interface SignupRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Body]: Joi.extractType<typeof signupSchema>
+    [ContainerTypes.Body]: Joi.extractType<typeof signupSchema>;
 }
 
 router.post('/finishSignup',
     validator.body(signupSchema),
     async function (req: ValidatedRequest<SignupRequest>, res) {
-        const newUser : NewUser = {
+        const newUser: NewUser = {
             username: req.session.signupInfo.username,
-            displayName: req.body.displayName,
-            verifier: req.body.verifier,
-            srpSalt: req.body.srpSalt,
-            mukSalt: req.body.mukSalt,
-            publicKey: req.body.publicKey,
-            privateKey: req.body.privateKey,
-            privateKeyIv: req.body.privateKeyIv,
+            ...req.body,
         }
         const responseData = await authService.finishSignup(req.session, newUser)
         return res.json(responseData)

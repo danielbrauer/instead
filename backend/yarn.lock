@@ -2101,8 +2101,9 @@ expect@^26.1.0:
     jest-message-util "^26.1.0"
     jest-regex-util "^26.0.0"
 
-"express-joi-validation@file:../../express-joi-validation":
+express-joi-validation@danielbrauer/express-joi-validation#3.x:
   version "4.0.4-beta.0"
+  resolved "https://codeload.github.com/danielbrauer/express-joi-validation/tar.gz/b785fb83d49d5bcc9aa340e0a27b34c6b49ac6d4"
 
 express-promise-router@^3.0.3:
   version "3.0.3"

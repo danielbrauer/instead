@@ -41,7 +41,7 @@
     "cors": "^2.8.5",
     "eslint": "^6.4.0",
     "express": "^4.17.0",
-    "express-joi-validation": "file:../../express-joi-validation",
+    "express-joi-validation": "danielbrauer/express-joi-validation#3.x",
     "express-promise-router": "^3.0.3",
     "express-session": "^1.16.2",
     "express-static-gzip": "^2.0.5",
