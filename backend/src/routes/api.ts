@@ -127,8 +127,8 @@ router.put('/sendFollowRequest',
 
 router.put('/rejectFollowRequest',
     validator.query(Schema.empty),
-    validator.body(Schema.getByUserIdBody),
-    async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
+    validator.body(Schema.putByUserIdBody),
+    async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
         await userService.removeFollowRequest(req.body.userid, req.user.id)
         return res.json({ success: true })
     }
@@ -136,8 +136,8 @@ router.put('/rejectFollowRequest',
 
 router.put('/unfollow',
     validator.query(Schema.empty),
-    validator.body(Schema.getByUserIdBody),
-    async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
+    validator.body(Schema.putByUserIdBody),
+    async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
         await userService.removeFollower(req.user.id, req.body.userid)
         return res.json({ success: true })
     }
@@ -145,8 +145,8 @@ router.put('/unfollow',
 
 router.put('/removeFollower',
     validator.query(Schema.empty),
-    validator.body(Schema.getByUserIdBody),
-    async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
+    validator.body(Schema.putByUserIdBody),
+    async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
         await userService.removeFollower(req.body.userid, req.user.id)
         return res.json({ success: true })
     }
@@ -154,8 +154,8 @@ router.put('/removeFollower',
 
 router.put('/acceptFollowRequest',
     validator.query(Schema.empty),
-    validator.body(Schema.getByUserIdBody),
-    async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
+    validator.body(Schema.putByUserIdBody),
+    async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
         await userService.acceptFollowRequest(req.body.userid, req.user.id)
         return res.json({ success: true })
     }

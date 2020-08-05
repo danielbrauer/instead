@@ -77,11 +77,11 @@ export interface SendFollowRequestRequest extends ValidatedRequestSchema {
     [ContainerTypes.Body]: Joi.extractType<typeof sendFollowRequestBody>;
 }
 
-export const getByUserIdBody = Joi.object({
+export const putByUserIdBody = Joi.object({
     userid: Joi.number().integer().required(),
 })
 
-export interface GetByUserIdRequest extends ValidatedRequestSchema {
+export interface PutByUserIdRequest extends ValidatedRequestSchema {
     [ContainerTypes.Query]: Joi.extractType<typeof empty>;
-    [ContainerTypes.Body]: Joi.extractType<typeof getByUserIdBody>;
+    [ContainerTypes.Body]: Joi.extractType<typeof putByUserIdBody>;
 }
