@@ -20,7 +20,7 @@ authorizedAxios.interceptors.response.use(response => {
 })
 
 export async function logout() {
-    await authorizedAxios.get('/logout')
+    await authorizedAxios.put('/logout')
 }
 
 export async function getContentUrl() {
@@ -50,15 +50,15 @@ export async function getCurrentKey() {
     return response.data
 }
 
-export async function createCurrentKey(jwkBase64: string) {
+export async function createCurrentKey(keyBase64: string) {
     const response = await authorizedAxios.post<number>('/createCurrentKey', {
-        jwk: jwkBase64,
+        key: keyBase64,
     })
     return response.data
 }
 
 export async function addKeys(keys: EncryptedPostKey[]) {
-    await authorizedAxios.post('/addKeys', {
+    await authorizedAxios.put('/addKeys', {
         keys
     })
 }
@@ -74,7 +74,7 @@ export async function startPost(keyId: number, ivBase64: string, contentMD5Base6
 }
 
 export async function finishPost(postId: number, success: boolean) {
-    await authorizedAxios.post<FinishPostResult>('/finishPost', {
+    await authorizedAxios.put<FinishPostResult>('/finishPost', {
         postId,
         success
     })
@@ -88,34 +88,34 @@ export async function getUser(key: string, userid: number) {
 }
 
 export async function sendFollowRequest(username: string) {
-    await authorizedAxios.post('/sendFollowRequest', {
+    await authorizedAxios.put('/sendFollowRequest', {
         username: username,
     })
 }
 
 export async function rejectFollowRequest(userid: number) {
-    await authorizedAxios.post('/rejectFollowRequest', {
+    await authorizedAxios.put('/rejectFollowRequest', {
         userid: userid
     })
     queryCache.invalidateQueries('followRequests')
 }
 
 export async function unfollow(userid: number) {
-    await authorizedAxios.post('/unfollow', {
+    await authorizedAxios.put('/unfollow', {
         userid: userid
     })
     queryCache.invalidateQueries('followees')
 }
 
 export async function removeFollower(userid: number) {
-    await authorizedAxios.post('/removeFollower', {
+    await authorizedAxios.put('/removeFollower', {
         userid: userid
     })
     queryCache.invalidateQueries('followers')
 }
 
 export async function acceptFollowRequest(userid: number) {
-    await authorizedAxios.post('/acceptFollowRequest', {
+    await authorizedAxios.put('/acceptFollowRequest', {
         userid: userid
     })
     queryCache.invalidateQueries('followers')

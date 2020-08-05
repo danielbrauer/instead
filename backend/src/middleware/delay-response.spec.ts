@@ -6,7 +6,6 @@ describe('delay-response', () => {
         const send = jest.fn()
         const next = jest.fn()
         const req = { send } as any
-        const startTime = Date.now()
         delayResponse(500, 500)({} as any, req, next as any)
         expect(next).toBeCalled()
         req.send()

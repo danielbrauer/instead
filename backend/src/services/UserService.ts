@@ -50,7 +50,7 @@ export default class UserService {
     }
 
     async addFollowRequest(requesterId: number, requesteeName: string) {
-        const error = await this.db.transaction(async(client) => {
+        await this.db.transaction(async(client) => {
             const [requestee] = await Users.getByName.run({ username: requesteeName }, client)
             if (!requestee)
                 throw new ServerError('User does not exist')
