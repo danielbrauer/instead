@@ -53,10 +53,14 @@ router.post('/finishSignup',
     }
 )
 
-router.post('/cancel', async function (req, res) {
-    delete req.session
-    return res.send('Authentication cancelled')
-})
+router.post('/cancel',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async function (req, res) {
+        delete req.session
+        return res.send('Authentication cancelled')
+    }
+)
 
 router.use(function hangupHandler(err: any, req: any, res: any, next: any) {
     delete req.session

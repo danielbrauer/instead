@@ -25,8 +25,8 @@ export interface CreateCurrentKeyRequest extends ValidatedRequestSchema {
 export const addKeysBody = Joi.object({
     keys: Joi.array().min(1).items(
         {
-            userId: Joi.number().required(),
-            keySetId: Joi.number().required(),
+            userId: Joi.number().integer().required(),
+            keySetId: Joi.number().integer().required(),
             key: Joi.string().base64().required(),
         }
     ),
@@ -38,7 +38,7 @@ export interface AddKeysRequest extends ValidatedRequestSchema {
 }
 
 export const startPostBody = Joi.object({
-    keyId: Joi.number().required(),
+    keyId: Joi.number().integer().required(),
     iv: Joi.string().base64().required(),
     md5: Joi.string().base64().required(),
     aspect: Joi.number().required(),
@@ -51,7 +51,7 @@ export interface StartPostRequest extends ValidatedRequestSchema {
 
 export const finishPostBody = Joi.object({
     success: Joi.boolean().required(),
-    postId: Joi.number().required(),
+    postId: Joi.number().integer().required(),
 })
 
 export interface FinishPostRequest extends ValidatedRequestSchema {
@@ -60,7 +60,7 @@ export interface FinishPostRequest extends ValidatedRequestSchema {
 }
 
 export const getUserByIdQuery = Joi.object({
-    userid: Joi.number().required(),
+    userid: Joi.number().integer().required(),
 })
 
 export interface GetUserByIdRequest extends ValidatedRequestSchema {
@@ -78,7 +78,7 @@ export interface SendFollowRequestRequest extends ValidatedRequestSchema {
 }
 
 export const getByUserIdBody = Joi.object({
-    userid: Joi.number().required(),
+    userid: Joi.number().integer().required(),
 })
 
 export interface GetByUserIdRequest extends ValidatedRequestSchema {

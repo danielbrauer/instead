@@ -5,7 +5,7 @@ import 'joi-extract-type'
 export const empty = Joi.object()
 
 export const startLoginBody = Joi.object({
-    username: Joi.string().required(),
+    username: Joi.string().min(2).max(100).required(),
     clientEphemeralPublic: Joi.string().hex().required(),
 })
 
@@ -29,7 +29,7 @@ export interface StartSignupRequest extends ValidatedRequestSchema {
 }
 
 export const finishSignupBody = Joi.object({
-    displayName: Joi.string().required(),
+    displayName: Joi.string().min(1).max(100).required(),
     verifier: Joi.string().hex().required(),
     srpSalt: Joi.string().hex().required(),
     mukSalt: Joi.string().hex().required(),

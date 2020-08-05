@@ -13,24 +13,36 @@ const userService = Container.get(UserService)
 const postService = Container.get(PostService)
 const keyService = Container.get(KeyService)
 
-router.get('/logout', async function (req, res) {
-    req.session.destroy(err => {
-        if (err)
-            res.status(500).send('Could not end session')
-        else
-            res.send('Logged out')
-    })
-})
+router.get('/logout',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        req.session.destroy(err => {
+            if (err)
+                res.status(500).send('Could not end session')
+            else
+                res.send('Logged out')
+        })
+    }
+)
 
-router.get('/getContentUrl', (req, res) => {
-    const contentUrl = postService.getContentUrl()
-    res.json(contentUrl)
-})
+router.get('/getContentUrl',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const contentUrl = postService.getContentUrl()
+        res.json(contentUrl)
+    }
+)
 
-router.get('/getPosts', async (req, res) => {
-    const posts = await postService.getPostsByAuthor(req.user.id)
-    return res.json(posts)
-})
+router.get('/getPosts',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const posts = await postService.getPostsByAuthor(req.user.id)
+        return res.json(posts)
+    }
+)
 
 router.delete('/deletePost',
     validator.query(Schema.deletePostQuery),
@@ -41,12 +53,17 @@ router.delete('/deletePost',
     }
 )
 
-router.get('/getCurrentKey', async (req, res) => {
-    const currentKey = await keyService.getCurrentKey(req.user.id)
-    return res.json(currentKey)
-})
+router.get('/getCurrentKey',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const currentKey = await keyService.getCurrentKey(req.user.id)
+        return res.json(currentKey)
+    }
+)
 
 router.post('/createCurrentKey',
+    validator.query(Schema.empty),
     validator.body(Schema.createCurrentKeyBody),
     async (req: ValidatedRequest<Schema.CreateCurrentKeyRequest>, res) => {
         const keySetId = await keyService.createKeySet(req.user.id, req.body.key)
@@ -144,24 +161,40 @@ router.post('/acceptFollowRequest',
     }
 )
 
-router.get('/getFollowRequests', async (req, res) => {
-    const requests = await userService.getFollowRequests(req.user.id)
-    return res.json(requests)
-})
+router.get('/getFollowRequests',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const requests = await userService.getFollowRequests(req.user.id)
+        return res.json(requests)
+    }
+)
 
-router.get('/getFollowerIds', async (req, res) => {
-    const followers = await userService.getFollowers(req.user.id)
-    return res.json(followers)
-})
+router.get('/getFollowerIds',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const followers = await userService.getFollowers(req.user.id)
+        return res.json(followers)
+    }
+)
 
-router.get('/getFollowerPublicKeys', async (req, res) => {
-    const keys = await keyService.getFollowerPublicKeys(req.user.id)
-    return res.json(keys)
-})
+router.get('/getFollowerPublicKeys',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const keys = await keyService.getFollowerPublicKeys(req.user.id)
+        return res.json(keys)
+    }
+)
 
-router.get('/getFollowees', async (req, res) => {
-    const followees = await userService.getFollowees(req.user.id)
-    return res.json(followees)
-})
+router.get('/getFollowees',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const followees = await userService.getFollowees(req.user.id)
+        return res.json(followees)
+    }
+)
 
 export default router
