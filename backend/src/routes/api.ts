@@ -13,7 +13,7 @@ const userService = Container.get(UserService)
 const postService = Container.get(PostService)
 const keyService = Container.get(KeyService)
 
-router.get('/logout',
+router.put('/logout',
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
@@ -71,7 +71,7 @@ router.post('/createCurrentKey',
     }
 )
 
-router.post('/addKeys',
+router.put('/addKeys',
     validator.query(Schema.empty),
     validator.body(Schema.addKeysBody),
     async (req: ValidatedRequest<Schema.AddKeysRequest>, res) => {
@@ -94,7 +94,7 @@ router.post('/startPost',
     }
 )
 
-router.post('/finishPost',
+router.put('/finishPost',
     validator.query(Schema.empty),
     validator.body(Schema.finishPostBody),
     async (req: ValidatedRequest<Schema.FinishPostRequest>, res) => {
@@ -116,7 +116,7 @@ router.get('/getUserById',
     }
 )
 
-router.post('/sendFollowRequest',
+router.put('/sendFollowRequest',
     validator.query(Schema.empty),
     validator.body(Schema.sendFollowRequestBody),
     async (req: ValidatedRequest<Schema.SendFollowRequestRequest>, res) => {
@@ -125,7 +125,7 @@ router.post('/sendFollowRequest',
     }
 )
 
-router.post('/rejectFollowRequest',
+router.put('/rejectFollowRequest',
     validator.query(Schema.empty),
     validator.body(Schema.getByUserIdBody),
     async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
@@ -134,7 +134,7 @@ router.post('/rejectFollowRequest',
     }
 )
 
-router.post('/unfollow',
+router.put('/unfollow',
     validator.query(Schema.empty),
     validator.body(Schema.getByUserIdBody),
     async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
@@ -143,7 +143,7 @@ router.post('/unfollow',
     }
 )
 
-router.post('/removeFollower',
+router.put('/removeFollower',
     validator.query(Schema.empty),
     validator.body(Schema.getByUserIdBody),
     async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
@@ -152,7 +152,7 @@ router.post('/removeFollower',
     }
 )
 
-router.post('/acceptFollowRequest',
+router.put('/acceptFollowRequest',
     validator.query(Schema.empty),
     validator.body(Schema.getByUserIdBody),
     async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {

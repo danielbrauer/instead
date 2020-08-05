@@ -53,7 +53,7 @@ router.post('/finishSignup',
     }
 )
 
-router.post('/cancel',
+router.put('/cancel',
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async function (req, res) {
