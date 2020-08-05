@@ -68,6 +68,15 @@ export interface GetUserByIdRequest extends ValidatedRequestSchema {
     [ContainerTypes.Body]: Joi.extractType<typeof empty>;
 }
 
+export const sendFollowRequestBody = Joi.object({
+    username: Joi.string().regex(/^[a-zA-Z]+$/, 'alphabetical')
+})
+
+export interface SendFollowRequestRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>;
+    [ContainerTypes.Body]: Joi.extractType<typeof sendFollowRequestBody>;
+}
+
 export const getByUserIdBody = Joi.object({
     userid: Joi.number().required(),
 })

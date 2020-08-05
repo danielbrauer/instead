@@ -1,6 +1,5 @@
 import { Container } from 'typedi'
 import Router from 'express-promise-router'
-import validate from '../middleware/validate'
 import UserService from '../services/UserService'
 import PostService from '../services/PostService'
 import KeyService from '../services/KeyService'
@@ -100,12 +99,10 @@ router.get('/getUserById',
     }
 )
 
-router.post(
-    '/sendFollowRequest',
-    validate({
-        username: { in: ['body'], isAlpha: true }
-    }),
-    async (req, res) => {
+router.post('/sendFollowRequest',
+    validator.query(Schema.empty),
+    validator.body(Schema.sendFollowRequestBody),
+    async (req: ValidatedRequest<Schema.SendFollowRequestRequest>, res) => {
         await userService.addFollowRequest(req.user.id, req.body.username)
         return res.send(`Sent request to ${req.body.username}`)
     }
