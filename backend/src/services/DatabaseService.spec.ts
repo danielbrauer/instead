@@ -16,9 +16,8 @@ describe('DatabaseService', () => {
     describe('transaction', () => {
 
         const dummyClient = {
-            /* eslint-disable @typescript-eslint/no-empty-function */
-            query: jest.fn((x: string) => {}),
-            release: jest.fn(() => {}),
+            query: jest.fn((x: string) => { /* mock */ }),
+            release: jest.fn(() => { /* mock */ }),
         }
 
         beforeEach(async() => {
