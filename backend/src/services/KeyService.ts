@@ -1,28 +1,20 @@
-import Container, { Service, Inject } from 'typedi'
-import Database from './DatabaseService'
+import Container, { Service } from 'typedi'
+import DatabaseService from './DatabaseService'
 import * as Keys from '../queries/keys.gen'
-import UserService from '../services/UserService'
+import UserService from './UserService'
 import { FollowRelationship, EncryptedPostKey } from '../types/api'
 
 @Service()
 export default class KeyService {
 
-    @Inject()
-    private db: Database
-
-    constructor(private userService: UserService) {
+    constructor(private userService: UserService, private db: DatabaseService) {
         this.userService.onUserAddedFollower.subscribe(KeyService.onFollowerChanged)
         this.userService.onUserLostFollower.subscribe(KeyService.onFollowerChanged)
     }
 
-    async getCurrentKeySetId(userId: number) {
-        const [{ id }] = await Keys.getCurrentKeySetId.run({ userId }, this.db.pool)
-        return id || null
-    }
-
     async getCurrentKey(userId: number) {
         const [key] = await Keys.getCurrentKey.run({ userId }, this.db.pool)
-        return key
+        return key || null
     }
 
     async getFollowerPublicKeys(userId: number) {
@@ -36,7 +28,7 @@ export default class KeyService {
 
     async invalidateCurrentKeySet(userId: number) {
         await this.db.transaction(async client => {
-            const [{ id: currentKeySet }] = await Keys.getCurrentKeySetId.run({ userId }, client)
+            const [{ keySetId: currentKeySet }] = await Keys.getCurrentKey.run({ userId }, client)
             await Keys.endKeySetValidity.run({ keySetId: currentKeySet }, client)
         })
     }

@@ -1,6 +1,3 @@
-/* @name GetCurrentKeySetId */
-SELECT id FROM key_sets WHERE owner_id = :userId AND valid_end IS NULL;
-
 /* @name GetCurrentKey */
 SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
     SELECT id

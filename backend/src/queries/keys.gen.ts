@@ -3,33 +3,6 @@ import { PreparedQuery } from '@pgtyped/query';
 
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 
-/** 'GetCurrentKeySetId' parameters type */
-export interface IGetCurrentKeySetIdParams {
-  userId: number | null | void;
-}
-
-/** 'GetCurrentKeySetId' return type */
-export interface IGetCurrentKeySetIdResult {
-  id: number;
-}
-
-/** 'GetCurrentKeySetId' query type */
-export interface IGetCurrentKeySetIdQuery {
-  params: IGetCurrentKeySetIdParams;
-  result: IGetCurrentKeySetIdResult;
-}
-
-const getCurrentKeySetIdIR: any = {"name":"GetCurrentKeySetId","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":73,"b":78,"line":2,"col":42}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id FROM key_sets WHERE owner_id = :userId AND valid_end IS NULL","loc":{"a":31,"b":100,"line":2,"col":0}}};
-
-/**
- * Query generated from SQL:
- * ```
- * SELECT id FROM key_sets WHERE owner_id = :userId AND valid_end IS NULL
- * ```
- */
-export const getCurrentKeySetId = new PreparedQuery<IGetCurrentKeySetIdParams,IGetCurrentKeySetIdResult>(getCurrentKeySetIdIR);
-
-
 /** 'GetCurrentKey' parameters type */
 export interface IGetCurrentKeyParams {
   userId: number | null | void;
@@ -48,7 +21,7 @@ export interface IGetCurrentKeyQuery {
   result: IGetCurrentKeyResult;
 }
 
-const getCurrentKeyIR: any = {"name":"GetCurrentKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":166,"b":171,"line":5,"col":36},{"a":247,"b":252,"line":8,"col":22}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (\n    SELECT id\n    FROM key_sets\n    WHERE owner_id = :userId AND valid_end IS NULL\n)","loc":{"a":130,"b":276,"line":5,"col":0}}};
+const getCurrentKeyIR: any = {"name":"GetCurrentKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":62,"b":67,"line":2,"col":36},{"a":143,"b":148,"line":5,"col":22}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (\n    SELECT id\n    FROM key_sets\n    WHERE owner_id = :userId AND valid_end IS NULL\n)","loc":{"a":26,"b":172,"line":2,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -80,7 +53,7 @@ export interface IGetFollowerPublicKeysQuery {
   result: IGetFollowerPublicKeysResult;
 }
 
-const getFollowerPublicKeysIR: any = {"name":"GetFollowerPublicKeys","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":428,"b":433,"line":15,"col":25}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, public_key FROM users WHERE id IN (\n    SELECT follower_id\n    FROM followers\n    WHERE followee_id = :userId\n)","loc":{"a":314,"b":435,"line":12,"col":0}}};
+const getFollowerPublicKeysIR: any = {"name":"GetFollowerPublicKeys","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":324,"b":329,"line":12,"col":25}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, public_key FROM users WHERE id IN (\n    SELECT follower_id\n    FROM followers\n    WHERE followee_id = :userId\n)","loc":{"a":210,"b":331,"line":9,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -109,7 +82,7 @@ export interface IEndKeySetValidityQuery {
   result: IEndKeySetValidityResult;
 }
 
-const endKeySetValidityIR: any = {"name":"EndKeySetValidity","params":[{"name":"keySetId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":519,"b":526,"line":19,"col":50}]}}],"usedParamSet":{"keySetId":true},"statement":{"body":"UPDATE key_sets SET valid_end = now() WHERE id = :keySetId","loc":{"a":469,"b":526,"line":19,"col":0}}};
+const endKeySetValidityIR: any = {"name":"EndKeySetValidity","params":[{"name":"keySetId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":415,"b":422,"line":16,"col":50}]}}],"usedParamSet":{"keySetId":true},"statement":{"body":"UPDATE key_sets SET valid_end = now() WHERE id = :keySetId","loc":{"a":365,"b":422,"line":16,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -136,7 +109,7 @@ export interface ICreateKeySetQuery {
   result: ICreateKeySetResult;
 }
 
-const createKeySetIR: any = {"name":"CreateKeySet","params":[{"name":"ownerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":596,"b":602,"line":22,"col":41}]}}],"usedParamSet":{"ownerId":true},"statement":{"body":"INSERT INTO key_sets (owner_id) VALUES (:ownerId) RETURNING id","loc":{"a":555,"b":616,"line":22,"col":0}}};
+const createKeySetIR: any = {"name":"CreateKeySet","params":[{"name":"ownerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":492,"b":498,"line":19,"col":41}]}}],"usedParamSet":{"ownerId":true},"statement":{"body":"INSERT INTO key_sets (owner_id) VALUES (:ownerId) RETURNING id","loc":{"a":451,"b":512,"line":19,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -165,7 +138,7 @@ export interface IAddKeysQuery {
   result: IAddKeysResult;
 }
 
-const addKeysIR: any = {"name":"AddKeys","params":[{"name":"keys","codeRefs":{"defined":{"a":652,"b":655,"line":26,"col":11},"used":[{"a":744,"b":747,"line":29,"col":8}]},"transform":{"type":"pick_array_spread","keys":["userId","keySetId","key"]}}],"usedParamSet":{"keys":true},"statement":{"body":"INSERT INTO keys (user_id, key_set_id, key)\nVALUES :keys","loc":{"a":692,"b":747,"line":28,"col":0}}};
+const addKeysIR: any = {"name":"AddKeys","params":[{"name":"keys","codeRefs":{"defined":{"a":548,"b":551,"line":23,"col":11},"used":[{"a":640,"b":643,"line":26,"col":8}]},"transform":{"type":"pick_array_spread","keys":["userId","keySetId","key"]}}],"usedParamSet":{"keys":true},"statement":{"body":"INSERT INTO keys (user_id, key_set_id, key)\nVALUES :keys","loc":{"a":588,"b":643,"line":25,"col":0}}};
 
 /**
  * Query generated from SQL:
