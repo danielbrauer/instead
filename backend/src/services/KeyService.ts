@@ -12,6 +12,10 @@ export default class KeyService {
         this.userService.onUserLostFollower.subscribe(KeyService.onFollowerChanged)
     }
 
+    private static async onFollowerChanged(followRelationship: FollowRelationship) {
+        await Container.get(KeyService).invalidateCurrentKeySet(followRelationship.followeeId)
+    }
+
     async getCurrentKey(userId: number) {
         const [key] = await Keys.getCurrentKey.run({ userId }, this.db.pool)
         return key || null
@@ -22,14 +26,12 @@ export default class KeyService {
         return publicKeys
     }
 
-    private static async onFollowerChanged(followRelationship: FollowRelationship) {
-        await Container.get(KeyService).invalidateCurrentKeySet(followRelationship.followeeId)
-    }
-
     async invalidateCurrentKeySet(userId: number) {
         await this.db.transaction(async client => {
-            const [{ keySetId: currentKeySet }] = await Keys.getCurrentKey.run({ userId }, client)
-            await Keys.endKeySetValidity.run({ keySetId: currentKeySet }, client)
+            const [key] = await Keys.getCurrentKey.run({ userId }, client)
+            if (key) {
+                await Keys.endKeySetValidity.run({ keySetId: key.keySetId }, client)
+            }
         })
     }
 
