@@ -6,8 +6,10 @@ interface CurrentUserInfo {
     displayName: string
     secretKey: string
     accountKeys: CryptoKeyPair
-    accountKeyPrivate?: JsonWebKey
-    accountKeyPublic?: JsonWebKey
+    accountKeysJwk?: {
+        privateKey: JsonWebKey,
+        publicKey: JsonWebKey
+    }
 }
 
 const kUserInfoKey = 'userInfoKey'
@@ -44,17 +46,15 @@ class CurrentUser {
     }
 
     static async getAccountKeys() {
-        if ((CurrentUser.info.accountKeys.privateKey as any).kty === undefined) {
-            CurrentUser._info.accountKeys = await importAccountKeysFromJwks(CurrentUser._info.accountKeyPrivate!, CurrentUser._info.accountKeyPublic!)
-        }
+        if ((CurrentUser.info.accountKeys.privateKey as any).kty === undefined)
+            CurrentUser._info.accountKeys = await importAccountKeysFromJwks(CurrentUser._info.accountKeysJwk!)
         return CurrentUser.info.accountKeys
     }
 
     static async set(info: CurrentUserInfo) {
         CurrentUser._info = info
-        const [privateJwk, publicJwk] = await exportAccountKeysToJwks(info.accountKeys)
-        CurrentUser._info.accountKeyPrivate = privateJwk
-        CurrentUser._info.accountKeyPublic = publicJwk
+        const accountKeysJwk = await exportAccountKeysToJwks(info.accountKeys)
+        CurrentUser._info.accountKeysJwk = accountKeysJwk
         sessionStorage.setItem(kUserInfoKey, JSON.stringify(info))
         localStorage.setItem(kSecretKeyKey, info.secretKey)
     }

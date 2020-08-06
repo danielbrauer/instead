@@ -52,17 +52,20 @@ async function importExtractableRsaKeyFromJwk(jwk: JsonWebKey, usages: KeyUsage[
     )
 }
 
-export async function importAccountKeysFromJwks(privateJwk: JsonWebKey, publicJwk: JsonWebKey) {
-    const privateKeyPromise = importExtractableRsaKeyFromJwk(privateJwk, ['decrypt', 'unwrapKey'])
-    const publicKeyPromise = importExtractableRsaKeyFromJwk(publicJwk, ['encrypt', 'wrapKey'])
-    const [privateKey, publicKey] = await Promise.all([privateKeyPromise, publicKeyPromise])
+export async function importAccountKeysFromJwks(jwks: {privateKey: JsonWebKey, publicKey: JsonWebKey}) {
+    const [privateKey, publicKey] = await Promise.all([
+        importExtractableRsaKeyFromJwk(jwks.privateKey, ['decrypt', 'unwrapKey']),
+        importExtractableRsaKeyFromJwk(jwks.publicKey, ['encrypt', 'wrapKey'])
+    ])
     return { privateKey, publicKey }
 }
 
 export async function exportAccountKeysToJwks(keys: CryptoKeyPair) {
-    const privateKeyPromise = Crypto.subtle.exportKey('jwk', keys.privateKey)
-    const publicKeyPromise = Crypto.subtle.exportKey('jwk', keys.publicKey)
-    return Promise.all([privateKeyPromise, publicKeyPromise])
+    const [privateKey, publicKey] = await Promise.all([
+        Crypto.subtle.exportKey('jwk', keys.privateKey),
+        Crypto.subtle.exportKey('jwk', keys.publicKey)
+    ])
+    return { privateKey, publicKey }
 }
 
 export async function login(info : LoginInfo) {

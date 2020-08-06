@@ -36,29 +36,27 @@ async function getCurrentPostKey() : Promise<PostKey | null> {
 }
 
 async function createNewCurrentPostKey() : Promise<PostKey> {
-    const keyPromise = Crypto.subtle.generateKey(
-        {
-            name: "AES-GCM",
-            length: 256
-        },
-        true,
-        ["encrypt", "decrypt"]
-    )
+    const [postKey, accountKeys] = await Promise.all([
+        Crypto.subtle.generateKey(
+            {
+                name: "AES-GCM",
+                length: 256
+            },
+            true,
+            ["encrypt", "decrypt"]
+        ),
+        CurrentUser.getAccountKeys()
+    ])
 
-    const accountKeysPromise = CurrentUser.getAccountKeys()
-
-    const [postKey, accountKeys] = await Promise.all([keyPromise, accountKeysPromise])
-
-    const authorPostKeyPromise = Crypto.subtle.wrapKey(
-        'jwk',
-        postKey,
-        accountKeys.publicKey,
-        { name: 'RSA-OAEP' }
-    )
-
-    const followerPublicKeysPromise = getFollowerPublicKeys()
-
-    const [authorPostKey, followerPublicKeys] = await Promise.all([authorPostKeyPromise, followerPublicKeysPromise])
+    const [authorPostKey, followerPublicKeys] = await Promise.all([
+        Crypto.subtle.wrapKey(
+            'jwk',
+            postKey,
+            accountKeys.publicKey,
+            { name: 'RSA-OAEP' }
+        ),
+        getFollowerPublicKeys()
+    ])
 
     const keySetId = await createCurrentKey(Buffer.from(authorPostKey).toString('base64'))
 
@@ -96,13 +94,14 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
 }
 
 export async function handleUpload({file, aspect} : {file: File, aspect: number}) {
-    const filePromise = readAsArrayBuffer(file)
-    const keyPromise = getCurrentPostKey()
-    const iv = Crypto.getRandomValues(new Uint8Array(12))
-    const [result, currentKey] = await Promise.all([filePromise, keyPromise])
+    const [result, currentKey] = await Promise.all([
+        readAsArrayBuffer(file),
+        getCurrentPostKey()
+    ])
     let postKey = currentKey
     if (postKey === null)
         postKey = await createNewCurrentPostKey()
+    const iv = Crypto.getRandomValues(new Uint8Array(12))
     const ivBuffer = toBuffer(iv)
     const encrypted = await Crypto.subtle.encrypt(
         {
