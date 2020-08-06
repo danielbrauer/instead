@@ -622,6 +622,16 @@
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
+"@types/connect-redis@^0.0.14":
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/@types/connect-redis/-/connect-redis-0.0.14.tgz#b4bc8e5510bdd9dfcc7b22bda527151f94cf52e5"
+  integrity sha512-snjiYYc1TUk4iJvwO41omcrZKBB0mdwMvl718m7zZj5Tz7qBqjTNS23KQdHF2QmJX/x40m1IH16R6GNLh2Et4Q==
+  dependencies:
+    "@types/express" "*"
+    "@types/express-session" "*"
+    "@types/ioredis" "*"
+    "@types/redis" "*"
+
 "@types/connect@*":
   version "3.4.33"
   resolved "https://registry.yarnpkg.com/@types/connect/-/connect-3.4.33.tgz#31610c901eca573b8713c3330abc6e6b9f588546"
@@ -655,7 +665,7 @@
     "@types/qs" "*"
     "@types/range-parser" "*"
 
-"@types/express-session@^1.15.14":
+"@types/express-session@*", "@types/express-session@^1.15.14":
   version "1.17.0"
   resolved "https://registry.yarnpkg.com/@types/express-session/-/express-session-1.17.0.tgz#770daf81368f6278e3e40dd894e1e52abbdca0cd"
   integrity sha512-OQEHeBFE1UhChVIBhRh9qElHUvTp4BzKKHxMDkGHT7WuYk5eL93hPG7D8YAIkoBSbhNEY0RjreF15zn+U0eLjA==
@@ -698,6 +708,13 @@
   integrity sha512-MPZ7HoCGLoajTZhy3hMWHvdiOMHCZJ51U2Bve25oujn3G7KdXy0G3iRS0dUpVtKOGMNcuBF6yLDRpNdm2JH0OQ==
   dependencies:
     "@types/express" "*"
+
+"@types/ioredis@*":
+  version "4.17.3"
+  resolved "https://registry.yarnpkg.com/@types/ioredis/-/ioredis-4.17.3.tgz#65ba8b9344576ecb229c57ec1db92be3fe830ee9"
+  integrity sha512-G0pN/WZb7OBMFksZOBcqATBUeBII00IZ7C9OW0bm7VG3XMXBI75stTXWLBxm6iNLQxdjFZgzThRbc3gBXBhZGw==
+  dependencies:
+    "@types/node" "*"
 
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0", "@types/istanbul-lib-coverage@^2.0.1":
   version "2.0.3"
@@ -802,10 +819,10 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.3.tgz#7ee330ba7caafb98090bece86a5ee44115904c2c"
   integrity sha512-ewFXqrQHlFsgc09MK5jP5iR7vumV/BYayNC6PgJO2LPe8vrnNFyjQjSppfEngITi0qvfKtzFvgKymGheFM9UOA==
 
-"@types/redis@^2.8.13":
-  version "2.8.22"
-  resolved "https://registry.yarnpkg.com/@types/redis/-/redis-2.8.22.tgz#8935227cbe39080506b625276d64974ddbcb9ea4"
-  integrity sha512-O21YLcAtcSzax8wy4CfxMNjIMNf5X2c1pKTXDWLMa2p77Igvy7wuNjWVv+Db93wTvRvLLev6oq3IE7gxNKFZyg==
+"@types/redis@*":
+  version "2.8.25"
+  resolved "https://registry.yarnpkg.com/@types/redis/-/redis-2.8.25.tgz#046bfff24b82effa59d74744c6fcf8995be17479"
+  integrity sha512-e5N5Dg712aZ1CPi1Li0XalukPSWd2RTLYzmrMsQ84NkYQ7cqKHC+HroXM1WP65O1zRGfzld72/u9ikumEe+ylA==
   dependencies:
     "@types/node" "*"
 
@@ -1546,10 +1563,10 @@ concurrently@^4.1.2:
     tree-kill "^1.2.1"
     yargs "^12.0.5"
 
-connect-redis@^4.0.2:
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/connect-redis/-/connect-redis-4.0.4.tgz#b194abe2f3754551f38086e1a28cb9e68d6c3b28"
-  integrity sha512-aXk7btMlG0J5LqtPNRpFKa5fglzlTzukYNx+Fq8cghbUIQHN/gyK9c3+b0XEROMwiSxMoZDADqjp9tdpUoZLAg==
+connect-redis@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/connect-redis/-/connect-redis-5.0.0.tgz#68fe890117e761ee98e13a14b835338bd6bf044c"
+  integrity sha512-R4nTW5uXeG5s6zr/q4abmtcdloglZrL/A3cpa0JU0RLFJU4mTR553HUY8OZ0ngeySkGDclwQ5xmCcjjKkxdOSg==
 
 content-disposition@0.5.3:
   version "0.5.3"

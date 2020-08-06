@@ -1,8 +1,10 @@
 import session, { SessionOptions } from 'express-session'
 import redis from 'redis'
 import * as config from '../config/config'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const RedisStore = require('connect-redis')(session)
+import connectRedis from 'connect-redis'
+
+const RedisStore = connectRedis(session)
+
 const client = redis.createClient({
     url: config.string('REDIS_URL'),
 })
