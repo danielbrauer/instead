@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.production.json",
     "test": "jest",
-    "test-with-coverage": "jest --coverage",
+    "test-coverage": "jest --coverage",
     "submit-coverage": "cat ./src/coverage/lcov.info | coveralls || rm -rf ./src/coverage",
     "lint": "eslint \"**/*.{js,ts}\" --quiet --fix",
     "watch": "yarn lint && tsc-watch --onSuccess \"node --require dotenv/config --inspect dist/src/server.js\" --onFailure \"echo Compilation Failed\"",
@@ -70,5 +70,13 @@
     "jest": "^26.1.0",
     "ts-jest": "^26.1.4-alpha.0",
     "tsc-watch": "^4.2.9"
+  },
+  "jest": {
+    "rootDir": "src",
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/queries/"
+    ]
   }
 }

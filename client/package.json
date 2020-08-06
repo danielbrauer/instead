@@ -2,6 +2,36 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build && yarn run compress",
+    "test": "react-scripts test",
+    "test-coverage": "react-scripts test --coverage --watchAll=false",
+    "submit-coverage": "cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
+    "eject": "react-scripts eject",
+    "compress": "node compress.js"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danielbrauer/instead.git",
+    "directory": "client"
+  },
   "dependencies": {
     "@types/jest": "^26.0.0",
     "@types/js-md5": "^0.4.2",
@@ -35,36 +65,6 @@
     "typedarray-to-buffer": "^3.1.5",
     "typescript": "^3.7.3",
     "unorm": "^1.6.0"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build && yarn run compress",
-    "test": "react-scripts test",
-    "test-with-coverage": "react-scripts test --coverage",
-    "submit-coverage": "cat ./src/coverage/lcov.info | coveralls",
-    "eject": "react-scripts eject",
-    "compress": "node compress.js"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/danielbrauer/instead.git",
-    "directory": "client"
   },
   "devDependencies": {
     "coveralls": "^3.1.0",
