@@ -1,5 +1,5 @@
 import { Service } from 'typedi'
-import Database from './DatabaseService'
+import DatabaseService from './DatabaseService'
 import * as Users from '../queries/users.gen'
 import * as Followers from '../queries/followers.gen'
 import * as FollowRequests from '../queries/follow_requests.gen'
@@ -15,7 +15,7 @@ export default class UserService {
     private _onUserAddedFollower = new SimpleEventDispatcher<FollowRelationship>()
     private _onUserLostFollower = new SimpleEventDispatcher<FollowRelationship>()
 
-    constructor(private db: Database) {}
+    constructor(private db: DatabaseService) {}
 
     public get onUserCreated() { return this._onUserCreated.asEvent() }
     public get onUserAddedFollower() { return this._onUserAddedFollower.asEvent() }
