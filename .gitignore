@@ -29,3 +29,4 @@ yarn-error.log*
 .env
 backend/pgtconfig.json
 
+**/coverage
