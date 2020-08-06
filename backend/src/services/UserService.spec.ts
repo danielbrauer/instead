@@ -5,7 +5,6 @@ import * as FollowRequests from '../queries/follow_requests.gen'
 import DatabaseService from './DatabaseService'
 import UserService from './UserService'
 import { NewUser } from 'auth'
-import { ClientBase } from 'pg'
 import { FollowRelationship } from 'api'
 
 jest.mock('../queries/users.gen')
@@ -21,10 +20,6 @@ describe('UserService', () => {
     beforeAll(() => {
         const db = new DatabaseService()
         userService = new UserService(db)
-        mocked(db.transaction).mockImplementation(async (commands) => {
-            const client = { } as ClientBase
-            await commands(client)
-        })
         jest.useFakeTimers()
     })
 
