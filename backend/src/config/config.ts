@@ -1,10 +1,3 @@
-function split(input: string) {
-    if (input === null || input === undefined)
-        return []
-    else
-        return input.split(',')
-}
-
 export function string(name: string) {
     const value = process.env[name]
     if (value === undefined)
@@ -17,7 +10,7 @@ export function int(name: string) {
 }
 
 export function strings(name: string) {
-    return split(string(name))
+    return string(name).split(',')
 }
 
 export function isLocalDev() {
