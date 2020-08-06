@@ -7,5 +7,10 @@ matrix:
         - env: TARGET=client
         - env: TARGET=backend
 
-install: cd $TARGET && yarn --frozen-lockfile
-script: yarn test
+install:
+- cd $TARGET
+- yarn --frozen-lockfile
+script:
+- yarn test-with-coverage
+after_script:
+- yarn submit-coverage
