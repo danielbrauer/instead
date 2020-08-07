@@ -2,9 +2,21 @@ language: node_js
 node_js:
   - 12.13.1
 
+env:
+  - COVERALLS_PARALLEL=true
+
+notifications:
+  webhooks: https://coveralls.io/webhook
+
 matrix:
     include:
         - env: TARGET=client
         - env: TARGET=backend
 
-install: cd $TARGET && yarn --frozen-lockfile && yarn test
+install:
+  - cd $TARGET
+  - yarn --frozen-lockfile
+script:
+  - yarn test-coverage
+after_script:
+  - yarn submit-coverage

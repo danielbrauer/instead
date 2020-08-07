@@ -6,6 +6,8 @@
   "scripts": {
     "build": "tsc --project tsconfig.production.json",
     "test": "jest",
+    "test-coverage": "jest --coverage",
+    "submit-coverage": "cat ./src/coverage/lcov.info | coveralls || rm -rf ./src/coverage",
     "lint": "eslint \"**/*.{js,ts}\" --quiet --fix",
     "watch": "yarn lint && tsc-watch --onSuccess \"node --require dotenv/config --inspect dist/src/server.js\" --onFailure \"echo Compilation Failed\"",
     "watch-debug": "concurrently --kill-others \"yarn watch\" \"yarn migrate-dev && pgtyped -w -c pgtconfig.json\"",
@@ -39,7 +41,6 @@
     "body-parser": "^1.19.0",
     "connect-redis": "^5.0.0",
     "cors": "^2.8.5",
-    "eslint": "^6.4.0",
     "express": "^4.17.0",
     "express-joi-validation": "danielbrauer/express-joi-validation#3.x",
     "express-promise-router": "^3.0.3",
@@ -63,9 +64,21 @@
   "devDependencies": {
     "@types/jest": "^26.0.5",
     "concurrently": "^4.1.2",
+    "coveralls": "^3.1.0",
     "dotenv": "^8.1.0",
+    "eslint": "^6.0.0",
     "jest": "^26.1.0",
     "ts-jest": "^26.1.4-alpha.0",
     "tsc-watch": "^4.2.9"
+  },
+  "jest": {
+    "rootDir": "src",
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "collectCoverageFrom" : ["**/*.ts"],
+    "coverageReporters": ["lcov"],
+    "coveragePathIgnorePatterns": [
+      "/queries/"
+    ]
   }
 }
