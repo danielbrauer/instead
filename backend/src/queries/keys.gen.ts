@@ -150,3 +150,33 @@ const addKeysIR: any = {"name":"AddKeys","params":[{"name":"keys","codeRefs":{"d
 export const addKeys = new PreparedQuery<IAddKeysParams,IAddKeysResult>(addKeysIR);
 
 
+/** 'RemoveFollowerKeys' parameters type */
+export interface IRemoveFollowerKeysParams {
+  followerId: number | null | void;
+  followeeId: number | null | void;
+}
+
+/** 'RemoveFollowerKeys' return type */
+export type IRemoveFollowerKeysResult = void;
+
+/** 'RemoveFollowerKeys' query type */
+export interface IRemoveFollowerKeysQuery {
+  params: IRemoveFollowerKeysParams;
+  result: IRemoveFollowerKeysResult;
+}
+
+const removeFollowerKeysIR: any = {"name":"RemoveFollowerKeys","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":712,"b":721,"line":29,"col":34}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":805,"b":814,"line":32,"col":22}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"DELETE FROM keys WHERE user_id = :followerId AND key_set_id IN (\n    SELECT key_set_id\n    FROM key_sets\n    WHERE owner_id = :followeeId\n)","loc":{"a":678,"b":816,"line":29,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * DELETE FROM keys WHERE user_id = :followerId AND key_set_id IN (
+ *     SELECT key_set_id
+ *     FROM key_sets
+ *     WHERE owner_id = :followeeId
+ * )
+ * ```
+ */
+export const removeFollowerKeys = new PreparedQuery<IRemoveFollowerKeysParams,IRemoveFollowerKeysResult>(removeFollowerKeysIR);
+
+

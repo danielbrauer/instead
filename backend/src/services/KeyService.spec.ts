@@ -115,4 +115,11 @@ describe('KeyService', () => {
             expect(mocked(Keys.addKeys.run).mock.calls[0][0]).toEqual({ keys })
         })
     })
+
+    describe('removeFollowerKeys', () => {
+        test('removes keys for relationship', async() => {
+            await keyService.removeFollowerKeys(0, 1)
+            expect(mocked(Keys.removeFollowerKeys.run).mock.calls[0][0]).toEqual({ followerId: 0, followeeId: 1 })
+        })
+    })
 })

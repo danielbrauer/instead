@@ -1,4 +1,4 @@
-import { Pool, ClientBase } from "pg"
+import { Pool, ClientBase } from 'pg'
 
 type TransactionContents = (client: ClientBase) => Promise<any>
 

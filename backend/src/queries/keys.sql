@@ -24,3 +24,10 @@ INSERT INTO key_sets (owner_id) VALUES (:ownerId) RETURNING id;
 */
 INSERT INTO keys (user_id, key_set_id, key)
 VALUES :keys;
+
+/* @name RemoveFollowerKeys */
+DELETE FROM keys WHERE user_id = :followerId AND key_set_id IN (
+    SELECT key_set_id
+    FROM key_sets
+    WHERE owner_id = :followeeId
+);
