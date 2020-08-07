@@ -76,6 +76,7 @@
     "preset": "ts-jest",
     "testEnvironment": "node",
     "collectCoverageFrom" : ["**/*.ts"],
+    "coverageReporters": ["lcov"],
     "coveragePathIgnorePatterns": [
       "/queries/"
     ]
