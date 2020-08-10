@@ -1,6 +1,6 @@
 import React from 'react'
 import { Post } from '../../backend/src/types/api'
-import { Form, Button, Loader } from 'semantic-ui-react'
+import { Form, Button } from 'semantic-ui-react'
 import { useMutation } from 'react-query'
 import { encryptAndPostComment } from './postCrypto'
 import { useInput } from './Components/useInput'
@@ -15,6 +15,7 @@ export default function(props: Props) {
 
     async function onSubmit() {
         await commentMutation({ postId: props.post.id, keySetId: props.post.keySetId, content: content.value })
+        content.reset()
     }
 
     return (

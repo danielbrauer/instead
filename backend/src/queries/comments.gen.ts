@@ -69,6 +69,7 @@ export interface IGetCommentsForPostResult {
   authorId: number;
   content: string;
   contentIv: string;
+  published: Date;
   key: string;
 }
 
@@ -78,12 +79,12 @@ export interface IGetCommentsForPostQuery {
   result: IGetCommentsForPostResult;
 }
 
-const getCommentsForPostIR: any = {"name":"GetCommentsForPost","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":420,"b":425,"line":12,"col":26}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":489,"b":494,"line":14,"col":20}]}}],"usedParamSet":{"postId":true,"userId":true},"statement":{"body":"SELECT comments.id, comments.author_id, comments.content, comments.content_iv,\n       keys.key\nFROM comments, keys\nWHERE comments.post_id = :postId\nAND comments.key_set_id = keys.key_set_id\nAND keys.user_id = :userId\nORDER BY published DESC","loc":{"a":279,"b":518,"line":9,"col":0}}};
+const getCommentsForPostIR: any = {"name":"GetCommentsForPost","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":440,"b":445,"line":12,"col":26}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":509,"b":514,"line":14,"col":20}]}}],"usedParamSet":{"postId":true,"userId":true},"statement":{"body":"SELECT comments.id, comments.author_id, comments.content, comments.content_iv, comments.published,\n       keys.key\nFROM comments, keys\nWHERE comments.post_id = :postId\nAND comments.key_set_id = keys.key_set_id\nAND keys.user_id = :userId\nORDER BY published DESC","loc":{"a":279,"b":538,"line":9,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT comments.id, comments.author_id, comments.content, comments.content_iv,
+ * SELECT comments.id, comments.author_id, comments.content, comments.content_iv, comments.published,
  *        keys.key
  * FROM comments, keys
  * WHERE comments.post_id = :postId

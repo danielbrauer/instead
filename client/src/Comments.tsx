@@ -1,7 +1,8 @@
 import React from 'react'
-import { Comment, Message, Loader, List } from 'semantic-ui-react'
+import { Message, Loader, Comment } from 'semantic-ui-react'
 import { useQuery } from 'react-query'
 import { getComments } from './RoutesAuthenticated'
+import SingleComment from './SingleComment'
 
 export interface Props {
     postId: number
@@ -26,13 +27,11 @@ export default function(props: Props) {
             {commentsQuery.data!.length === 0 ?
             null
             :
-            <List>
+            <Comment.Group>
                 {commentsQuery.data!.map(comment => (
-                    <List.Item key={comment.id}>
-                        <Comment >{comment.contentIv}</Comment>
-                    </List.Item>
+                    <SingleComment key={comment.id} comment={comment}/>
                 ))}
-            </List>
+            </Comment.Group>
             }
         </div>
     )

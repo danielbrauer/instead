@@ -6,7 +6,7 @@ VALUES (:authorId, :keySetId, :postId, :content, :contentIv);
 DELETE FROM comments WHERE id = :commentId AND author_id = :authorId;
 
 /* @name GetCommentsForPost */
-SELECT comments.id, comments.author_id, comments.content, comments.content_iv,
+SELECT comments.id, comments.author_id, comments.content, comments.content_iv, comments.published,
        keys.key
 FROM comments, keys
 WHERE comments.post_id = :postId
