@@ -4,6 +4,7 @@ import { List, Message, Loader } from 'semantic-ui-react'
 import EncryptedImage from './EncryptedImage'
 import { getPosts, getContentUrl } from './RoutesAuthenticated'
 import PostHeader from './PostHeader'
+import { Link } from 'react-router-dom'
 
 export default function () {
     const posts = useQuery('posts', getPosts)
@@ -29,7 +30,9 @@ export default function () {
                 {posts.data!.map(post => (
                     <List.Item key={post.id}>
                         <PostHeader post={post} />
+                        <Link to={`/post/${post.id.toString()}`}>
                         <EncryptedImage encryptedUrl={contentUrl.data + post.filename} iv={post.iv} decKey={post.key} aspect={post.aspect} />
+                        </Link>
                     </List.Item>
                 ))}
             </List>

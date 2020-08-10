@@ -11,7 +11,7 @@ DELETE FROM posts WHERE id = :postId AND author_id = :authorId RETURNING *;
 DELETE FROM posts WHERE id = :postId AND published IS NULL RETURNING *;
 
 /* @name GetHomePostsWithKeys */
-SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect,
+SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
        keys.key
 FROM posts, keys
 WHERE posts.key_set_id = keys.key_set_id
@@ -22,3 +22,12 @@ AND (posts.author_id = :authorId OR posts.author_id IN (
     FROM followers
     WHERE followers.follower_id = :authorId
 )) ORDER BY published DESC;
+
+/* @name GetPostWithKey */
+SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
+       keys.key
+FROM posts, keys
+WHERE posts.key_set_id = keys.key_set_id
+AND keys.user_id = :requesterId
+AND posts.published IS NOT NULL
+AND posts.id = :postId;

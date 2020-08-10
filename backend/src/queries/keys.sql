@@ -5,6 +5,9 @@ SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
     WHERE owner_id = :userId AND valid_end IS NULL
 );
 
+/* @name GetKey */
+SELECT * FROM keys WHERE user_id = :userId AND key_set_id = :keySetId;
+
 /* @name GetFollowerPublicKeys */
 SELECT id, public_key FROM users WHERE id IN (
     SELECT follower_id

@@ -44,10 +44,37 @@ router.get('/getPosts',
     }
 )
 
-router.delete('/deletePost',
-    validator.query(Schema.deletePostQuery),
+router.get('/getPost',
+    validator.query(Schema.postByIdQuery),
     validator.body(Schema.empty),
-    async (req: ValidatedRequest<Schema.DeletePostRequest>, res) => {
+    async (req: ValidatedRequest<Schema.PostByIdRequest>, res) => {
+        const post = await postService.getPost(req.query.id, req.user.id)
+        return res.json(post)
+    }
+)
+
+router.get('/getComments',
+    validator.query(Schema.postByIdQuery),
+    validator.body(Schema.empty),
+    async (req: ValidatedRequest<Schema.PostByIdRequest>, res) => {
+        const comments = await postService.getCommentsForPost(req.query.id, req.user.id)
+        return res.json(comments)
+    }
+)
+
+router.post('/createComment',
+    validator.query(Schema.empty),
+    validator.body(Schema.createCommentBody),
+    async (req: ValidatedRequest<Schema.CreateCommentRequest>, res) => {
+        const result = await postService.addCommentToPost({ authorId: req.user.id, ...req.body })
+        return res.json(result)
+    }
+)
+
+router.delete('/deletePost',
+    validator.query(Schema.postByIdQuery),
+    validator.body(Schema.empty),
+    async (req: ValidatedRequest<Schema.PostByIdRequest>, res) => {
         const result = await postService.deletePost(req.query.id, req.user.id)
         return res.json(result)
     }
@@ -68,6 +95,15 @@ router.post('/createCurrentKey',
     async (req: ValidatedRequest<Schema.CreateCurrentKeyRequest>, res) => {
         const keySetId = await keyService.createKeySet(req.user.id, req.body.key)
         return res.json(keySetId)
+    }
+)
+
+router.get('/getKey',
+    validator.query(Schema.getKeyQuery),
+    validator.body(Schema.empty),
+    async (req: ValidatedRequest<Schema.GetKeyRequest>, res) => {
+        const key = await keyService.getKey(req.user.id, req.query.keySetId)
+        return res.json(key)
     }
 )
 

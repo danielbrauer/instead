@@ -1,4 +1,4 @@
-import { startPost, finishPost, getCurrentKey, getFollowerPublicKeys, createCurrentKey, addKeys } from './RoutesAuthenticated'
+import * as Routes from './RoutesAuthenticated'
 import { readAsArrayBuffer } from 'promise-file-reader'
 import Axios from 'axios'
 import CurrentUser from './CurrentUser'
@@ -15,14 +15,13 @@ interface PostKey {
     id: number
 }
 
-async function getCurrentPostKey() : Promise<PostKey | null> {
-    const encrypted = await getCurrentKey()
-    if (encrypted === null)
+async function unwrapKey(wrappedKey: EncryptedPostKey | null) {
+    if (wrappedKey === null)
         return null
     const accountKeys = await CurrentUser.getAccountKeys()
     const key = await Crypto.subtle.unwrapKey(
         'jwk',
-        Buffer.from(encrypted.key, 'base64'),
+        Buffer.from(wrappedKey.key, 'base64'),
         accountKeys.privateKey,
         { name: 'RSA-OAEP'},
         'AES-GCM',
@@ -31,11 +30,21 @@ async function getCurrentPostKey() : Promise<PostKey | null> {
     )
     return {
         key,
-        id: encrypted.keySetId,
+        id: wrappedKey.keySetId,
     }
 }
 
-async function createNewCurrentPostKey() : Promise<PostKey> {
+async function getCurrentPostKey() : Promise<PostKey | null> {
+    const encrypted = await Routes.getCurrentKey()
+    return await unwrapKey(encrypted)
+}
+
+async function getPostKey(keySetId: number) : Promise<PostKey | null> {
+    const encrypted = await Routes.getKey(keySetId)
+    return await unwrapKey(encrypted)
+}
+
+async function createPostKeyAndMakeCurrent() : Promise<PostKey> {
     const [postKey, accountKeys] = await Promise.all([
         Crypto.subtle.generateKey(
             {
@@ -55,10 +64,10 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
             accountKeys.publicKey,
             { name: 'RSA-OAEP' }
         ),
-        getFollowerPublicKeys()
+        Routes.getFollowerPublicKeys()
     ])
 
-    const keySetId = await createCurrentKey(Buffer.from(authorPostKey).toString('base64'))
+    const keySetId = await Routes.createCurrentKey(Buffer.from(authorPostKey).toString('base64'))
 
     const followerPostKeyPromises = followerPublicKeys.map(async(publicKey): Promise<EncryptedPostKey> => {
         const followerPublicKey = await Crypto.subtle.importKey(
@@ -84,7 +93,7 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
 
     if (followerPostKeyPromises.length > 0) {
         const encryptedKeys = await Promise.all(followerPostKeyPromises)
-        await addKeys(encryptedKeys)
+        await Routes.addKeys(encryptedKeys)
     }
 
     return {
@@ -93,14 +102,14 @@ async function createNewCurrentPostKey() : Promise<PostKey> {
     }
 }
 
-export async function handleUpload({file, aspect} : {file: File, aspect: number}) {
-    const [result, currentKey] = await Promise.all([
-        readAsArrayBuffer(file),
-        getCurrentPostKey()
-    ])
-    let postKey = currentKey
-    if (postKey === null)
-        postKey = await createNewCurrentPostKey()
+async function getOrCreatePostKey() {
+    let currentKey = await getCurrentPostKey()
+    if (currentKey === null)
+        currentKey = await createPostKeyAndMakeCurrent()
+    return currentKey
+}
+
+async function encryptSymmetric(buffer: ArrayBuffer, key: CryptoKey) {
     const iv = Crypto.getRandomValues(new Uint8Array(12))
     const ivBuffer = toBuffer(iv)
     const encrypted = await Crypto.subtle.encrypt(
@@ -108,11 +117,20 @@ export async function handleUpload({file, aspect} : {file: File, aspect: number}
             name: "AES-GCM",
             iv,
         },
-        postKey.key,
-        result
+        key,
+        buffer
     )
+    return { encrypted, ivBuffer }
+}
+
+export async function encryptAndUploadImage({file, aspect} : {file: File, aspect: number}) {
+    const [fileBuffer, postKey] = await Promise.all([
+        readAsArrayBuffer(file),
+        getOrCreatePostKey()
+    ])
+    const { encrypted, ivBuffer } = await encryptSymmetric(fileBuffer, postKey.key)
     const contentMD5 = md5.base64(encrypted)
-    const postInfo = await startPost(postKey.id, ivBuffer.toString('base64'), contentMD5, aspect)
+    const postInfo = await Routes.startPost(postKey.id, ivBuffer.toString('base64'), contentMD5, aspect)
     const signedRequest = postInfo.signedRequest
 
     const options = {
@@ -127,8 +145,21 @@ export async function handleUpload({file, aspect} : {file: File, aspect: number}
     } catch (error) {
         success = false
     }
-    await finishPost(postInfo.postId, success)
+    await Routes.finishPost(postInfo.postId, success)
     return success
+}
+
+export async function encryptAndPostComment(comment: { postId: number, keySetId: number, content: string }) {
+    const postKey = await getPostKey(comment.keySetId)
+    const contentBuffer = Buffer.from(comment.content, 'utf8')
+    const { encrypted, ivBuffer } = await encryptSymmetric(contentBuffer, postKey!.key)
+    await Routes.createComment({
+        postId: comment.postId,
+        keySetId: comment.keySetId,
+        content: Buffer.from(encrypted).toString('base64'),
+        contentIv: ivBuffer.toString('base64')
+    })
+    return true
 }
 
 type EncryptedImageState = {

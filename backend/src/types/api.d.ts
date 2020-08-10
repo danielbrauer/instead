@@ -1,5 +1,6 @@
 import { IGetHomePostsWithKeysResult } from "../queries/posts.gen"
 import { IGetFollowerPublicKeysResult, IGetCurrentKeyResult} from "../queries/keys.gen"
+import { IGetCommentsForPostResult } from "../queries/comments.gen"
 
 export interface User {
     id: number
@@ -25,6 +26,8 @@ export interface StartPostResult {
 export interface FinishPostResult extends ActionResult {}
 
 export interface Post extends IGetHomePostsWithKeysResult {}
+
+export interface Comment extends IGetCommentsForPostResult {}
 
 export interface EncryptedPostKey extends IGetCurrentKeyResult {}
 

@@ -137,6 +137,7 @@ export interface IGetHomePostsWithKeysResult {
   filename: string;
   iv: string;
   aspect: number;
+  keySetId: number;
   key: string;
 }
 
@@ -146,12 +147,12 @@ export interface IGetHomePostsWithKeysQuery {
   result: IGetHomePostsWithKeysResult;
 }
 
-const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":668,"b":675,"line":18,"col":20},{"a":733,"b":740,"line":20,"col":24},{"a":843,"b":850,"line":23,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :authorId\nAND posts.published IS NOT NULL\nAND (posts.author_id = :authorId OR posts.author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n)) ORDER BY published DESC","loc":{"a":483,"b":877,"line":14,"col":0}}};
+const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":686,"b":693,"line":18,"col":20},{"a":751,"b":758,"line":20,"col":24},{"a":861,"b":868,"line":23,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :authorId\nAND posts.published IS NOT NULL\nAND (posts.author_id = :authorId OR posts.author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n)) ORDER BY published DESC","loc":{"a":483,"b":895,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect,
+ * SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
  *        keys.key
  * FROM posts, keys
  * WHERE posts.key_set_id = keys.key_set_id
@@ -165,5 +166,46 @@ const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"n
  * ```
  */
 export const getHomePostsWithKeys = new PreparedQuery<IGetHomePostsWithKeysParams,IGetHomePostsWithKeysResult>(getHomePostsWithKeysIR);
+
+
+/** 'GetPostWithKey' parameters type */
+export interface IGetPostWithKeyParams {
+  requesterId: number | null | void;
+  postId: number | null | void;
+}
+
+/** 'GetPostWithKey' return type */
+export interface IGetPostWithKeyResult {
+  id: number;
+  published: Date | null;
+  authorId: number;
+  filename: string;
+  iv: string;
+  aspect: number;
+  keySetId: number;
+  key: string;
+}
+
+/** 'GetPostWithKey' query type */
+export interface IGetPostWithKeyQuery {
+  params: IGetPostWithKeyParams;
+  result: IGetPostWithKeyResult;
+}
+
+const getPostWithKeyIR: any = {"name":"GetPostWithKey","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1129,"b":1139,"line":31,"col":20}]}},{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1189,"b":1194,"line":33,"col":16}]}}],"usedParamSet":{"requesterId":true,"postId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :requesterId\nAND posts.published IS NOT NULL\nAND posts.id = :postId","loc":{"a":926,"b":1194,"line":27,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
+ *        keys.key
+ * FROM posts, keys
+ * WHERE posts.key_set_id = keys.key_set_id
+ * AND keys.user_id = :requesterId
+ * AND posts.published IS NOT NULL
+ * AND posts.id = :postId
+ * ```
+ */
+export const getPostWithKey = new PreparedQuery<IGetPostWithKeyParams,IGetPostWithKeyResult>(getPostWithKeyIR);
 
 
