@@ -12,7 +12,7 @@
     "watch": "yarn lint && tsc-watch --onSuccess \"node --require dotenv/config --inspect dist/src/server.js\" --onFailure \"echo Compilation Failed\"",
     "watch-debug": "concurrently --kill-others \"yarn watch\" \"pgtyped -w -c pgtconfig.json\"",
     "migrate": "node-pg-migrate",
-    "migrate-up": "PGSSLMODE=verify-full ts-node --reject-unauthorized --compiler-options '{\"module\":\"commonjs\"}' node_modules/node-pg-migrate/bin/node-pg-migrate --migration-file-language ts up",
+    "migrate-up": "PGSSLMODE=verify-full ts-node --compiler-options '{\"module\":\"commonjs\"}' node_modules/node-pg-migrate/bin/node-pg-migrate --migration-file-language ts up",
     "migrate-dev": "ts-node --compiler-options '{\"module\":\"commonjs\"}' node_modules/node-pg-migrate/bin/node-pg-migrate --migration-file-language ts"
   },
   "author": "Daniel Brauer",
