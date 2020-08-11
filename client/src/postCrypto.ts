@@ -15,7 +15,7 @@ interface PostKey {
     id: number
 }
 
-async function unwrapKey(wrappedKeyBase64: string) {
+async function unwrapKeyAsymmetric(wrappedKeyBase64: string) {
     const accountKeys = await CurrentUser.getAccountKeys()
     const key = await Crypto.subtle.unwrapKey(
         'jwk',
@@ -27,6 +27,15 @@ async function unwrapKey(wrappedKeyBase64: string) {
         ['encrypt', 'decrypt']
     )
     return key
+}
+
+async function wrapKeyAsymmetric(key: CryptoKey, wrappingKey: CryptoKey) {
+    return await Crypto.subtle.wrapKey(
+        'jwk',
+        key,
+        wrappingKey,
+        { name: 'RSA-OAEP' }
+    )
 }
 
 async function createPostKeyAndMakeCurrent() : Promise<PostKey> {
@@ -43,12 +52,7 @@ async function createPostKeyAndMakeCurrent() : Promise<PostKey> {
     ])
 
     const [authorPostKey, followerPublicKeys] = await Promise.all([
-        Crypto.subtle.wrapKey(
-            'jwk',
-            postKey,
-            accountKeys.publicKey,
-            { name: 'RSA-OAEP' }
-        ),
+        wrapKeyAsymmetric(postKey, accountKeys.publicKey),
         Routes.getFollowerPublicKeys()
     ])
 
@@ -62,12 +66,7 @@ async function createPostKeyAndMakeCurrent() : Promise<PostKey> {
             false,
             ['encrypt', 'wrapKey']
         )
-        const followerVersion = await Crypto.subtle.wrapKey(
-            'jwk',
-            postKey,
-            followerPublicKey,
-            { name: 'RSA-OAEP' }
-        )
+        const followerVersion = await wrapKeyAsymmetric(postKey, followerPublicKey)
         const encryptedKey: EncryptedPostKey = {
             key: Buffer.from(followerVersion).toString('base64'),
             userId: publicKey.id,
@@ -91,7 +90,7 @@ async function getOrCreatePostKey(): Promise<PostKey> {
     const currentKeyEncrypted = await Routes.getCurrentKey()
     if (currentKeyEncrypted === null)
         return await createPostKeyAndMakeCurrent()
-    const currentKey = await unwrapKey(currentKeyEncrypted.key)
+    const currentKey = await unwrapKeyAsymmetric(currentKeyEncrypted.key)
     return { id: currentKeyEncrypted.keySetId, key: currentKey }
 }
 
@@ -136,7 +135,7 @@ export async function encryptAndUploadImage({file, aspect} : {file: File, aspect
 }
 
 export async function encryptAndPostComment({post, content} : {post: Post, content: string}) {
-    const postKey = await unwrapKey(post.key)
+    const postKey = await unwrapKeyAsymmetric(post.key)
     const contentBuffer = Buffer.from(content, 'utf8')
     const { encrypted, ivBuffer } = await encryptSymmetric(contentBuffer, postKey)
     await Routes.createComment({
@@ -190,7 +189,7 @@ export function useEncryptedComment(wrappedKeyBase64: string, contentBase64: str
         const decrypt = async() => {
             dispatch({ type: 'request' })
             try {
-                const postKey = await unwrapKey(wrappedKeyBase64)
+                const postKey = await unwrapKeyAsymmetric(wrappedKeyBase64)
                 const decrypted = await decryptSymmetric(Buffer.from(contentBase64, 'base64'), ivBase64, postKey)
                 decryptedContent = Buffer.from(decrypted).toString('utf8')
                 dispatch({ type: 'success', results: decryptedContent })
@@ -219,7 +218,7 @@ export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, en
             dispatch({ type: 'request' })
             try {
                 const [postKey, encryptedImage] = await Promise.all([
-                    unwrapKey(wrappedKeyBase64),
+                    unwrapKeyAsymmetric(wrappedKeyBase64),
                     Axios.get(
                         encryptedUrl,
                         { responseType: 'arraybuffer' }
