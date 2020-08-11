@@ -14,7 +14,7 @@ export default function(props: Props) {
     const [commentMutation, commentStatus] = useMutation(encryptAndPostComment)
 
     async function onSubmit() {
-        await commentMutation({ postId: props.post.id, keySetId: props.post.keySetId, content: content.value })
+        await commentMutation({post: props.post, content: content.value})
         content.reset()
     }
 

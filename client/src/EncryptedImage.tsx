@@ -12,5 +12,5 @@ export default function(props: { post: Post }) {
     if (decryptedPost.isLoading)
         return <Placeholder fluid style={{ height: `${100*props.post.aspect}vw`}}><Placeholder.Image /></Placeholder>
 
-    return <Image fluid src={decryptedPost.decryptedUrl} alt={props.post.filename} />
+    return <Image fluid src={decryptedPost.results} alt={props.post.filename} />
 }

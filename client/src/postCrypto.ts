@@ -4,7 +4,7 @@ import Axios from 'axios'
 import CurrentUser from './CurrentUser'
 import md5 from 'js-md5'
 import { useReducer, useEffect } from 'react'
-import { EncryptedPostKey } from '../../backend/src/types/api'
+import { EncryptedPostKey, Post } from '../../backend/src/types/api'
 const toBuffer = require('typedarray-to-buffer') as (typedArray: Uint8Array) => Buffer
 require('buffer')
 const Crypto = window.crypto
@@ -15,33 +15,18 @@ interface PostKey {
     id: number
 }
 
-async function unwrapKey(wrappedKey: EncryptedPostKey | null) {
-    if (wrappedKey === null)
-        return null
+async function unwrapKey(wrappedKeyBase64: string) {
     const accountKeys = await CurrentUser.getAccountKeys()
     const key = await Crypto.subtle.unwrapKey(
         'jwk',
-        Buffer.from(wrappedKey.key, 'base64'),
+        Buffer.from(wrappedKeyBase64, 'base64'),
         accountKeys.privateKey,
         { name: 'RSA-OAEP'},
         'AES-GCM',
         true,
         ['encrypt', 'decrypt']
     )
-    return {
-        key,
-        id: wrappedKey.keySetId,
-    }
-}
-
-async function getCurrentPostKey() : Promise<PostKey | null> {
-    const encrypted = await Routes.getCurrentKey()
-    return await unwrapKey(encrypted)
-}
-
-async function getPostKey(keySetId: number) : Promise<PostKey | null> {
-    const encrypted = await Routes.getKey(keySetId)
-    return await unwrapKey(encrypted)
+    return key
 }
 
 async function createPostKeyAndMakeCurrent() : Promise<PostKey> {
@@ -102,11 +87,12 @@ async function createPostKeyAndMakeCurrent() : Promise<PostKey> {
     }
 }
 
-async function getOrCreatePostKey() {
-    let currentKey = await getCurrentPostKey()
-    if (currentKey === null)
-        currentKey = await createPostKeyAndMakeCurrent()
-    return currentKey
+async function getOrCreatePostKey(): Promise<PostKey> {
+    const currentKeyEncrypted = await Routes.getCurrentKey()
+    if (currentKeyEncrypted === null)
+        return await createPostKeyAndMakeCurrent()
+    const currentKey = await unwrapKey(currentKeyEncrypted.key)
+    return { id: currentKeyEncrypted.keySetId, key: currentKey }
 }
 
 async function encryptSymmetric(buffer: ArrayBuffer, key: CryptoKey) {
@@ -149,42 +135,78 @@ export async function encryptAndUploadImage({file, aspect} : {file: File, aspect
     return success
 }
 
-export async function encryptAndPostComment(comment: { postId: number, keySetId: number, content: string }) {
-    const postKey = await getPostKey(comment.keySetId)
-    const contentBuffer = Buffer.from(comment.content, 'utf8')
-    const { encrypted, ivBuffer } = await encryptSymmetric(contentBuffer, postKey!.key)
+export async function encryptAndPostComment({post, content} : {post: Post, content: string}) {
+    const postKey = await unwrapKey(post.key)
+    const contentBuffer = Buffer.from(content, 'utf8')
+    const { encrypted, ivBuffer } = await encryptSymmetric(contentBuffer, postKey)
     await Routes.createComment({
-        postId: comment.postId,
-        keySetId: comment.keySetId,
+        postId: post.id,
+        keySetId: post.keySetId,
         content: Buffer.from(encrypted).toString('base64'),
         contentIv: ivBuffer.toString('base64')
     })
     return true
 }
 
-type EncryptedImageState = {
-    decryptedUrl?: string
+export async function decryptSymmetric(buffer: ArrayBuffer, ivBase64: string, key: CryptoKey) {
+    return await Crypto.subtle.decrypt(
+        {
+            name: 'AES-GCM',
+            iv: Buffer.from(ivBase64, 'base64'),
+        },
+        key,
+        buffer,
+    )
+}
+
+type AsyncState = {
+    results?: string
     isLoading: boolean
     error?: string
 }
 
-type EncryptedImageAction =
+type AsyncAction =
     | { type: 'request' }
     | { type: 'success', results: string }
     | { type: 'failure', error: string }
 
+function reducer(state: AsyncState, action: AsyncAction): AsyncState {
+    switch (action.type) {
+        case 'request':
+            return { isLoading: true };
+        case 'success':
+            return { isLoading: false, results: action.results };
+        case 'failure':
+            return { isLoading: false, error: action.error };
+    }
+}
+
+export function useEncryptedComment(wrappedKeyBase64: string, contentBase64: string, ivBase64: string) {
+
+    const [state, dispatch] = useReducer(reducer, { isLoading: false })
+
+    useEffect(() => {
+        let decryptedContent = ''
+        const decrypt = async() => {
+            dispatch({ type: 'request' })
+            try {
+                const postKey = await unwrapKey(wrappedKeyBase64)
+                const decrypted = await decryptSymmetric(Buffer.from(contentBase64, 'base64'), ivBase64, postKey)
+                decryptedContent = Buffer.from(decrypted).toString('utf8')
+                dispatch({ type: 'success', results: decryptedContent })
+            } catch (error) {
+                dispatch({ type: 'failure', error })
+            }
+        }
+        decrypt()
+
+    }, [wrappedKeyBase64, contentBase64, ivBase64])
+
+    return state
+}
+
 export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, encryptedUrl: string) {
 
-    function reducer(state: EncryptedImageState, action: EncryptedImageAction): EncryptedImageState {
-        switch (action.type) {
-            case 'request':
-                return { isLoading: true };
-            case 'success':
-                return { isLoading: false, decryptedUrl: action.results };
-            case 'failure':
-                return { isLoading: false, error: action.error };
-        }
-    }
     const [state, dispatch] = useReducer(reducer, { isLoading: false })
 
     useEffect(() => {
@@ -196,19 +218,8 @@ export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, en
         const decrypt = async() => {
             dispatch({ type: 'request' })
             try {
-                const accountKeys = await CurrentUser.getAccountKeys()
-                if (cancelRequest)
-                    return
-                const [cryptoKey, encryptedImage] = await Promise.all([
-                    Crypto.subtle.unwrapKey(
-                        'jwk',
-                        Buffer.from(wrappedKeyBase64, 'base64'),
-                        accountKeys.privateKey,
-                        { name: 'RSA-OAEP' },
-                        { name: 'AES-GCM' },
-                        false,
-                        ['encrypt', 'decrypt'],
-                    ),
+                const [postKey, encryptedImage] = await Promise.all([
+                    unwrapKey(wrappedKeyBase64),
                     Axios.get(
                         encryptedUrl,
                         { responseType: 'arraybuffer' }
@@ -216,14 +227,7 @@ export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, en
                 ])
                 if (cancelRequest)
                     return
-                const decrypted = await Crypto.subtle.decrypt(
-                    {
-                        name: 'AES-GCM',
-                        iv: Buffer.from(ivBase64, 'base64'),
-                    },
-                    cryptoKey,
-                    encryptedImage.data,
-                )
+                const decrypted = await decryptSymmetric(encryptedImage.data, ivBase64, postKey)
                 if (cancelRequest)
                     return
                 const blob = new Blob([decrypted], { type: 'image/jpeg' })
