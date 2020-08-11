@@ -20,8 +20,7 @@ export default function(props: Props) {
 
     return (
         <Form reply loading={commentStatus.isLoading}>
-            <Form.Input placeholder='Write a comment...' {...content.bind}/>
-            <Button content='Reply' primary onClick={onSubmit} />
+            <Form.Input action={{primary: true, content: 'Reply', disabled: content.value === '', onClick: onSubmit }} placeholder='Write a comment...' {...content.bind}/>
         </Form>
     )
 }

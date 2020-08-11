@@ -11,7 +11,6 @@ export default function(props: {comment: Types.Comment}) {
     const decryptedComment = useEncryptedComment(props.comment.key, props.comment.content, props.comment.contentIv)
     return (
         <Comment>
-            <Comment.Avatar src='https://react.semantic-ui.com/images/avatar/small/matt.jpg' />
             <Comment.Content>
                 <Comment.Author as='a' content={userQuery.isSuccess ? userQuery.data.username : 'User'} />
                 <Comment.Metadata content={moment(props.comment.published).fromNow()} />
