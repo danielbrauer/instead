@@ -37,7 +37,13 @@ export default function SignupForm(props: RouterProps) {
 
     return (
         <div>
-            <Form className='attached inverted segment' size='large' error={signupQuery.isError} loading={passwordCheckQuery.isLoading || signupQuery.isLoading || signupQuery.isSuccess} onSubmit={handleSubmit}>
+            <Form
+                className='attached inverted segment'
+                size='large'
+                error={signupQuery.isError}
+                loading={passwordCheckQuery.isLoading || signupQuery.isLoading || signupQuery.isSuccess}
+                onSubmit={handleSubmit}
+            >
                 <Header textAlign='center' content='Instead' />
                 <Form.Input
                     fluid

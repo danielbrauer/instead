@@ -39,9 +39,9 @@ export default function AppWelcome(props : AppProps) {
             <br />
             <Message warning>
                 <Message.Header>Important</Message.Header>
-                <p>You will need these, along with your password, to log in. Please print this page, take a screenshot, or write them down, and store them somewhere safe.</p>
+                <p>You will need this information to log in on the next page. Please take a screenshot, put it in your password manager, or write it down and store it somewhere safe.</p>
 
-            <Button onClick={ok}>Ok, I've made a copy</Button>
+            <Button onClick={ok}>I've made a copy</Button>
                 </Message>
 
             </Segment>
