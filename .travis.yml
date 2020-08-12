@@ -2,12 +2,6 @@ language: node_js
 node_js:
   - 12.13.1
 
-env:
-  - COVERALLS_PARALLEL=true
-
-notifications:
-  webhooks: https://coveralls.io/webhook
-
 matrix:
     include:
         - env: TARGET=client
@@ -19,4 +13,4 @@ install:
 script:
   - yarn test-coverage
 after_script:
-  - COVERALLS_FLAG_NAME=$TARGET yarn submit-coverage
+  - bash <(curl -s https://codecov.io/bash)
