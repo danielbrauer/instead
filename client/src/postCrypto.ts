@@ -30,12 +30,13 @@ async function unwrapKeyAsymmetric(wrappedKeyBase64: string) {
 }
 
 async function wrapKeyAsymmetric(key: CryptoKey, wrappingKey: CryptoKey) {
-    return await Crypto.subtle.wrapKey(
+    const arrayBuffer = await Crypto.subtle.wrapKey(
         'jwk',
         key,
         wrappingKey,
         { name: 'RSA-OAEP' }
     )
+    return Buffer.from(arrayBuffer).toString('base64')
 }
 
 async function createPostKeyAndMakeCurrent() : Promise<PostKey> {
@@ -56,7 +57,7 @@ async function createPostKeyAndMakeCurrent() : Promise<PostKey> {
         Routes.getFollowerPublicKeys()
     ])
 
-    const keySetId = await Routes.createCurrentKey(Buffer.from(authorPostKey).toString('base64'))
+    const keySetId = await Routes.createCurrentKey(authorPostKey)
 
     const followerPostKeyPromises = followerPublicKeys.map(async(publicKey): Promise<EncryptedPostKey> => {
         const followerPublicKey = await Crypto.subtle.importKey(
@@ -68,7 +69,7 @@ async function createPostKeyAndMakeCurrent() : Promise<PostKey> {
         )
         const followerVersion = await wrapKeyAsymmetric(postKey, followerPublicKey)
         const encryptedKey: EncryptedPostKey = {
-            key: Buffer.from(followerVersion).toString('base64'),
+            key: followerVersion,
             userId: publicKey.id,
             keySetId: keySetId,
         }
@@ -94,7 +95,7 @@ async function getOrCreatePostKey(): Promise<PostKey> {
     return { id: currentKeyEncrypted.keySetId, key: currentKey }
 }
 
-async function encryptSymmetric(buffer: ArrayBuffer, key: CryptoKey) {
+async function encryptSymmetric(arrayBuffer: ArrayBuffer, key: CryptoKey) {
     const iv = Crypto.getRandomValues(new Uint8Array(12))
     const ivBuffer = toBuffer(iv)
     const encrypted = await Crypto.subtle.encrypt(
@@ -103,7 +104,7 @@ async function encryptSymmetric(buffer: ArrayBuffer, key: CryptoKey) {
             iv,
         },
         key,
-        buffer
+        arrayBuffer
     )
     return { encrypted, ivBuffer }
 }
@@ -169,7 +170,7 @@ type AsyncAction =
     | { type: 'success', results: string }
     | { type: 'failure', error: string }
 
-function reducer(state: AsyncState, action: AsyncAction): AsyncState {
+function asyncReducer(state: AsyncState, action: AsyncAction): AsyncState {
     switch (action.type) {
         case 'request':
             return { isLoading: true };
@@ -182,7 +183,7 @@ function reducer(state: AsyncState, action: AsyncAction): AsyncState {
 
 export function useEncryptedComment(comment: Comment) {
 
-    const [state, dispatch] = useReducer(reducer, { isLoading: false })
+    const [state, dispatch] = useReducer(asyncReducer, { isLoading: false })
 
     useEffect(() => {
         let decryptedContent = ''
@@ -206,7 +207,7 @@ export function useEncryptedComment(comment: Comment) {
 
 export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, encryptedUrl: string) {
 
-    const [state, dispatch] = useReducer(reducer, { isLoading: false })
+    const [state, dispatch] = useReducer(asyncReducer, { isLoading: false })
 
     useEffect(() => {
         let cancelRequest = false
