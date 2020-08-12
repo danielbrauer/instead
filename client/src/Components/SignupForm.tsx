@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { useInput, useInputBool } from './useInput'
-import { Button, Form, Message, Header, Segment } from 'semantic-ui-react'
+import { Button, Form, Message, Header } from 'semantic-ui-react'
 import { RouterProps } from 'react-router'
 import CurrentUser from '../CurrentUser'
 import { signup, passwordCheck } from '../auth'
 import { useMutation } from 'react-query'
+import { Link } from 'react-router-dom'
 
 export default function SignupForm(props: RouterProps) {
     const { value: displayName, bind: bindDisplayName } = useInput('')
@@ -54,53 +55,51 @@ export default function SignupForm(props: RouterProps) {
 
     return (
         <div>
-            <Form error={signupQuery.isError} loading={passwordCheckQuery.isLoading || signupQuery.isLoading || signupQuery.isSuccess} onSubmit={handleSubmit}>
-                <Segment inverted stacked size='large'>
-                    <Header textAlign='center' content='Instead' />
-                    <Form.Input
-                        fluid
-                        icon='user'
-                        iconPosition='left'
-                        placeholder='Display Name'
-                        autoComplete='off'
-                        {...bindDisplayName}
-                    />
-                    <Form.Input
-                        fluid
-                        icon='ellipsis horizontal'
-                        iconPosition='left'
-                        placeholder='Password'
-                        type='password'
-                        autoComplete='off'
-                        {...bindPassword}
-                    />
-                    <Form.Input
-                        fluid
-                        icon='ellipsis horizontal'
-                        iconPosition='left'
-                        placeholder='Repeat password'
-                        type='password'
-                        autoComplete='off'
-                        error={getPasswordError()}
-                        {...bindRepeatPassword}
-                    />
-                    <Form.Checkbox
-                        label='I agree to the Terms and Conditions'
-                        error={(missedTerms && !agreeTerms) ? {
-                            content: 'You must agree to the terms and conditions',
-                        } : false}
-                        {...bindAgreeTerms}
-                    />
-                    <Message
-                        error
-                        header='Could not create user'
-                        content={signupQuery.error?.message}
-                    />
-                    <Button size='large' content='Sign Up' />
-                </Segment>
+            <Form className='attached inverted segment' size='large' error={signupQuery.isError} loading={passwordCheckQuery.isLoading || signupQuery.isLoading || signupQuery.isSuccess} onSubmit={handleSubmit}>
+                <Header textAlign='center' content='Instead' />
+                <Form.Input
+                    fluid
+                    icon='user'
+                    iconPosition='left'
+                    placeholder='Display Name'
+                    autoComplete='off'
+                    {...bindDisplayName}
+                />
+                <Form.Input
+                    fluid
+                    icon='ellipsis horizontal'
+                    iconPosition='left'
+                    placeholder='Password'
+                    type='password'
+                    autoComplete='off'
+                    {...bindPassword}
+                />
+                <Form.Input
+                    fluid
+                    icon='ellipsis horizontal'
+                    iconPosition='left'
+                    placeholder='Repeat password'
+                    type='password'
+                    autoComplete='off'
+                    error={getPasswordError()}
+                    {...bindRepeatPassword}
+                />
+                <Form.Checkbox
+                    label='I agree to the Terms and Conditions'
+                    error={(missedTerms && !agreeTerms) ? {
+                        content: 'You must agree to the terms and conditions',
+                    } : false}
+                    {...bindAgreeTerms}
+                />
+                <Message
+                    error
+                    header='Could not create user'
+                    content={signupQuery.error?.message}
+                />
+                <Button size='large' content='Sign Up' />
             </Form>
-            <Message>
-                Already have an account? <Button onClick={() => props.history.push('/login')}>Log In</Button>
+            <Message attached='bottom' warning>
+                Already have an account?&nbsp;<Link to='/login' onClick={(e) => {e.preventDefault();props.history.push('/login')}}>Log in</Link>&nbsp;here.
             </Message>
         </div>
     )
