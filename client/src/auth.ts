@@ -152,11 +152,8 @@ export async function signup(info : NewUserInfo) {
         Buffer.from(accountPrivateIv).toString('base64')
     )
     return {
-        id: userid,
         username,
         secretKey,
-        displayName: info.displayName,
-        accountKeys
     }
 }
 

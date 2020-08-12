@@ -59,6 +59,10 @@ class CurrentUser {
         localStorage.setItem(kSecretKeyKey, info.secretKey)
     }
 
+    static async setSecretKey(secretKey: string) {
+        localStorage.setItem(kSecretKeyKey, secretKey)
+    }
+
     static clear() {
         delete CurrentUser._info
         sessionStorage.clear()

@@ -2,6 +2,7 @@ import React from 'react'
 import { Menu, Segment, Header, Button, Message, Icon, Label } from "semantic-ui-react"
 import { History } from 'history'
 import CurrentUser from './CurrentUser'
+import WelcomeInfo from './WelcomeInfo'
 
 export interface AppProps {
     history: History,
@@ -10,7 +11,8 @@ export interface AppProps {
 export default function AppWelcome(props : AppProps) {
 
     function ok() {
-        props.history.push('/home')
+        WelcomeInfo.clear()
+        props.history.push('/login')
     }
 
     return (
@@ -23,14 +25,14 @@ export default function AppWelcome(props : AppProps) {
             <br />
             <br />
             <Segment>
-                Hi {CurrentUser.getDisplayName()}, welcome to Instead!
+                Hi {WelcomeInfo.getDisplayName()}, welcome to Instead!
                 <br/>
                 <br/>
                 Here is your login information:
             </Segment>
             <Segment>
                 <Header as='h5'>Username</Header>
-                <Label color='black' size='large'><Icon name='paw'/>{CurrentUser.getUsername()}</Label>
+                <Label color='black' size='large'><Icon name='paw'/>{WelcomeInfo.getUsername()}</Label>
                 <Header as='h5'>Secret Key</Header>
                 <Label color='black' size='large'><Icon name='key'/>{CurrentUser.getSecretKey()}</Label>
             <br />
@@ -41,7 +43,7 @@ export default function AppWelcome(props : AppProps) {
 
             <Button onClick={ok}>Ok, I've made a copy</Button>
                 </Message>
-            
+
             </Segment>
         </div>
     )

@@ -89,8 +89,8 @@ export default class AuthService {
         if (!session.signupInfo)
             throw new Error('Session hasn\'t started signing in')
         const newUserResult = await this.userService.create(newUser)
-        session.user = { username: session.signupInfo.username, id: newUserResult.id }
+        const user = { username: session.signupInfo.username, id: newUserResult.id }
         delete session.signupInfo
-        return { user: session.user }
+        return { user }
     }
 }

@@ -6,14 +6,13 @@ import CurrentUser from '../CurrentUser'
 import { signup, passwordCheck } from '../auth'
 import { useMutation } from 'react-query'
 import { Link } from 'react-router-dom'
+import WelcomeInfo from '../WelcomeInfo'
 
 export default function SignupForm(props: RouterProps) {
     const { value: displayName, bind: bindDisplayName } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
-    const { value: repeatPassword, bind: bindRepeatPassword, reset: resetRepeatPassword } = useInput('')
     const { value: agreeTerms, bind: bindAgreeTerms } = useInputBool(false)
     const [missedTerms, setMissedTerms] = useState(false)
-    const [missedRepeatPassword, setMissedRepeatPassword] = useState(false)
     const [passwordCheckMutation, passwordCheckQuery] = useMutation(passwordCheck)
     const [signupMutation, signupQuery] = useMutation(signup)
 
@@ -23,34 +22,17 @@ export default function SignupForm(props: RouterProps) {
         signupQuery.reset()
         const userMissedTerms = !agreeTerms
         setMissedTerms(userMissedTerms)
-        const userMissedRepeatPassword = password !== repeatPassword
-        if (userMissedRepeatPassword) {
-            resetPassword()
-            resetRepeatPassword()
-        }
-        setMissedRepeatPassword(userMissedRepeatPassword)
-        if (userMissedTerms || userMissedRepeatPassword)
+        if (userMissedTerms)
             return
         try {
             await passwordCheckMutation(password)
             const userInfo = await signupMutation({ displayName, password })
-            CurrentUser.set(userInfo)
+            CurrentUser.setSecretKey(userInfo.secretKey)
+            WelcomeInfo.set({ displayName, username: userInfo.username })
             props.history.push('/welcome')
         } catch (error) {
             resetPassword()
-            resetRepeatPassword()
         }
-    }
-
-    function getPasswordError(): string | boolean {
-        let content = ""
-        if (passwordCheckQuery.isError) {
-            content = passwordCheckQuery.error.message
-        }
-        if (missedRepeatPassword) {
-            content = 'Your password must match'
-        }
-        return content || false
     }
 
     return (
@@ -72,17 +54,8 @@ export default function SignupForm(props: RouterProps) {
                     placeholder='Password'
                     type='password'
                     autoComplete='off'
+                    error={passwordCheckQuery.isError ? passwordCheckQuery.error.message : false}
                     {...bindPassword}
-                />
-                <Form.Input
-                    fluid
-                    icon='ellipsis horizontal'
-                    iconPosition='left'
-                    placeholder='Repeat password'
-                    type='password'
-                    autoComplete='off'
-                    error={getPasswordError()}
-                    {...bindRepeatPassword}
                 />
                 <Form.Checkbox
                     label='I agree to the Terms and Conditions'
