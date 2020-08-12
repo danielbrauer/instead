@@ -7,7 +7,6 @@
     "build": "react-scripts build && yarn run compress",
     "test": "react-scripts test",
     "test-coverage": "react-scripts test --coverage --watchAll=false",
-    "submit-coverage": "cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
     "eject": "react-scripts eject",
     "compress": "node compress.js"
   },
@@ -68,7 +67,6 @@
     "unorm": "^1.6.0"
   },
   "devDependencies": {
-    "coveralls": "^3.1.0",
     "react-test-renderer": "^16.13.1"
   }
 }

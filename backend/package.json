@@ -7,7 +7,6 @@
     "build": "tsc --project tsconfig.production.json",
     "test": "jest",
     "test-coverage": "jest --coverage",
-    "submit-coverage": "cat ./src/coverage/lcov.info | coveralls || rm -rf ./src/coverage",
     "lint": "eslint \"**/*.{js,ts}\" --quiet --fix",
     "watch": "yarn lint && tsc-watch --onSuccess \"node --require dotenv/config --inspect dist/src/server.js\" --onFailure \"echo Compilation Failed\"",
     "watch-debug": "concurrently --kill-others \"yarn watch\" \"pgtyped -w -c pgtconfig.json\"",
@@ -65,7 +64,6 @@
   "devDependencies": {
     "@types/jest": "^26.0.5",
     "concurrently": "^4.1.2",
-    "coveralls": "^3.1.0",
     "dotenv": "^8.1.0",
     "eslint": "^6.0.0",
     "jest": "^26.1.0",
@@ -76,8 +74,12 @@
     "rootDir": "src",
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "collectCoverageFrom" : ["**/*.ts"],
-    "coverageReporters": ["lcov"],
+    "collectCoverageFrom": [
+      "**/*.ts"
+    ],
+    "coverageReporters": [
+      "lcov"
+    ],
     "coveragePathIgnorePatterns": [
       "/queries/"
     ]
