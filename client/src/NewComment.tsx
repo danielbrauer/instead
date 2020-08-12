@@ -1,26 +1,31 @@
 import React from 'react'
 import { Post } from '../../backend/src/types/api'
-import { Form, Button } from 'semantic-ui-react'
+import { Form } from 'semantic-ui-react'
 import { useMutation } from 'react-query'
 import { encryptAndPostComment } from './postCrypto'
 import { useInput } from './Components/useInput'
 
-export interface Props {
-    post: Post
-}
-
-export default function(props: Props) {
-    const content = useInput('')
+export default function({ post } : { post: Post }) {
+    const contentInput = useInput('')
     const [commentMutation, commentStatus] = useMutation(encryptAndPostComment)
 
     async function onSubmit() {
-        await commentMutation({post: props.post, content: content.value})
-        content.reset()
+        await commentMutation({ post, content: contentInput.value })
+        contentInput.reset()
     }
 
     return (
         <Form reply loading={commentStatus.isLoading}>
-            <Form.Input action={{primary: true, content: 'Reply', disabled: content.value === '', onClick: onSubmit }} placeholder='Write a comment...' {...content.bind}/>
+            <Form.Input
+                action={{
+                    primary: true,
+                    content: 'Reply',
+                    disabled: contentInput.value === '',
+                    onClick: onSubmit
+                }}
+                placeholder='Write a comment...'
+                {...contentInput.bind}
+            />
         </Form>
     )
 }
