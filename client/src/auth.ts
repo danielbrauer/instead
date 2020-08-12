@@ -21,7 +21,7 @@ async function derivePrivateKey(salt : string, password : string, secretKey : st
     }
     const keyParts = secretKey.split('-')
     const version = keyParts.shift()!
-    const key = keyParts.join()
+    const key = keyParts.shift()!
 
     const passwordBuffer = Buffer.from(password.trim().normalize('NFKC'))
 

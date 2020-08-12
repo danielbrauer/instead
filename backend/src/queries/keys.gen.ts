@@ -36,6 +36,36 @@ const getCurrentKeyIR: any = {"name":"GetCurrentKey","params":[{"name":"userId",
 export const getCurrentKey = new PreparedQuery<IGetCurrentKeyParams,IGetCurrentKeyResult>(getCurrentKeyIR);
 
 
+/** 'GetKey' parameters type */
+export interface IGetKeyParams {
+  userId: number | null | void;
+  keySetId: number | null | void;
+}
+
+/** 'GetKey' return type */
+export interface IGetKeyResult {
+  key: string;
+  userId: number;
+  keySetId: number;
+}
+
+/** 'GetKey' query type */
+export interface IGetKeyQuery {
+  params: IGetKeyParams;
+  result: IGetKeyResult;
+}
+
+const getKeyIR: any = {"name":"GetKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":231,"b":236,"line":9,"col":36}]}},{"name":"keySetId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":256,"b":263,"line":9,"col":61}]}}],"usedParamSet":{"userId":true,"keySetId":true},"statement":{"body":"SELECT * FROM keys WHERE user_id = :userId AND key_set_id = :keySetId","loc":{"a":195,"b":263,"line":9,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT * FROM keys WHERE user_id = :userId AND key_set_id = :keySetId
+ * ```
+ */
+export const getKey = new PreparedQuery<IGetKeyParams,IGetKeyResult>(getKeyIR);
+
+
 /** 'GetFollowerPublicKeys' parameters type */
 export interface IGetFollowerPublicKeysParams {
   userId: number | null | void;
@@ -53,7 +83,7 @@ export interface IGetFollowerPublicKeysQuery {
   result: IGetFollowerPublicKeysResult;
 }
 
-const getFollowerPublicKeysIR: any = {"name":"GetFollowerPublicKeys","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":324,"b":329,"line":12,"col":25}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, public_key FROM users WHERE id IN (\n    SELECT follower_id\n    FROM followers\n    WHERE followee_id = :userId\n)","loc":{"a":210,"b":331,"line":9,"col":0}}};
+const getFollowerPublicKeysIR: any = {"name":"GetFollowerPublicKeys","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":415,"b":420,"line":15,"col":25}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, public_key FROM users WHERE id IN (\n    SELECT follower_id\n    FROM followers\n    WHERE followee_id = :userId\n)","loc":{"a":301,"b":422,"line":12,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -82,7 +112,7 @@ export interface IEndKeySetValidityQuery {
   result: IEndKeySetValidityResult;
 }
 
-const endKeySetValidityIR: any = {"name":"EndKeySetValidity","params":[{"name":"keySetId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":415,"b":422,"line":16,"col":50}]}}],"usedParamSet":{"keySetId":true},"statement":{"body":"UPDATE key_sets SET valid_end = now() WHERE id = :keySetId","loc":{"a":365,"b":422,"line":16,"col":0}}};
+const endKeySetValidityIR: any = {"name":"EndKeySetValidity","params":[{"name":"keySetId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":506,"b":513,"line":19,"col":50}]}}],"usedParamSet":{"keySetId":true},"statement":{"body":"UPDATE key_sets SET valid_end = now() WHERE id = :keySetId","loc":{"a":456,"b":513,"line":19,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -109,7 +139,7 @@ export interface ICreateKeySetQuery {
   result: ICreateKeySetResult;
 }
 
-const createKeySetIR: any = {"name":"CreateKeySet","params":[{"name":"ownerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":492,"b":498,"line":19,"col":41}]}}],"usedParamSet":{"ownerId":true},"statement":{"body":"INSERT INTO key_sets (owner_id) VALUES (:ownerId) RETURNING id","loc":{"a":451,"b":512,"line":19,"col":0}}};
+const createKeySetIR: any = {"name":"CreateKeySet","params":[{"name":"ownerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":583,"b":589,"line":22,"col":41}]}}],"usedParamSet":{"ownerId":true},"statement":{"body":"INSERT INTO key_sets (owner_id) VALUES (:ownerId) RETURNING id","loc":{"a":542,"b":603,"line":22,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -138,7 +168,7 @@ export interface IAddKeysQuery {
   result: IAddKeysResult;
 }
 
-const addKeysIR: any = {"name":"AddKeys","params":[{"name":"keys","codeRefs":{"defined":{"a":548,"b":551,"line":23,"col":11},"used":[{"a":640,"b":643,"line":26,"col":8}]},"transform":{"type":"pick_array_spread","keys":["userId","keySetId","key"]}}],"usedParamSet":{"keys":true},"statement":{"body":"INSERT INTO keys (user_id, key_set_id, key)\nVALUES :keys","loc":{"a":588,"b":643,"line":25,"col":0}}};
+const addKeysIR: any = {"name":"AddKeys","params":[{"name":"keys","codeRefs":{"defined":{"a":639,"b":642,"line":26,"col":11},"used":[{"a":731,"b":734,"line":29,"col":8}]},"transform":{"type":"pick_array_spread","keys":["userId","keySetId","key"]}}],"usedParamSet":{"keys":true},"statement":{"body":"INSERT INTO keys (user_id, key_set_id, key)\nVALUES :keys","loc":{"a":679,"b":734,"line":28,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -165,7 +195,7 @@ export interface IRemoveFollowerKeysQuery {
   result: IRemoveFollowerKeysResult;
 }
 
-const removeFollowerKeysIR: any = {"name":"RemoveFollowerKeys","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":712,"b":721,"line":29,"col":34}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":805,"b":814,"line":32,"col":22}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"DELETE FROM keys WHERE user_id = :followerId AND key_set_id IN (\n    SELECT key_set_id\n    FROM key_sets\n    WHERE owner_id = :followeeId\n)","loc":{"a":678,"b":816,"line":29,"col":0}}};
+const removeFollowerKeysIR: any = {"name":"RemoveFollowerKeys","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":803,"b":812,"line":32,"col":34}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":896,"b":905,"line":35,"col":22}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"DELETE FROM keys WHERE user_id = :followerId AND key_set_id IN (\n    SELECT key_set_id\n    FROM key_sets\n    WHERE owner_id = :followeeId\n)","loc":{"a":769,"b":907,"line":32,"col":0}}};
 
 /**
  * Query generated from SQL:

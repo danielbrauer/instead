@@ -29,6 +29,11 @@ export default class KeyService {
         return key || null
     }
 
+    async getKey(userId: number, keySetId: number) {
+        const [key] = await Keys.getKey.run({ userId, keySetId }, this.db.pool)
+        return key || null
+    }
+
     async getFollowerPublicKeys(userId: number) {
         const publicKeys = await Keys.getFollowerPublicKeys.run({ userId }, this.db.pool)
         return publicKeys

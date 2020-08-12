@@ -1,7 +1,7 @@
 
 import config from './config'
 import Axios from 'axios'
-import { User, Post, DeletePostResult, StartPostResult, FinishPostResult, EncryptedPostKey, PublicKey } from '../../backend/src/types/api'
+import { User, Post, Comment, DeletePostResult, StartPostResult, FinishPostResult, EncryptedPostKey, PublicKey } from '../../backend/src/types/api'
 import { queryCache } from 'react-query'
 
 const baseURL = `${config.serverUrl}/api`
@@ -33,6 +33,32 @@ export async function getPosts() {
     return response.data
 }
 
+export async function getPost(query: string, id: number) {
+    const response = await authorizedAxios.get<Post>('getPost', {
+        params: {
+            id
+        }
+    })
+    return response.data
+}
+
+export async function getComments(query: string, id: number) {
+    const response = await authorizedAxios.get<Comment[]>('getComments', {
+        params: {
+            id
+        }
+    })
+    return response.data
+}
+
+export async function createComment(comment: { postId: number, keySetId: number, content: string, contentIv: string }) {
+    const response = await authorizedAxios.post('/createComment', {
+        ...comment
+    })
+    queryCache.invalidateQueries(['comments', comment.postId])
+    return response.data
+}
+
 export async function deletePost(idTodelete: number) {
     const response = await authorizedAxios.delete<DeletePostResult>('/deletePost', {
         params: {
@@ -54,6 +80,17 @@ export async function createCurrentKey(keyBase64: string) {
     const response = await authorizedAxios.post<number>('/createCurrentKey', {
         key: keyBase64,
     })
+    return response.data
+}
+
+export async function getKey(keySetId: number) {
+    const response = await authorizedAxios.get<EncryptedPostKey | "">('/getKey', {
+        params: {
+            keySetId
+        }
+    })
+    if (response.data === "")
+        return null
     return response.data
 }
 

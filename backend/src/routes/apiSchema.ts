@@ -4,13 +4,25 @@ import 'joi-extract-type'
 
 export const empty = Joi.object()
 
-export const deletePostQuery = Joi.object({
+export const postByIdQuery = Joi.object({
     id: Joi.number().integer().required(),
 })
 
-export interface DeletePostRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof deletePostQuery>;
+export interface PostByIdRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof postByIdQuery>;
     [ContainerTypes.Body]: Joi.extractType<typeof empty>;
+}
+
+export const createCommentBody = Joi.object({
+    postId: Joi.number().integer().required(),
+    keySetId: Joi.number().integer().required(),
+    content: Joi.string().base64().required(),
+    contentIv: Joi.string().base64().required(),
+})
+
+export interface CreateCommentRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>;
+    [ContainerTypes.Body]: Joi.extractType<typeof createCommentBody>;
 }
 
 export const createCurrentKeyBody = Joi.object({
@@ -20,6 +32,15 @@ export const createCurrentKeyBody = Joi.object({
 export interface CreateCurrentKeyRequest extends ValidatedRequestSchema {
     [ContainerTypes.Query]: Joi.extractType<typeof empty>;
     [ContainerTypes.Body]: Joi.extractType<typeof createCurrentKeyBody>;
+}
+
+export const getKeyQuery = Joi.object({
+    keySetId: Joi.number().integer().required()
+})
+
+export interface GetKeyRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof getKeyQuery>;
+    [ContainerTypes.Body]: Joi.extractType<typeof empty>;
 }
 
 export const addKeysBody = Joi.object({

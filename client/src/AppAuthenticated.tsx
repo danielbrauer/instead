@@ -8,6 +8,7 @@ import { Route, Switch, Redirect, RouteComponentProps } from 'react-router-dom'
 import { Menu, Dropdown } from 'semantic-ui-react'
 import { queryCache } from 'react-query'
 import { logout } from './RoutesAuthenticated'
+import SinglePost from './SinglePost'
 
 export default function(props: RouteComponentProps<any>) {
 
@@ -56,6 +57,7 @@ export default function(props: RouteComponentProps<any>) {
                 <Route path='/requests' render={props => <FollowerPage {...props} />} />
                 <Route path='/home'><Posts /></Route>
                 <Route path='/new' render={props => <NewPost {...props} />} />
+                <Route path='/post/:id' render={props => <SinglePost {...props} />} />
             </Switch>
         </div>
     )

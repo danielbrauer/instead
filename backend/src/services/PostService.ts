@@ -2,6 +2,7 @@ import Container, { Service, Inject } from 'typedi'
 import Database from './DatabaseService'
 import AWSService from './AWSService'
 import * as Posts from '../queries/posts.gen'
+import * as Comments from '../queries/comments.gen'
 import uuidv1 from 'uuid/v1'
 import { SimpleEventDispatcher } from 'strongly-typed-events'
 import * as config from '../config/config'
@@ -34,6 +35,11 @@ export default class PostService {
         return await Posts.getHomePostsWithKeys.run({ authorId }, this.db.pool)
     }
 
+    async getPost(postId: number, requesterId: number) {
+        const [post] = await Posts.getPostWithKey.run({ postId, requesterId }, this.db.pool)
+        return post
+    }
+
     async deletePost(postId: number, authorId: number): Promise<DeletePostResult> {
         const [deleted] = await Posts.destroyAndReturn.run({ postId, authorId }, this.db.pool)
         if (!deleted) {
@@ -62,6 +68,18 @@ export default class PostService {
 
     async removePostIfNotPublished(postId: number) {
         await Posts.destroyIfUnpublished.run({ postId }, this.db.pool)
+    }
+
+    async addCommentToPost(comment: Comments.ICreateParams) {
+        await Comments.create.run(comment, this.db.pool)
+    }
+
+    async removeComment(commentId: number, authorId: number) {
+        await Comments.destroy.run({ commentId, authorId }, this.db.pool)
+    }
+
+    async getCommentsForPost(postId: number, userId: number) {
+        return await Comments.getCommentsForPost.run({ postId, userId }, this.db.pool)
     }
 
     onPostCreated(postId: number) {
