@@ -23,16 +23,10 @@ export default function(props: Props) {
         </div>
     )
     return (
-        <div>
-            {commentsQuery.data!.length === 0 ?
-            null
-            :
-            <Comment.Group>
-                {commentsQuery.data!.map(comment => (
-                    <SingleComment key={comment.id} comment={comment}/>
-                ))}
-            </Comment.Group>
-            }
-        </div>
+        <Comment.Group>
+            {commentsQuery.data!.map(comment => (
+                <SingleComment key={comment.id} comment={comment}/>
+            ))}
+        </Comment.Group>
     )
 }
