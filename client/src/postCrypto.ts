@@ -4,7 +4,7 @@ import Axios from 'axios'
 import CurrentUser from './CurrentUser'
 import md5 from 'js-md5'
 import { useReducer, useEffect } from 'react'
-import { EncryptedPostKey, Post } from '../../backend/src/types/api'
+import { EncryptedPostKey, Post, Comment } from '../../backend/src/types/api'
 const toBuffer = require('typedarray-to-buffer') as (typedArray: Uint8Array) => Buffer
 require('buffer')
 const Crypto = window.crypto
@@ -180,7 +180,7 @@ function reducer(state: AsyncState, action: AsyncAction): AsyncState {
     }
 }
 
-export function useEncryptedComment(wrappedKeyBase64: string, contentBase64: string, ivBase64: string) {
+export function useEncryptedComment(comment: Comment) {
 
     const [state, dispatch] = useReducer(reducer, { isLoading: false })
 
@@ -189,8 +189,8 @@ export function useEncryptedComment(wrappedKeyBase64: string, contentBase64: str
         const decrypt = async() => {
             dispatch({ type: 'request' })
             try {
-                const postKey = await unwrapKeyAsymmetric(wrappedKeyBase64)
-                const decrypted = await decryptSymmetric(Buffer.from(contentBase64, 'base64'), ivBase64, postKey)
+                const postKey = await unwrapKeyAsymmetric(comment.key)
+                const decrypted = await decryptSymmetric(Buffer.from(comment.content, 'base64'), comment.contentIv, postKey)
                 decryptedContent = Buffer.from(decrypted).toString('utf8')
                 dispatch({ type: 'success', results: decryptedContent })
             } catch (error) {
@@ -199,7 +199,7 @@ export function useEncryptedComment(wrappedKeyBase64: string, contentBase64: str
         }
         decrypt()
 
-    }, [wrappedKeyBase64, contentBase64, ivBase64])
+    }, [comment])
 
     return state
 }

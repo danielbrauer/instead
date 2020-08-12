@@ -6,14 +6,14 @@ import { useQuery } from 'react-query'
 import { getUser } from './RoutesAuthenticated'
 import { useEncryptedComment } from './postCrypto'
 
-export default function(props: {comment: Types.Comment}) {
-    const userQuery = useQuery(['users', props.comment.authorId], getUser)
-    const decryptedComment = useEncryptedComment(props.comment.key, props.comment.content, props.comment.contentIv)
+export default function({ comment } : { comment: Types.Comment}) {
+    const userQuery = useQuery(['users', comment.authorId], getUser)
+    const decryptedComment = useEncryptedComment(comment)
     return (
         <Comment>
             <Comment.Content>
                 <Comment.Author as='a' content={userQuery.isSuccess ? userQuery.data.username : 'User'} />
-                <Comment.Metadata content={moment(props.comment.published).fromNow()} />
+                <Comment.Metadata content={moment(comment.published).fromNow()} />
                 {decryptedComment.isLoading
                 ?
                     <Placeholder><Placeholder.Line /></Placeholder>
