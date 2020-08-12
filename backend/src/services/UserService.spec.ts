@@ -11,7 +11,6 @@ jest.mock('../queries/users.gen')
 jest.mock('../queries/followers.gen')
 jest.mock('../queries/follow_requests.gen')
 jest.mock('./DatabaseService')
-jest.mock('pg')
 
 describe('UserService', () => {
 

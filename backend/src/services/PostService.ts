@@ -1,4 +1,4 @@
-import Container, { Service, Inject } from 'typedi'
+import Container, { Service } from 'typedi'
 import Database from './DatabaseService'
 import AWSService from './AWSService'
 import * as Posts from '../queries/posts.gen'
@@ -11,19 +11,13 @@ import { DeletePostResult, StartPostResult } from 'api'
 @Service()
 export default class PostService {
 
-    @Inject()
-    private db: Database
-
-    @Inject()
-    private aws: AWSService
-
     private _onCreate = new SimpleEventDispatcher<number>()
     private _onDelete = new SimpleEventDispatcher<number>()
 
     public get onCreate() { return this._onCreate.asEvent() }
     public get onDelete() { return this._onDelete.asEvent() }
 
-    constructor() {
+    constructor(private db: Database, private aws: AWSService) {
         this.onCreate.subscribe(this.onPostCreated)
     }
 
