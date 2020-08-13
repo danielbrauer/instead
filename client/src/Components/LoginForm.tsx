@@ -1,13 +1,14 @@
 import React from 'react'
 import { useInput } from './useInput'
 import { Button, Form, Message, Header } from 'semantic-ui-react'
-import { RouterProps } from 'react-router'
 import CurrentUser from '../CurrentUser'
 import { login, cancel } from '../auth'
 import { useMutation } from 'react-query'
-import { Link } from 'react-router-dom'
+import InternalLink from './InternalLink'
+import { useHistory } from 'react-router-dom'
 
-export default function LoginForm(props: RouterProps) {
+export default function LoginForm() {
+    const history = useHistory()
     const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: secretKey, bind: bindSecretKey } = useInput(CurrentUser.getSecretKey() || '')
@@ -20,7 +21,7 @@ export default function LoginForm(props: RouterProps) {
         try {
             const userInfo = await loginMutation({ username, password, secretKey })
             CurrentUser.set(userInfo)
-            props.history.push('/home')
+            history.push('/home')
         } catch (error) {
             resetPassword()
             await cancelMutation()
@@ -64,7 +65,7 @@ export default function LoginForm(props: RouterProps) {
                 <Button size='large' content='Log in'/>
             </Form>
             <Message attached='bottom' warning>
-                New to Instead?&nbsp;<Link to='/signup' onClick={(e) => {e.preventDefault();props.history.push('/signup')}}>Sign up</Link>&nbsp;here.
+                New to Instead?&nbsp;<InternalLink to='/signup' >Sign up</InternalLink>&nbsp;here.
             </Message>
         </div>
     )

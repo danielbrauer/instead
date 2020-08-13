@@ -4,11 +4,13 @@ import { List, Message, Loader } from 'semantic-ui-react'
 import EncryptedImage from './EncryptedImage'
 import { getUserPosts } from './RoutesAuthenticated'
 import PostHeader from './PostHeader'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import InternalLink from './Components/InternalLink'
 
 export default function () {
     const { id: userId } = useParams()
     const posts = useQuery(['posts', userId], getUserPosts)
+
     if (posts.isError) return (
         <div>
             <Message negative>
@@ -27,9 +29,9 @@ export default function () {
                 {posts.data!.map(post => (
                     <List.Item key={post.id}>
                         <PostHeader post={post} />
-                        <Link to={`/post/${post.id.toString()}`}>
+                        <InternalLink to={`/post/${post.id.toString()}`}>
                             <EncryptedImage post={post} />
-                        </Link>
+                        </InternalLink>
                     </List.Item>
                 ))}
             </List>

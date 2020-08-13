@@ -5,7 +5,7 @@ import moment from 'moment'
 import { useQuery } from 'react-query'
 import { getUser } from './RoutesAuthenticated'
 import { useEncryptedComment } from './postCrypto'
-import { Link } from 'react-router-dom'
+import InternalLink from './Components/InternalLink'
 
 export default function({ comment } : { comment: Types.Comment}) {
     const userQuery = useQuery(['users', comment.authorId], getUser)
@@ -13,7 +13,9 @@ export default function({ comment } : { comment: Types.Comment}) {
     return (
         <Comment>
             <Comment.Content>
-                <Comment.Author as='a' href={`/user/${comment.authorId.toString()}`} content={userQuery.isSuccess ? userQuery.data.username : 'User'} />
+                <InternalLink to={`/user/${comment.authorId.toString()}`}>
+                    <Comment.Author content={userQuery.isSuccess ? userQuery.data.username : 'User'} />
+                </InternalLink>
                 <Comment.Metadata content={moment(comment.published).fromNow()} />
                 {decryptedComment.isLoading
                 ?

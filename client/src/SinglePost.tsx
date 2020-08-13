@@ -1,5 +1,5 @@
 import React from 'react'
-import { RouteComponentProps, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import PostHeader from './PostHeader'
 import EncryptedImage from './EncryptedImage'
 import { useQuery } from 'react-query'
@@ -8,7 +8,7 @@ import { getPost } from './RoutesAuthenticated'
 import Comments from './Comments'
 import NewComment from './NewComment'
 
-export default function(props: RouteComponentProps<any>) {
+export default function() {
     const { id: postId } = useParams()
     const postQuery = useQuery(['post', postId], getPost)
 

@@ -3,7 +3,7 @@ import CurrentUser from './CurrentUser'
 import FollowerPage from './FollowerPage'
 import Posts from './Posts'
 import NewPost from './NewPost'
-import { Route, Switch, Redirect, RouteComponentProps } from 'react-router-dom'
+import { Route, Switch, Redirect, useHistory } from 'react-router-dom'
 
 import { Menu, Dropdown } from 'semantic-ui-react'
 import { queryCache } from 'react-query'
@@ -11,7 +11,8 @@ import { logout } from './RoutesAuthenticated'
 import SinglePost from './SinglePost'
 import UserPosts from './UserPosts'
 
-export default function(props: RouteComponentProps<any>) {
+export default function() {
+    const history = useHistory()
 
     const logOutAndClear = async () => {
         try {
@@ -19,7 +20,7 @@ export default function(props: RouteComponentProps<any>) {
         } finally {
             queryCache.clear()
             CurrentUser.clear()
-            props.history.push('/login')
+            history.push('/login')
         }
     }
 
@@ -41,9 +42,9 @@ export default function(props: RouteComponentProps<any>) {
                 <Menu.Item fitted position='right'>
                     <Dropdown item direction='left' text={CurrentUser.getUsername()}>
                         <Dropdown.Menu>
-                            <Dropdown.Item icon='list' text='Home' onClick={() => props.history.push('/home')}/>
-                            <Dropdown.Item icon='image' text='New Post' onClick={() => props.history.push('/new')}/>
-                            <Dropdown.Item icon='user' text='Followers' onClick={() => props.history.push('/followers')}/>
+                            <Dropdown.Item icon='list' text='Home' onClick={() => history.push('/home')}/>
+                            <Dropdown.Item icon='image' text='New Post' onClick={() => history.push('/new')}/>
+                            <Dropdown.Item icon='user' text='Followers' onClick={() => history.push('/followers')}/>
                             <Dropdown.Divider />
                             <Dropdown.Item icon='sign-out' text='Log Out' onClick={logOutAndClear}/>
                         </Dropdown.Menu>
@@ -53,12 +54,12 @@ export default function(props: RouteComponentProps<any>) {
             <br />
             <br />
             <Switch>
-                <Route path='/followers' render={props => <FollowerPage {...props}/>} />
-                <Route path='/following' render={props => <FollowerPage {...props} />} />
-                <Route path='/requests' render={props => <FollowerPage {...props} />} />
+                <Route path='/followers'><FollowerPage /></Route>
+                <Route path='/following'><FollowerPage /></Route>
+                <Route path='/requests'><FollowerPage /></Route>
                 <Route path='/home'><Posts /></Route>
-                <Route path='/new' render={props => <NewPost {...props} />} />
-                <Route path='/post/:id' render={props => <SinglePost {...props} />} />
+                <Route path='/new'><NewPost /></Route>
+                <Route path='/post/:id'><SinglePost /></Route>
                 <Route path='/user/:id'><UserPosts /></Route>
             </Switch>
         </div>

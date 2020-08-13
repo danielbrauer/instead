@@ -5,13 +5,13 @@ import { useMutation, useQuery } from "react-query"
 import { getUser, deletePost } from './RoutesAuthenticated'
 import { List } from "semantic-ui-react";
 import SafetyButton from "./SafetyButton";
+import UserInList from './UserInList';
 
 export interface Props {
     post: Post
 }
 
 export default function PostHeader({ post } : Props) {
-    const username = useQuery(['user', post.authorId], getUser)
     const [deletePostMutation] = useMutation(deletePost)
     return (
         <div>
@@ -21,8 +21,7 @@ export default function PostHeader({ post } : Props) {
                 </List.Content>
                 :
                 null}
-            <List.Icon name='user' />
-            <List.Content>{username.data ? username.data!.username : 'loading'}</List.Content>
+            <UserInList id={post.authorId} />
         </div>
     )
 }
