@@ -15,13 +15,23 @@ SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, pos
        keys.key
 FROM posts, keys
 WHERE posts.key_set_id = keys.key_set_id
-AND keys.user_id = :authorId
+AND keys.user_id = :userId
 AND posts.published IS NOT NULL
-AND (posts.author_id = :authorId OR posts.author_id IN (
+AND (posts.author_id = :userId OR posts.author_id IN (
     SELECT followee_id
     FROM followers
-    WHERE followers.follower_id = :authorId
+    WHERE followers.follower_id = :userId
 )) ORDER BY published DESC;
+
+/* @name GetUserPostsWithKeys */
+SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
+       keys.key
+FROM posts, keys
+WHERE posts.key_set_id = keys.key_set_id
+AND keys.user_id = :requesterId
+AND posts.published IS NOT NULL
+AND posts.author_id = :userId
+ORDER BY published DESC;
 
 /* @name GetPostWithKey */
 SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,

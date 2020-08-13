@@ -47,5 +47,11 @@ describe('PostService', () => {
             const post = await postService.getPost(0, 0)
             expect(post).toEqual(testPost)
         })
+
+        test('returns null if there is none', async() => {
+            mocked(Posts.getPostWithKey.run).mockResolvedValueOnce([])
+            const post = await postService.getPost(0, 0)
+            expect(post).toBeNull()
+        })
     })
 })

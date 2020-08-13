@@ -59,7 +59,7 @@ export default class AuthService {
         const { privateKey, privateKeyIv, publicKey, mukSalt } = await this.userService.getUserInfo(session.user.id)
         delete session.loginInfo
         return {
-            userid: session.user.id,
+            userId: session.user.id,
             serverSessionProof: serverSession.proof,
             displayName: loginInfo.user.displayName,
             privateKey,

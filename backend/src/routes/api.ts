@@ -35,11 +35,20 @@ router.get('/getContentUrl',
     }
 )
 
-router.get('/getPosts',
+router.get('/getHomePosts',
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const posts = await postService.getPostsByAuthor(req.user.id)
+        const posts = await postService.getHomePosts(req.user.id)
+        return res.json(posts)
+    }
+)
+
+router.get('/getUserPosts',
+    validator.query(Schema.getByUserIdQuery),
+    validator.body(Schema.empty),
+    async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
+        const posts = await postService.getUserPosts(req.query.userId, req.user.id)
         return res.json(posts)
     }
 )
@@ -144,10 +153,10 @@ router.put('/finishPost',
 )
 
 router.get('/getUserById',
-    validator.query(Schema.getUserByIdQuery),
+    validator.query(Schema.getByUserIdQuery),
     validator.body(Schema.empty),
-    async (req: ValidatedRequest<Schema.GetUserByIdRequest>, res) => {
-        const user = await userService.getUserById(req.query.userid)
+    async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
+        const user = await userService.getUserById(req.query.userId)
         return res.json(user)
     }
 )
@@ -165,7 +174,7 @@ router.put('/rejectFollowRequest',
     validator.query(Schema.empty),
     validator.body(Schema.putByUserIdBody),
     async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
-        await userService.removeFollowRequest(req.body.userid, req.user.id)
+        await userService.removeFollowRequest(req.body.userId, req.user.id)
         return res.json({ success: true })
     }
 )
@@ -174,7 +183,7 @@ router.put('/unfollow',
     validator.query(Schema.empty),
     validator.body(Schema.putByUserIdBody),
     async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
-        await userService.removeFollower(req.user.id, req.body.userid)
+        await userService.removeFollower(req.user.id, req.body.userId)
         return res.json({ success: true })
     }
 )
@@ -183,7 +192,7 @@ router.put('/removeFollower',
     validator.query(Schema.empty),
     validator.body(Schema.putByUserIdBody),
     async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
-        await userService.removeFollower(req.body.userid, req.user.id)
+        await userService.removeFollower(req.body.userId, req.user.id)
         return res.json({ success: true })
     }
 )
@@ -192,7 +201,7 @@ router.put('/acceptFollowRequest',
     validator.query(Schema.empty),
     validator.body(Schema.putByUserIdBody),
     async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
-        await userService.acceptFollowRequest(req.body.userid, req.user.id)
+        await userService.acceptFollowRequest(req.body.userId, req.user.id)
         return res.json({ success: true })
     }
 )

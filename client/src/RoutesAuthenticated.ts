@@ -28,8 +28,17 @@ export async function getContentUrl() {
     return response.data
 }
 
-export async function getPosts() {
-    const response = await authorizedAxios.get<Post[]>('/getPosts')
+export async function getHomePosts() {
+    const response = await authorizedAxios.get<Post[]>('/getHomePosts')
+    return response.data
+}
+
+export async function getUserPosts(query: string, userId: number) {
+    const response = await authorizedAxios.get<Post[]>('/getUserPosts', {
+        params: {
+            userId
+        }
+    })
     return response.data
 }
 
@@ -117,9 +126,9 @@ export async function finishPost(postId: number, success: boolean) {
     })
 }
 
-export async function getUser(key: string, userid: number) {
+export async function getUser(key: string, userId: number) {
     const response = await authorizedAxios.get<User>('/getUserById', {
-        params: {userid: userid}
+        params: { userId }
     })
     return response.data
 }
@@ -130,30 +139,30 @@ export async function sendFollowRequest(username: string) {
     })
 }
 
-export async function rejectFollowRequest(userid: number) {
+export async function rejectFollowRequest(userId: number) {
     await authorizedAxios.put('/rejectFollowRequest', {
-        userid: userid
+        userId
     })
     queryCache.invalidateQueries('followRequests')
 }
 
-export async function unfollow(userid: number) {
+export async function unfollow(userId: number) {
     await authorizedAxios.put('/unfollow', {
-        userid: userid
+        userId
     })
     queryCache.invalidateQueries('followees')
 }
 
-export async function removeFollower(userid: number) {
+export async function removeFollower(userId: number) {
     await authorizedAxios.put('/removeFollower', {
-        userid: userid
+        userId
     })
     queryCache.invalidateQueries('followers')
 }
 
-export async function acceptFollowRequest(userid: number) {
+export async function acceptFollowRequest(userId: number) {
     await authorizedAxios.put('/acceptFollowRequest', {
-        userid: userid
+        userId
     })
     queryCache.invalidateQueries('followers')
     queryCache.invalidateQueries('followRequests')

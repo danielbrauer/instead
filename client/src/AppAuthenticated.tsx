@@ -9,6 +9,7 @@ import { Menu, Dropdown } from 'semantic-ui-react'
 import { queryCache } from 'react-query'
 import { logout } from './RoutesAuthenticated'
 import SinglePost from './SinglePost'
+import UserPosts from './UserPosts'
 
 export default function(props: RouteComponentProps<any>) {
 
@@ -58,6 +59,7 @@ export default function(props: RouteComponentProps<any>) {
                 <Route path='/home'><Posts /></Route>
                 <Route path='/new' render={props => <NewPost {...props} />} />
                 <Route path='/post/:id' render={props => <SinglePost {...props} />} />
+                <Route path='/user/:id'><UserPosts /></Route>
             </Switch>
         </div>
     )

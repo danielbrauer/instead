@@ -126,7 +126,7 @@ export const destroyIfUnpublished = new PreparedQuery<IDestroyIfUnpublishedParam
 
 /** 'GetHomePostsWithKeys' parameters type */
 export interface IGetHomePostsWithKeysParams {
-  authorId: number | null | void;
+  userId: number | null | void;
 }
 
 /** 'GetHomePostsWithKeys' return type */
@@ -147,7 +147,7 @@ export interface IGetHomePostsWithKeysQuery {
   result: IGetHomePostsWithKeysResult;
 }
 
-const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"name":"authorId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":686,"b":693,"line":18,"col":20},{"a":751,"b":758,"line":20,"col":24},{"a":861,"b":868,"line":23,"col":35}]}}],"usedParamSet":{"authorId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :authorId\nAND posts.published IS NOT NULL\nAND (posts.author_id = :authorId OR posts.author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :authorId\n)) ORDER BY published DESC","loc":{"a":483,"b":895,"line":14,"col":0}}};
+const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":686,"b":691,"line":18,"col":20},{"a":749,"b":754,"line":20,"col":24},{"a":857,"b":862,"line":23,"col":35}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :userId\nAND posts.published IS NOT NULL\nAND (posts.author_id = :userId OR posts.author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :userId\n)) ORDER BY published DESC","loc":{"a":483,"b":889,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -156,16 +156,58 @@ const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"n
  *        keys.key
  * FROM posts, keys
  * WHERE posts.key_set_id = keys.key_set_id
- * AND keys.user_id = :authorId
+ * AND keys.user_id = :userId
  * AND posts.published IS NOT NULL
- * AND (posts.author_id = :authorId OR posts.author_id IN (
+ * AND (posts.author_id = :userId OR posts.author_id IN (
  *     SELECT followee_id
  *     FROM followers
- *     WHERE followers.follower_id = :authorId
+ *     WHERE followers.follower_id = :userId
  * )) ORDER BY published DESC
  * ```
  */
 export const getHomePostsWithKeys = new PreparedQuery<IGetHomePostsWithKeysParams,IGetHomePostsWithKeysResult>(getHomePostsWithKeysIR);
+
+
+/** 'GetUserPostsWithKeys' parameters type */
+export interface IGetUserPostsWithKeysParams {
+  requesterId: number | null | void;
+  userId: number | null | void;
+}
+
+/** 'GetUserPostsWithKeys' return type */
+export interface IGetUserPostsWithKeysResult {
+  id: number;
+  published: Date | null;
+  authorId: number;
+  filename: string;
+  iv: string;
+  aspect: number;
+  keySetId: number;
+  key: string;
+}
+
+/** 'GetUserPostsWithKeys' query type */
+export interface IGetUserPostsWithKeysQuery {
+  params: IGetUserPostsWithKeysParams;
+  result: IGetUserPostsWithKeysResult;
+}
+
+const getUserPostsWithKeysIR: any = {"name":"GetUserPostsWithKeys","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1129,"b":1139,"line":31,"col":20}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1196,"b":1201,"line":33,"col":23}]}}],"usedParamSet":{"requesterId":true,"userId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :requesterId\nAND posts.published IS NOT NULL\nAND posts.author_id = :userId\nORDER BY published DESC","loc":{"a":926,"b":1225,"line":27,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
+ *        keys.key
+ * FROM posts, keys
+ * WHERE posts.key_set_id = keys.key_set_id
+ * AND keys.user_id = :requesterId
+ * AND posts.published IS NOT NULL
+ * AND posts.author_id = :userId
+ * ORDER BY published DESC
+ * ```
+ */
+export const getUserPostsWithKeys = new PreparedQuery<IGetUserPostsWithKeysParams,IGetUserPostsWithKeysResult>(getUserPostsWithKeysIR);
 
 
 /** 'GetPostWithKey' parameters type */
@@ -192,7 +234,7 @@ export interface IGetPostWithKeyQuery {
   result: IGetPostWithKeyResult;
 }
 
-const getPostWithKeyIR: any = {"name":"GetPostWithKey","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1129,"b":1139,"line":31,"col":20}]}},{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1189,"b":1194,"line":33,"col":16}]}}],"usedParamSet":{"requesterId":true,"postId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :requesterId\nAND posts.published IS NOT NULL\nAND posts.id = :postId","loc":{"a":926,"b":1194,"line":27,"col":0}}};
+const getPostWithKeyIR: any = {"name":"GetPostWithKey","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1459,"b":1469,"line":41,"col":20}]}},{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1519,"b":1524,"line":43,"col":16}]}}],"usedParamSet":{"requesterId":true,"postId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :requesterId\nAND posts.published IS NOT NULL\nAND posts.id = :postId","loc":{"a":1256,"b":1524,"line":37,"col":0}}};
 
 /**
  * Query generated from SQL:
