@@ -1,4 +1,3 @@
-
 import config from './config'
 import Axios from 'axios'
 import { StartLoginResult, FinishLoginResult, StartSignupResult } from '../../backend/src/types/auth'

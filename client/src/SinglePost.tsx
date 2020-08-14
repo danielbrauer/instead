@@ -10,7 +10,7 @@ import NewComment from './NewComment'
 
 export default function() {
     const { id: postId } = useParams()
-    const postQuery = useQuery(['post', postId], getPost)
+    const postQuery = useQuery(['post', postId], getPost, { staleTime: Infinity })
 
     if (postQuery.isError) return (
         <div>

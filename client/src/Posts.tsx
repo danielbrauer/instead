@@ -7,7 +7,7 @@ import PostHeader from './PostHeader'
 import InternalLink from './Components/InternalLink'
 
 export default function () {
-    const posts = useQuery('posts', getHomePosts)
+    const posts = useQuery('posts', getHomePosts, { staleTime: Infinity })
     if (posts.isError) return (
         <div>
             <Message negative>

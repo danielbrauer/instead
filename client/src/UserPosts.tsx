@@ -9,7 +9,7 @@ import InternalLink from './Components/InternalLink'
 
 export default function () {
     const { id: userId } = useParams()
-    const posts = useQuery(['posts', userId], getUserPosts)
+    const posts = useQuery(['posts', userId], getUserPosts, { staleTime: Infinity })
 
     if (posts.isError) return (
         <div>

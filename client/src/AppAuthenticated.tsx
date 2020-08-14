@@ -4,7 +4,6 @@ import FollowerPage from './FollowerPage'
 import Posts from './Posts'
 import NewPost from './NewPost'
 import { Route, Switch, Redirect, useHistory } from 'react-router-dom'
-
 import { Menu, Dropdown } from 'semantic-ui-react'
 import { queryCache } from 'react-query'
 import { logout } from './RoutesAuthenticated'

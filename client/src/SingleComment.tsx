@@ -1,9 +1,7 @@
 import React from 'react'
 import * as Types from '../../backend/src/types/api'
-import { Comment, Placeholder, Icon } from 'semantic-ui-react'
+import { Comment, Placeholder } from 'semantic-ui-react'
 import moment from 'moment'
-import { useQuery } from 'react-query'
-import { getUser } from './RoutesAuthenticated'
 import { useEncryptedComment } from './postCrypto'
 import UserInList from './UserInList'
 
