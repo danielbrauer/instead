@@ -3,7 +3,6 @@ import CurrentUser from "./CurrentUser";
 import { Post } from '../../backend/src/types/api'
 import { useMutation } from "react-query"
 import { deletePost } from './RoutesAuthenticated'
-import { List } from "semantic-ui-react";
 import SafetyButton from "./SafetyButton";
 import UserInList from './UserInList';
 
@@ -16,13 +15,11 @@ export default function PostHeader({ post } : Props) {
 
     return (
         <div>
+            <UserInList id={post.authorId} />
             {CurrentUser.getId() === post.authorId ?
-                <List.Content floated='right'>
-                    <SafetyButton size='mini' onClick={() => deletePostMutation(post.id)}>Delete</SafetyButton>
-                </List.Content>
+                <SafetyButton floated='right' size='mini' onClick={() => deletePostMutation(post.id)}>Delete</SafetyButton>
                 :
                 null}
-            <UserInList id={post.authorId} />
         </div>
     )
 }
