@@ -1,8 +1,8 @@
 import React from 'react'
 import CurrentUser from "./CurrentUser";
 import { Post } from '../../backend/src/types/api'
-import { useMutation, useQuery } from "react-query"
-import { getUser, deletePost } from './RoutesAuthenticated'
+import { useMutation } from "react-query"
+import { deletePost } from './RoutesAuthenticated'
 import { List } from "semantic-ui-react";
 import SafetyButton from "./SafetyButton";
 import UserInList from './UserInList';
@@ -13,6 +13,7 @@ export interface Props {
 
 export default function PostHeader({ post } : Props) {
     const [deletePostMutation] = useMutation(deletePost)
+
     return (
         <div>
             {CurrentUser.getId() === post.authorId ?

@@ -36,7 +36,7 @@ export async function startSignup() {
 }
 
 export async function finishSignup(displayName: string, srpSalt: string, verifier: string, mukSalt: string, publicKey: JsonWebKey, privateKey: string, privateKeyIv: string) {
-    const finishRes = await authorizedAxios.post('/finishSignup', {
+    await authorizedAxios.post('/finishSignup', {
         displayName,
         srpSalt,
         verifier,
