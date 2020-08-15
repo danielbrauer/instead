@@ -65,7 +65,10 @@
     "concurrently": "^4.1.2",
     "dotenv": "^8.1.0",
     "eslint": "^6.0.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
     "jest": "^26.1.0",
+    "prettier": "^2.0.5",
     "ts-jest": "^26.1.4-alpha.0",
     "tsc-watch": "^4.2.9"
   },
