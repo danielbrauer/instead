@@ -1,18 +1,13 @@
-import React, { ReactNode } from 'react'
+import React from 'react'
 import { useHistory } from 'react-router'
-import { Link } from 'react-router-dom'
+import { Link, LinkProps } from 'react-router-dom'
 
-interface Props {
-    to: string,
-    children: ReactNode,
-}
-
-export default function(props: Props) {
+export default function(props: LinkProps) {
     const history = useHistory()
 
     const linkAction = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         event.preventDefault()
-        history.push(props.to)
+        history.push(props.to as string)
     }
 
     return (
