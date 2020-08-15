@@ -6,11 +6,7 @@ import { deletePost } from './RoutesAuthenticated'
 import SafetyButton from './SafetyButton'
 import UserInList from './UserInList'
 
-export interface Props {
-    post: Post
-}
-
-export default function PostHeader({ post }: Props) {
+export default function PostHeader({ post }: { post: Post }) {
     const [deletePostMutation] = useMutation(deletePost)
 
     return (
