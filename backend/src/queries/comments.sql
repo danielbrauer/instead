@@ -12,4 +12,4 @@ FROM comments, keys
 WHERE comments.post_id = :postId
 AND comments.key_set_id = keys.key_set_id
 AND keys.user_id = :userId
-ORDER BY published DESC;
+ORDER BY published;
