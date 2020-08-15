@@ -8,13 +8,15 @@ import { StartLoginResult, FinishLoginResult, StartSignupResult, FinishSignupRes
 
 @Service()
 export default class AuthService {
-
     @Inject()
     private userService: UserService
 
-    async startLogin(session: Express.Session, username: string, clientEphemeralPublic: string): Promise<StartLoginResult> {
-        if (session.user)
-            throw new Error('Session already started logging in')
+    async startLogin(
+        session: Express.Session,
+        username: string,
+        clientEphemeralPublic: string,
+    ): Promise<StartLoginResult> {
+        if (session.user) throw new Error('Session already started logging in')
         const user = await this.userService.getLoginInfo(username)
         if (user) {
             const serverEphemeral = srp.generateEphemeral(user.verifier)
@@ -22,7 +24,7 @@ export default class AuthService {
                 loginFake: false,
                 user,
                 clientEphemeralPublic,
-                serverEphemeralSecret: serverEphemeral.secret
+                serverEphemeralSecret: serverEphemeral.secret,
             }
             return {
                 srpSalt: user.srpSalt,
@@ -42,10 +44,8 @@ export default class AuthService {
     }
 
     async finishLogin(session: Express.Session, clientSessionProof: string): Promise<FinishLoginResult> {
-        if (!session.loginInfo)
-            throw new Error('Missing startLogin')
-        if (session.loginInfo.loginFake)
-            throw new Error('No such user')
+        if (!session.loginInfo) throw new Error('Missing startLogin')
+        if (session.loginInfo.loginFake) throw new Error('No such user')
         const loginInfo = session.loginInfo
         const serverSession = srp.deriveSession(
             loginInfo.serverEphemeralSecret,
@@ -53,9 +53,13 @@ export default class AuthService {
             loginInfo.user.srpSalt,
             loginInfo.user.username,
             loginInfo.user.verifier,
-            clientSessionProof
+            clientSessionProof,
         )
-        session.user = { id: loginInfo.user.id, username: loginInfo.user.username }
+        session.user = {
+            id: loginInfo.user.id,
+            username: loginInfo.user.username,
+            displayName: loginInfo.user.displayName,
+        }
         const { privateKey, privateKeyIv, publicKey, mukSalt } = await this.userService.getUserInfo(session.user.id)
         delete session.loginInfo
         return {
@@ -69,7 +73,7 @@ export default class AuthService {
         }
     }
 
-    async startSignup(session: Express.Session): Promise<StartSignupResult>{
+    async startSignup(session: Express.Session): Promise<StartSignupResult> {
         let username = ''
         for (let i = 0; i < 5; ++i) {
             username = generateCombination(1, '', true)
@@ -82,14 +86,14 @@ export default class AuthService {
         throw new Error('Too many user name collisions!')
     }
 
-    async finishSignup(
-        session: Express.Session,
-        newUser: NewUser,
-    ): Promise<FinishSignupResult> {
-        if (!session.signupInfo)
-            throw new Error('Session hasn\'t started signing in')
+    async finishSignup(session: Express.Session, newUser: NewUser): Promise<FinishSignupResult> {
+        if (!session.signupInfo) throw new Error("Session hasn't started signing in")
         const newUserResult = await this.userService.create(newUser)
-        const user = { username: session.signupInfo.username, id: newUserResult.id }
+        const user = {
+            username: session.signupInfo.username,
+            id: newUserResult.id,
+            displayName: newUser.displayName as string,
+        }
         delete session.signupInfo
         return { user }
     }

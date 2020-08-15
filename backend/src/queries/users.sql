@@ -8,7 +8,7 @@ SELECT private_key, private_key_iv, public_key, muk_salt FROM users WHERE id = :
 SELECT COUNT(*)::int FROM users WHERE username = :username;
 
 /* @name GetById */
-SELECT id, username FROM users WHERE id = :userId;
+SELECT id, username, display_name FROM users WHERE id = :userId;
 
 /* @name GetByName */
 SELECT id FROM users WHERE username = :username;

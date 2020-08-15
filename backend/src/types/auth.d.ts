@@ -24,4 +24,4 @@ export type FinishSignupResult = {
     user: User
 }
 
-export interface NewUser extends ICreateParams {}
+export type NewUser = ICreateParams

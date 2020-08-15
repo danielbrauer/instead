@@ -1,11 +1,7 @@
-import { IGetHomePostsWithKeysResult } from "../queries/posts.gen"
-import { IGetFollowerPublicKeysResult, IGetKeyResult } from "../queries/keys.gen"
-import { IGetCommentsForPostResult } from "../queries/comments.gen"
-
-export interface User {
-    id: number
-    username: string
-}
+import { IGetHomePostsWithKeysResult } from '../queries/posts.gen'
+import { IGetFollowerPublicKeysResult, IGetKeyResult } from '../queries/keys.gen'
+import { IGetCommentsForPostResult } from '../queries/comments.gen'
+import { IGetByIdResult } from '../queries/users.gen'
 
 export interface FollowRelationship {
     followerId: number
@@ -16,19 +12,21 @@ export interface ActionResult {
     success: boolean
 }
 
-export interface DeletePostResult extends ActionResult {}
+export type DeletePostResult = ActionResult
 
 export interface StartPostResult {
     signedRequest: string
     postId: number
 }
 
-export interface FinishPostResult extends ActionResult {}
+export type FinishPostResult = ActionResult
 
-export interface Post extends IGetHomePostsWithKeysResult {}
+export type User = IGetByIdResult
 
-export interface Comment extends IGetCommentsForPostResult {}
+export type Post = IGetHomePostsWithKeysResult
 
-export interface EncryptedPostKey extends IGetKeyResult {}
+export type Comment = IGetCommentsForPostResult
 
-export interface PublicKey extends IGetFollowerPublicKeysResult {}
+export type EncryptedPostKey = IGetKeyResult
+
+export type PublicKey = IGetFollowerPublicKeysResult
