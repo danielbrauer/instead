@@ -7,35 +7,26 @@ import PostHeader from './PostHeader'
 import InternalLink from './Components/InternalLink'
 
 export default function () {
-    const posts = useQuery('posts', getHomePosts, { staleTime: Infinity })
-    if (posts.isError) return (
-        <div>
-            <Message negative>
-                <Message.Header>Error fetching posts</Message.Header>
-            </Message>
-        </div>
-    )
-    if (posts.isLoading) return (
-        <div>
-            <Loader active></Loader>
-        </div>
-    )
+    const posts = useQuery('posts', getHomePosts)
+
+    if (posts.isError) return <Message negative content='Error fetching posts' />
+    if (posts.isLoading) return <Loader active />
     return (
         <div>
-            {posts.data!.length === 0 ?
-            <Message>To post a photo or follow people, use the menu ➚</Message>
-            :
-            <List>
-                {posts.data!.map(post => (
-                    <List.Item key={post.id}>
-                        <PostHeader post={post} />
-                        <InternalLink to={`/post/${post.id.toString()}`}>
-                            <EncryptedImage post={post} />
-                        </InternalLink>
-                    </List.Item>
-                ))}
-            </List>
-            }
+            {posts.data!.length === 0 ? (
+                <Message>To post a photo or follow people, use the menu ➚</Message>
+            ) : (
+                <List>
+                    {posts.data!.map((post) => (
+                        <List.Item key={post.id}>
+                            <PostHeader post={post} />
+                            <InternalLink to={`/post/${post.id.toString()}`}>
+                                <EncryptedImage post={post} />
+                            </InternalLink>
+                        </List.Item>
+                    ))}
+                </List>
+            )}
         </div>
     )
 }
