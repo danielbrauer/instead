@@ -8,36 +8,32 @@ export default function FollowerList() {
     const requests = useQuery('followRequests', getFollowRequests)
     const [acceptMutation] = useMutation(acceptFollowRequest)
     const [rejectMutation] = useMutation(rejectFollowRequest)
-    if (requests.isError) return (
-        <div>
-            <Message negative>
-                <Message.Header>Error fetching followers</Message.Header>
-            </Message>
-        </div>
-    )
-    if (requests.isLoading) return (
-        <div>
-            <Loader active></Loader>
-        </div>
-    )
+
+    if (requests.isError) return <Message negative content='Error fetching followers' />
+    if (requests.isLoading) return <Loader active />
     return (
         <div>
-            {requests.data!.length === 0 ?
+            {requests.data!.length === 0 ? (
                 <Message>You don't have any follow requests</Message>
-                :
+            ) : (
                 <List verticalAlign='middle'>
                     {requests.data!.map((requester) => (
                         <List.Item key={requester}>
                             <List.Content floated='right'>
                                 <Button.Group size='mini'>
-                                    <Button positive onClick={() => acceptMutation(requester)}>Accept</Button>
-                                    <Button negative onClick={() => rejectMutation(requester)}>Reject</Button>
+                                    <Button positive onClick={() => acceptMutation(requester)}>
+                                        Accept
+                                    </Button>
+                                    <Button negative onClick={() => rejectMutation(requester)}>
+                                        Reject
+                                    </Button>
                                 </Button.Group>
                             </List.Content>
                             <UserInList id={requester} />
                         </List.Item>
                     ))}
-                </List>}
+                </List>
+            )}
         </div>
     )
 }

@@ -11,22 +11,12 @@ export default function () {
     const { id: userId } = useParams()
     const posts = useQuery(['posts', userId], getUserPosts, { staleTime: Infinity })
 
-    if (posts.isError) return (
-        <div>
-            <Message negative>
-                <Message.Header>Error fetching posts</Message.Header>
-            </Message>
-        </div>
-    )
-    if (posts.isLoading) return (
-        <div>
-            <Loader active></Loader>
-        </div>
-    )
+    if (posts.isError) return <Message negative content='Error fetching posts' />
+    if (posts.isLoading) return <Loader active />
     return (
         <div>
             <List>
-                {posts.data!.map(post => (
+                {posts.data!.map((post) => (
                     <List.Item key={post.id}>
                         <PostHeader post={post} />
                         <InternalLink to={`/post/${post.id.toString()}`}>
