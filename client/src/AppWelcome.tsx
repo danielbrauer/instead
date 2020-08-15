@@ -1,18 +1,15 @@
 import React from 'react'
 import { Menu, Segment, Header, Button, Message, Icon, Label } from "semantic-ui-react"
-import { History } from 'history'
 import CurrentUser from './CurrentUser'
 import WelcomeInfo from './WelcomeInfo'
+import { useHistory } from 'react-router-dom'
 
-export interface AppProps {
-    history: History,
-}
-
-export default function AppWelcome(props : AppProps) {
+export default function AppWelcome() {
+    const history = useHistory()
 
     function ok() {
         WelcomeInfo.clear()
-        props.history.push('/login')
+        history.push('/login')
     }
 
     return (

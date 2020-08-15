@@ -25,13 +25,17 @@ export default class PostService {
         return this.aws.s3ContentUrl()
     }
 
-    async getPostsByAuthor(authorId: number) {
-        return await Posts.getHomePostsWithKeys.run({ authorId }, this.db.pool)
+    async getHomePosts(userId: number) {
+        return await Posts.getHomePostsWithKeys.run({ userId }, this.db.pool)
+    }
+
+    async getUserPosts(userId: number, requesterId: number) {
+        return await Posts.getUserPostsWithKeys.run({ userId, requesterId }, this.db.pool)
     }
 
     async getPost(postId: number, requesterId: number) {
         const [post] = await Posts.getPostWithKey.run({ postId, requesterId }, this.db.pool)
-        return post
+        return post || null
     }
 
     async deletePost(postId: number, authorId: number): Promise<DeletePostResult> {

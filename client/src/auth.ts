@@ -76,7 +76,7 @@ export async function login(info : LoginInfo) {
     const srpKey = await derivePrivateKey(srpSalt, info.password, info.secretKey, info.username)
     const clientSession = srp.deriveSession(clientEphemeral.secret, serverEphemeralPublic, srpSalt, info.username, srpKey)
     const userInfo = await finishLogin(clientSession.proof)
-    const { serverSessionProof, userid, displayName, privateKey: privateKeyEnc, privateKeyIv, publicKey: publicKeyJwk, mukSalt } = userInfo
+    const { serverSessionProof, userId, displayName, privateKey: privateKeyEnc, privateKeyIv, publicKey: publicKeyJwk, mukSalt } = userInfo
     srp.verifySession(clientEphemeral.public, clientSession, serverSessionProof)
 
     const mukHex = await derivePrivateKey(mukSalt, info.password, info.secretKey, info.username)
@@ -96,7 +96,7 @@ export async function login(info : LoginInfo) {
         publicKey,
     }
     return {
-        id: userid,
+        id: userId,
         username: info.username,
         displayName,
         secretKey: info.secretKey,
@@ -142,7 +142,7 @@ export async function signup(info : NewUserInfo) {
         muk,
         { name: 'AES-GCM', iv: accountPrivateIv}
     )
-    const { user: {id: userid} } = await finishSignup(
+    await finishSignup(
         info.displayName,
         srpSalt,
         verifier,

@@ -21,9 +21,9 @@ export default function() {
             <Grid textAlign='center' style={{ height: '100vh' }} verticalAlign='middle'>
                 <Grid.Column style={{ maxWidth: 450 }}>
                     <Switch>
-                        <Route exact path="/" render={props => <Redirect {...props} to="/login" />} />
-                        <Route exact path="/signup" render={props => <SignupForm {...props} />} />
-                        <Route exact path="/login" render={props => <LoginForm {...props} />} />
+                        <Route exact path="/"> <Redirect to="/login" /></Route>
+                        <Route exact path="/signup"><SignupForm /></Route>
+                        <Route exact path="/login"><LoginForm /></Route>
                     </Switch>
                 </Grid.Column>
             </Grid>

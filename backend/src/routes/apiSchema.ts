@@ -80,12 +80,12 @@ export interface FinishPostRequest extends ValidatedRequestSchema {
     [ContainerTypes.Body]: Joi.extractType<typeof finishPostBody>;
 }
 
-export const getUserByIdQuery = Joi.object({
-    userid: Joi.number().integer().required(),
+export const getByUserIdQuery = Joi.object({
+    userId: Joi.number().integer().required(),
 })
 
-export interface GetUserByIdRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof getUserByIdQuery>;
+export interface GetByUserIdRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof getByUserIdQuery>;
     [ContainerTypes.Body]: Joi.extractType<typeof empty>;
 }
 
@@ -99,7 +99,7 @@ export interface SendFollowRequestRequest extends ValidatedRequestSchema {
 }
 
 export const putByUserIdBody = Joi.object({
-    userid: Joi.number().integer().required(),
+    userId: Joi.number().integer().required(),
 })
 
 export interface PutByUserIdRequest extends ValidatedRequestSchema {

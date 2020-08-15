@@ -7,7 +7,7 @@ export type StartLoginResult = {
 }
 
 export type FinishLoginResult = {
-    userid: number
+    userId: number
     serverSessionProof: string
     displayName: string
     privateKey: string

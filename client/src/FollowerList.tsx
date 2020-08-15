@@ -8,34 +8,25 @@ import { getFollowers, removeFollower } from './RoutesAuthenticated'
 export default function FollowerList() {
     const followers = useQuery('followers', getFollowers)
     const [removeFollowerMutation] = useMutation(removeFollower)
-    if (followers.isError) return (
-        <div>
-            <Message negative>
-                <Message.Header>Error fetching followers</Message.Header>
-            </Message>
-        </div>
-    )
-    if (followers.isLoading) return (
-        <div>
-            <Loader active></Loader>
-        </div>
-    )
+
+    if (followers.isError) return <Message negative content='Error fetching followers' />
+    if (followers.isLoading) return <Loader active />
     return (
         <div>
-            {followers.data!.length === 0 ?
+            {followers.data!.length === 0 ? (
                 <Message>You don't have any followers yet</Message>
-                :
+            ) : (
                 <List verticalAlign='middle'>
-                    {followers.data!.map(follower => (
+                    {followers.data!.map((follower) => (
                         <List.Item key={follower}>
-                            <List.Content floated='right'>
-                                <SafetyButton size='mini' onClick={() => removeFollowerMutation(follower)}>Remove</SafetyButton>
-                            </List.Content>
+                            <SafetyButton floated='right' size='mini' onClick={() => removeFollowerMutation(follower)}>
+                                Remove
+                            </SafetyButton>
                             <UserInList id={follower} />
                         </List.Item>
                     ))}
                 </List>
-            }
+            )}
         </div>
     )
 }

@@ -5,7 +5,7 @@ import { useMutation } from 'react-query'
 import { encryptAndPostComment } from './postCrypto'
 import { useInput } from './Components/useInput'
 
-export default function({ post } : { post: Post }) {
+export default function ({ post }: { post: Post }) {
     const contentInput = useInput('')
     const [commentMutation, commentStatus] = useMutation(encryptAndPostComment)
 
@@ -21,7 +21,7 @@ export default function({ post } : { post: Post }) {
                     primary: true,
                     content: 'Reply',
                     disabled: contentInput.value === '',
-                    onClick: onSubmit
+                    onClick: onSubmit,
                 }}
                 placeholder='Write a comment...'
                 {...contentInput.bind}
