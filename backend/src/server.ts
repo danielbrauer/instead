@@ -12,14 +12,12 @@ import auth from './routes/auth'
 import api from './routes/api'
 import { forwardErrors } from './middleware/errors'
 import path from 'path'
-import httpServer from './middleware/http-server'
 
 const app = express()
 app.use(forceHttps)
 app.use(helmet())
 app.use(cors)
-if (!config.isLocalDev())
-    app.set('trust proxy', 1) // trust first proxy
+if (!config.isLocalDev()) app.set('trust proxy', 1) // trust first proxy
 app.use(session)
 
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -32,7 +30,11 @@ app.use('/api', authManager.authenticateSession, api, forwardErrors)
 if (!config.isLocalDev()) {
     const relativePathToReact = '/../../../client/build'
     const reactPath = path.join(__dirname, relativePathToReact)
-    httpServer(app, reactPath)
+
+    app.use(express.static(path.join(__dirname, relativePathToReact)))
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(reactPath, '/index.html'))
+    })
 }
 
 const port = config.int('PORT')
