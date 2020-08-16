@@ -41,6 +41,16 @@ async function importPublicKey(jwk: JsonWebKey) {
     ])
 }
 
+async function createEncryptedPostKey(postKey: CryptoKey, keySetId: number, publicKey: CryptoKey, userId: number) {
+    const followerVersion = await wrapKeyAsymmetric(postKey, publicKey)
+    const encryptedKey: EncryptedPostKey = {
+        key: followerVersion,
+        userId,
+        keySetId,
+    }
+    return encryptedKey
+}
+
 export async function createKeysForNewFollower(userId: number) {
     const getAndImportPublicKey = async () => {
         const publicKey = await Routes.getPublicKey(userId)
@@ -50,13 +60,7 @@ export async function createKeysForNewFollower(userId: number) {
     const followerPostKeyPromises = postKeys.map(
         async (encryptedPostKey): Promise<EncryptedPostKey> => {
             const postKey = await unwrapKeyAsymmetric(encryptedPostKey.key)
-            const followerVersion = await wrapKeyAsymmetric(postKey, publicKey)
-            const encryptedKey: EncryptedPostKey = {
-                key: followerVersion,
-                userId,
-                keySetId: encryptedPostKey.keySetId,
-            }
-            return encryptedKey
+            return await createEncryptedPostKey(postKey, encryptedPostKey.keySetId, publicKey, userId)
         },
     )
     if (followerPostKeyPromises.length > 0) {
@@ -88,13 +92,7 @@ async function createPostKeyAndMakeCurrent(): Promise<PostKey> {
     const followerPostKeyPromises = followerPublicKeys.map(
         async (publicKey): Promise<EncryptedPostKey> => {
             const followerPublicKey = await importPublicKey(publicKey.publicKey as JsonWebKey)
-            const followerVersion = await wrapKeyAsymmetric(postKey, followerPublicKey)
-            const encryptedKey: EncryptedPostKey = {
-                key: followerVersion,
-                userId: publicKey.id,
-                keySetId: keySetId,
-            }
-            return encryptedKey
+            return await createEncryptedPostKey(postKey, keySetId, followerPublicKey, publicKey.id)
         },
     )
 
