@@ -175,6 +175,29 @@ export async function decryptSymmetric(buffer: ArrayBuffer, ivBase64: string, ke
     )
 }
 
+export async function getComments(query: string, postId: number) {
+    const commentsEncrypted = await Routes.getComments(postId)
+    const commentsDecrypted = Promise.all(
+        commentsEncrypted.map(
+            async (commentEnc): Promise<Comment> => {
+                const postKey = await unwrapKeyAsymmetric(commentEnc.key)
+                const decrypted = await decryptSymmetric(
+                    Buffer.from(commentEnc.content, 'base64'),
+                    commentEnc.contentIv,
+                    postKey,
+                )
+                return {
+                    id: commentEnc.id,
+                    content: Buffer.from(decrypted).toString('utf8'),
+                    authorId: commentEnc.authorId,
+                    published: commentEnc.published,
+                }
+            },
+        ),
+    )
+    return commentsDecrypted
+}
+
 type AsyncState = {
     results?: string
     isLoading: boolean
@@ -192,32 +215,6 @@ function asyncReducer(state: AsyncState, action: AsyncAction): AsyncState {
         case 'failure':
             return { isLoading: false, error: action.error }
     }
-}
-
-export function useEncryptedComment(comment: Comment) {
-    const [state, dispatch] = useReducer(asyncReducer, { isLoading: false })
-
-    useEffect(() => {
-        let decryptedContent = ''
-        const decrypt = async () => {
-            dispatch({ type: 'request' })
-            try {
-                const postKey = await unwrapKeyAsymmetric(comment.key)
-                const decrypted = await decryptSymmetric(
-                    Buffer.from(comment.content, 'base64'),
-                    comment.contentIv,
-                    postKey,
-                )
-                decryptedContent = Buffer.from(decrypted).toString('utf8')
-                dispatch({ type: 'success', results: decryptedContent })
-            } catch (error) {
-                dispatch({ type: 'failure', error })
-            }
-        }
-        decrypt()
-    }, [comment])
-
-    return state
 }
 
 export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, encryptedUrl: string) {

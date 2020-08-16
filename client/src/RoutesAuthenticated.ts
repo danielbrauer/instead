@@ -3,7 +3,7 @@ import Axios from 'axios'
 import {
     User,
     Post,
-    Comment,
+    EncryptedComment,
     DeletePostResult,
     StartPostResult,
     FinishPostResult,
@@ -63,8 +63,8 @@ export async function getPost(query: string, id: number) {
     return response.data
 }
 
-export async function getComments(query: string, id: number) {
-    const response = await authorizedAxios.get<Comment[]>('getComments', {
+export async function getComments(id: number) {
+    const response = await authorizedAxios.get<EncryptedComment[]>('getComments', {
         params: {
             id,
         },

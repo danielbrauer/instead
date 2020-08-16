@@ -1,8 +1,8 @@
-import { Button, ButtonProps } from "semantic-ui-react"
-import React, { useState, ReactNode } from "react"
+import { Button, ButtonProps } from 'semantic-ui-react'
+import React, { useState } from 'react'
 import { useCleanTimeout } from './UnmountCleanup'
 
-export default function SafetyButton(props : ButtonProps) {
+export default function SafetyButton(props: ButtonProps) {
     const [tapped, setTapped] = useState(false)
     const setCleanTimeout = useCleanTimeout()
 
@@ -16,7 +16,15 @@ export default function SafetyButton(props : ButtonProps) {
     }
 
     if (tapped)
-        return <Button onClick={props.onClick} negative {...props} >Confirm</Button>
+        return (
+            <Button onClick={props.onClick} negative {...props}>
+                Confirm
+            </Button>
+        )
     else
-        return <Button onClick={firstTap} {...props}>{props.children}</Button>
+        return (
+            <Button onClick={firstTap} {...props}>
+                {props.children}
+            </Button>
+        )
 }

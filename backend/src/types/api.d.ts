@@ -19,13 +19,20 @@ export interface StartPostResult {
     postId: number
 }
 
+export interface Comment {
+    id: number
+    authorId: number
+    content: string
+    published: Date
+}
+
 export type FinishPostResult = ActionResult
 
 export type User = IGetByIdResult
 
 export type Post = IGetHomePostsWithKeysResult
 
-export type Comment = IGetCommentsForPostResult
+export type EncryptedComment = IGetCommentsForPostResult
 
 export type EncryptedPostKey = IGetKeyResult
 
