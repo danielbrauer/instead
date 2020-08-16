@@ -4,7 +4,13 @@ import crypto from '../util/crypto-promise'
 import { generateCombination } from '../util/animalGenerator'
 import * as config from '../config/config'
 import UserService from './UserService'
-import { StartLoginResult, FinishLoginResult, StartSignupResult, FinishSignupResult, NewUser } from 'auth'
+import {
+    StartLoginResult,
+    FinishLoginResult,
+    StartSignupResult,
+    FinishSignupResult,
+    NewUser,
+} from 'auth'
 
 @Service()
 export default class AuthService {
@@ -16,7 +22,7 @@ export default class AuthService {
         username: string,
         clientEphemeralPublic: string,
     ): Promise<StartLoginResult> {
-        if (session.user) throw new Error('Session already started logging in')
+        if (session.loginInfo) throw new Error('Session already started logging in')
         const user = await this.userService.getLoginInfo(username)
         if (user) {
             const serverEphemeral = srp.generateEphemeral(user.verifier)
@@ -32,7 +38,10 @@ export default class AuthService {
             }
         } else {
             const bytes = await crypto.randomBytes(256)
-            const hash = crypto.createHash('sha256').update(username).update(config.string('GARBAGE_SEED'))
+            const hash = crypto
+                .createHash('sha256')
+                .update(username)
+                .update(config.string('GARBAGE_SEED'))
             session.loginInfo = {
                 loginFake: true,
             }
@@ -43,7 +52,10 @@ export default class AuthService {
         }
     }
 
-    async finishLogin(session: Express.Session, clientSessionProof: string): Promise<FinishLoginResult> {
+    async finishLogin(
+        session: Express.Session,
+        clientSessionProof: string,
+    ): Promise<FinishLoginResult> {
         if (!session.loginInfo) throw new Error('Missing startLogin')
         if (session.loginInfo.loginFake) throw new Error('No such user')
         const loginInfo = session.loginInfo
@@ -60,7 +72,9 @@ export default class AuthService {
             username: loginInfo.user.username,
             displayName: loginInfo.user.displayName,
         }
-        const { privateKey, privateKeyIv, publicKey, mukSalt } = await this.userService.getUserInfo(session.user.id)
+        const { privateKey, privateKeyIv, publicKey, mukSalt } = await this.userService.getUserInfo(
+            session.user.id,
+        )
         delete session.loginInfo
         return {
             userId: session.user.id,
