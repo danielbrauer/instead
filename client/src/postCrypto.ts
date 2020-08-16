@@ -220,7 +220,7 @@ export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, en
             try {
                 const [postKey, encryptedImage] = await Promise.all([
                     unwrapKeyAsymmetric(wrappedKeyBase64),
-                    Axios.get(
+                    Axios.get<ArrayBuffer>(
                         encryptedUrl,
                         { responseType: 'arraybuffer' }
                     )
