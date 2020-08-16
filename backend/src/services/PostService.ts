@@ -10,12 +10,15 @@ import { DeletePostResult, StartPostResult } from 'api'
 
 @Service()
 export default class PostService {
-
     private _onCreate = new SimpleEventDispatcher<number>()
     private _onDelete = new SimpleEventDispatcher<number>()
 
-    public get onCreate() { return this._onCreate.asEvent() }
-    public get onDelete() { return this._onDelete.asEvent() }
+    public get onCreate() {
+        return this._onCreate.asEvent()
+    }
+    public get onDelete() {
+        return this._onDelete.asEvent()
+    }
 
     constructor(private db: Database, private aws: AWSService) {
         this.onCreate.subscribe(this.onPostCreated)
@@ -49,11 +52,17 @@ export default class PostService {
         return { success: true }
     }
 
-    async createPost(authorId: number, keySetId: number, iv: string, md5: string, aspect: number): Promise<StartPostResult> {
+    async createPost(
+        authorId: number,
+        keySetId: number,
+        iv: string,
+        md5: string,
+        aspect: number,
+    ): Promise<StartPostResult> {
         const fileName = uuidv1()
-        const [signedRequest, [{id: postId}]] = await Promise.all([
+        const [signedRequest, [{ id: postId }]] = await Promise.all([
             this.aws.s3GetSignedUploadUrl(fileName, 'application/octet-stream', md5),
-            Posts.createAndReturn.run({ fileName, authorId, keySetId, iv, aspect }, this.db.pool)
+            Posts.createAndReturn.run({ fileName, authorId, keySetId, iv, aspect }, this.db.pool),
         ])
         this._onCreate.dispatchAsync(postId)
         return { signedRequest, postId }
@@ -81,6 +90,9 @@ export default class PostService {
     }
 
     onPostCreated(postId: number) {
-        setTimeout(() => Container.get(PostService).removePostIfNotPublished(postId), (config.int('UPLOAD_TIME') + 1)*1000)
+        setTimeout(
+            () => Container.get(PostService).removePostIfNotPublished(postId),
+            (config.int('UPLOAD_TIME') + 1) * 1000,
+        )
     }
 }
