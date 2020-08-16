@@ -9,7 +9,7 @@ coverage:
     project:
       default:
         target: 0%
-        threshold: 0%
+        threshold: 100%
         base: auto 
 
 parsers:
