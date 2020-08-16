@@ -8,9 +8,9 @@ coverage:
   status:
     project:
       default:
-        target: 0%
-        threshold: 100%
-        base: auto 
+        target: auto
+        threshold: 0%
+        informational: true
 
 parsers:
   gcov:
