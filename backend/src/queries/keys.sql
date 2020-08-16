@@ -8,12 +8,22 @@ SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
 /* @name GetKey */
 SELECT * FROM keys WHERE user_id = :userId AND key_set_id = :keySetId;
 
+/* @name GetAllKeys */
+SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
+    SELECT id
+    FROM key_sets
+    WHERE owner_id = :userId
+);
+
 /* @name GetFollowerPublicKeys */
 SELECT id, public_key FROM users WHERE id IN (
     SELECT follower_id
     FROM followers
     WHERE followee_id = :userId
 );
+
+/* @name GetPublicKey */
+SELECT id, public_key FROM users WHERE id = :userId;
 
 /* @name EndKeySetValidity */
 UPDATE key_sets SET valid_end = now() WHERE id = :keySetId;

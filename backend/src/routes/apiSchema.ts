@@ -9,8 +9,8 @@ export const postByIdQuery = Joi.object({
 })
 
 export interface PostByIdRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof postByIdQuery>;
-    [ContainerTypes.Body]: Joi.extractType<typeof empty>;
+    [ContainerTypes.Query]: Joi.extractType<typeof postByIdQuery>
+    [ContainerTypes.Body]: Joi.extractType<typeof empty>
 }
 
 export const createCommentBody = Joi.object({
@@ -21,8 +21,8 @@ export const createCommentBody = Joi.object({
 })
 
 export interface CreateCommentRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof empty>;
-    [ContainerTypes.Body]: Joi.extractType<typeof createCommentBody>;
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof createCommentBody>
 }
 
 export const createCurrentKeyBody = Joi.object({
@@ -30,44 +30,42 @@ export const createCurrentKeyBody = Joi.object({
 })
 
 export interface CreateCurrentKeyRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof empty>;
-    [ContainerTypes.Body]: Joi.extractType<typeof createCurrentKeyBody>;
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof createCurrentKeyBody>
 }
 
 export const getKeyQuery = Joi.object({
-    keySetId: Joi.number().integer().required()
+    keySetId: Joi.number().integer().required(),
 })
 
 export interface GetKeyRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof getKeyQuery>;
-    [ContainerTypes.Body]: Joi.extractType<typeof empty>;
+    [ContainerTypes.Query]: Joi.extractType<typeof getKeyQuery>
+    [ContainerTypes.Body]: Joi.extractType<typeof empty>
 }
 
 export const addKeysBody = Joi.object({
-    keys: Joi.array().min(1).items(
-        {
-            userId: Joi.number().integer().required(),
-            keySetId: Joi.number().integer().required(),
-            key: Joi.string().base64().required(),
-        }
-    ),
+    keys: Joi.array().min(1).items({
+        userId: Joi.number().integer().required(),
+        keySetId: Joi.number().integer().required(),
+        key: Joi.string().base64().required(),
+    }),
 })
 
 export interface AddKeysRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof empty>;
-    [ContainerTypes.Body]: Joi.extractType<typeof addKeysBody>;
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof addKeysBody>
 }
 
 export const startPostBody = Joi.object({
-    keyId: Joi.number().integer().required(),
+    keySetId: Joi.number().integer().required(),
     iv: Joi.string().base64().required(),
     md5: Joi.string().base64().required(),
     aspect: Joi.number().required(),
 })
 
 export interface StartPostRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof empty>;
-    [ContainerTypes.Body]: Joi.extractType<typeof startPostBody>;
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof startPostBody>
 }
 
 export const finishPostBody = Joi.object({
@@ -76,8 +74,8 @@ export const finishPostBody = Joi.object({
 })
 
 export interface FinishPostRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof empty>;
-    [ContainerTypes.Body]: Joi.extractType<typeof finishPostBody>;
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof finishPostBody>
 }
 
 export const getByUserIdQuery = Joi.object({
@@ -85,17 +83,17 @@ export const getByUserIdQuery = Joi.object({
 })
 
 export interface GetByUserIdRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof getByUserIdQuery>;
-    [ContainerTypes.Body]: Joi.extractType<typeof empty>;
+    [ContainerTypes.Query]: Joi.extractType<typeof getByUserIdQuery>
+    [ContainerTypes.Body]: Joi.extractType<typeof empty>
 }
 
 export const sendFollowRequestBody = Joi.object({
-    username: Joi.string().regex(/^[a-zA-Z]+$/, 'alphabetical')
+    username: Joi.string().regex(/^[a-zA-Z]+$/, 'alphabetical'),
 })
 
 export interface SendFollowRequestRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof empty>;
-    [ContainerTypes.Body]: Joi.extractType<typeof sendFollowRequestBody>;
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof sendFollowRequestBody>
 }
 
 export const putByUserIdBody = Joi.object({
@@ -103,6 +101,6 @@ export const putByUserIdBody = Joi.object({
 })
 
 export interface PutByUserIdRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof empty>;
-    [ContainerTypes.Body]: Joi.extractType<typeof putByUserIdBody>;
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof putByUserIdBody>
 }
