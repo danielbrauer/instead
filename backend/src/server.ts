@@ -8,6 +8,7 @@ import authManager from './middleware/auth-strategies'
 import * as config from './config/config'
 import forceHttps from './middleware/force-https'
 import session from './middleware/session'
+import apiHeaders from './middleware/api-headers'
 import auth from './routes/auth'
 import api from './routes/api'
 import { forwardErrors } from './middleware/errors'
@@ -24,8 +25,8 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(morgan('dev'))
 
-app.use('/auth', auth)
-app.use('/api', authManager.authenticateSession, api, forwardErrors)
+app.use('/auth', apiHeaders, auth)
+app.use('/api', apiHeaders, authManager.authenticateSession, api, forwardErrors)
 
 if (!config.isLocalDev()) {
     const relativePathToReact = '/../../../client/build'
