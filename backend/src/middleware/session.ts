@@ -19,6 +19,7 @@ const sessionConfig: SessionOptions = {
     cookie: {
         httpOnly: true,
         secure: false,
+        sameSite: 'strict',
         maxAge: 14 * 24 * 60 * 60 * 1000,
     },
 }
