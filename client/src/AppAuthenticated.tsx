@@ -10,7 +10,7 @@ import { logout } from './RoutesAuthenticated'
 import SinglePost from './SinglePost'
 import UserPosts from './UserPosts'
 
-export default function() {
+export default function () {
     const history = useHistory()
 
     const logOutAndClear = async () => {
@@ -24,28 +24,23 @@ export default function() {
     }
 
     useEffect(() => {
-        if (!CurrentUser.loggedIn())
-            logOutAndClear()
+        if (!CurrentUser.loggedIn()) logOutAndClear()
     })
 
-    if (!CurrentUser.loggedIn()) {
-        return (<Redirect to='/login' />)
-    }
+    if (!CurrentUser.loggedIn()) return <Redirect to='/login' />
 
     return (
         <div>
             <Menu inverted fixed='top' size='small'>
-                <Menu.Item header>
-                    Instead
-                </Menu.Item>
+                <Menu.Item header>Instead</Menu.Item>
                 <Menu.Item fitted position='right'>
-                    <Dropdown item direction='left' text={CurrentUser.getUsername()}>
+                    <Dropdown item direction='left' text={CurrentUser.getDisplayName()}>
                         <Dropdown.Menu>
-                            <Dropdown.Item icon='list' text='Home' onClick={() => history.push('/home')}/>
-                            <Dropdown.Item icon='image' text='New Post' onClick={() => history.push('/new')}/>
-                            <Dropdown.Item icon='user' text='Followers' onClick={() => history.push('/followers')}/>
+                            <Dropdown.Item icon='list' text='Home' onClick={() => history.push('/home')} />
+                            <Dropdown.Item icon='image' text='New Post' onClick={() => history.push('/new')} />
+                            <Dropdown.Item icon='user' text='Followers' onClick={() => history.push('/followers')} />
                             <Dropdown.Divider />
-                            <Dropdown.Item icon='sign-out' text='Log Out' onClick={logOutAndClear}/>
+                            <Dropdown.Item icon='sign-out' text='Log Out' onClick={logOutAndClear} />
                         </Dropdown.Menu>
                     </Dropdown>
                 </Menu.Item>
@@ -53,13 +48,11 @@ export default function() {
             <br />
             <br />
             <Switch>
-                <Route path='/followers'><FollowerPage /></Route>
-                <Route path='/following'><FollowerPage /></Route>
-                <Route path='/requests'><FollowerPage /></Route>
-                <Route path='/home'><Posts /></Route>
-                <Route path='/new'><NewPost /></Route>
-                <Route path='/post/:id'><SinglePost /></Route>
-                <Route path='/user/:id'><UserPosts /></Route>
+                <Route path={['/followers', '/following', '/requests']} component={FollowerPage} />
+                <Route path='/home' component={Posts} />
+                <Route path='/new' component={NewPost} />
+                <Route path='/post/:id' component={SinglePost} />
+                <Route path='/user/:id' component={UserPosts} />
             </Switch>
         </div>
     )
