@@ -40,9 +40,13 @@ export async function getContentUrl() {
     return response.data
 }
 
-export async function getHomePosts() {
-    const response = await authorizedAxios.get<Post[]>('/getHomePosts')
-    return response.data
+export async function getHomePosts(key: string, olderThan: Date = new Date(Date.now())) {
+    const response = await authorizedAxios.get<Post[]>('/getHomePosts', {
+        params: {
+            olderThan,
+        },
+    })
+    return { data: response.data, nextCursor: response.data[response.data.length - 1].published }
 }
 
 export async function getUserPosts(query: string, userId: number) {
@@ -140,7 +144,7 @@ export async function getFollowerPublicKeys() {
 
 export async function startPost(keySetId: number, ivBase64: string, contentMD5Base64: string, aspect: number) {
     const postResponse = await authorizedAxios.post<StartPostResult>('/startPost', {
-        keyId: keySetId,
+        keySetId,
         iv: ivBase64,
         md5: contentMD5Base64,
         aspect,

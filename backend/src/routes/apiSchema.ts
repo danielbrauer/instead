@@ -87,6 +87,15 @@ export interface GetByUserIdRequest extends ValidatedRequestSchema {
     [ContainerTypes.Body]: Joi.extractType<typeof empty>
 }
 
+export const getHomePostsQuery = Joi.object({
+    olderThan: Joi.date().required(),
+})
+
+export interface GetHomePostsRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof getHomePostsQuery>
+    [ContainerTypes.Body]: Joi.extractType<typeof empty>
+}
+
 export const sendFollowRequestBody = Joi.object({
     username: Joi.string().regex(/^[a-zA-Z]+$/, 'alphabetical'),
 })

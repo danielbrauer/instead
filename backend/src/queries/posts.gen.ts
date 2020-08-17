@@ -127,6 +127,7 @@ export const destroyIfUnpublished = new PreparedQuery<IDestroyIfUnpublishedParam
 /** 'GetHomePostsWithKeys' parameters type */
 export interface IGetHomePostsWithKeysParams {
   userId: number | null | void;
+  olderThan: Date | null | void;
 }
 
 /** 'GetHomePostsWithKeys' return type */
@@ -147,7 +148,7 @@ export interface IGetHomePostsWithKeysQuery {
   result: IGetHomePostsWithKeysResult;
 }
 
-const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":686,"b":691,"line":18,"col":20},{"a":749,"b":754,"line":20,"col":24},{"a":857,"b":862,"line":23,"col":35}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :userId\nAND posts.published IS NOT NULL\nAND (posts.author_id = :userId OR posts.author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :userId\n)) ORDER BY published DESC","loc":{"a":483,"b":889,"line":14,"col":0}}};
+const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":686,"b":691,"line":18,"col":20},{"a":750,"b":755,"line":20,"col":24},{"a":858,"b":863,"line":23,"col":35}]}},{"name":"olderThan","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":716,"b":724,"line":19,"col":23}]}}],"usedParamSet":{"userId":true,"olderThan":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :userId\nAND posts.published < :olderThan\nAND (posts.author_id = :userId OR posts.author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :userId\n))\nORDER BY published DESC\nLIMIT 2","loc":{"a":483,"b":898,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -157,12 +158,14 @@ const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"n
  * FROM posts, keys
  * WHERE posts.key_set_id = keys.key_set_id
  * AND keys.user_id = :userId
- * AND posts.published IS NOT NULL
+ * AND posts.published < :olderThan
  * AND (posts.author_id = :userId OR posts.author_id IN (
  *     SELECT followee_id
  *     FROM followers
  *     WHERE followers.follower_id = :userId
- * )) ORDER BY published DESC
+ * ))
+ * ORDER BY published DESC
+ * LIMIT 2
  * ```
  */
 export const getHomePostsWithKeys = new PreparedQuery<IGetHomePostsWithKeysParams,IGetHomePostsWithKeysResult>(getHomePostsWithKeysIR);
@@ -192,7 +195,7 @@ export interface IGetUserPostsWithKeysQuery {
   result: IGetUserPostsWithKeysResult;
 }
 
-const getUserPostsWithKeysIR: any = {"name":"GetUserPostsWithKeys","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1129,"b":1139,"line":31,"col":20}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1196,"b":1201,"line":33,"col":23}]}}],"usedParamSet":{"requesterId":true,"userId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :requesterId\nAND posts.published IS NOT NULL\nAND posts.author_id = :userId\nORDER BY published DESC","loc":{"a":926,"b":1225,"line":27,"col":0}}};
+const getUserPostsWithKeysIR: any = {"name":"GetUserPostsWithKeys","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1138,"b":1148,"line":33,"col":20}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1205,"b":1210,"line":35,"col":23}]}}],"usedParamSet":{"requesterId":true,"userId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :requesterId\nAND posts.published IS NOT NULL\nAND posts.author_id = :userId\nORDER BY published DESC","loc":{"a":935,"b":1234,"line":29,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -234,7 +237,7 @@ export interface IGetPostWithKeyQuery {
   result: IGetPostWithKeyResult;
 }
 
-const getPostWithKeyIR: any = {"name":"GetPostWithKey","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1459,"b":1469,"line":41,"col":20}]}},{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1519,"b":1524,"line":43,"col":16}]}}],"usedParamSet":{"requesterId":true,"postId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :requesterId\nAND posts.published IS NOT NULL\nAND posts.id = :postId","loc":{"a":1256,"b":1524,"line":37,"col":0}}};
+const getPostWithKeyIR: any = {"name":"GetPostWithKey","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1468,"b":1478,"line":43,"col":20}]}},{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1528,"b":1533,"line":45,"col":16}]}}],"usedParamSet":{"requesterId":true,"postId":true},"statement":{"body":"SELECT posts.id, posts.published, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :requesterId\nAND posts.published IS NOT NULL\nAND posts.id = :postId","loc":{"a":1265,"b":1533,"line":39,"col":0}}};
 
 /**
  * Query generated from SQL:

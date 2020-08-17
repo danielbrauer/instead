@@ -1,4 +1,4 @@
-import { ButtonProps } from "semantic-ui-react"
+import { ButtonProps } from 'semantic-ui-react'
 
 export interface LoginInfo {
     username: string
@@ -11,4 +11,7 @@ export interface NewUserInfo {
     password: string
 }
 
-export type ButtonCallback = (event: React.MouseEvent<HTMLButtonElement>, data: ButtonProps) => void
+export interface SignupResult {
+    username: string
+    secretKey: string
+}

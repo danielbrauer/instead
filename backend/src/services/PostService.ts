@@ -28,8 +28,8 @@ export default class PostService {
         return this.aws.s3ContentUrl()
     }
 
-    async getHomePosts(userId: number) {
-        return await Posts.getHomePostsWithKeys.run({ userId }, this.db.pool)
+    async getHomePosts(userId: number, olderThan: Date) {
+        return await Posts.getHomePostsWithKeys.run({ userId, olderThan }, this.db.pool)
     }
 
     async getUserPosts(userId: number, requesterId: number) {

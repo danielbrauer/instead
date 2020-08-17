@@ -6,7 +6,9 @@ import { sendFollowRequest } from '../RoutesAuthenticated'
 
 export default function FollowUserForm() {
     const { value: username, bind: bindUsername, reset: resetUsername } = useInput('')
-    const [sendFollowRequestMutation, { error, reset, isSuccess }] = useMutation(sendFollowRequest)
+    const [sendFollowRequestMutation, { error, reset, isSuccess }] = useMutation<void, Error, string, unknown>(
+        sendFollowRequest,
+    )
 
     async function handleSubmit() {
         reset()
@@ -17,25 +19,16 @@ export default function FollowUserForm() {
     return (
         <Segment>
             To follow a user, enter their username:
-            <br/>
-            <br/>
+            <br />
+            <br />
             <Form error={error != null} success={isSuccess} onSubmit={handleSubmit} size='large'>
                 <Form.Group>
                     <Form.Input placeholder='AdjectiveAnimal' name='username' {...bindUsername} />
                     <Form.Button size='large' content='Request' disabled={username === ''} />
                 </Form.Group>
-                <Message
-                    error
-                    header={`Can't follow`}
-                    content={error ? error.message : ``}
-                />
-                <Message
-                    success
-                    header={`Success`}
-                    content={`Follow request sent`}
-                />
+                <Message error header={`Can't follow`} content={error ? error.message : ``} />
+                <Message success header={`Success`} content={`Follow request sent`} />
             </Form>
-
         </Segment>
     )
 }

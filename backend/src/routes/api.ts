@@ -37,10 +37,10 @@ router.get(
 
 router.get(
     '/getHomePosts',
-    validator.query(Schema.empty),
+    validator.query(Schema.getHomePostsQuery),
     validator.body(Schema.empty),
-    async (req, res) => {
-        const posts = await postService.getHomePosts(req.user.id)
+    async (req: ValidatedRequest<Schema.GetHomePostsRequest>, res) => {
+        const posts = await postService.getHomePosts(req.user.id, req.query.olderThan)
         return res.json(posts)
     },
 )

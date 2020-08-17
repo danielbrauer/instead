@@ -7,6 +7,7 @@ import { useMutation } from 'react-query'
 import WelcomeInfo from '../WelcomeInfo'
 import InternalLink from './InternalLink'
 import { useHistory } from 'react-router-dom'
+import { SignupResult, NewUserInfo } from '../Interfaces'
 
 export default function SignupForm() {
     const history = useHistory()
@@ -14,8 +15,8 @@ export default function SignupForm() {
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: agreeTerms, bind: bindAgreeTerms } = useInputBool(false)
     const [missedTerms, setMissedTerms] = useState(false)
-    const [passwordCheckMutation, passwordCheckQuery] = useMutation(passwordCheck)
-    const [signupMutation, signupQuery] = useMutation(signup)
+    const [passwordCheckMutation, passwordCheckQuery] = useMutation<void, Error, string, unknown>(passwordCheck)
+    const [signupMutation, signupQuery] = useMutation<SignupResult, Error, NewUserInfo, unknown>(signup)
 
     async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
         evt.preventDefault()
@@ -23,13 +24,12 @@ export default function SignupForm() {
         signupQuery.reset()
         const userMissedTerms = !agreeTerms
         setMissedTerms(userMissedTerms)
-        if (userMissedTerms)
-            return
+        if (userMissedTerms) return
         try {
             await passwordCheckMutation(password)
             const userInfo = await signupMutation({ displayName, password })
-            CurrentUser.setSecretKey(userInfo.secretKey)
-            WelcomeInfo.set({ displayName, username: userInfo.username })
+            CurrentUser.setSecretKey(userInfo!.secretKey)
+            WelcomeInfo.set({ displayName, username: userInfo!.username })
             history.push('/welcome')
         } catch (error) {
             resetPassword()
@@ -61,25 +61,25 @@ export default function SignupForm() {
                     placeholder='Password'
                     type='password'
                     autoComplete='off'
-                    error={passwordCheckQuery.isError ? passwordCheckQuery.error.message : false}
+                    error={passwordCheckQuery.isError ? passwordCheckQuery.error!.message : false}
                     {...bindPassword}
                 />
                 <Form.Checkbox
                     label='I agree to the Terms and Conditions'
-                    error={(missedTerms && !agreeTerms) ? {
-                        content: 'You must agree to the terms and conditions',
-                    } : false}
+                    error={
+                        missedTerms && !agreeTerms
+                            ? {
+                                  content: 'You must agree to the terms and conditions',
+                              }
+                            : false
+                    }
                     {...bindAgreeTerms}
                 />
-                <Message
-                    error
-                    header='Could not create user'
-                    content={signupQuery.error?.message}
-                />
+                <Message error header='Could not create user' content={signupQuery.error?.message} />
                 <Button size='large' content='Sign Up' />
             </Form>
             <Message attached='bottom' warning>
-                Already have an account?&nbsp;<InternalLink to='/login' >Log in</InternalLink>&nbsp;here.
+                Already have an account?&nbsp;<InternalLink to='/login'>Log in</InternalLink>&nbsp;here.
             </Message>
         </div>
     )
