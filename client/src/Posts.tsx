@@ -16,7 +16,12 @@ export default function () {
     if (posts.isError) return <Message negative content='Error fetching posts' />
     if (posts.isLoading) return <Loader active />
     return (
-        <InfiniteScroll loadMore={() => posts.fetchMore()} hasMore={posts.canFetchMore} loader={<Loader />}>
+        <InfiniteScroll
+            loadMore={() => posts.fetchMore()}
+            hasMore={posts.canFetchMore}
+            loader={<Loader />}
+            initialLoad={false}
+        >
             {posts.data!.map((group) =>
                 group.map((post) => (
                     <List.Item key={post.id}>
