@@ -8,7 +8,8 @@ import InternalLink from './Components/InternalLink'
 
 export default function () {
     const posts = useInfiniteQuery('posts', getHomePosts, {
-        getFetchMore: (lastGroup, allGroups) => lastGroup.nextCursor,
+        getFetchMore: (lastGroup, allGroups) =>
+            lastGroup.length ? lastGroup[lastGroup.length - 1].publishOrder : false,
     })
 
     if (posts.isError) return <Message negative content='Error fetching posts' />
@@ -21,7 +22,7 @@ export default function () {
                 <>
                     <List>
                         {posts.data!.map((group) =>
-                            group.data.map((post) => (
+                            group.map((post) => (
                                 <List.Item key={post.id}>
                                     <PostHeader post={post} />
                                     <InternalLink to={`/post/${post.id.toString()}`}>
@@ -31,7 +32,7 @@ export default function () {
                             )),
                         )}
                     </List>
-                    <Button onClick={() => posts.fetchMore()} content='Load more' />
+                    <Button disabled={!posts.canFetchMore} onClick={() => posts.fetchMore()} content='Load more' />
                 </>
             )}
         </div>

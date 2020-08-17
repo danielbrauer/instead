@@ -88,7 +88,7 @@ export interface GetByUserIdRequest extends ValidatedRequestSchema {
 }
 
 export const getHomePostsQuery = Joi.object({
-    olderThan: Joi.date().required(),
+    beforePublishOrder: Joi.number().integer(),
 })
 
 export interface GetHomePostsRequest extends ValidatedRequestSchema {

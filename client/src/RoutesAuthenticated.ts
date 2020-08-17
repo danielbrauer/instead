@@ -40,13 +40,13 @@ export async function getContentUrl() {
     return response.data
 }
 
-export async function getHomePosts(key: string, olderThan: Date = new Date(Date.now())) {
+export async function getHomePosts(key: string, beforePublishOrder?: number) {
     const response = await authorizedAxios.get<Post[]>('/getHomePosts', {
         params: {
-            olderThan,
+            beforePublishOrder,
         },
     })
-    return { data: response.data, nextCursor: response.data[response.data.length - 1].published }
+    return response.data
 }
 
 export async function getUserPosts(query: string, userId: number) {
@@ -157,6 +157,7 @@ export async function finishPost(postId: number, success: boolean) {
         postId,
         success,
     })
+    queryCache.invalidateQueries('posts')
 }
 
 export async function getUser(key: string, userId: number) {

@@ -33,6 +33,7 @@ describe('PostService', () => {
         id: 0,
         authorId: 0,
         published: new Date(2012, 1),
+        publishOrder: 0,
         filename: 'abcd',
         aspect: 1.2,
         keySetId: 0,
@@ -44,6 +45,7 @@ describe('PostService', () => {
         id: 1,
         authorId: 1,
         published: new Date(2012, 2),
+        publishOrder: 1,
         filename: 'abcd',
         aspect: 1.2,
         keySetId: 1,
@@ -68,10 +70,10 @@ describe('PostService', () => {
     describe('getHomePosts', () => {
         test('calls database and gets posts', async () => {
             mocked(Posts.getHomePostsWithKeys.run).mockResolvedValueOnce([testPost, secondPost])
-            const posts = await postService.getHomePosts(0, new Date(2012, 1))
+            const posts = await postService.getHomePosts(0, Number.MAX_SAFE_INTEGER)
             expect(mocked(Posts.getHomePostsWithKeys.run).mock.calls[0][0]).toEqual({
                 userId: 0,
-                olderThan: new Date(2012, 1),
+                beforePublishOrder: Number.MAX_SAFE_INTEGER,
             })
             expect(posts).toHaveLength(2)
         })
