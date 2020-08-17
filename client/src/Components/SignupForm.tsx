@@ -7,7 +7,6 @@ import { useMutation } from 'react-query'
 import WelcomeInfo from '../WelcomeInfo'
 import InternalLink from './InternalLink'
 import { useHistory } from 'react-router-dom'
-import { SignupResult, NewUserInfo } from '../Interfaces'
 
 export default function SignupForm() {
     const history = useHistory()
@@ -15,8 +14,8 @@ export default function SignupForm() {
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: agreeTerms, bind: bindAgreeTerms } = useInputBool(false)
     const [missedTerms, setMissedTerms] = useState(false)
-    const [passwordCheckMutation, passwordCheckQuery] = useMutation<void, Error, string, unknown>(passwordCheck)
-    const [signupMutation, signupQuery] = useMutation<SignupResult, Error, NewUserInfo, unknown>(signup)
+    const [passwordCheckMutation, passwordCheckQuery] = useMutation(passwordCheck)
+    const [signupMutation, signupQuery] = useMutation(signup)
 
     async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
         evt.preventDefault()
@@ -61,7 +60,7 @@ export default function SignupForm() {
                     placeholder='Password'
                     type='password'
                     autoComplete='off'
-                    error={passwordCheckQuery.isError ? passwordCheckQuery.error!.message : false}
+                    error={passwordCheckQuery.isError && (passwordCheckQuery.error as Error).message}
                     {...bindPassword}
                 />
                 <Form.Checkbox
@@ -75,7 +74,11 @@ export default function SignupForm() {
                     }
                     {...bindAgreeTerms}
                 />
-                <Message error header='Could not create user' content={signupQuery.error?.message} />
+                <Message
+                    error
+                    header='Could not create user'
+                    content={signupQuery.isError && (signupQuery.error as Error).message}
+                />
                 <Button size='large' content='Sign Up' />
             </Form>
             <Message attached='bottom' warning>

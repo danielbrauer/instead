@@ -1,28 +1,23 @@
 import React from 'react'
 import { useInput } from './useInput'
 import { Button, Form, Message, Header } from 'semantic-ui-react'
-import CurrentUser, { CurrentUserInfo } from '../CurrentUser'
+import CurrentUser from '../CurrentUser'
 import { login, cancel } from '../auth'
 import { useMutation } from 'react-query'
 import InternalLink from './InternalLink'
 import { useHistory } from 'react-router-dom'
-import { LoginInfo } from '../Interfaces'
 
 export default function LoginForm() {
     const history = useHistory()
     const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: secretKey, bind: bindSecretKey } = useInput(CurrentUser.getSecretKey() || '')
-    const [loginMutation, { error, reset, isLoading, isSuccess, isError }] = useMutation<
-        CurrentUserInfo,
-        Error,
-        LoginInfo,
-        unknown
-    >(login)
+    const [loginMutation, loginQuery] = useMutation(login)
+    const loginErrorMessage = loginQuery.error ? (loginQuery.error as Error).message : ''
     const [cancelMutation] = useMutation(cancel)
 
     async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
-        reset()
+        loginQuery.reset()
         evt.preventDefault()
         try {
             const userInfo = await loginMutation({ username, password, secretKey })
@@ -39,8 +34,8 @@ export default function LoginForm() {
             <Form
                 className='attached inverted segment'
                 size='large'
-                error={isError}
-                loading={isLoading || isSuccess}
+                error={loginQuery.isError}
+                loading={loginQuery.isLoading || loginQuery.isSuccess}
                 onSubmit={handleSubmit}
             >
                 <Header textAlign='center' content='Instead' />
@@ -69,7 +64,7 @@ export default function LoginForm() {
                     // autoComplete="current-password"
                     {...bindSecretKey}
                 />
-                <Message error header='Could not log in' content={error?.message} />
+                <Message error header='Could not log in' content={loginErrorMessage} />
                 <Button size='large' content='Log in' />
             </Form>
             <Message attached='bottom' warning>
