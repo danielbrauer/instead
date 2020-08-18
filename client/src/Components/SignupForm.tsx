@@ -23,13 +23,12 @@ export default function SignupForm() {
         signupQuery.reset()
         const userMissedTerms = !agreeTerms
         setMissedTerms(userMissedTerms)
-        if (userMissedTerms)
-            return
+        if (userMissedTerms) return
         try {
             await passwordCheckMutation(password)
             const userInfo = await signupMutation({ displayName, password })
-            CurrentUser.setSecretKey(userInfo.secretKey)
-            WelcomeInfo.set({ displayName, username: userInfo.username })
+            CurrentUser.setSecretKey(userInfo!.secretKey)
+            WelcomeInfo.set({ displayName, username: userInfo!.username })
             history.push('/welcome')
         } catch (error) {
             resetPassword()
@@ -61,25 +60,29 @@ export default function SignupForm() {
                     placeholder='Password'
                     type='password'
                     autoComplete='off'
-                    error={passwordCheckQuery.isError ? passwordCheckQuery.error.message : false}
+                    error={passwordCheckQuery.isError && (passwordCheckQuery.error as Error).message}
                     {...bindPassword}
                 />
                 <Form.Checkbox
                     label='I agree to the Terms and Conditions'
-                    error={(missedTerms && !agreeTerms) ? {
-                        content: 'You must agree to the terms and conditions',
-                    } : false}
+                    error={
+                        missedTerms && !agreeTerms
+                            ? {
+                                  content: 'You must agree to the terms and conditions',
+                              }
+                            : false
+                    }
                     {...bindAgreeTerms}
                 />
                 <Message
                     error
                     header='Could not create user'
-                    content={signupQuery.error?.message}
+                    content={signupQuery.isError && (signupQuery.error as Error).message}
                 />
                 <Button size='large' content='Sign Up' />
             </Form>
             <Message attached='bottom' warning>
-                Already have an account?&nbsp;<InternalLink to='/login' >Log in</InternalLink>&nbsp;here.
+                Already have an account?&nbsp;<InternalLink to='/login'>Log in</InternalLink>&nbsp;here.
             </Message>
         </div>
     )

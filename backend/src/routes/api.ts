@@ -37,20 +37,24 @@ router.get(
 
 router.get(
     '/getHomePosts',
-    validator.query(Schema.empty),
+    validator.query(Schema.getHomePostsQuery),
     validator.body(Schema.empty),
-    async (req, res) => {
-        const posts = await postService.getHomePosts(req.user.id)
+    async (req: ValidatedRequest<Schema.GetHomePostsRequest>, res) => {
+        const posts = await postService.getHomePosts(req.user.id, req.query.pageIndex)
         return res.json(posts)
     },
 )
 
 router.get(
     '/getUserPosts',
-    validator.query(Schema.getByUserIdQuery),
+    validator.query(Schema.getUserPostsQuery),
     validator.body(Schema.empty),
-    async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
-        const posts = await postService.getUserPosts(req.query.userId, req.user.id)
+    async (req: ValidatedRequest<Schema.GetUserPostsRequest>, res) => {
+        const posts = await postService.getUserPosts(
+            req.query.userId,
+            req.user.id,
+            req.query.pageIndex,
+        )
         return res.json(posts)
     },
 )

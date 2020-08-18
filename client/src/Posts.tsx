@@ -1,32 +1,36 @@
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useInfiniteQuery } from 'react-query'
 import { List, Message, Loader } from 'semantic-ui-react'
 import EncryptedImage from './EncryptedImage'
 import { getHomePosts } from './RoutesAuthenticated'
 import PostHeader from './PostHeader'
 import InternalLink from './Components/InternalLink'
+import InfiniteScroll from 'react-infinite-scroller'
 
 export default function () {
-    const posts = useQuery('posts', getHomePosts)
+    const posts = useInfiniteQuery('posts', getHomePosts, {
+        getFetchMore: (lastGroup, allGroups) => lastGroup.length > 0 && lastGroup[lastGroup.length - 1].index,
+    })
 
     if (posts.isError) return <Message negative content='Error fetching posts' />
     if (posts.isLoading) return <Loader active />
     return (
-        <div>
-            {posts.data!.length === 0 ? (
-                <Message>To post a photo or follow people, use the menu ➚</Message>
-            ) : (
-                <List>
-                    {posts.data!.map((post) => (
-                        <List.Item key={post.id}>
-                            <PostHeader post={post} />
-                            <InternalLink to={`/post/${post.id.toString()}`}>
-                                <EncryptedImage post={post} />
-                            </InternalLink>
-                        </List.Item>
-                    ))}
-                </List>
+        <InfiniteScroll
+            loadMore={() => posts.fetchMore()}
+            hasMore={posts.canFetchMore}
+            loader={<Loader />}
+            initialLoad={false}
+        >
+            {posts.data!.map((group) =>
+                group.map((post) => (
+                    <List.Item key={post.id}>
+                        <PostHeader post={post} />
+                        <InternalLink to={`/post/${post.id.toString()}`}>
+                            <EncryptedImage post={post} />
+                        </InternalLink>
+                    </List.Item>
+                )),
             )}
-        </div>
+        </InfiniteScroll>
     )
 }

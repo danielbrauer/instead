@@ -12,15 +12,16 @@ export default function LoginForm() {
     const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: secretKey, bind: bindSecretKey } = useInput(CurrentUser.getSecretKey() || '')
-    const [loginMutation, { error, reset, isLoading, isSuccess, isError }] = useMutation(login)
+    const [loginMutation, loginQuery] = useMutation(login)
+    const loginErrorMessage = loginQuery.error ? (loginQuery.error as Error).message : ''
     const [cancelMutation] = useMutation(cancel)
 
-    async function handleSubmit(evt : React.FormEvent<HTMLFormElement>) {
-        reset()
+    async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
+        loginQuery.reset()
         evt.preventDefault()
         try {
             const userInfo = await loginMutation({ username, password, secretKey })
-            CurrentUser.set(userInfo)
+            CurrentUser.set(userInfo!)
             history.push('/home')
         } catch (error) {
             resetPassword()
@@ -30,8 +31,14 @@ export default function LoginForm() {
 
     return (
         <div>
-            <Form className='attached inverted segment' size='large' error={isError} loading={isLoading || isSuccess} onSubmit={handleSubmit}>
-                <Header textAlign='center' content='Instead'/>
+            <Form
+                className='attached inverted segment'
+                size='large'
+                error={loginQuery.isError}
+                loading={loginQuery.isLoading || loginQuery.isSuccess}
+                onSubmit={handleSubmit}
+            >
+                <Header textAlign='center' content='Instead' />
                 <Form.Input
                     fluid
                     icon='paw'
@@ -46,7 +53,7 @@ export default function LoginForm() {
                     iconPosition='left'
                     placeholder='Password'
                     type='password'
-                    autoComplete="current-password"
+                    autoComplete='current-password'
                     {...bindPassword}
                 />
                 <Form.Input
@@ -57,15 +64,11 @@ export default function LoginForm() {
                     // autoComplete="current-password"
                     {...bindSecretKey}
                 />
-                <Message
-                    error
-                    header='Could not log in'
-                    content={error?.message}
-                />
-                <Button size='large' content='Log in'/>
+                <Message error header='Could not log in' content={loginErrorMessage} />
+                <Button size='large' content='Log in' />
             </Form>
             <Message attached='bottom' warning>
-                New to Instead?&nbsp;<InternalLink to='/signup' >Sign up</InternalLink>&nbsp;here.
+                New to Instead?&nbsp;<InternalLink to='/signup'>Sign up</InternalLink>&nbsp;here.
             </Message>
         </div>
     )

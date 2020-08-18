@@ -1,13 +1,13 @@
 import { importAccountKeysFromJwks, exportAccountKeysToJwks } from './auth'
 
-interface CurrentUserInfo {
+export interface CurrentUserInfo {
     id: number
     username: string
     displayName: string
     secretKey: string
     accountKeys: CryptoKeyPair
     accountKeysJwk?: {
-        privateKey: JsonWebKey,
+        privateKey: JsonWebKey
         publicKey: JsonWebKey
     }
 }
@@ -16,10 +16,9 @@ const kUserInfoKey = 'userInfoKey'
 const kSecretKeyKey = 'secretKey'
 
 class CurrentUser {
-
     private static _info: CurrentUserInfo
 
-    private static get info() : CurrentUserInfo {
+    private static get info(): CurrentUserInfo {
         if (!CurrentUser._info) {
             const sessionUser = sessionStorage.getItem(kUserInfoKey)
             if (sessionUser) {
@@ -29,19 +28,19 @@ class CurrentUser {
         return CurrentUser._info
     }
 
-    static getId() : number {
+    static getId(): number {
         return CurrentUser.info.id
     }
 
-    static getUsername() : string {
+    static getUsername(): string {
         return CurrentUser.info.username
     }
 
-    static getDisplayName() : string {
+    static getDisplayName(): string {
         return CurrentUser.info.displayName
     }
 
-    static getSecretKey() : string | null {
+    static getSecretKey(): string | null {
         return (CurrentUser.info && CurrentUser.info.secretKey) || localStorage.getItem(kSecretKeyKey)
     }
 

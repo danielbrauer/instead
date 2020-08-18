@@ -87,6 +87,25 @@ export interface GetByUserIdRequest extends ValidatedRequestSchema {
     [ContainerTypes.Body]: Joi.extractType<typeof empty>
 }
 
+export const getHomePostsQuery = Joi.object({
+    pageIndex: Joi.string().regex(/^[0-9]+$/, 'integer'),
+})
+
+export interface GetHomePostsRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof getHomePostsQuery>
+    [ContainerTypes.Body]: Joi.extractType<typeof empty>
+}
+
+export const getUserPostsQuery = Joi.object({
+    userId: Joi.number().integer().required(),
+    pageIndex: Joi.string().regex(/^[0-9]+$/, 'integer'),
+})
+
+export interface GetUserPostsRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof getUserPostsQuery>
+    [ContainerTypes.Body]: Joi.extractType<typeof empty>
+}
+
 export const sendFollowRequestBody = Joi.object({
     username: Joi.string().regex(/^[a-zA-Z]+$/, 'alphabetical'),
 })

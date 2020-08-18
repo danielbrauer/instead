@@ -1,4 +1,4 @@
-/** Types generated for queries found in "src/queries/comments.sql" */
+/** Types generated for queries found in "./src/queries/comments.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
 /** 'Create' parameters type */

@@ -6,10 +6,10 @@ import { sendFollowRequest } from '../RoutesAuthenticated'
 
 export default function FollowUserForm() {
     const { value: username, bind: bindUsername, reset: resetUsername } = useInput('')
-    const [sendFollowRequestMutation, { error, reset, isSuccess }] = useMutation(sendFollowRequest)
+    const [sendFollowRequestMutation, sendFollowRequestQuery] = useMutation(sendFollowRequest)
 
     async function handleSubmit() {
-        reset()
+        sendFollowRequestQuery.reset()
         await sendFollowRequestMutation(username)
         resetUsername()
     }
@@ -17,25 +17,25 @@ export default function FollowUserForm() {
     return (
         <Segment>
             To follow a user, enter their username:
-            <br/>
-            <br/>
-            <Form error={error != null} success={isSuccess} onSubmit={handleSubmit} size='large'>
+            <br />
+            <br />
+            <Form
+                error={sendFollowRequestQuery.isError}
+                success={sendFollowRequestQuery.isSuccess}
+                onSubmit={handleSubmit}
+                size='large'
+            >
                 <Form.Group>
                     <Form.Input placeholder='AdjectiveAnimal' name='username' {...bindUsername} />
                     <Form.Button size='large' content='Request' disabled={username === ''} />
                 </Form.Group>
                 <Message
                     error
-                    header={`Can't follow`}
-                    content={error ? error.message : ``}
+                    header={"Can't follow"}
+                    content={sendFollowRequestQuery.isError && (sendFollowRequestQuery.error as Error).message}
                 />
-                <Message
-                    success
-                    header={`Success`}
-                    content={`Follow request sent`}
-                />
+                <Message success header={'Success'} content={'Follow request sent'} />
             </Form>
-
         </Segment>
     )
 }
