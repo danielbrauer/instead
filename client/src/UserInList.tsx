@@ -5,7 +5,7 @@ import { getUser } from './RoutesAuthenticated'
 import InternalLink from './Components/InternalLink'
 
 export default function UserInList({ id }: { id: number }) {
-    const user = useQuery(['user', id], getUser)
+    const user = useQuery(['user', id], getUser, { staleTime: Infinity })
     return (
         <>
             <Icon size='big' name='user' />

@@ -10,13 +10,14 @@ import InfiniteScroll from 'react-infinite-scroller'
 export default function () {
     const posts = useInfiniteQuery('posts', getHomePosts, {
         getFetchMore: (lastGroup, allGroups) => lastGroup.length > 0 && lastGroup[lastGroup.length - 1].index,
+        staleTime: Infinity,
     })
 
     if (posts.isError) return <Message negative content='Error fetching posts' />
     if (posts.isLoading) return <Loader active />
     return (
         <InfiniteScroll
-            loadMore={() => posts.fetchMore()}
+            loadMore={() => posts.canFetchMore && posts.fetchMore()}
             hasMore={posts.canFetchMore}
             loader={<Loader />}
             initialLoad={false}

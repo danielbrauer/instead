@@ -18,7 +18,8 @@ export default function () {
     if (posts.isLoading) return <Loader active />
     return (
         <InfiniteScroll
-            loadMore={() => posts.fetchMore()}
+            element={'List'}
+            loadMore={() => posts.canFetchMore && posts.fetchMore()}
             hasMore={posts.canFetchMore}
             loader={<Loader />}
             initialLoad={false}
