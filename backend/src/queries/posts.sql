@@ -11,7 +11,7 @@ DELETE FROM posts WHERE id = :postId AND author_id = :authorId RETURNING *;
 DELETE FROM posts WHERE id = :postId AND published IS NULL RETURNING *;
 
 /* @name GetHomePostsWithKeys */
-SELECT posts.id, posts.published, EXTRACT(EPOCH FROM posts.published)*1000000 AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
+SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
        keys.key
 FROM posts, keys
 WHERE posts.key_set_id = keys.key_set_id
@@ -21,12 +21,12 @@ AND (posts.author_id = :userId OR posts.author_id IN (
     FROM followers
     WHERE followers.follower_id = :userId
 ))
-AND (:pageIndex::int8 IS NULL OR posts.published < (TIMESTAMP WITHOUT TIME ZONE 'epoch' + (:pageIndex::int8 / 1000000.0) * INTERVAL '1 second'))
+AND (:pageIndex::int8 IS NULL OR posts.published < int_to_timestamp(:pageIndex::int8))
 ORDER BY posts.published DESC
 LIMIT 2;
 
 /* @name GetUserPostsWithKeys */
-SELECT posts.id, posts.published, EXTRACT(EPOCH FROM posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
+SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
        keys.key
 FROM posts, keys
 WHERE posts.key_set_id = keys.key_set_id
@@ -36,7 +36,7 @@ AND posts.author_id = :userId
 ORDER BY published DESC;
 
 /* @name GetPostWithKey */
-SELECT posts.id, posts.published, EXTRACT(EPOCH FROM posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
+SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
        keys.key
 FROM posts, keys
 WHERE posts.key_set_id = keys.key_set_id
