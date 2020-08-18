@@ -40,10 +40,7 @@ router.get(
     validator.query(Schema.getHomePostsQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.GetHomePostsRequest>, res) => {
-        const posts = await postService.getHomePosts(
-            req.user.id,
-            req.query.beforePublishOrder || 2147483647,
-        )
+        const posts = await postService.getHomePosts(req.user.id, req.query.pageIndex)
         return res.json(posts)
     },
 )

@@ -40,10 +40,10 @@ export async function getContentUrl() {
     return response.data
 }
 
-export async function getHomePosts(key: string, beforePublishOrder?: number) {
+export async function getHomePosts(key: string, pageIndex?: string) {
     const response = await authorizedAxios.get<Post[]>('/getHomePosts', {
         params: {
-            beforePublishOrder,
+            pageIndex,
         },
     })
     return response.data

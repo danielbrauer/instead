@@ -28,8 +28,9 @@ export default class PostService {
         return this.aws.s3ContentUrl()
     }
 
-    async getHomePosts(userId: number, beforePublishOrder: number) {
-        return await Posts.getHomePostsWithKeys.run({ userId, beforePublishOrder }, this.db.pool)
+    async getHomePosts(userId: number, pageIndex?: number) {
+        const index = pageIndex === undefined ? undefined : pageIndex.toString()
+        return await Posts.getHomePostsWithKeys.run({ userId, pageIndex: index }, this.db.pool)
     }
 
     async getUserPosts(userId: number, requesterId: number) {

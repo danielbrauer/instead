@@ -9,8 +9,7 @@ import InfiniteScroll from 'react-infinite-scroller'
 
 export default function () {
     const posts = useInfiniteQuery('posts', getHomePosts, {
-        getFetchMore: (lastGroup, allGroups) =>
-            lastGroup.length ? lastGroup[lastGroup.length - 1].publishOrder : false,
+        getFetchMore: (lastGroup, allGroups) => (lastGroup.length ? lastGroup[lastGroup.length - 1].index : false),
     })
 
     if (posts.isError) return <Message negative content='Error fetching posts' />
