@@ -88,7 +88,7 @@ export interface GetByUserIdRequest extends ValidatedRequestSchema {
 }
 
 export const getHomePostsQuery = Joi.object({
-    pageIndex: Joi.number().integer(),
+    pageIndex: Joi.string().regex(/^[0-9]+$/, 'integer'),
 })
 
 export interface GetHomePostsRequest extends ValidatedRequestSchema {

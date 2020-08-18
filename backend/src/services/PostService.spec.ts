@@ -70,7 +70,7 @@ describe('PostService', () => {
     describe('getHomePosts', () => {
         test('calls database and gets posts', async () => {
             mocked(Posts.getHomePostsWithKeys.run).mockResolvedValueOnce([testPost, secondPost])
-            const posts = await postService.getHomePosts(0, 1)
+            const posts = await postService.getHomePosts(0, '1')
             expect(mocked(Posts.getHomePostsWithKeys.run).mock.calls[0][0]).toEqual({
                 userId: 0,
                 pageIndex: '1',
