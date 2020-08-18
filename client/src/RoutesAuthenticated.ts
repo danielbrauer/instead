@@ -49,10 +49,11 @@ export async function getHomePosts(key: string, pageIndex?: string) {
     return response.data
 }
 
-export async function getUserPosts(query: string, userId: number) {
+export async function getUserPosts(query: string, userId: number, pageIndex?: string) {
     const response = await authorizedAxios.get<Post[]>('/getUserPosts', {
         params: {
             userId,
+            pageIndex,
         },
     })
     return response.data

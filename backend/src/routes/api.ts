@@ -47,10 +47,14 @@ router.get(
 
 router.get(
     '/getUserPosts',
-    validator.query(Schema.getByUserIdQuery),
+    validator.query(Schema.getUserPostsQuery),
     validator.body(Schema.empty),
-    async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
-        const posts = await postService.getUserPosts(req.query.userId, req.user.id)
+    async (req: ValidatedRequest<Schema.GetUserPostsRequest>, res) => {
+        const posts = await postService.getUserPosts(
+            req.query.userId,
+            req.user.id,
+            req.query.pageIndex,
+        )
         return res.json(posts)
     },
 )

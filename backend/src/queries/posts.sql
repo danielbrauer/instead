@@ -21,6 +21,7 @@ AND (posts.author_id = :userId OR posts.author_id IN (
     FROM followers
     WHERE followers.follower_id = :userId
 ))
+AND posts.published IS NOT NULL
 AND (:pageIndex::int8 IS NULL OR posts.published < int_to_timestamp(:pageIndex::int8))
 ORDER BY posts.published DESC
 LIMIT 2;
@@ -31,9 +32,11 @@ SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, po
 FROM posts, keys
 WHERE posts.key_set_id = keys.key_set_id
 AND keys.user_id = :requesterId
-AND posts.published IS NOT NULL
 AND posts.author_id = :userId
-ORDER BY published DESC;
+AND posts.published IS NOT NULL
+AND (:pageIndex::int8 IS NULL OR posts.published < int_to_timestamp(:pageIndex::int8))
+ORDER BY posts.published DESC
+LIMIT 2;
 
 /* @name GetPostWithKey */
 SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,

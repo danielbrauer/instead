@@ -32,8 +32,11 @@ export default class PostService {
         return await Posts.getHomePostsWithKeys.run({ userId, pageIndex }, this.db.pool)
     }
 
-    async getUserPosts(userId: number, requesterId: number) {
-        return await Posts.getUserPostsWithKeys.run({ userId, requesterId }, this.db.pool)
+    async getUserPosts(userId: number, requesterId: number, pageIndex?: string) {
+        return await Posts.getUserPostsWithKeys.run(
+            { userId, requesterId, pageIndex },
+            this.db.pool,
+        )
     }
 
     async getPost(postId: number, requesterId: number) {
