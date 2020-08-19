@@ -1,7 +1,7 @@
 import React from 'react'
 import FollowerList from './FollowerList'
 import FolloweeList from './FolloweeList'
-import { Menu, MenuItem } from 'semantic-ui-react'
+import { Menu, MenuItem, Segment } from 'semantic-ui-react'
 import { Switch, Route, useHistory } from 'react-router'
 
 export default function FollowerPage() {
@@ -18,19 +18,21 @@ export default function FollowerPage() {
     }
 
     return (
-        <div>
-            <Menu secondary widths={2}>
+        <>
+            <Menu widths={2} tabular>
                 <PathMenuItem name='Followers' path='/followers' />
                 <PathMenuItem name='Following' path='/following' />
             </Menu>
-            <Switch>
-                <Route path='/followers'>
-                    <FollowerList />
-                </Route>
-                <Route path='/following'>
-                    <FolloweeList />
-                </Route>
-            </Switch>
-        </div>
+            <Segment vertical>
+                <Switch>
+                    <Route path='/followers'>
+                        <FollowerList />
+                    </Route>
+                    <Route path='/following'>
+                        <FolloweeList />
+                    </Route>
+                </Switch>
+            </Segment>
+        </>
     )
 }
