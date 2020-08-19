@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import CurrentUser from './CurrentUser'
 import FollowerPage from './FollowerPage'
-import Posts from './Posts'
+import HomePosts from './HomePosts'
 import NewPost from './NewPost'
 import { Route, Switch, Redirect, useHistory } from 'react-router-dom'
 import { Menu, Dropdown } from 'semantic-ui-react'
@@ -49,7 +49,7 @@ export default function () {
             <br />
             <Switch>
                 <Route path={['/followers', '/following', '/requests']} component={FollowerPage} />
-                <Route path='/home' component={Posts} />
+                <Route path='/home' component={HomePosts} />
                 <Route path='/new' component={NewPost} />
                 <Route path='/post/:id' component={SinglePost} />
                 <Route path='/user/:id' component={UserPosts} />

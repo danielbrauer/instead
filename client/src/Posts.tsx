@@ -1,18 +1,13 @@
 import React from 'react'
-import { useInfiniteQuery } from 'react-query'
+import { InfiniteQueryResult } from 'react-query'
 import { List, Message, Loader } from 'semantic-ui-react'
 import EncryptedImage from './EncryptedImage'
-import { getHomePosts } from './RoutesAuthenticated'
 import PostHeader from './PostHeader'
 import InternalLink from './Components/InternalLink'
 import InfiniteScroll from 'react-infinite-scroller'
+import { IGetHomePostsWithKeysResult } from '../../backend/src/queries/posts.gen'
 
-export default function () {
-    const posts = useInfiniteQuery('posts', getHomePosts, {
-        getFetchMore: (lastGroup, allGroups) => lastGroup.length > 0 && lastGroup[lastGroup.length - 1].index,
-        staleTime: Infinity,
-    })
-
+export default function ({ posts }: { posts: InfiniteQueryResult<IGetHomePostsWithKeysResult[], unknown> }) {
     if (posts.isError) return <Message negative content='Error fetching posts' />
     if (posts.isLoading) return <Loader active />
     return (
