@@ -49,10 +49,12 @@ export default function ({ item, onAccept }: { item: FollowerItemInfo; onAccept:
                     </>
                 )}
             </List.Content>
-            <Icon size='big' name='user' />
-            <InternalLink to={`/user/${item.id.toString()}`}>
-                {user.data ? user.data!.displayName : 'loading'}
-            </InternalLink>
+            <List.Content>
+                <Icon size='big' name='user' />
+                <InternalLink to={`/user/${item.id.toString()}`}>
+                    {user.data ? user.data!.displayName : 'loading'}
+                </InternalLink>
+            </List.Content>
         </List.Item>
     )
 }
