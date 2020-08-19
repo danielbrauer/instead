@@ -5,13 +5,13 @@ import { encryptAndUploadImage } from './postCrypto'
 import { useMutation } from 'react-query'
 import { Redirect } from 'react-router-dom'
 
-let urls = new WeakMap()
+const urls = new WeakMap()
 
-let blobUrl = (blob: Blob) => {
+const blobUrl = (blob: Blob) => {
     if (urls.has(blob)) {
         return urls.get(blob)
     } else {
-        let url = URL.createObjectURL(blob)
+        const url = URL.createObjectURL(blob)
         urls.set(blob, url)
         return url
     }
@@ -21,7 +21,7 @@ export default function NewPost() {
     const [uploadInput, setUploadInput] = useState<File | null>(null)
     const [aspect, setAspect] = useState<number | null>(null)
     const [uploadMutation, uploadStatus] = useMutation(encryptAndUploadImage)
-    const onDropAccepted = useCallback(acceptedFiles => {
+    const onDropAccepted = useCallback((acceptedFiles) => {
         setUploadInput(acceptedFiles[0])
     }, [])
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -37,55 +37,49 @@ export default function NewPost() {
         setUploadInput(null)
     }
 
-    function storeImageDimensions({target}: any) {
-        setAspect(target.height/target.width)
+    function storeImageDimensions({ target }: any) {
+        setAspect(target.height / target.width)
     }
 
-    if (uploadStatus.isSuccess)
-        return (<Redirect to='/home' />)
+    if (uploadStatus.isSuccess) return <Redirect to='/home' />
 
     return (
-        <div>
-            {uploadStatus.error ?
+        <>
+            {uploadStatus.error ? (
                 <Message negative>
                     <Message.Header>Sorry, there was an error uploading your post</Message.Header>
                 </Message>
-                :
-                null
-            }
-            {uploadInput !== null ?
-                <div>
-                    <Dimmer inverted active={uploadStatus.isLoading || uploadStatus.isSuccess} >
+            ) : null}
+            {uploadInput !== null ? (
+                <>
+                    <Dimmer inverted active={uploadStatus.isLoading || uploadStatus.isSuccess}>
                         <Loader inverted />
                     </Dimmer>
                     <Image fluid onLoad={storeImageDimensions} src={blobUrl(uploadInput!)} alt={uploadInput.name} />
-                </div>
-                :
-                <Segment>
+                </>
+            ) : (
+                <Segment vertical>
                     <div {...getRootProps()}>
                         <input {...getInputProps()} />
-                        {
-                            isDragActive ?
-                                <Button fluid size='huge' color='blue'>Drop here...</Button>
-                                :
-                                <Button fluid size='huge'>Drop a photo here</Button>
-                        }
+                        {isDragActive ? (
+                            <Button fluid size='huge' color='blue' content='Drop here...' />
+                        ) : (
+                            <Button fluid size='huge' content='Drop a photo here' />
+                        )}
                     </div>
                 </Segment>
-            }
-            {uploadInput !== null && !uploadStatus.isLoading ?
+            )}
+            {uploadInput !== null && !uploadStatus.isLoading ? (
                 <Menu secondary fluid fixed='bottom'>
                     <Menu.Item>
-                        <Button negative onClick={onCancel}>Cancel</Button>
+                        <Button negative onClick={onCancel} content='Cancel' />
                     </Menu.Item>
 
                     <Menu.Item position='right'>
-                        <Button positive onClick={onSubmit}>Upload</Button>
+                        <Button positive onClick={onSubmit} content='Upload' />
                     </Menu.Item>
                 </Menu>
-                :
-                null
-            }
-        </div>
+            ) : null}
+        </>
     )
 }
