@@ -4,14 +4,15 @@ import FollowerPage from './FollowerPage'
 import HomePosts from './HomePosts'
 import NewPost from './NewPost'
 import { Route, Switch, Redirect, useHistory } from 'react-router-dom'
-import { Menu, Dropdown } from 'semantic-ui-react'
-import { queryCache } from 'react-query'
-import { logout } from './RoutesAuthenticated'
+import { Menu, Dropdown, Label, Icon } from 'semantic-ui-react'
+import { queryCache, useQuery } from 'react-query'
+import { logout, getFollowRequests } from './RoutesAuthenticated'
 import SinglePost from './SinglePost'
 import UserPosts from './UserPosts'
 
 export default function () {
     const history = useHistory()
+    const requests = useQuery('followRequests', getFollowRequests)
 
     const logOutAndClear = async () => {
         try {
@@ -32,13 +33,26 @@ export default function () {
     return (
         <div>
             <Menu inverted fixed='top' size='small'>
-                <Menu.Item header>Instead</Menu.Item>
+                <Menu.Item header onClick={() => window.location.pathname !== '/home' && history.push('/home')}>
+                    Instead
+                </Menu.Item>
+                <Menu.Item onClick={() => history.push('/new')}>
+                    <Icon fitted name='camera' />
+                </Menu.Item>
                 <Menu.Item fitted position='right'>
+                    <Menu.Item onClick={() => history.push('/followers')}>
+                        <Icon fitted name='user' />
+                        {requests.isSuccess && requests.data!.length > 0 ? (
+                            <Label color='red' size='medium' empty circular corner />
+                        ) : null}
+                    </Menu.Item>
                     <Dropdown item direction='left' text={CurrentUser.getDisplayName()}>
                         <Dropdown.Menu>
-                            <Dropdown.Item icon='list' text='Home' onClick={() => history.push('/home')} />
-                            <Dropdown.Item icon='image' text='New Post' onClick={() => history.push('/new')} />
-                            <Dropdown.Item icon='user' text='Followers' onClick={() => history.push('/followers')} />
+                            <Dropdown.Item
+                                icon='user'
+                                text='Profile'
+                                onClick={() => history.push(`/user/${CurrentUser.getId()}`)}
+                            />
                             <Dropdown.Divider />
                             <Dropdown.Item icon='sign-out' text='Log Out' onClick={logOutAndClear} />
                         </Dropdown.Menu>
@@ -48,7 +62,7 @@ export default function () {
             <br />
             <br />
             <Switch>
-                <Route path={['/followers', '/following', '/requests']} component={FollowerPage} />
+                <Route path={['/followers', '/following']} component={FollowerPage} />
                 <Route path='/home' component={HomePosts} />
                 <Route path='/new' component={NewPost} />
                 <Route path='/post/:id' component={SinglePost} />

@@ -4,6 +4,7 @@ import SafetyButton from './SafetyButton'
 import UserInList from './UserInList'
 import { useQuery, useMutation } from 'react-query'
 import { getFollowees, unfollow } from './RoutesAuthenticated'
+import FollowUserForm from './Components/FollowUserForm'
 
 export default function FolloweeList() {
     const following = useQuery('followees', getFollowees)
@@ -13,20 +14,17 @@ export default function FolloweeList() {
     if (following.isLoading) return <Loader active />
     return (
         <div>
-            {following.data!.length === 0 ? (
-                <Message>You aren't following anyone yet</Message>
-            ) : (
-                <List verticalAlign='middle'>
-                    {following.data!.map((followee) => (
-                        <List.Item key={followee}>
-                            <SafetyButton floated='right' size='mini' onClick={() => unfollowMutation(followee)}>
-                                Unfollow
-                            </SafetyButton>
-                            <UserInList id={followee} />
-                        </List.Item>
-                    ))}
-                </List>
-            )}
+            <FollowUserForm />
+            <List verticalAlign='middle'>
+                {following.data!.map((followee) => (
+                    <List.Item key={followee}>
+                        <SafetyButton floated='right' size='mini' onClick={() => unfollowMutation(followee)}>
+                            Unfollow
+                        </SafetyButton>
+                        <UserInList id={followee} />
+                    </List.Item>
+                ))}
+            </List>
         </div>
     )
 }
