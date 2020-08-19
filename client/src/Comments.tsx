@@ -4,12 +4,8 @@ import { useQuery } from 'react-query'
 import { getComments } from './postCrypto'
 import SingleComment from './SingleComment'
 
-export interface Props {
-    postId: number
-}
-
-export default function (props: Props) {
-    const commentsQuery = useQuery(['comments', props.postId], getComments)
+export default function ({ postId }: { postId: number }) {
+    const commentsQuery = useQuery(['comments', postId], getComments)
     if (commentsQuery.isError)
         return (
             <div>

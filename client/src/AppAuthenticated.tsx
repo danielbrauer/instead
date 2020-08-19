@@ -33,7 +33,7 @@ export default function () {
     return (
         <div>
             <Menu inverted fixed='top' size='small'>
-                <Menu.Item header onClick={() => window.location.pathname !== '/home' && history.push('/home')}>
+                <Menu.Item header onClick={() => history.location.pathname !== '/home' && history.push('/home')}>
                     Instead
                 </Menu.Item>
                 <Menu.Item onClick={() => history.push('/new')}>
