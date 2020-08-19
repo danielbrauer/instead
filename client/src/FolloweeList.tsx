@@ -18,9 +18,13 @@ export default function FolloweeList() {
             <List verticalAlign='middle'>
                 {following.data!.map((followee) => (
                     <List.Item key={followee}>
-                        <SafetyButton floated='right' size='mini' onClick={() => unfollowMutation(followee)}>
-                            Unfollow
-                        </SafetyButton>
+                        <SafetyButton
+                            icon='x'
+                            color='red'
+                            floated='right'
+                            size='mini'
+                            onClick={() => unfollowMutation(followee)}
+                        />
                         <UserInList id={followee} />
                     </List.Item>
                 ))}

@@ -39,7 +39,7 @@ export default function () {
                 <Menu.Item onClick={() => history.push('/new')}>
                     <Icon fitted name='camera' />
                 </Menu.Item>
-                <Menu.Item fitted position='right'>
+                <Menu.Menu position='right'>
                     <Menu.Item onClick={() => history.push('/followers')}>
                         <Icon fitted name='user' />
                         {requests.isSuccess && requests.data!.length > 0 ? (
@@ -57,7 +57,7 @@ export default function () {
                             <Dropdown.Item icon='sign-out' text='Log Out' onClick={logOutAndClear} />
                         </Dropdown.Menu>
                     </Dropdown>
-                </Menu.Item>
+                </Menu.Menu>
             </Menu>
             <br />
             <br />

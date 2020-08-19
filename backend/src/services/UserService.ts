@@ -10,21 +10,25 @@ import { NewUser } from 'auth'
 
 @Service()
 export default class UserService {
-
     private _onUserCreated = new SimpleEventDispatcher<number>()
     private _onUserAddedFollower = new SimpleEventDispatcher<FollowRelationship>()
     private _onUserLostFollower = new SimpleEventDispatcher<FollowRelationship>()
 
     constructor(private db: DatabaseService) {}
 
-    public get onUserCreated() { return this._onUserCreated.asEvent() }
-    public get onUserAddedFollower() { return this._onUserAddedFollower.asEvent() }
-    public get onUserLostFollower() { return this._onUserLostFollower.asEvent() }
+    public get onUserCreated() {
+        return this._onUserCreated.asEvent()
+    }
+    public get onUserAddedFollower() {
+        return this._onUserAddedFollower.asEvent()
+    }
+    public get onUserLostFollower() {
+        return this._onUserLostFollower.asEvent()
+    }
 
     async getUserById(userId: number) {
         const [user] = await Users.getById.run({ userId }, this.db.pool)
-        if (!user)
-            throw new ServerError('User does not exist')
+        if (!user) throw new ServerError('User does not exist')
         return user
     }
 
@@ -39,7 +43,7 @@ export default class UserService {
     }
 
     async countByName(username: string) {
-        const [{count}] = await Users.countByName.run({ username }, this.db.pool)
+        const [{ count }] = await Users.countByName.run({ username }, this.db.pool)
         return count
     }
 
@@ -49,40 +53,55 @@ export default class UserService {
         return user
     }
 
-    async addFollowRequest(requesterId: number, requesteeName: string) {
-        await this.db.transaction(async(client) => {
-            const [requestee] = await Users.getByName.run({ username: requesteeName }, client)
-            if (!requestee)
-                throw new ServerError('User does not exist')
-            if (requestee.id === requesterId)
-                throw new ServerError('You don\'t need to follow yourself')
-            const [{count: followCount}] = await Followers.count.run(
-                { followerId: requesterId, followeeId: requestee.id },
-                client
+    async addFollowRequestByName(requesterId: number, requesteeName: string) {
+        const [requestee] = await Users.getByName.run({ username: requesteeName }, this.db.pool)
+        if (!requestee) throw new ServerError('User does not exist')
+        await this.addFollowRequest(requesterId, requestee.id)
+    }
+
+    async addFollowRequestById(requesterId: number, requesteeId: number) {
+        const [{ count: followCount }] = await Followers.count.run(
+            { followerId: requesteeId, followeeId: requesterId },
+            this.db.pool,
+        )
+        if (followCount === 0) throw new ServerError('Requestee does not follow you')
+        await this.addFollowRequest(requesterId, requesteeId)
+    }
+
+    async addFollowRequest(requesterId: number, requesteeId: number) {
+        await this.db.transaction(async (client) => {
+            if (requesteeId === requesterId)
+                throw new ServerError("You don't need to follow yourself")
+            const [{ count: followCount }] = await Followers.count.run(
+                { followerId: requesterId, followeeId: requesteeId },
+                client,
             )
-            if (followCount !== 0)
-                throw new ServerError('Already following user')
-            const [{count: requestCount}] = await FollowRequests.count.run(
-                { requesterId: requesterId, requesteeId: requestee.id },
-                client
+            if (followCount !== 0) throw new ServerError('Already following user')
+            const [{ count: requestCount }] = await FollowRequests.count.run(
+                { requesterId, requesteeId },
+                client,
             )
-            if (requestCount !== 0)
-                throw new ServerError('Request already exists')
-            await FollowRequests.create.run({ requesterId, requesteeId: requestee.id }, client)
+            if (requestCount !== 0) throw new ServerError('Request already exists')
+            await FollowRequests.create.run({ requesterId, requesteeId }, client)
         })
     }
 
     async acceptFollowRequest(requesterId: number, requesteeId: number) {
-        await this.db.transaction(async(client) => {
-            const [request] = await FollowRequests.destroyAndReturn.run({ requesterId, requesteeId}, client)
-            if (!request)
-                throw new ServerError('No such follow request')
+        await this.db.transaction(async (client) => {
+            const [request] = await FollowRequests.destroyAndReturn.run(
+                { requesterId, requesteeId },
+                client,
+            )
+            if (!request) throw new ServerError('No such follow request')
             await Followers.create.run(
-                { followerId: request.requesterId, followeeId: request.requesteeId},
-                client
+                { followerId: request.requesterId, followeeId: request.requesteeId },
+                client,
             )
         })
-        this._onUserAddedFollower.dispatchAsync({ followerId: requesterId, followeeId: requesteeId })
+        this._onUserAddedFollower.dispatchAsync({
+            followerId: requesterId,
+            followeeId: requesteeId,
+        })
     }
 
     async removeFollowRequest(requesterId: number, requesteeId: number) {
@@ -91,23 +110,26 @@ export default class UserService {
 
     async getFollowRequests(requesteeId: number) {
         const requests = await FollowRequests.getByRequesteeId.run({ requesteeId }, this.db.pool)
-        return requests.map(r => r.requesterId)
+        return requests.map((r) => r.requesterId)
+    }
+
+    async getSentFollowRequests(requesterId: number) {
+        const requests = await FollowRequests.getByRequesterId.run({ requesterId }, this.db.pool)
+        return requests.map((r) => r.requesteeId)
     }
 
     async getFollowers(followeeId: number) {
         const follows = await Followers.getByFolloweeId.run({ followeeId }, this.db.pool)
-        return follows.map(r => r.followerId)
+        return follows.map((r) => r.followerId)
     }
 
     async getFollowees(followerId: number) {
         const follows = await Followers.getByFollowerId.run({ followerId }, this.db.pool)
-        return follows.map(r => r.followeeId)
+        return follows.map((r) => r.followeeId)
     }
 
     async removeFollower(followerId: number, followeeId: number) {
         const [removed] = await Followers.destroy.run({ followerId, followeeId }, this.db.pool)
-        if (removed)
-            this._onUserLostFollower.dispatchAsync({ followerId, followeeId })
+        if (removed) this._onUserLostFollower.dispatchAsync({ followerId, followeeId })
     }
 }
-

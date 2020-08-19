@@ -219,8 +219,18 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.sendFollowRequestBody),
     async (req: ValidatedRequest<Schema.SendFollowRequestRequest>, res) => {
-        await userService.addFollowRequest(req.user.id, req.body.username)
-        return res.send(`Sent request to ${req.body.username}`)
+        await userService.addFollowRequestByName(req.user.id, req.body.username)
+        return res.send('Sent request!')
+    },
+)
+
+router.put(
+    '/sendFollowRequestDirect',
+    validator.query(Schema.empty),
+    validator.body(Schema.putByUserIdBody),
+    async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
+        await userService.addFollowRequestById(req.user.id, req.body.userId)
+        return res.send('Sent request!')
     },
 )
 
@@ -270,6 +280,16 @@ router.get(
     validator.body(Schema.empty),
     async (req, res) => {
         const requests = await userService.getFollowRequests(req.user.id)
+        return res.json(requests)
+    },
+)
+
+router.get(
+    '/getSentFollowRequests',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const requests = await userService.getSentFollowRequests(req.user.id)
         return res.json(requests)
     },
 )

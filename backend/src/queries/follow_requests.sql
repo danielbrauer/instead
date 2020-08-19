@@ -13,3 +13,6 @@ SELECT COUNT(*)::int FROM follow_requests WHERE requester_id = :requesterId AND 
 /* @name GetByRequesteeId */
 SELECT requester_id FROM follow_requests WHERE requestee_id = :requesteeId;
 
+/* @name GetByRequesterId */
+SELECT requestee_id FROM follow_requests WHERE requester_id = :requesterId;
+

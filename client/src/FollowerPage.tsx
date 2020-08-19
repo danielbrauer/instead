@@ -19,7 +19,7 @@ export default function FollowerPage() {
 
     return (
         <div>
-            <Menu fluid pointing>
+            <Menu secondary widths={2}>
                 <PathMenuItem name='Followers' path='/followers' />
                 <PathMenuItem name='Following' path='/following' />
             </Menu>

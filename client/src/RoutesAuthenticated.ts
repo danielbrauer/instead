@@ -170,8 +170,16 @@ export async function getUser(key: string, userId: number) {
 
 export async function sendFollowRequest(username: string) {
     await authorizedAxios.put('/sendFollowRequest', {
-        username: username,
+        username,
     })
+    queryCache.invalidateQueries('sentFollowRequests')
+}
+
+export async function sendFollowRequestDirect(userId: number) {
+    await authorizedAxios.put('/sendFollowRequestDirect', {
+        userId,
+    })
+    queryCache.invalidateQueries('sentFollowRequests')
 }
 
 export async function rejectFollowRequest(userId: number) {
@@ -216,5 +224,10 @@ export async function getFollowees() {
 
 export async function getFollowRequests() {
     const response = await authorizedAxios.get<number[]>('/getFollowRequests')
+    return response.data
+}
+
+export async function getSentFollowRequests() {
+    const response = await authorizedAxios.get<number[]>('/getSentFollowRequests')
     return response.data
 }

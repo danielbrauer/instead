@@ -52,7 +52,9 @@ describe('UserService', () => {
             mocked(Users.getLoginInfoByName.run).mockResolvedValueOnce([userInstance])
             const user = await userService.getLoginInfo(userInstance.username)
             expect(user).toEqual(userInstance)
-            expect(mocked(Users.getLoginInfoByName.run).mock.calls[0][0]).toEqual({ username: userInstance.username })
+            expect(mocked(Users.getLoginInfoByName.run).mock.calls[0][0]).toEqual({
+                username: userInstance.username,
+            })
         })
 
         test('should return null if no such user', async () => {
@@ -87,7 +89,9 @@ describe('UserService', () => {
         test('should count user who exists', async () => {
             mocked(Users.countByName.run).mockResolvedValueOnce([{ count: 1 }])
             const count = await userService.countByName('AntisocialAardvark')
-            expect(mocked(Users.countByName.run).mock.calls[0][0]).toEqual({ username: 'AntisocialAardvark' })
+            expect(mocked(Users.countByName.run).mock.calls[0][0]).toEqual({
+                username: 'AntisocialAardvark',
+            })
             expect(count).toEqual(1)
         })
 
@@ -130,7 +134,7 @@ describe('UserService', () => {
         })
     })
 
-    describe('addFollowRequest', () => {
+    describe('addFollowRequestByName', () => {
         const requestee: Users.IGetByNameResult = {
             id: 2,
         }
@@ -139,9 +143,14 @@ describe('UserService', () => {
             mocked(Users.getByName.run).mockResolvedValueOnce([requestee])
             mocked(Followers.count.run).mockResolvedValueOnce([{ count: 0 }])
             mocked(FollowRequests.count.run).mockResolvedValueOnce([{ count: 0 }])
-            await userService.addFollowRequest(0, 'AntisocialAardvark')
-            expect(mocked(Users.getByName.run).mock.calls[0][0]).toEqual({ username: 'AntisocialAardvark' })
-            expect(mocked(Followers.count.run).mock.calls[0][0]).toEqual({ followerId: 0, followeeId: requestee.id })
+            await userService.addFollowRequestByName(0, 'AntisocialAardvark')
+            expect(mocked(Users.getByName.run).mock.calls[0][0]).toEqual({
+                username: 'AntisocialAardvark',
+            })
+            expect(mocked(Followers.count.run).mock.calls[0][0]).toEqual({
+                followerId: 0,
+                followeeId: requestee.id,
+            })
             expect(mocked(FollowRequests.count.run).mock.calls[0][0]).toEqual({
                 requesterId: 0,
                 requesteeId: requestee.id,
@@ -150,25 +159,33 @@ describe('UserService', () => {
 
         test('should throw if requestee does not exist', async () => {
             mocked(Users.getByName.run).mockResolvedValueOnce([])
-            await expect(userService.addFollowRequest(0, 'AntisocialAardvark')).rejects.toThrow()
+            await expect(
+                userService.addFollowRequestByName(0, 'AntisocialAardvark'),
+            ).rejects.toThrow()
         })
 
         test('should throw if requestee id is requester id', async () => {
             mocked(Users.getByName.run).mockResolvedValueOnce([requestee])
-            await expect(userService.addFollowRequest(requestee.id, 'AntisocialAardvark')).rejects.toThrow()
+            await expect(
+                userService.addFollowRequestByName(requestee.id, 'AntisocialAardvark'),
+            ).rejects.toThrow()
         })
 
         test('should throw if already following', async () => {
             mocked(Users.getByName.run).mockResolvedValueOnce([requestee])
             mocked(Followers.count.run).mockResolvedValueOnce([{ count: 1 }])
-            await expect(userService.addFollowRequest(0, 'AntisocialAardvark')).rejects.toThrow()
+            await expect(
+                userService.addFollowRequestByName(0, 'AntisocialAardvark'),
+            ).rejects.toThrow()
         })
 
         test('should throw if already requested', async () => {
             mocked(Users.getByName.run).mockResolvedValueOnce([requestee])
             mocked(Followers.count.run).mockResolvedValueOnce([{ count: 0 }])
             mocked(FollowRequests.count.run).mockResolvedValueOnce([{ count: 1 }])
-            await expect(userService.addFollowRequest(0, 'AntisocialAardvark')).rejects.toThrow()
+            await expect(
+                userService.addFollowRequestByName(0, 'AntisocialAardvark'),
+            ).rejects.toThrow()
         })
     })
 
@@ -180,10 +197,15 @@ describe('UserService', () => {
             }
             let notifiedRelationship: FollowRelationship
             mocked(FollowRequests.destroyAndReturn.run).mockResolvedValueOnce([request])
-            userService.onUserAddedFollower.subscribe((relationship) => (notifiedRelationship = relationship))
+            userService.onUserAddedFollower.subscribe(
+                (relationship) => (notifiedRelationship = relationship),
+            )
             await userService.acceptFollowRequest(0, 1)
             expect(mocked(FollowRequests.destroyAndReturn.run).mock.calls[0][0]).toEqual(request)
-            expect(mocked(Followers.create.run).mock.calls[0][0]).toEqual({ followerId: 0, followeeId: 1 })
+            expect(mocked(Followers.create.run).mock.calls[0][0]).toEqual({
+                followerId: 0,
+                followeeId: 1,
+            })
             jest.runAllTimers()
             expect(notifiedRelationship.followerId).toEqual(0)
             expect(notifiedRelationship.followeeId).toEqual(1)
@@ -198,7 +220,10 @@ describe('UserService', () => {
     describe('removeFollowRequest', () => {
         test('should destroy relationship', async () => {
             await userService.removeFollowRequest(0, 1)
-            expect(mocked(FollowRequests.destroy.run).mock.calls[0][0]).toEqual({ requesterId: 0, requesteeId: 1 })
+            expect(mocked(FollowRequests.destroy.run).mock.calls[0][0]).toEqual({
+                requesterId: 0,
+                requesteeId: 1,
+            })
         })
     })
 
@@ -212,7 +237,9 @@ describe('UserService', () => {
             ]
             mocked(FollowRequests.getByRequesteeId.run).mockResolvedValueOnce(sampleRequests)
             const result = await userService.getFollowRequests(1)
-            expect(mocked(FollowRequests.getByRequesteeId.run).mock.calls[0][0]).toEqual({ requesteeId: 1 })
+            expect(mocked(FollowRequests.getByRequesteeId.run).mock.calls[0][0]).toEqual({
+                requesteeId: 1,
+            })
             expect(result).toEqual([0, 2, 3, 4])
         })
     })
@@ -227,7 +254,9 @@ describe('UserService', () => {
             ]
             mocked(Followers.getByFolloweeId.run).mockResolvedValueOnce(sampleFollowers)
             const result = await userService.getFollowers(1)
-            expect(mocked(Followers.getByFolloweeId.run).mock.calls[0][0]).toEqual({ followeeId: 1 })
+            expect(mocked(Followers.getByFolloweeId.run).mock.calls[0][0]).toEqual({
+                followeeId: 1,
+            })
             expect(result).toEqual([0, 2, 3, 4])
         })
     })
@@ -242,7 +271,9 @@ describe('UserService', () => {
             ]
             mocked(Followers.getByFollowerId.run).mockResolvedValueOnce(sampleFollowees)
             const result = await userService.getFollowees(1)
-            expect(mocked(Followers.getByFollowerId.run).mock.calls[0][0]).toEqual({ followerId: 1 })
+            expect(mocked(Followers.getByFollowerId.run).mock.calls[0][0]).toEqual({
+                followerId: 1,
+            })
             expect(result).toEqual([0, 2, 3, 4])
         })
     })
@@ -255,7 +286,9 @@ describe('UserService', () => {
             }
             let notifiedRelationship: FollowRelationship
             mocked(Followers.destroy.run).mockResolvedValueOnce([request])
-            userService.onUserLostFollower.subscribe((relationship) => (notifiedRelationship = relationship))
+            userService.onUserLostFollower.subscribe(
+                (relationship) => (notifiedRelationship = relationship),
+            )
             await userService.removeFollower(0, 1)
             expect(mocked(Followers.destroy.run).mock.calls[0][0]).toEqual(request)
             jest.runAllTimers()

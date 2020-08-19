@@ -1,4 +1,4 @@
-/** Types generated for queries found in "./src/queries/follow_requests.sql" */
+/** Types generated for queries found in "src/queries/follow_requests.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
 /** 'Create' parameters type */
@@ -135,5 +135,32 @@ const getByRequesteeIdIR: any = {"name":"GetByRequesteeId","params":[{"name":"re
  * ```
  */
 export const getByRequesteeId = new PreparedQuery<IGetByRequesteeIdParams,IGetByRequesteeIdResult>(getByRequesteeIdIR);
+
+
+/** 'GetByRequesterId' parameters type */
+export interface IGetByRequesterIdParams {
+  requesterId: number | null | void;
+}
+
+/** 'GetByRequesterId' return type */
+export interface IGetByRequesterIdResult {
+  requesteeId: number;
+}
+
+/** 'GetByRequesterId' query type */
+export interface IGetByRequesterIdQuery {
+  params: IGetByRequesterIdParams;
+  result: IGetByRequesterIdResult;
+}
+
+const getByRequesterIdIR: any = {"name":"GetByRequesterId","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":693,"b":703,"line":17,"col":63}]}}],"usedParamSet":{"requesterId":true},"statement":{"body":"SELECT requestee_id FROM follow_requests WHERE requester_id = :requesterId","loc":{"a":630,"b":703,"line":17,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT requestee_id FROM follow_requests WHERE requester_id = :requesterId
+ * ```
+ */
+export const getByRequesterId = new PreparedQuery<IGetByRequesterIdParams,IGetByRequesterIdResult>(getByRequesterIdIR);
 
 
