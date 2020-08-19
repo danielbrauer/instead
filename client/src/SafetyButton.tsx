@@ -15,16 +15,16 @@ export default function SafetyButton(props: ButtonProps) {
         setTapped(false)
     }
 
-    if (tapped)
+    if (!tapped)
         return (
-            <Button onClick={props.onClick} negative {...props}>
-                Confirm
+            <Button {...props} onClick={firstTap}>
+                {props.children}
             </Button>
         )
     else
         return (
-            <Button onClick={firstTap} {...props}>
-                {props.children}
+            <Button {...props} negative>
+                Confirm
             </Button>
         )
 }
