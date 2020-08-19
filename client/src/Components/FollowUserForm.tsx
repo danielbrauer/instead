@@ -1,6 +1,6 @@
 import React from 'react'
 import { useInput } from './useInput'
-import { Form, Message, Segment } from 'semantic-ui-react'
+import { Form, Message } from 'semantic-ui-react'
 import { useMutation } from 'react-query'
 import { sendFollowRequest } from '../RoutesAuthenticated'
 
@@ -15,20 +15,27 @@ export default function FollowUserForm() {
     }
 
     return (
-        <Segment>
+        <>
             To follow a user, enter their username:
             <br />
             <br />
             <Form
                 error={sendFollowRequestQuery.isError}
                 success={sendFollowRequestQuery.isSuccess}
-                onSubmit={handleSubmit}
+                loading={sendFollowRequestQuery.isLoading}
                 size='large'
             >
-                <Form.Group>
-                    <Form.Input placeholder='AdjectiveAnimal' name='username' {...bindUsername} />
-                    <Form.Button size='large' content='Request' disabled={username === ''} />
-                </Form.Group>
+                <Form.Input
+                    placeholder='AdjectiveAnimal'
+                    name='username'
+                    action={{
+                        primary: true,
+                        content: 'Request',
+                        disabled: username === '',
+                        onClick: handleSubmit,
+                    }}
+                    {...bindUsername}
+                />
                 <Message
                     error
                     header={"Can't follow"}
@@ -36,6 +43,6 @@ export default function FollowUserForm() {
                 />
                 <Message success header={'Success'} content={'Follow request sent'} />
             </Form>
-        </Segment>
+        </>
     )
 }
