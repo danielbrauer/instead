@@ -12,6 +12,7 @@ import {
 } from '../../backend/src/types/api'
 import { queryCache } from 'react-query'
 import { createKeysForNewFollower } from './postCrypto'
+import CurrentUser from './CurrentUser'
 
 const baseURL = `${config.serverUrl}/api`
 
@@ -168,9 +169,9 @@ export async function getUser(key: string, userId: number) {
     return response.data
 }
 
-export async function sendFollowRequest(username: string) {
+export async function sendFollowRequest(friendCode: string) {
     await authorizedAxios.put('/sendFollowRequest', {
-        username,
+        friendCode,
     })
     queryCache.invalidateQueries('sentFollowRequests')
 }
@@ -230,4 +231,11 @@ export async function getFollowRequests() {
 export async function getSentFollowRequests() {
     const response = await authorizedAxios.get<number[]>('/getSentFollowRequests')
     return response.data
+}
+
+export async function regenerateFriendCode() {
+    const response = await authorizedAxios.post<string>('/regenerateFriendCode')
+    const code = response.data
+    CurrentUser.setFriendCode(code)
+    return code
 }

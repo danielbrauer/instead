@@ -5,18 +5,18 @@ import { useMutation } from 'react-query'
 import { sendFollowRequest } from '../RoutesAuthenticated'
 
 export default function FollowUserForm() {
-    const { value: username, bind: bindUsername, reset: resetUsername } = useInput('')
-    const [sendFollowRequestMutation, sendFollowRequestQuery] = useMutation(sendFollowRequest)
+    const { value: code, bind: bindCode, reset: resetCode } = useInput('')
+    const [sendFollowRequestMutation, sendFollowRequestQuery] = useMutation(sendFollowRequest, { throwOnError: false })
 
     async function handleSubmit() {
         sendFollowRequestQuery.reset()
-        await sendFollowRequestMutation(username)
-        resetUsername()
+        await sendFollowRequestMutation(code)
+        resetCode()
     }
 
     return (
         <>
-            To follow a user, enter their username:
+            To follow a user, enter their Friend Code:
             <br />
             <br />
             <Form
@@ -26,15 +26,15 @@ export default function FollowUserForm() {
                 size='large'
             >
                 <Form.Input
-                    placeholder='AdjectiveAnimal'
-                    name='username'
+                    placeholder='XXX'
+                    name='friendCode'
                     action={{
                         primary: true,
                         content: 'Request',
-                        disabled: username === '',
+                        disabled: code === '',
                         onClick: handleSubmit,
                     }}
-                    {...bindUsername}
+                    {...bindCode}
                 />
                 <Message
                     error

@@ -219,7 +219,7 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.sendFollowRequestBody),
     async (req: ValidatedRequest<Schema.SendFollowRequestRequest>, res) => {
-        await userService.addFollowRequestByName(req.user.id, req.body.username)
+        await userService.addFollowRequestByCode(req.user.id, req.body.friendCode)
         return res.send('Sent request!')
     },
 )
@@ -311,6 +311,16 @@ router.get(
     async (req, res) => {
         const followees = await userService.getFollowees(req.user.id)
         return res.json(followees)
+    },
+)
+
+router.post(
+    '/regenerateFriendCode',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const code = await userService.regenerateFriendCode(req.user.id)
+        return res.json(code)
     },
 )
 

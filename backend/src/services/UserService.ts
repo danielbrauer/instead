@@ -3,6 +3,7 @@ import DatabaseService from './DatabaseService'
 import * as Users from '../queries/users.gen'
 import * as Followers from '../queries/followers.gen'
 import * as FollowRequests from '../queries/follow_requests.gen'
+import unambiguousString from '../util/unambiguousString'
 import { SimpleEventDispatcher } from 'strongly-typed-events'
 import { FollowRelationship } from '../types/api'
 import { ServerError } from '../middleware/errors'
@@ -53,8 +54,8 @@ export default class UserService {
         return user
     }
 
-    async addFollowRequestByName(requesterId: number, requesteeName: string) {
-        const [requestee] = await Users.getByName.run({ username: requesteeName }, this.db.pool)
+    async addFollowRequestByCode(requesterId: number, friendCode: string) {
+        const [requestee] = await Users.getByFriendCode.run({ friendCode }, this.db.pool)
         if (!requestee) throw new ServerError('User does not exist')
         await this.addFollowRequest(requesterId, requestee.id)
     }
@@ -131,5 +132,20 @@ export default class UserService {
     async removeFollower(followerId: number, followeeId: number) {
         const [removed] = await Followers.destroy.run({ followerId, followeeId }, this.db.pool)
         if (removed) this._onUserLostFollower.dispatchAsync({ followerId, followeeId })
+    }
+
+    async regenerateFriendCode(userId: number) {
+        const codeLength = Math.floor(Math.log2(userId) / 5.0) + 3 //three digits plus 1 for every power of 32
+        let code = ''
+        for (let i = 0; i < 5; ++i) {
+            code = await unambiguousString(codeLength)
+            try {
+                await Users.setFriendCode.run({ friendCode: code, userId }, this.db.pool)
+                return code
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        throw new ServerError('Too many hits. Please try again.')
     }
 }

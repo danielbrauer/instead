@@ -4,6 +4,7 @@ export interface CurrentUserInfo {
     id: number
     username: string
     displayName: string
+    friendCode: string
     secretKey: string
     accountKeys: CryptoKeyPair
     accountKeysJwk?: {
@@ -36,6 +37,10 @@ class CurrentUser {
         return CurrentUser.info.username
     }
 
+    static getFriendCode(): string {
+        return CurrentUser.info.friendCode
+    }
+
     static getDisplayName(): string {
         return CurrentUser.info.displayName
     }
@@ -50,16 +55,24 @@ class CurrentUser {
         return CurrentUser.info.accountKeys
     }
 
-    static async set(info: CurrentUserInfo) {
-        CurrentUser._info = info
-        const accountKeysJwk = await exportAccountKeysToJwks(info.accountKeys)
-        CurrentUser._info.accountKeysJwk = accountKeysJwk
-        sessionStorage.setItem(kUserInfoKey, JSON.stringify(info))
-        localStorage.setItem(kSecretKeyKey, info.secretKey)
+    static async storeCurrentInfo() {
+        sessionStorage.setItem(kUserInfoKey, JSON.stringify(CurrentUser._info))
+        localStorage.setItem(kSecretKeyKey, CurrentUser._info.secretKey)
     }
 
     static async setSecretKey(secretKey: string) {
         localStorage.setItem(kSecretKeyKey, secretKey)
+    }
+
+    static async set(info: CurrentUserInfo) {
+        CurrentUser._info = info
+        const accountKeysJwk = await exportAccountKeysToJwks(CurrentUser._info.accountKeys)
+        CurrentUser._info.accountKeysJwk = accountKeysJwk
+    }
+
+    static async setFriendCode(newCode: string) {
+        CurrentUser._info.friendCode = newCode
+        await CurrentUser.storeCurrentInfo()
     }
 
     static clear() {

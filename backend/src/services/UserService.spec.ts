@@ -71,6 +71,7 @@ describe('UserService', () => {
                 privateKeyIv: 'aaaaa',
                 mukSalt: '0FFFF',
                 publicKey: 'aaaaa',
+                friendCode: 'LOL',
             }
             mocked(Users.getUserInfo.run).mockResolvedValueOnce([userInstance])
             const user = await userService.getUserInfo(0)
@@ -134,17 +135,17 @@ describe('UserService', () => {
         })
     })
 
-    describe('addFollowRequestByName', () => {
-        const requestee: Users.IGetByNameResult = {
+    describe('addFollowRequestByCode', () => {
+        const requestee: Users.IGetByFriendCodeResult = {
             id: 2,
         }
 
         test('should create a new request', async () => {
-            mocked(Users.getByName.run).mockResolvedValueOnce([requestee])
+            mocked(Users.getByFriendCode.run).mockResolvedValueOnce([requestee])
             mocked(Followers.count.run).mockResolvedValueOnce([{ count: 0 }])
             mocked(FollowRequests.count.run).mockResolvedValueOnce([{ count: 0 }])
-            await userService.addFollowRequestByName(0, 'AntisocialAardvark')
-            expect(mocked(Users.getByName.run).mock.calls[0][0]).toEqual({
+            await userService.addFollowRequestByCode(0, 'AntisocialAardvark')
+            expect(mocked(Users.getByFriendCode.run).mock.calls[0][0]).toEqual({
                 username: 'AntisocialAardvark',
             })
             expect(mocked(Followers.count.run).mock.calls[0][0]).toEqual({
@@ -158,33 +159,33 @@ describe('UserService', () => {
         })
 
         test('should throw if requestee does not exist', async () => {
-            mocked(Users.getByName.run).mockResolvedValueOnce([])
+            mocked(Users.getByFriendCode.run).mockResolvedValueOnce([])
             await expect(
-                userService.addFollowRequestByName(0, 'AntisocialAardvark'),
+                userService.addFollowRequestByCode(0, 'AntisocialAardvark'),
             ).rejects.toThrow()
         })
 
         test('should throw if requestee id is requester id', async () => {
-            mocked(Users.getByName.run).mockResolvedValueOnce([requestee])
+            mocked(Users.getByFriendCode.run).mockResolvedValueOnce([requestee])
             await expect(
-                userService.addFollowRequestByName(requestee.id, 'AntisocialAardvark'),
+                userService.addFollowRequestByCode(requestee.id, 'AntisocialAardvark'),
             ).rejects.toThrow()
         })
 
         test('should throw if already following', async () => {
-            mocked(Users.getByName.run).mockResolvedValueOnce([requestee])
+            mocked(Users.getByFriendCode.run).mockResolvedValueOnce([requestee])
             mocked(Followers.count.run).mockResolvedValueOnce([{ count: 1 }])
             await expect(
-                userService.addFollowRequestByName(0, 'AntisocialAardvark'),
+                userService.addFollowRequestByCode(0, 'AntisocialAardvark'),
             ).rejects.toThrow()
         })
 
         test('should throw if already requested', async () => {
-            mocked(Users.getByName.run).mockResolvedValueOnce([requestee])
+            mocked(Users.getByFriendCode.run).mockResolvedValueOnce([requestee])
             mocked(Followers.count.run).mockResolvedValueOnce([{ count: 0 }])
             mocked(FollowRequests.count.run).mockResolvedValueOnce([{ count: 1 }])
             await expect(
-                userService.addFollowRequestByName(0, 'AntisocialAardvark'),
+                userService.addFollowRequestByCode(0, 'AntisocialAardvark'),
             ).rejects.toThrow()
         })
     })

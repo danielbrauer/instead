@@ -107,7 +107,7 @@ export interface GetUserPostsRequest extends ValidatedRequestSchema {
 }
 
 export const sendFollowRequestBody = Joi.object({
-    username: Joi.string().regex(/^[a-zA-Z]+$/, 'alphabetical'),
+    friendCode: Joi.string().regex(/^[A-HJ-NP-Z2-9]+$/, 'friend code'),
 })
 
 export interface SendFollowRequestRequest extends ValidatedRequestSchema {

@@ -76,16 +76,16 @@ export async function login(info: LoginInfo) {
         info.username,
         srpKey,
     )
-    const userInfo = await finishLogin(clientSession.proof)
     const {
         serverSessionProof,
         userId,
         displayName,
+        friendCode,
         privateKey: privateKeyEnc,
         privateKeyIv,
         publicKey: publicKeyJwk,
         mukSalt,
-    } = userInfo
+    } = await finishLogin(clientSession.proof)
     srp.verifySession(clientEphemeral.public, clientSession, serverSessionProof)
 
     const mukHex = await derivePrivateKey(mukSalt, info.password, info.secretKey, info.username)
@@ -106,6 +106,7 @@ export async function login(info: LoginInfo) {
     }
     return {
         id: userId,
+        friendCode,
         username: info.username,
         displayName,
         secretKey: info.secretKey,
@@ -113,11 +114,16 @@ export async function login(info: LoginInfo) {
     }
 }
 
-function createSecretKey() {
+export function createSecureUnambiguousString(length: number) {
     const characters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'
-    const values = Crypto.getRandomValues(new Uint8Array(26))
+    const values = Crypto.getRandomValues(new Uint8Array(length))
     let output = ''
     values.forEach((x) => (output += characters.charAt(x % 32)))
+    return output
+}
+
+function createSecretKey() {
+    const output = createSecureUnambiguousString(26)
     return 'A1-' + output
 }
 

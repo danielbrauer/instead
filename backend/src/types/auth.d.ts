@@ -10,6 +10,7 @@ export type FinishLoginResult = {
     userId: number
     serverSessionProof: string
     displayName: string
+    friendCode: string
     privateKey: string
     privateKeyIv: string
     publicKey: JsonWebKey

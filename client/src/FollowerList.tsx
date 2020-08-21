@@ -9,6 +9,7 @@ import {
     getFollowees,
     getSentFollowRequests,
 } from './RoutesAuthenticated'
+import FriendCodeDisplay from './Components/FriendCodeDisplay'
 
 export default function FollowerList() {
     const requests = useQuery('followRequests', getFollowRequests)
@@ -62,6 +63,7 @@ export default function FollowerList() {
 
     return (
         <>
+            <FriendCodeDisplay />
             {requests.data!.length + followers.data!.length === 0 ? (
                 <Message>You don't have any followers yet</Message>
             ) : null}
