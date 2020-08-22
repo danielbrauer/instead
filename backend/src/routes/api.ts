@@ -40,7 +40,7 @@ router.get(
     validator.query(Schema.getHomePostsQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.GetHomePostsRequest>, res) => {
-        const posts = await postService.getHomePosts(req.user.id, req.query.pageIndex)
+        const posts = await postService.getHomePosts(req.userId, req.query.pageIndex)
         return res.json(posts)
     },
 )
@@ -52,7 +52,7 @@ router.get(
     async (req: ValidatedRequest<Schema.GetUserPostsRequest>, res) => {
         const posts = await postService.getUserPosts(
             req.query.userId,
-            req.user.id,
+            req.userId,
             req.query.pageIndex,
         )
         return res.json(posts)
@@ -64,7 +64,7 @@ router.get(
     validator.query(Schema.postByIdQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.PostByIdRequest>, res) => {
-        const post = await postService.getPost(req.query.id, req.user.id)
+        const post = await postService.getPost(req.query.id, req.userId)
         return res.json(post)
     },
 )
@@ -74,7 +74,7 @@ router.get(
     validator.query(Schema.postByIdQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.PostByIdRequest>, res) => {
-        const comments = await postService.getCommentsForPost(req.query.id, req.user.id)
+        const comments = await postService.getCommentsForPost(req.query.id, req.userId)
         return res.json(comments)
     },
 )
@@ -84,7 +84,7 @@ router.post(
     validator.query(Schema.empty),
     validator.body(Schema.createCommentBody),
     async (req: ValidatedRequest<Schema.CreateCommentRequest>, res) => {
-        const result = await postService.addCommentToPost({ authorId: req.user.id, ...req.body })
+        const result = await postService.addCommentToPost({ authorId: req.userId, ...req.body })
         return res.json(result)
     },
 )
@@ -94,7 +94,7 @@ router.delete(
     validator.query(Schema.postByIdQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.PostByIdRequest>, res) => {
-        const result = await postService.deletePost(req.query.id, req.user.id)
+        const result = await postService.deletePost(req.query.id, req.userId)
         return res.json(result)
     },
 )
@@ -104,7 +104,7 @@ router.get(
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const currentKey = await keyService.getCurrentKey(req.user.id)
+        const currentKey = await keyService.getCurrentKey(req.userId)
         return res.json(currentKey)
     },
 )
@@ -114,7 +114,7 @@ router.post(
     validator.query(Schema.empty),
     validator.body(Schema.createCurrentKeyBody),
     async (req: ValidatedRequest<Schema.CreateCurrentKeyRequest>, res) => {
-        const keySetId = await keyService.createKeySet(req.user.id, req.body.key)
+        const keySetId = await keyService.createKeySet(req.userId, req.body.key)
         return res.json(keySetId)
     },
 )
@@ -124,7 +124,7 @@ router.get(
     validator.query(Schema.getKeyQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.GetKeyRequest>, res) => {
-        const key = await keyService.getKey(req.user.id, req.query.keySetId)
+        const key = await keyService.getKey(req.userId, req.query.keySetId)
         return res.json(key)
     },
 )
@@ -134,7 +134,7 @@ router.get(
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const keys = await keyService.getAllKeys(req.user.id)
+        const keys = await keyService.getAllKeys(req.userId)
         return res.json(keys)
     },
 )
@@ -165,7 +165,7 @@ router.get(
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const keys = await keyService.getFollowerPublicKeys(req.user.id)
+        const keys = await keyService.getFollowerPublicKeys(req.userId)
         return res.json(keys)
     },
 )
@@ -175,12 +175,12 @@ router.post(
     validator.query(Schema.empty),
     validator.body(Schema.startPostBody),
     async (req: ValidatedRequest<Schema.StartPostRequest>, res) => {
-        const currentKey = await keyService.getCurrentKey(req.user.id)
+        const currentKey = await keyService.getCurrentKey(req.userId)
         if (currentKey == null) throw new ServerError('No current key')
         if (currentKey.keySetId !== req.body.keySetId)
             throw new ServerError('Post key does not match current key')
         const postInfo = await postService.createPost(
-            req.user.id,
+            req.userId,
             req.body.keySetId,
             req.body.iv,
             req.body.md5,
@@ -198,7 +198,7 @@ router.put(
         if (req.body.success) {
             await postService.publishPost(req.body.postId)
         } else {
-            await postService.deletePost(req.body.postId, req.user.id)
+            await postService.deletePost(req.body.postId, req.userId)
         }
         return res.json({ success: true })
     },
@@ -219,7 +219,7 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.sendFollowRequestBody),
     async (req: ValidatedRequest<Schema.SendFollowRequestRequest>, res) => {
-        await userService.addFollowRequestByCode(req.user.id, req.body.friendCode)
+        await userService.addFollowRequestByCode(req.userId, req.body.friendCode)
         return res.send('Sent request!')
     },
 )
@@ -229,7 +229,7 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.putByUserIdBody),
     async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
-        await userService.addFollowRequestById(req.user.id, req.body.userId)
+        await userService.addFollowRequestById(req.userId, req.body.userId)
         return res.send('Sent request!')
     },
 )
@@ -239,7 +239,7 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.putByUserIdBody),
     async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
-        await userService.removeFollowRequest(req.body.userId, req.user.id)
+        await userService.removeFollowRequest(req.body.userId, req.userId)
         return res.json({ success: true })
     },
 )
@@ -249,7 +249,7 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.putByUserIdBody),
     async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
-        await userService.removeFollower(req.user.id, req.body.userId)
+        await userService.removeFollower(req.userId, req.body.userId)
         return res.json({ success: true })
     },
 )
@@ -259,7 +259,7 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.putByUserIdBody),
     async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
-        await userService.removeFollower(req.body.userId, req.user.id)
+        await userService.removeFollower(req.body.userId, req.userId)
         return res.json({ success: true })
     },
 )
@@ -269,7 +269,7 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.putByUserIdBody),
     async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
-        await userService.acceptFollowRequest(req.body.userId, req.user.id)
+        await userService.acceptFollowRequest(req.body.userId, req.userId)
         return res.json({ success: true })
     },
 )
@@ -279,7 +279,7 @@ router.get(
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const requests = await userService.getFollowRequests(req.user.id)
+        const requests = await userService.getFollowRequests(req.userId)
         return res.json(requests)
     },
 )
@@ -289,7 +289,7 @@ router.get(
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const requests = await userService.getSentFollowRequests(req.user.id)
+        const requests = await userService.getSentFollowRequests(req.userId)
         return res.json(requests)
     },
 )
@@ -299,7 +299,7 @@ router.get(
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const followers = await userService.getFollowers(req.user.id)
+        const followers = await userService.getFollowers(req.userId)
         return res.json(followers)
     },
 )
@@ -309,8 +309,18 @@ router.get(
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const followees = await userService.getFollowees(req.user.id)
+        const followees = await userService.getFollowees(req.userId)
         return res.json(followees)
+    },
+)
+
+router.get(
+    '/getFriendCode',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const code = await userService.getFriendCode(req.userId)
+        return res.json(code)
     },
 )
 
@@ -319,7 +329,7 @@ router.post(
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const code = await userService.regenerateFriendCode(req.user.id)
+        const code = await userService.regenerateFriendCode(req.userId)
         return res.json(code)
     },
 )

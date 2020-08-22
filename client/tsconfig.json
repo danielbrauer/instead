@@ -12,6 +12,7 @@
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
@@ -23,6 +24,6 @@
     "src"
   ],
   "references": [
-      { "path": "../backend/tsconfig.production.json" }
+      { "path": "../backend/tsconfig.json" }
   ]
 }

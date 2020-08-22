@@ -4,13 +4,7 @@ import crypto from '../util/crypto-promise'
 import { generateCombination } from '../util/animalGenerator'
 import * as config from '../config/config'
 import UserService from './UserService'
-import {
-    StartLoginResult,
-    FinishLoginResult,
-    StartSignupResult,
-    FinishSignupResult,
-    NewUser,
-} from 'auth'
+import { StartLoginResult, FinishLoginResult, StartSignupResult, NewUser } from 'auth'
 
 @Service()
 export default class AuthService {
@@ -67,24 +61,14 @@ export default class AuthService {
             loginInfo.user.verifier,
             clientSessionProof,
         )
-        session.user = {
-            id: loginInfo.user.id,
-            username: loginInfo.user.username,
-            displayName: loginInfo.user.displayName,
-        }
-        const {
-            privateKey,
-            privateKeyIv,
-            publicKey,
-            mukSalt,
-            friendCode,
-        } = await this.userService.getUserInfo(session.user.id)
+        session.userId = loginInfo.user.id
+        const { privateKey, privateKeyIv, publicKey, mukSalt } = await this.userService.getUserInfo(
+            session.userId,
+        )
         delete session.loginInfo
         return {
-            userId: session.user.id,
+            userId: session.userId,
             serverSessionProof: serverSession.proof,
-            displayName: loginInfo.user.displayName,
-            friendCode,
             privateKey,
             privateKeyIv,
             publicKey: publicKey as JsonWebKey,
@@ -105,15 +89,9 @@ export default class AuthService {
         throw new Error('Too many user name collisions!')
     }
 
-    async finishSignup(session: Express.Session, newUser: NewUser): Promise<FinishSignupResult> {
+    async finishSignup(session: Express.Session, newUser: NewUser) {
         if (!session.signupInfo) throw new Error("Session hasn't started signing in")
-        const newUserResult = await this.userService.create(newUser)
-        const user = {
-            username: session.signupInfo.username,
-            id: newUserResult.id,
-            displayName: newUser.displayName as string,
-        }
+        await this.userService.create(newUser)
         delete session.signupInfo
-        return { user }
     }
 }

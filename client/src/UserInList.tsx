@@ -9,7 +9,9 @@ export default function UserInList({ id }: { id: number }) {
     return (
         <>
             <Icon size='big' name='user' />
-            <InternalLink to={`/user/${id.toString()}`}>{user.data ? user.data!.displayName : 'loading'}</InternalLink>
+            <InternalLink to={`/user/${id.toString()}`}>
+                {user.data ? user.data!.displayName || user.data!.id.toString() : 'loading'}
+            </InternalLink>
         </>
     )
 }

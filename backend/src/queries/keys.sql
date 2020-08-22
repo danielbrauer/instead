@@ -44,3 +44,13 @@ DELETE FROM keys WHERE user_id = :followerId AND key_set_id IN (
     FROM key_sets
     WHERE owner_id = :followeeId
 );
+
+/* @name GetInfoKey */
+SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
+    SELECT info_key_set_id
+    FROM users
+    WHERE id = :ownerId
+);
+
+/* @name SetInfoKey */
+UPDATE users SET info_key_set_id = :newKey WHERE id = :userId;

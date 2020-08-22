@@ -56,8 +56,8 @@ router.post(
             username: req.session.signupInfo.username,
             ...req.body,
         }
-        const responseData = await authService.finishSignup(req.session, newUser)
-        return res.json(responseData)
+        await authService.finishSignup(req.session, newUser)
+        return res.json({ success: true })
     },
 )
 

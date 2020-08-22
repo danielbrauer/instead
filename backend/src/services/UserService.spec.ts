@@ -4,8 +4,8 @@ import * as Followers from '../queries/followers.gen'
 import * as FollowRequests from '../queries/follow_requests.gen'
 import DatabaseService from './DatabaseService'
 import UserService from './UserService'
-import { NewUser } from 'auth'
-import { FollowRelationship } from 'api'
+import { NewUser } from '../types/auth'
+import { FollowRelationship } from '../types/api'
 
 jest.mock('../queries/users.gen')
 jest.mock('../queries/followers.gen')
@@ -25,8 +25,8 @@ describe('UserService', () => {
         test('should get user who exists', async () => {
             const userInstance: Users.IGetByIdResult = {
                 id: 0,
-                username: 'AntisocialAardvark',
-                displayName: 'Randall',
+                displayName: 'someBase64',
+                displayNameIv: 'moreBase64',
             }
             mocked(Users.getById.run).mockResolvedValueOnce([userInstance])
             const user = await userService.getUserById(0)
@@ -47,7 +47,6 @@ describe('UserService', () => {
                 username: 'AntisocialAardvark',
                 srpSalt: '0FFFF',
                 verifier: '0FFFFF',
-                displayName: 'Gerald',
             }
             mocked(Users.getLoginInfoByName.run).mockResolvedValueOnce([userInstance])
             const user = await userService.getLoginInfo(userInstance.username)
@@ -71,7 +70,6 @@ describe('UserService', () => {
                 privateKeyIv: 'aaaaa',
                 mukSalt: '0FFFF',
                 publicKey: 'aaaaa',
-                friendCode: 'LOL',
             }
             mocked(Users.getUserInfo.run).mockResolvedValueOnce([userInstance])
             const user = await userService.getUserInfo(0)
@@ -106,7 +104,6 @@ describe('UserService', () => {
     describe('create', () => {
         const newUser: NewUser = {
             username: 'AntisocialAardvark',
-            displayName: 'Gerald',
             mukSalt: '0FFFF',
             srpSalt: '0FFFF',
             verifier: '0FFFFF',
@@ -122,8 +119,7 @@ describe('UserService', () => {
             let id = -1
             userService.onUserCreated.subscribe(async (createdId: number) => (id = createdId))
             mocked(Users.create.run).mockResolvedValueOnce([newId])
-            const createdUser = await userService.create(newUser)
-            expect(createdUser).toEqual(newId)
+            await userService.create(newUser)
             expect(mocked(Users.create.run).mock.calls[0][0]).toEqual(newUser)
             jest.runAllTimers()
             expect(id).toEqual(newId.id)

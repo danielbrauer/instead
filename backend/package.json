@@ -7,7 +7,7 @@
     "build": "tsc --project tsconfig.production.json",
     "test": "jest",
     "test-coverage": "jest --coverage",
-    "watch": "tsc-watch --onSuccess \"node --require dotenv/config --inspect dist/src/server.js\" --onFailure \"echo Compilation Failed\"",
+    "watch": "tsc-watch --noClear --onSuccess \"node --require dotenv/config --inspect dist/src/server.js\" --onFailure \"echo Compilation Failed\"",
     "watch-debug": "concurrently --kill-others \"yarn watch\" \"pgtyped -w -c pgtconfig.json\"",
     "types": "pgtyped -c pgtconfig.json",
     "migrate": "node-pg-migrate",

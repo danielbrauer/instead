@@ -63,7 +63,14 @@ export async function exportAccountKeysToJwks(keys: CryptoKeyPair) {
     return { privateKey, publicKey }
 }
 
-export async function login(info: LoginInfo) {
+export interface UserInfo {
+    id: number
+    username: string
+    secretKey: string
+    accountKeys: CryptoKeyPair
+}
+
+export async function login(info: LoginInfo): Promise<UserInfo> {
     console.log('logging in')
     const clientEphemeral = srp.generateEphemeral()
     const startResponse = await startLogin(info.username, clientEphemeral.public)
@@ -79,8 +86,6 @@ export async function login(info: LoginInfo) {
     const {
         serverSessionProof,
         userId,
-        displayName,
-        friendCode,
         privateKey: privateKeyEnc,
         privateKeyIv,
         publicKey: publicKeyJwk,
@@ -106,9 +111,7 @@ export async function login(info: LoginInfo) {
     }
     return {
         id: userId,
-        friendCode,
         username: info.username,
-        displayName,
         secretKey: info.secretKey,
         accountKeys,
     }
@@ -156,8 +159,8 @@ export async function signup(info: NewUserInfo): Promise<SignupResult> {
         name: 'AES-GCM',
         iv: accountPrivateIv,
     })
+
     await finishSignup(
-        info.displayName,
         srpSalt,
         verifier,
         mukSalt,

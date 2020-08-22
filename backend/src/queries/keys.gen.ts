@@ -1,4 +1,4 @@
-/** Types generated for queries found in "./src/queries/keys.sql" */
+/** Types generated for queries found in "src/queries/keys.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
@@ -269,5 +269,65 @@ const removeFollowerKeysIR: any = {"name":"RemoveFollowerKeys","params":[{"name"
  * ```
  */
 export const removeFollowerKeys = new PreparedQuery<IRemoveFollowerKeysParams,IRemoveFollowerKeysResult>(removeFollowerKeysIR);
+
+
+/** 'GetInfoKey' parameters type */
+export interface IGetInfoKeyParams {
+  userId: number | null | void;
+  ownerId: number | null | void;
+}
+
+/** 'GetInfoKey' return type */
+export interface IGetInfoKeyResult {
+  key: string;
+  userId: number;
+  keySetId: number;
+}
+
+/** 'GetInfoKey' query type */
+export interface IGetInfoKeyQuery {
+  params: IGetInfoKeyParams;
+  result: IGetInfoKeyResult;
+}
+
+const getInfoKeyIR: any = {"name":"GetInfoKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1200,"b":1205,"line":49,"col":36}]}},{"name":"ownerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1285,"b":1291,"line":52,"col":16}]}}],"usedParamSet":{"userId":true,"ownerId":true},"statement":{"body":"SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (\n    SELECT info_key_set_id\n    FROM users\n    WHERE id = :ownerId\n)","loc":{"a":1164,"b":1293,"line":49,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
+ *     SELECT info_key_set_id
+ *     FROM users
+ *     WHERE id = :ownerId
+ * )
+ * ```
+ */
+export const getInfoKey = new PreparedQuery<IGetInfoKeyParams,IGetInfoKeyResult>(getInfoKeyIR);
+
+
+/** 'SetInfoKey' parameters type */
+export interface ISetInfoKeyParams {
+  newKey: number | null | void;
+  userId: number | null | void;
+}
+
+/** 'SetInfoKey' return type */
+export type ISetInfoKeyResult = void;
+
+/** 'SetInfoKey' query type */
+export interface ISetInfoKeyQuery {
+  params: ISetInfoKeyParams;
+  result: ISetInfoKeyResult;
+}
+
+const setInfoKeyIR: any = {"name":"SetInfoKey","params":[{"name":"newKey","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1356,"b":1361,"line":56,"col":36}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1375,"b":1380,"line":56,"col":55}]}}],"usedParamSet":{"newKey":true,"userId":true},"statement":{"body":"UPDATE users SET info_key_set_id = :newKey WHERE id = :userId","loc":{"a":1320,"b":1380,"line":56,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * UPDATE users SET info_key_set_id = :newKey WHERE id = :userId
+ * ```
+ */
+export const setInfoKey = new PreparedQuery<ISetInfoKeyParams,ISetInfoKeyResult>(setInfoKeyIR);
 
 

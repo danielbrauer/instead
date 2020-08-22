@@ -1,19 +1,22 @@
 import React from 'react'
 import { Label, Button } from 'semantic-ui-react'
-import { useMutation } from 'react-query'
-import { regenerateFriendCode } from '../RoutesAuthenticated'
-import CurrentUser from '../CurrentUser'
+import { useMutation, useQuery } from 'react-query'
+import { regenerateFriendCode, getFriendCode } from '../RoutesAuthenticated'
 import './FriendCodeDisplay.css'
 
 export default function () {
+    const friendCodeQuery = useQuery('friendCode', getFriendCode)
     const [createCodeMutation, createCodeStatus] = useMutation(regenerateFriendCode)
-    const friendCode = CurrentUser.getFriendCode() || '-'
 
     return (
         <div className='friend-code-display-container'>
             Give your Friend Code to other people to follow you:
             <Label size='massive' circular>
-                {createCodeStatus.isLoading ? '...' : friendCode}
+                {friendCodeQuery.isLoading || createCodeStatus.isLoading
+                    ? '...'
+                    : friendCodeQuery.isSuccess
+                    ? friendCodeQuery.data || '-'
+                    : 'error'}
             </Label>
             <Button
                 size='tiny'

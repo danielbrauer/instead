@@ -51,7 +51,6 @@ export default class UserService {
     async create(newUser: NewUser) {
         const [user] = await Users.create.run(newUser, this.db.pool)
         this._onUserCreated.dispatchAsync(user.id)
-        return user
     }
 
     async addFollowRequestByCode(requesterId: number, friendCode: string) {
@@ -132,6 +131,11 @@ export default class UserService {
     async removeFollower(followerId: number, followeeId: number) {
         const [removed] = await Followers.destroy.run({ followerId, followeeId }, this.db.pool)
         if (removed) this._onUserLostFollower.dispatchAsync({ followerId, followeeId })
+    }
+
+    async getFriendCode(userId: number) {
+        const [{ friendCode }] = await Users.getFriendCode.run({ userId }, this.db.pool)
+        return friendCode || null
     }
 
     async regenerateFriendCode(userId: number) {
