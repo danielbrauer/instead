@@ -1,5 +1,5 @@
 import React from 'react'
-import { Menu, Segment, Header, Button, Message, Icon, Label } from "semantic-ui-react"
+import { Menu, Segment, Header, Button, Message, Icon, Label } from 'semantic-ui-react'
 import CurrentUser from './CurrentUser'
 import WelcomeInfo from './WelcomeInfo'
 import { useHistory } from 'react-router-dom'
@@ -15,32 +15,38 @@ export default function AppWelcome() {
     return (
         <div>
             <Menu inverted fixed='top' size='small'>
-                <Menu.Item header>
-                    Instead
-                </Menu.Item>
+                <Menu.Item header>Instead</Menu.Item>
             </Menu>
             <br />
             <br />
             <Segment>
-                Hi {WelcomeInfo.getDisplayName()}, welcome to Instead!
-                <br/>
-                <br/>
+                Welcome to Instead!
+                <br />
+                <br />
                 Here is your login information:
             </Segment>
             <Segment>
                 <Header as='h5'>Username</Header>
-                <Label color='black' size='large'><Icon name='paw'/>{WelcomeInfo.getUsername()}</Label>
+                <Label color='black' size='large'>
+                    <Icon name='user' />
+                    {WelcomeInfo.getUsername()}
+                </Label>
                 <Header as='h5'>Secret Key</Header>
-                <Label color='black' size='large'><Icon name='key'/>{CurrentUser.getSecretKey()}</Label>
-            <br />
-            <br />
-            <Message warning>
-                <Message.Header>Important</Message.Header>
-                <p>You will need this information to log in on the next page. Please take a screenshot, put it in your password manager, or write it down and store it somewhere safe.</p>
+                <Label color='black' size='large'>
+                    <Icon name='key' />
+                    {CurrentUser.getSecretKey()}
+                </Label>
+                <br />
+                <br />
+                <Message warning>
+                    <Message.Header>Important</Message.Header>
+                    <p>
+                        You will need this information to log in on the next page. Please take a screenshot, put it in
+                        your password manager, or write it down and store it somewhere safe.
+                    </p>
 
-            <Button onClick={ok}>I've made a copy</Button>
+                    <Button onClick={ok}>I've made a copy</Button>
                 </Message>
-
             </Segment>
         </div>
     )

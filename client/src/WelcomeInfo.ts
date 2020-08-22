@@ -1,15 +1,13 @@
 interface Info {
     username: string
-    displayName: string
 }
 
 const kWelcomeInfoKey = 'welcomeInfoKey'
 
 class WelcomeInfo {
-
     private static _info: Info
 
-    private static get info() : Info {
+    private static get info(): Info {
         if (!WelcomeInfo._info) {
             const sessionUser = sessionStorage.getItem(kWelcomeInfoKey)
             if (sessionUser) {
@@ -19,12 +17,8 @@ class WelcomeInfo {
         return WelcomeInfo._info
     }
 
-    static getUsername() : string {
+    static getUsername(): string {
         return WelcomeInfo.info.username
-    }
-
-    static getDisplayName() : string {
-        return WelcomeInfo.info.displayName
     }
 
     static set(info: Info) {

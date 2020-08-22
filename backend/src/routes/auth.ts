@@ -4,7 +4,6 @@ import AuthService from '../services/AuthService'
 import { createValidator, ValidatedRequest } from 'express-joi-validation'
 import * as Schema from './authSchema'
 import delayResponse from '../middleware/delay-response'
-import { NewUser } from 'auth'
 import * as config from '../config/config'
 
 const router = Router()
@@ -37,26 +36,12 @@ router.post(
     },
 )
 
-router.get(
-    '/startSignup',
-    validator.query(Schema.empty),
-    validator.body(Schema.empty),
-    async function (req: ValidatedRequest<Schema.StartSignupRequest>, res) {
-        const responseData = await authService.startSignup(req.session)
-        return res.json(responseData)
-    },
-)
-
 router.post(
-    '/finishSignup',
+    '/signup',
     validator.query(Schema.empty),
-    validator.body(Schema.finishSignupBody),
-    async function (req: ValidatedRequest<Schema.FinishSignupRequest>, res) {
-        const newUser: NewUser = {
-            username: req.session.signupInfo.username,
-            ...req.body,
-        }
-        await authService.finishSignup(req.session, newUser)
+    validator.body(Schema.signupBody),
+    async function (req: ValidatedRequest<Schema.SignupRequest>, res) {
+        await authService.signup(req.body)
         return res.json({ success: true })
     },
 )

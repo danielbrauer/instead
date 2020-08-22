@@ -1,10 +1,10 @@
 import scrypt, { ScryptOptions } from 'scrypt-async-modern'
 import srp from 'secure-remote-password/client'
 import { LoginInfo, SignupResult } from './Interfaces'
-import { startLogin, finishLogin, finishSignup, cancelAuth } from './RoutesUnauthenticated'
+import * as Routes from './RoutesUnauthenticated'
 import { NewUserInfo } from './Interfaces'
-import { startSignup } from './RoutesUnauthenticated'
 import { pwnedPassword } from 'hibp'
+import { Json } from '../../backend/src/queries/users.gen'
 const toBuffer = require('typedarray-to-buffer') as (x: Uint8Array) => Buffer
 const hkdf = require('futoin-hkdf') as (
     ikm: string,
@@ -73,7 +73,7 @@ export interface UserInfo {
 export async function login(info: LoginInfo): Promise<UserInfo> {
     console.log('logging in')
     const clientEphemeral = srp.generateEphemeral()
-    const startResponse = await startLogin(info.username, clientEphemeral.public)
+    const startResponse = await Routes.startLogin(info.username, clientEphemeral.public)
     const { srpSalt, serverEphemeralPublic } = startResponse
     const srpKey = await derivePrivateKey(srpSalt, info.password, info.secretKey, info.username)
     const clientSession = srp.deriveSession(
@@ -90,7 +90,7 @@ export async function login(info: LoginInfo): Promise<UserInfo> {
         privateKeyIv,
         publicKey: publicKeyJwk,
         mukSalt,
-    } = await finishLogin(clientSession.proof)
+    } = await Routes.finishLogin(clientSession.proof)
     srp.verifySession(clientEphemeral.public, clientSession, serverSessionProof)
 
     const mukHex = await derivePrivateKey(mukSalt, info.password, info.secretKey, info.username)
@@ -132,15 +132,14 @@ function createSecretKey() {
 
 export async function signup(info: NewUserInfo): Promise<SignupResult> {
     console.log('creating user')
-    const { username } = await startSignup()
 
     const srpSalt = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
     const secretKey = createSecretKey()
-    const srpKey = await derivePrivateKey(srpSalt, info.password, secretKey, username)
+    const srpKey = await derivePrivateKey(srpSalt, info.password, secretKey, info.username)
     const verifier = srp.deriveVerifier(srpKey)
 
     const mukSalt = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
-    const mukHex = await derivePrivateKey(mukSalt, info.password, secretKey, username)
+    const mukHex = await derivePrivateKey(mukSalt, info.password, secretKey, info.username)
     const muk = await importMukFromHex(mukHex)
     const keyParams: RsaHashedKeyGenParams = {
         ...RSAOAEP_SHA256,
@@ -160,16 +159,16 @@ export async function signup(info: NewUserInfo): Promise<SignupResult> {
         iv: accountPrivateIv,
     })
 
-    await finishSignup(
+    await Routes.signup({
+        username: info.username,
         srpSalt,
         verifier,
         mukSalt,
-        exportedPublic,
-        Buffer.from(wrappedPrivate).toString('base64'),
-        Buffer.from(accountPrivateIv).toString('base64'),
-    )
+        publicKey: exportedPublic as Json,
+        privateKey: Buffer.from(wrappedPrivate).toString('base64'),
+        privateKeyIv: Buffer.from(accountPrivateIv).toString('base64'),
+    })
     return {
-        username,
         secretKey,
     }
 }
@@ -183,5 +182,5 @@ export async function passwordCheck(password: string) {
 }
 
 export async function cancel() {
-    await cancelAuth()
+    await Routes.cancelAuth()
 }

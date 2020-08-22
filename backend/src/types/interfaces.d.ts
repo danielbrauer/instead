@@ -14,10 +14,6 @@ export interface LoginInfo {
     serverEphemeralSecret?: string
 }
 
-export interface SignupInfo {
-    username: string
-}
-
 declare module 'express-serve-static-core' {
     interface Request {
         userId?: number
@@ -29,7 +25,6 @@ declare global {
     namespace Express {
         interface Session {
             loginInfo?: LoginInfo
-            signupInfo?: SignupInfo
             userId?: number
         }
     }

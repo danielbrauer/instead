@@ -5,11 +5,10 @@ export interface LoginInfo {
 }
 
 export interface NewUserInfo {
-    displayName: string
+    username: string
     password: string
 }
 
 export interface SignupResult {
-    username: string
     secretKey: string
 }

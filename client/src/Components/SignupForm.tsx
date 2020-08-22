@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom'
 
 export default function SignupForm() {
     const history = useHistory()
-    const { value: displayName, bind: bindDisplayName } = useInput('')
+    const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: agreeTerms, bind: bindAgreeTerms } = useInputBool(false)
     const [missedTerms, setMissedTerms] = useState(false)
@@ -26,9 +26,9 @@ export default function SignupForm() {
         if (userMissedTerms) return
         try {
             await passwordCheckMutation(password)
-            const userInfo = await signupMutation({ displayName, password })
+            const userInfo = await signupMutation({ username, password })
             CurrentUser.setSecretKey(userInfo!.secretKey)
-            WelcomeInfo.set({ displayName, username: userInfo!.username })
+            WelcomeInfo.set({ username })
             history.push('/welcome')
         } catch (error) {
             resetPassword()
@@ -49,9 +49,10 @@ export default function SignupForm() {
                     fluid
                     icon='user'
                     iconPosition='left'
-                    placeholder='Display Name'
+                    placeholder='Username'
+                    type='username'
                     autoComplete='off'
-                    {...bindDisplayName}
+                    {...bindUsername}
                 />
                 <Form.Input
                     fluid

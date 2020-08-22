@@ -1,10 +1,9 @@
 import { Service, Inject } from 'typedi'
 import srp from 'secure-remote-password/server'
 import crypto from '../util/crypto-promise'
-import { generateCombination } from '../util/animalGenerator'
 import * as config from '../config/config'
 import UserService from './UserService'
-import { StartLoginResult, FinishLoginResult, StartSignupResult, NewUser } from 'auth'
+import { StartLoginResult, FinishLoginResult, NewUser } from 'auth'
 
 @Service()
 export default class AuthService {
@@ -76,22 +75,7 @@ export default class AuthService {
         }
     }
 
-    async startSignup(session: Express.Session): Promise<StartSignupResult> {
-        let username = ''
-        for (let i = 0; i < 5; ++i) {
-            username = generateCombination(1, '', true)
-            const count = await this.userService.countByName(username)
-            if (count == 0) {
-                session.signupInfo = { username }
-                return { username }
-            }
-        }
-        throw new Error('Too many user name collisions!')
-    }
-
-    async finishSignup(session: Express.Session, newUser: NewUser) {
-        if (!session.signupInfo) throw new Error("Session hasn't started signing in")
+    async signup(newUser: NewUser) {
         await this.userService.create(newUser)
-        delete session.signupInfo
     }
 }

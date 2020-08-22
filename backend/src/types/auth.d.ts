@@ -14,8 +14,4 @@ export type FinishLoginResult = {
     mukSalt: string
 }
 
-export type StartSignupResult = {
-    username: string
-}
-
 export type NewUser = ICreateParams
