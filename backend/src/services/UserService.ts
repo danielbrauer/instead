@@ -7,19 +7,17 @@ import unambiguousString from '../util/unambiguousString'
 import { SimpleEventDispatcher } from 'strongly-typed-events'
 import { FollowRelationship } from '../types/api'
 import { ServerError } from '../middleware/errors'
-import { NewUser } from 'auth'
+import AuthService from './AuthService'
 
 @Service()
 export default class UserService {
-    private _onUserCreated = new SimpleEventDispatcher<number>()
     private _onUserAddedFollower = new SimpleEventDispatcher<FollowRelationship>()
     private _onUserLostFollower = new SimpleEventDispatcher<FollowRelationship>()
 
-    constructor(private db: DatabaseService) {}
-
-    public get onUserCreated() {
-        return this._onUserCreated.asEvent()
+    constructor(private db: DatabaseService, auth: AuthService) {
+        auth.onUserCreated.subscribe((x) => this.regenerateFriendCode(x))
     }
+
     public get onUserAddedFollower() {
         return this._onUserAddedFollower.asEvent()
     }
@@ -31,26 +29,6 @@ export default class UserService {
         const [user] = await Users.getById.run({ userId }, this.db.pool)
         if (!user) throw new ServerError('User does not exist')
         return user
-    }
-
-    async getLoginInfo(username: string) {
-        const [loginInfo] = await Users.getLoginInfoByName.run({ username }, this.db.pool)
-        return loginInfo || null
-    }
-
-    async getUserInfo(userId: number) {
-        const [info] = await Users.getUserInfo.run({ userId }, this.db.pool)
-        return info || null
-    }
-
-    async countByName(username: string) {
-        const [{ count }] = await Users.countByName.run({ username }, this.db.pool)
-        return count
-    }
-
-    async create(newUser: NewUser) {
-        const [user] = await Users.create.run(newUser, this.db.pool)
-        this._onUserCreated.dispatchAsync(user.id)
     }
 
     async addFollowRequestByCode(requesterId: number, friendCode: string) {

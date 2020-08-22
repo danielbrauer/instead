@@ -6,7 +6,7 @@ import NewPost from './NewPost'
 import { Route, Switch, Redirect, useHistory } from 'react-router-dom'
 import { Menu, Dropdown, Label, Icon } from 'semantic-ui-react'
 import { queryCache, useQuery } from 'react-query'
-import { logout, getFollowRequests, getUser } from './RoutesAuthenticated'
+import { logout, getFollowRequests, getUser } from './routes/api'
 import SinglePost from './SinglePost'
 import UserPosts from './UserPosts'
 

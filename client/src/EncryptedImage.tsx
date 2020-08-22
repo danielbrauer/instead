@@ -3,7 +3,7 @@ import { Placeholder, Image } from 'semantic-ui-react'
 import { useEncryptedImage } from './postCrypto'
 import { Post } from '../../backend/src/types/api'
 import { useQuery } from 'react-query'
-import { getContentUrl } from './RoutesAuthenticated'
+import { getContentUrl } from './routes/api'
 import { longLivedQuery } from './QuerySettings'
 
 export default function (props: { post: Post }) {

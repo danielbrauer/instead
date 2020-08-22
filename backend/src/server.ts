@@ -4,14 +4,14 @@ import cors from './middleware/cors'
 import bodyParser from 'body-parser'
 import morgan from 'morgan'
 import helmet from 'helmet'
-import authManager from './middleware/auth-strategies'
+import authenticateSession from './middleware/authenticate-session'
 import * as config from './config/config'
 import forceHttps from './middleware/force-https'
 import session from './middleware/session'
 import apiHeaders from './middleware/api-headers'
 import auth from './routes/auth'
+import signup from './routes/signup'
 import api from './routes/api'
-import { forwardErrors } from './middleware/errors'
 import path from 'path'
 
 const app = express()
@@ -25,8 +25,10 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(morgan('dev'))
 
-app.use('/auth', apiHeaders, auth)
-app.use('/api', apiHeaders, authManager.authenticateSession, api, forwardErrors)
+app.use(apiHeaders)
+app.use('/signup', signup)
+app.use('/auth', session, auth)
+app.use('/api', session, authenticateSession, api)
 
 if (!config.isLocalDev()) {
     const relativePathToReact = '/../../../client/build'

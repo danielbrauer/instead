@@ -1,6 +1,6 @@
-import config from './config'
+import config from '../config'
 import Axios from 'axios'
-import { StartLoginResult, FinishLoginResult, NewUser } from '../../backend/src/types/auth'
+import { StartLoginResult, FinishLoginResult } from '../../../backend/src/types/auth'
 
 const baseURL = `${config.serverUrl}/auth`
 
@@ -30,13 +30,6 @@ export async function finishLogin(clientSessionProof: string) {
         clientSessionProof,
     })
     return finishRes.data
-}
-
-export async function signup(newUser: NewUser) {
-    await authorizedAxios.post('/signup', {
-        ...newUser,
-    })
-    return
 }
 
 export async function cancelAuth() {

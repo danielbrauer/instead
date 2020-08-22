@@ -1,10 +1,11 @@
 import scrypt, { ScryptOptions } from 'scrypt-async-modern'
 import srp from 'secure-remote-password/client'
 import { LoginInfo, SignupResult } from './Interfaces'
-import * as Routes from './RoutesUnauthenticated'
+import * as Auth from './routes/auth'
+import * as Signup from './routes/signup'
 import { NewUserInfo } from './Interfaces'
 import { pwnedPassword } from 'hibp'
-import { Json } from '../../backend/src/queries/users.gen'
+import { Json } from '../../backend/src/queries/users-auth.gen'
 const toBuffer = require('typedarray-to-buffer') as (x: Uint8Array) => Buffer
 const hkdf = require('futoin-hkdf') as (
     ikm: string,
@@ -73,7 +74,7 @@ export interface UserInfo {
 export async function login(info: LoginInfo): Promise<UserInfo> {
     console.log('logging in')
     const clientEphemeral = srp.generateEphemeral()
-    const startResponse = await Routes.startLogin(info.username, clientEphemeral.public)
+    const startResponse = await Auth.startLogin(info.username, clientEphemeral.public)
     const { srpSalt, serverEphemeralPublic } = startResponse
     const srpKey = await derivePrivateKey(srpSalt, info.password, info.secretKey, info.username)
     const clientSession = srp.deriveSession(
@@ -90,7 +91,7 @@ export async function login(info: LoginInfo): Promise<UserInfo> {
         privateKeyIv,
         publicKey: publicKeyJwk,
         mukSalt,
-    } = await Routes.finishLogin(clientSession.proof)
+    } = await Auth.finishLogin(clientSession.proof)
     srp.verifySession(clientEphemeral.public, clientSession, serverSessionProof)
 
     const mukHex = await derivePrivateKey(mukSalt, info.password, info.secretKey, info.username)
@@ -159,7 +160,7 @@ export async function signup(info: NewUserInfo): Promise<SignupResult> {
         iv: accountPrivateIv,
     })
 
-    await Routes.signup({
+    await Signup.signup({
         username: info.username,
         srpSalt,
         verifier,
@@ -182,5 +183,5 @@ export async function passwordCheck(password: string) {
 }
 
 export async function cancel() {
-    await Routes.cancelAuth()
+    await Auth.cancelAuth()
 }

@@ -1,4 +1,4 @@
-import config from './config'
+import config from '../config'
 import Axios from 'axios'
 import {
     User,
@@ -10,9 +10,9 @@ import {
     EncryptedPostKey,
     PublicKey,
     SentRequest,
-} from '../../backend/src/types/api'
+} from '../../../backend/src/types/api'
 import { queryCache } from 'react-query'
-import { createKeysForNewFollower } from './postCrypto'
+import { createKeysForNewFollower } from '../postCrypto'
 
 const baseURL = `${config.serverUrl}/api`
 

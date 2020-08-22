@@ -2,13 +2,7 @@ import React, { useState } from 'react'
 import { List, Message, Loader } from 'semantic-ui-react'
 import { useQuery, useMutation } from 'react-query'
 import FollowerListItem, { FollowerItemInfo } from './FollowerListItem'
-import {
-    getFollowers,
-    getFollowRequests,
-    acceptFollowRequest,
-    getFollowees,
-    getSentFollowRequests,
-} from './RoutesAuthenticated'
+import { getFollowers, getFollowRequests, acceptFollowRequest, getFollowees, getSentFollowRequests } from './routes/api'
 import FriendCodeDisplay from './Components/FriendCodeDisplay'
 
 export default function FollowerList() {

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useInfiniteQuery } from 'react-query'
-import { getHomePosts } from './RoutesAuthenticated'
+import { getHomePosts } from './routes/api'
 import Posts from './Posts'
 
 export default function () {

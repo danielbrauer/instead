@@ -1,7 +1,7 @@
 import React from 'react'
 import { Icon } from 'semantic-ui-react'
 import { useQuery } from 'react-query'
-import { getUser } from './RoutesAuthenticated'
+import { getUser } from './routes/api'
 import InternalLink from './Components/InternalLink'
 
 export default function UserInList({ id }: { id: number }) {

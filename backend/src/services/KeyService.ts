@@ -1,4 +1,4 @@
-import Container, { Service } from 'typedi'
+import { Service } from 'typedi'
 import DatabaseService from './DatabaseService'
 import * as Keys from '../queries/keys.gen'
 import UserService from './UserService'
@@ -7,17 +7,13 @@ import { FollowRelationship, EncryptedPostKey } from '../types/api'
 @Service()
 export default class KeyService {
     constructor(private userService: UserService, private db: DatabaseService) {
-        this.userService.onUserLostFollower.subscribe(KeyService.onFollowerLost)
+        this.userService.onUserLostFollower.subscribe((x) => this.onFollowerLost(x))
     }
 
-    private static async onFollowerLost(followRelationship: FollowRelationship) {
-        const keyService = Container.get(KeyService)
+    private async onFollowerLost(followRelationship: FollowRelationship) {
         await Promise.all([
-            keyService.removeFollowerKeys(
-                followRelationship.followerId,
-                followRelationship.followeeId,
-            ),
-            keyService.invalidateCurrentKeySet(followRelationship.followeeId),
+            this.removeFollowerKeys(followRelationship.followerId, followRelationship.followeeId),
+            this.invalidateCurrentKeySet(followRelationship.followeeId),
         ])
     }
 

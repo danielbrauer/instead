@@ -3,7 +3,7 @@ import Router from 'express-promise-router'
 import UserService from '../services/UserService'
 import PostService from '../services/PostService'
 import KeyService from '../services/KeyService'
-import { ServerError } from '../middleware/errors'
+import { ServerError, forwardErrors } from '../middleware/errors'
 import { ValidatedRequest, createValidator } from 'express-joi-validation'
 import * as Schema from './apiSchema'
 
@@ -333,5 +333,7 @@ router.post(
         return res.json(code)
     },
 )
+
+router.use(forwardErrors)
 
 export default router

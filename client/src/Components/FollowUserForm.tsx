@@ -2,7 +2,7 @@ import React from 'react'
 import { useInput } from './useInput'
 import { Form, Message } from 'semantic-ui-react'
 import { useMutation } from 'react-query'
-import { sendFollowRequest } from '../RoutesAuthenticated'
+import { sendFollowRequest } from '../routes/api'
 import './FollowUserForm.css'
 
 export default function FollowUserForm() {

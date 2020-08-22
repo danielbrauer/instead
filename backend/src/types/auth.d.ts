@@ -1,4 +1,4 @@
-import { ICreateParams } from '../queries/users.gen'
+import { ICreateParams } from '../queries/users-auth.gen'
 
 export type StartLoginResult = {
     srpSalt: string

@@ -3,7 +3,7 @@ import { List, Message, Loader, Label } from 'semantic-ui-react'
 import SafetyButton from './SafetyButton'
 import UserInList from './UserInList'
 import { useQuery, useMutation } from 'react-query'
-import { getFollowees, unfollow, getSentFollowRequests } from './RoutesAuthenticated'
+import { getFollowees, unfollow, getSentFollowRequests } from './routes/api'
 import FollowUserForm from './Components/FollowUserForm'
 
 export default function FolloweeList() {

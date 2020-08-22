@@ -36,16 +36,6 @@ router.post(
     },
 )
 
-router.post(
-    '/signup',
-    validator.query(Schema.empty),
-    validator.body(Schema.signupBody),
-    async function (req: ValidatedRequest<Schema.SignupRequest>, res) {
-        await authService.signup(req.body)
-        return res.json({ success: true })
-    },
-)
-
 router.put('/cancel', validator.query(Schema.empty), validator.body(Schema.empty), async function (
     req,
     res,

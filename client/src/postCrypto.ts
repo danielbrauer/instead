@@ -1,4 +1,4 @@
-import * as Routes from './RoutesAuthenticated'
+import * as Routes from './routes/api'
 import { readAsArrayBuffer } from 'promise-file-reader'
 import Axios from 'axios'
 import CurrentUser from './CurrentUser'

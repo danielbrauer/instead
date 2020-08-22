@@ -2,7 +2,7 @@ import React from 'react'
 import { List, Button, Icon, Label } from 'semantic-ui-react'
 import SafetyButton from './SafetyButton'
 import { useMutation, useQuery } from 'react-query'
-import { rejectFollowRequest, removeFollower, getUser, sendFollowRequestDirect } from './RoutesAuthenticated'
+import { rejectFollowRequest, removeFollower, getUser, sendFollowRequestDirect } from './routes/api'
 import InternalLink from './Components/InternalLink'
 
 export interface FollowerItemInfo {

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Label, Button } from 'semantic-ui-react'
 import { useMutation, useQuery } from 'react-query'
-import { regenerateFriendCode, getFriendCode } from '../RoutesAuthenticated'
+import { regenerateFriendCode, getFriendCode } from '../routes/api'
 import * as QuerySettings from '../QuerySettings'
 import './FriendCodeDisplay.css'
 
