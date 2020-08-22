@@ -7,23 +7,26 @@ import { Message, Loader } from 'semantic-ui-react'
 import { getPost } from './RoutesAuthenticated'
 import Comments from './Comments'
 import NewComment from './NewComment'
+import { longLivedQuery } from './QuerySettings'
 
-export default function() {
+export default function () {
     const { id: postId } = useParams()
-    const postQuery = useQuery(['post', postId], getPost, { staleTime: Infinity })
+    const postQuery = useQuery(['post', postId], getPost, longLivedQuery)
 
-    if (postQuery.isError) return (
-        <div>
-            <Message negative>
-                <Message.Header>Error fetching posts</Message.Header>
-            </Message>
-        </div>
-    )
-    if (postQuery.isLoading) return (
-        <div>
-            <Loader active></Loader>
-        </div>
-    )
+    if (postQuery.isError)
+        return (
+            <div>
+                <Message negative>
+                    <Message.Header>Error fetching posts</Message.Header>
+                </Message>
+            </div>
+        )
+    if (postQuery.isLoading)
+        return (
+            <div>
+                <Loader active></Loader>
+            </div>
+        )
     const post = postQuery.data!
 
     return (

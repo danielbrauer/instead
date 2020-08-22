@@ -4,9 +4,10 @@ import { useEncryptedImage } from './postCrypto'
 import { Post } from '../../backend/src/types/api'
 import { useQuery } from 'react-query'
 import { getContentUrl } from './RoutesAuthenticated'
+import { longLivedQuery } from './QuerySettings'
 
 export default function (props: { post: Post }) {
-    const contentUrl = useQuery('contentUrl', getContentUrl, { staleTime: Infinity })
+    const contentUrl = useQuery('contentUrl', getContentUrl, longLivedQuery)
     const decryptedPost = useEncryptedImage(
         props.post.key,
         props.post.iv,

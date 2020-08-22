@@ -2,10 +2,11 @@ import React from 'react'
 import { Label, Button } from 'semantic-ui-react'
 import { useMutation, useQuery } from 'react-query'
 import { regenerateFriendCode, getFriendCode } from '../RoutesAuthenticated'
+import * as QuerySettings from '../QuerySettings'
 import './FriendCodeDisplay.css'
 
 export default function () {
-    const friendCodeQuery = useQuery('friendCode', getFriendCode)
+    const friendCodeQuery = useQuery('friendCode', getFriendCode, QuerySettings.longLivedQuery)
     const [createCodeMutation, createCodeStatus] = useMutation(regenerateFriendCode)
 
     return (
