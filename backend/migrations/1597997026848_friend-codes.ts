@@ -11,4 +11,10 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
         },
     })
     pgm.addIndex('users', 'friend_code', { unique: true })
+    pgm.addColumn('follow_requests', {
+        friend_code: {
+            type: 'text',
+            notNull: false,
+        },
+    })
 }

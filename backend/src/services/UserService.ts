@@ -57,7 +57,7 @@ export default class UserService {
     async addFollowRequestByCode(requesterId: number, friendCode: string) {
         const [requestee] = await Users.getByFriendCode.run({ friendCode }, this.db.pool)
         if (!requestee) throw new ServerError('User does not exist')
-        await this.addFollowRequest(requesterId, requestee.id)
+        await this.addFollowRequest(requesterId, requestee.id, friendCode)
     }
 
     async addFollowRequestById(requesterId: number, requesteeId: number) {
@@ -69,7 +69,7 @@ export default class UserService {
         await this.addFollowRequest(requesterId, requesteeId)
     }
 
-    async addFollowRequest(requesterId: number, requesteeId: number) {
+    async addFollowRequest(requesterId: number, requesteeId: number, friendCode?: string) {
         await this.db.transaction(async (client) => {
             if (requesteeId === requesterId)
                 throw new ServerError("You don't need to follow yourself")
@@ -83,7 +83,7 @@ export default class UserService {
                 client,
             )
             if (requestCount !== 0) throw new ServerError('Request already exists')
-            await FollowRequests.create.run({ requesterId, requesteeId }, client)
+            await FollowRequests.create.run({ requesterId, requesteeId, friendCode }, client)
         })
     }
 
@@ -116,7 +116,7 @@ export default class UserService {
 
     async getSentFollowRequests(requesterId: number) {
         const requests = await FollowRequests.getByRequesterId.run({ requesterId }, this.db.pool)
-        return requests.map((r) => r.requesteeId)
+        return requests
     }
 
     async getFollowers(followeeId: number) {

@@ -9,6 +9,7 @@ import {
     FinishPostResult,
     EncryptedPostKey,
     PublicKey,
+    SentRequest,
 } from '../../backend/src/types/api'
 import { queryCache } from 'react-query'
 import { createKeysForNewFollower } from './postCrypto'
@@ -229,7 +230,7 @@ export async function getFollowRequests() {
 }
 
 export async function getSentFollowRequests() {
-    const response = await authorizedAxios.get<number[]>('/getSentFollowRequests')
+    const response = await authorizedAxios.get<SentRequest[]>('/getSentFollowRequests')
     return response.data
 }
 

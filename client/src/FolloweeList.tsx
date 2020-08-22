@@ -17,13 +17,13 @@ export default function FolloweeList() {
         <>
             <FollowUserForm />
             <List>
-                {sentRequests.data!.map((requestee) => (
-                    <List.Item key={requestee}>
+                {sentRequests.data!.map((request) => (
+                    <List.Item key={request.requesteeId}>
                         <List.Content floated='right'>
                             <Label basic color='green' content='Requested' />
                         </List.Content>
                         <List.Content>
-                            <UserInList id={requestee} />
+                            <Label size='large' content={request.friendCode} />
                         </List.Content>
                     </List.Item>
                 ))}

@@ -47,9 +47,9 @@ export default function FollowerList() {
                     return {
                         id,
                         type: 'follower',
-                        justAccepted: accepted.indexOf(id) >= 0,
-                        following: following.data!.indexOf(id) >= 0,
-                        requested: sentRequests.data!.indexOf(id) >= 0,
+                        justAccepted: accepted.includes(id),
+                        following: following.data!.includes(id),
+                        requested: sentRequests.data!.some((x) => x.requesteeId === id),
                     }
                 },
             ),

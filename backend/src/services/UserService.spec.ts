@@ -144,9 +144,9 @@ describe('UserService', () => {
             mocked(Users.getByFriendCode.run).mockResolvedValueOnce([requestee])
             mocked(Followers.count.run).mockResolvedValueOnce([{ count: 0 }])
             mocked(FollowRequests.count.run).mockResolvedValueOnce([{ count: 0 }])
-            await userService.addFollowRequestByCode(0, 'AntisocialAardvark')
+            await userService.addFollowRequestByCode(0, 'MMM')
             expect(mocked(Users.getByFriendCode.run).mock.calls[0][0]).toEqual({
-                username: 'AntisocialAardvark',
+                friendCode: 'MMM',
             })
             expect(mocked(Followers.count.run).mock.calls[0][0]).toEqual({
                 followerId: 0,
@@ -195,6 +195,7 @@ describe('UserService', () => {
             const request: FollowRequests.IDestroyAndReturnResult = {
                 requesterId: 0,
                 requesteeId: 1,
+                friendCode: null,
             }
             let notifiedRelationship: FollowRelationship
             mocked(FollowRequests.destroyAndReturn.run).mockResolvedValueOnce([request])
@@ -202,7 +203,10 @@ describe('UserService', () => {
                 (relationship) => (notifiedRelationship = relationship),
             )
             await userService.acceptFollowRequest(0, 1)
-            expect(mocked(FollowRequests.destroyAndReturn.run).mock.calls[0][0]).toEqual(request)
+            expect(mocked(FollowRequests.destroyAndReturn.run).mock.calls[0][0]).toEqual({
+                requesterId: 0,
+                requesteeId: 1,
+            })
             expect(mocked(Followers.create.run).mock.calls[0][0]).toEqual({
                 followerId: 0,
                 followeeId: 1,
