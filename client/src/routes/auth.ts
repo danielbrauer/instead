@@ -4,8 +4,8 @@ import { StartLoginResult, FinishLoginResult } from '../../../backend/src/types/
 
 const baseURL = `${config.serverUrl}/auth`
 
-const authorizedAxios = Axios.create({ withCredentials: true, baseURL })
-authorizedAxios.interceptors.response.use(
+const server = Axios.create({ withCredentials: true, baseURL })
+server.interceptors.response.use(
     (response) => {
         return response
     },
@@ -18,7 +18,7 @@ authorizedAxios.interceptors.response.use(
 )
 
 export async function startLogin(username: string, clientEphemeralPublic: string) {
-    const startRes = await authorizedAxios.post<StartLoginResult>('/startLogin', {
+    const startRes = await server.post<StartLoginResult>('/startLogin', {
         username,
         clientEphemeralPublic,
     })
@@ -26,12 +26,12 @@ export async function startLogin(username: string, clientEphemeralPublic: string
 }
 
 export async function finishLogin(clientSessionProof: string) {
-    const finishRes = await authorizedAxios.post<FinishLoginResult>('/finishLogin', {
+    const finishRes = await server.post<FinishLoginResult>('/finishLogin', {
         clientSessionProof,
     })
     return finishRes.data
 }
 
 export async function cancelAuth() {
-    await authorizedAxios.put('/cancel')
+    await server.put('/cancel')
 }

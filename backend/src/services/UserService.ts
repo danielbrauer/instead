@@ -1,7 +1,7 @@
 import { Service } from 'typedi'
 import DatabaseService from './DatabaseService'
 import * as Users from '../queries/users.gen'
-import * as Followers from '../queries/followers.gen'
+import * as FollowRelationships from '../queries/follow_relationships.gen'
 import * as FollowRequests from '../queries/follow_requests.gen'
 import unambiguousString from '../util/unambiguousString'
 import { SimpleEventDispatcher } from 'strongly-typed-events'
@@ -38,7 +38,7 @@ export default class UserService {
     }
 
     async addFollowRequestById(requesterId: number, requesteeId: number) {
-        const [{ count: followCount }] = await Followers.count.run(
+        const [{ count: followCount }] = await FollowRelationships.count.run(
             { followerId: requesteeId, followeeId: requesterId },
             this.db.pool,
         )
@@ -50,7 +50,7 @@ export default class UserService {
         await this.db.transaction(async (client) => {
             if (requesteeId === requesterId)
                 throw new ServerError("You don't need to follow yourself")
-            const [{ count: followCount }] = await Followers.count.run(
+            const [{ count: followCount }] = await FollowRelationships.count.run(
                 { followerId: requesterId, followeeId: requesteeId },
                 client,
             )
@@ -71,7 +71,7 @@ export default class UserService {
                 client,
             )
             if (!request) throw new ServerError('No such follow request')
-            await Followers.create.run(
+            await FollowRelationships.create.run(
                 { followerId: request.requesterId, followeeId: request.requesteeId },
                 client,
             )
@@ -97,17 +97,20 @@ export default class UserService {
     }
 
     async getFollowers(followeeId: number) {
-        const follows = await Followers.getByFolloweeId.run({ followeeId }, this.db.pool)
+        const follows = await FollowRelationships.getByFolloweeId.run({ followeeId }, this.db.pool)
         return follows.map((r) => r.followerId)
     }
 
     async getFollowees(followerId: number) {
-        const follows = await Followers.getByFollowerId.run({ followerId }, this.db.pool)
+        const follows = await FollowRelationships.getByFollowerId.run({ followerId }, this.db.pool)
         return follows.map((r) => r.followeeId)
     }
 
     async removeFollower(followerId: number, followeeId: number) {
-        const [removed] = await Followers.destroy.run({ followerId, followeeId }, this.db.pool)
+        const [removed] = await FollowRelationships.destroy.run(
+            { followerId, followeeId },
+            this.db.pool,
+        )
         if (removed) this._onUserLostFollower.dispatchAsync({ followerId, followeeId })
     }
 

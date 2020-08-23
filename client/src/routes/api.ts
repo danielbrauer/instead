@@ -16,8 +16,8 @@ import { createKeysForNewFollower } from '../postCrypto'
 
 const baseURL = `${config.serverUrl}/api`
 
-const authorizedAxios = Axios.create({ withCredentials: true, baseURL })
-authorizedAxios.interceptors.response.use(
+const server = Axios.create({ withCredentials: true, baseURL })
+server.interceptors.response.use(
     (response) => {
         return response
     },
@@ -33,16 +33,16 @@ authorizedAxios.interceptors.response.use(
 )
 
 export async function logout() {
-    await authorizedAxios.put('/logout')
+    await server.put('/logout')
 }
 
 export async function getContentUrl() {
-    const response = await authorizedAxios.get<string>('/getContentUrl')
+    const response = await server.get<string>('/getContentUrl')
     return response.data
 }
 
 export async function getHomePosts(key: string, pageIndex?: string) {
-    const response = await authorizedAxios.get<Post[]>('/getHomePosts', {
+    const response = await server.get<Post[]>('/getHomePosts', {
         params: {
             pageIndex,
         },
@@ -51,7 +51,7 @@ export async function getHomePosts(key: string, pageIndex?: string) {
 }
 
 export async function getUserPosts(query: string, userId: number, pageIndex?: string) {
-    const response = await authorizedAxios.get<Post[]>('/getUserPosts', {
+    const response = await server.get<Post[]>('/getUserPosts', {
         params: {
             userId,
             pageIndex,
@@ -61,7 +61,7 @@ export async function getUserPosts(query: string, userId: number, pageIndex?: st
 }
 
 export async function getPost(query: string, id: number) {
-    const response = await authorizedAxios.get<Post>('getPost', {
+    const response = await server.get<Post>('getPost', {
         params: {
             id,
         },
@@ -70,7 +70,7 @@ export async function getPost(query: string, id: number) {
 }
 
 export async function getComments(id: number) {
-    const response = await authorizedAxios.get<EncryptedComment[]>('getComments', {
+    const response = await server.get<EncryptedComment[]>('getComments', {
         params: {
             id,
         },
@@ -79,7 +79,7 @@ export async function getComments(id: number) {
 }
 
 export async function createComment(comment: { postId: number; keySetId: number; content: string; contentIv: string }) {
-    const response = await authorizedAxios.post('/createComment', {
+    const response = await server.post('/createComment', {
         ...comment,
     })
     queryCache.invalidateQueries(['comments', comment.postId])
@@ -87,7 +87,7 @@ export async function createComment(comment: { postId: number; keySetId: number;
 }
 
 export async function deletePost(idTodelete: number) {
-    const response = await authorizedAxios.delete<DeletePostResult>('/deletePost', {
+    const response = await server.delete<DeletePostResult>('/deletePost', {
         params: {
             id: idTodelete,
         },
@@ -96,21 +96,21 @@ export async function deletePost(idTodelete: number) {
     return response.data
 }
 
-export async function getCurrentKey() {
-    const response = await authorizedAxios.get<EncryptedPostKey | ''>('/getCurrentKey')
+export async function getCurrentPostKey() {
+    const response = await server.get<EncryptedPostKey | ''>('/getCurrentPostKey')
     if (response.data === '') return null
     return response.data
 }
 
-export async function createCurrentKey(keyBase64: string) {
-    const response = await authorizedAxios.post<number>('/createCurrentKey', {
+export async function createCurrentPostKey(keyBase64: string) {
+    const response = await server.post<number>('/createCurrentPostKey', {
         key: keyBase64,
     })
     return response.data
 }
 
 export async function getKey(keySetId: number) {
-    const response = await authorizedAxios.get<EncryptedPostKey | ''>('/getKey', {
+    const response = await server.get<EncryptedPostKey | ''>('/getKey', {
         params: {
             keySetId,
         },
@@ -119,19 +119,25 @@ export async function getKey(keySetId: number) {
     return response.data
 }
 
-export async function getAllKeys() {
-    const response = await authorizedAxios.get<EncryptedPostKey[]>('/getAllKeys')
+export async function getAllPostKeys() {
+    const response = await server.get<EncryptedPostKey[]>('/getAllPostKeys')
     return response.data
 }
 
-export async function addKeys(keys: EncryptedPostKey[]) {
-    await authorizedAxios.put('/addKeys', {
+export async function addNewPostKeyForFollowers(keys: EncryptedPostKey[]) {
+    await server.put('/addNewPostKeyForFollowers', {
+        keys,
+    })
+}
+
+export async function addOldPostKeysForFollower(keys: EncryptedPostKey[]) {
+    await server.put('/addOldPostKeysForFollower', {
         keys,
     })
 }
 
 export async function getPublicKey(userId: number) {
-    const response = await authorizedAxios.get<PublicKey>('/getPublicKey', {
+    const response = await server.get<PublicKey>('/getPublicKey', {
         params: {
             userId,
         },
@@ -140,12 +146,12 @@ export async function getPublicKey(userId: number) {
 }
 
 export async function getFollowerPublicKeys() {
-    const response = await authorizedAxios.get<PublicKey[]>('/getFollowerPublicKeys')
+    const response = await server.get<PublicKey[]>('/getFollowerPublicKeys')
     return response.data
 }
 
 export async function startPost(keySetId: number, ivBase64: string, contentMD5Base64: string, aspect: number) {
-    const postResponse = await authorizedAxios.post<StartPostResult>('/startPost', {
+    const postResponse = await server.post<StartPostResult>('/startPost', {
         keySetId,
         iv: ivBase64,
         md5: contentMD5Base64,
@@ -155,7 +161,7 @@ export async function startPost(keySetId: number, ivBase64: string, contentMD5Ba
 }
 
 export async function finishPost(postId: number, success: boolean) {
-    await authorizedAxios.put<FinishPostResult>('/finishPost', {
+    await server.put<FinishPostResult>('/finishPost', {
         postId,
         success,
     })
@@ -163,49 +169,51 @@ export async function finishPost(postId: number, success: boolean) {
 }
 
 export async function getUser(key: string, userId: number) {
-    const response = await authorizedAxios.get<User>('/getUserById', {
+    const response = await server.get<User>('/getUserById', {
         params: { userId },
     })
     return response.data
 }
 
 export async function sendFollowRequest(friendCode: string) {
-    await authorizedAxios.put('/sendFollowRequest', {
+    await server.put('/sendFollowRequest', {
         friendCode,
     })
     queryCache.invalidateQueries('sentFollowRequests')
 }
 
 export async function sendFollowRequestDirect(userId: number) {
-    await authorizedAxios.put('/sendFollowRequestDirect', {
+    await server.put('/sendFollowRequestDirect', {
         userId,
     })
     queryCache.invalidateQueries('sentFollowRequests')
 }
 
 export async function rejectFollowRequest(userId: number) {
-    await authorizedAxios.put('/rejectFollowRequest', {
+    await server.put('/rejectFollowRequest', {
         userId,
     })
     queryCache.invalidateQueries('followRequests')
 }
 
 export async function unfollow(userId: number) {
-    await authorizedAxios.put('/unfollow', {
+    await server.put('/unfollow', {
         userId,
     })
     queryCache.invalidateQueries('followees')
+    queryCache.invalidateQueries('posts')
+    queryCache.invalidateQueries(['posts', userId])
 }
 
 export async function removeFollower(userId: number) {
-    await authorizedAxios.put('/removeFollower', {
+    await server.put('/removeFollower', {
         userId,
     })
     queryCache.invalidateQueries('followers')
 }
 
 export async function acceptFollowRequest(userId: number) {
-    await authorizedAxios.put('/acceptFollowRequest', {
+    await server.put('/acceptFollowRequest', {
         userId,
     })
     await createKeysForNewFollower(userId)
@@ -214,32 +222,32 @@ export async function acceptFollowRequest(userId: number) {
 }
 
 export async function getFollowers() {
-    const response = await authorizedAxios.get<number[]>('/getFollowerIds')
+    const response = await server.get<number[]>('/getFollowerIds')
     return response.data
 }
 
 export async function getFollowees() {
-    const response = await authorizedAxios.get<number[]>('/getFollowees')
+    const response = await server.get<number[]>('/getFollowees')
     return response.data
 }
 
 export async function getFollowRequests() {
-    const response = await authorizedAxios.get<number[]>('/getFollowRequests')
+    const response = await server.get<number[]>('/getFollowRequests')
     return response.data
 }
 
 export async function getSentFollowRequests() {
-    const response = await authorizedAxios.get<SentRequest[]>('/getSentFollowRequests')
+    const response = await server.get<SentRequest[]>('/getSentFollowRequests')
     return response.data
 }
 
 export async function getFriendCode() {
-    const response = await authorizedAxios.get<string | null>('/getFriendCode')
+    const response = await server.get<string | null>('/getFriendCode')
     return response.data
 }
 
 export async function regenerateFriendCode() {
-    const response = await authorizedAxios.post<string>('/regenerateFriendCode')
+    const response = await server.post<string>('/regenerateFriendCode')
     queryCache.invalidateQueries('friendCode')
     return response.data
 }

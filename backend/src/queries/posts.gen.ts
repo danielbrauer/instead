@@ -1,4 +1,4 @@
-/** Types generated for queries found in "src/queries/posts.sql" */
+/** Types generated for queries found in "./src/queries/posts.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
 /** 'CreateAndReturn' parameters type */
@@ -149,7 +149,7 @@ export interface IGetHomePostsWithKeysQuery {
   result: IGetHomePostsWithKeysResult;
 }
 
-const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":730,"b":735,"line":18,"col":20},{"a":761,"b":766,"line":19,"col":24},{"a":869,"b":874,"line":22,"col":35}]}},{"name":"pageIndex","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":917,"b":925,"line":25,"col":6},{"a":980,"b":988,"line":25,"col":69}]}}],"usedParamSet":{"userId":true,"pageIndex":true},"statement":{"body":"SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :userId\nAND (posts.author_id = :userId OR posts.author_id IN (\n    SELECT followee_id\n    FROM followers\n    WHERE followers.follower_id = :userId\n))\nAND posts.published IS NOT NULL\nAND (:pageIndex::int8 IS NULL OR posts.published < int_to_timestamp(:pageIndex::int8))\nORDER BY posts.published DESC\nLIMIT 2","loc":{"a":483,"b":1034,"line":14,"col":0}}};
+const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":730,"b":735,"line":18,"col":20},{"a":761,"b":766,"line":19,"col":24},{"a":891,"b":896,"line":22,"col":46}]}},{"name":"pageIndex","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":939,"b":947,"line":25,"col":6},{"a":1002,"b":1010,"line":25,"col":69}]}}],"usedParamSet":{"userId":true,"pageIndex":true},"statement":{"body":"SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :userId\nAND (posts.author_id = :userId OR posts.author_id IN (\n    SELECT followee_id\n    FROM follow_relationships\n    WHERE follow_relationships.follower_id = :userId\n))\nAND posts.published IS NOT NULL\nAND (:pageIndex::int8 IS NULL OR posts.published < int_to_timestamp(:pageIndex::int8))\nORDER BY posts.published DESC\nLIMIT 2","loc":{"a":483,"b":1056,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -161,8 +161,8 @@ const getHomePostsWithKeysIR: any = {"name":"GetHomePostsWithKeys","params":[{"n
  * AND keys.user_id = :userId
  * AND (posts.author_id = :userId OR posts.author_id IN (
  *     SELECT followee_id
- *     FROM followers
- *     WHERE followers.follower_id = :userId
+ *     FROM follow_relationships
+ *     WHERE follow_relationships.follower_id = :userId
  * ))
  * AND posts.published IS NOT NULL
  * AND (:pageIndex::int8 IS NULL OR posts.published < int_to_timestamp(:pageIndex::int8))
@@ -199,7 +199,7 @@ export interface IGetUserPostsWithKeysQuery {
   result: IGetUserPostsWithKeysResult;
 }
 
-const getUserPostsWithKeysIR: any = {"name":"GetUserPostsWithKeys","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1318,"b":1328,"line":34,"col":20}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1353,"b":1358,"line":35,"col":23}]}},{"name":"pageIndex","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1398,"b":1406,"line":37,"col":6},{"a":1461,"b":1469,"line":37,"col":69}]}}],"usedParamSet":{"requesterId":true,"userId":true,"pageIndex":true},"statement":{"body":"SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :requesterId\nAND posts.author_id = :userId\nAND posts.published IS NOT NULL\nAND (:pageIndex::int8 IS NULL OR posts.published < int_to_timestamp(:pageIndex::int8))\nORDER BY posts.published DESC\nLIMIT 2","loc":{"a":1071,"b":1515,"line":30,"col":0}}};
+const getUserPostsWithKeysIR: any = {"name":"GetUserPostsWithKeys","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1340,"b":1350,"line":34,"col":20}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1375,"b":1380,"line":35,"col":23}]}},{"name":"pageIndex","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1420,"b":1428,"line":37,"col":6},{"a":1483,"b":1491,"line":37,"col":69}]}}],"usedParamSet":{"requesterId":true,"userId":true,"pageIndex":true},"statement":{"body":"SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :requesterId\nAND posts.author_id = :userId\nAND posts.published IS NOT NULL\nAND (:pageIndex::int8 IS NULL OR posts.published < int_to_timestamp(:pageIndex::int8))\nORDER BY posts.published DESC\nLIMIT 2","loc":{"a":1093,"b":1537,"line":30,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -244,7 +244,7 @@ export interface IGetPostWithKeyQuery {
   result: IGetPostWithKeyResult;
 }
 
-const getPostWithKeyIR: any = {"name":"GetPostWithKey","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1793,"b":1803,"line":46,"col":20}]}},{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1853,"b":1858,"line":48,"col":16}]}}],"usedParamSet":{"requesterId":true,"postId":true},"statement":{"body":"SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :requesterId\nAND posts.published IS NOT NULL\nAND posts.id = :postId","loc":{"a":1546,"b":1858,"line":42,"col":0}}};
+const getPostWithKeyIR: any = {"name":"GetPostWithKey","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1815,"b":1825,"line":46,"col":20}]}},{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1875,"b":1880,"line":48,"col":16}]}}],"usedParamSet":{"requesterId":true,"postId":true},"statement":{"body":"SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,\n       keys.key\nFROM posts, keys\nWHERE posts.key_set_id = keys.key_set_id\nAND keys.user_id = :requesterId\nAND posts.published IS NOT NULL\nAND posts.id = :postId","loc":{"a":1568,"b":1880,"line":42,"col":0}}};
 
 /**
  * Query generated from SQL:

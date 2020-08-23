@@ -1,4 +1,4 @@
-/** Types generated for queries found in "src/queries/follow_requests.sql" */
+/** Types generated for queries found in "./src/queries/follow_requests.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
 /** 'Create' parameters type */
@@ -65,6 +65,7 @@ export interface IDestroyAndReturnResult {
   requesterId: number;
   requesteeId: number;
   friendCode: string | null;
+  id: number;
 }
 
 /** 'DestroyAndReturn' query type */

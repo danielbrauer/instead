@@ -35,7 +35,11 @@ export type Post = IGetHomePostsWithKeysResult
 
 export type EncryptedComment = IGetCommentsForPostResult
 
-export type EncryptedPostKey = IGetKeyResult
+export type EncryptedPostKey = {
+    key: string
+    userId: number
+    keySetId: number
+}
 
 export type PublicKey = IGetFollowerPublicKeysResult
 

@@ -9,6 +9,7 @@ import * as config from './config/config'
 import forceHttps from './middleware/force-https'
 import session from './middleware/session'
 import apiHeaders from './middleware/api-headers'
+import forwardErrors from './middleware/errors'
 import auth from './routes/auth'
 import signup from './routes/signup'
 import api from './routes/api'
@@ -19,16 +20,15 @@ app.use(forceHttps)
 app.use(helmet())
 app.use(cors)
 if (!config.isLocalDev()) app.set('trust proxy', 1) // trust first proxy
-app.use(session)
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(morgan('dev'))
 
 app.use(apiHeaders)
-app.use('/signup', signup)
+app.use('/signup', signup, forwardErrors)
 app.use('/auth', session, auth)
-app.use('/api', session, authenticateSession, api)
+app.use('/api', session, authenticateSession, api, forwardErrors)
 
 if (!config.isLocalDev()) {
     const relativePathToReact = '/../../../client/build'

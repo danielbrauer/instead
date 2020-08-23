@@ -1,4 +1,4 @@
-/** Types generated for queries found in "src/queries/users.sql" */
+/** Types generated for queries found in "./src/queries/users.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
 /** 'GetById' parameters type */

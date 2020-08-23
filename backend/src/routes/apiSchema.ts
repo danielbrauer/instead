@@ -43,7 +43,7 @@ export interface GetKeyRequest extends ValidatedRequestSchema {
     [ContainerTypes.Body]: Joi.extractType<typeof empty>
 }
 
-export const addKeysBody = Joi.object({
+export const addPostKeysBody = Joi.object({
     keys: Joi.array().min(1).items({
         userId: Joi.number().integer().required(),
         keySetId: Joi.number().integer().required(),
@@ -51,9 +51,9 @@ export const addKeysBody = Joi.object({
     }),
 })
 
-export interface AddKeysRequest extends ValidatedRequestSchema {
+export interface AddPostKeysRequest extends ValidatedRequestSchema {
     [ContainerTypes.Query]: Joi.extractType<typeof empty>
-    [ContainerTypes.Body]: Joi.extractType<typeof addKeysBody>
+    [ContainerTypes.Body]: Joi.extractType<typeof addPostKeysBody>
 }
 
 export const startPostBody = Joi.object({

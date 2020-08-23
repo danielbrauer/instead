@@ -18,8 +18,8 @@ WHERE posts.key_set_id = keys.key_set_id
 AND keys.user_id = :userId
 AND (posts.author_id = :userId OR posts.author_id IN (
     SELECT followee_id
-    FROM followers
-    WHERE followers.follower_id = :userId
+    FROM follow_relationships
+    WHERE follow_relationships.follower_id = :userId
 ))
 AND posts.published IS NOT NULL
 AND (:pageIndex::int8 IS NULL OR posts.published < int_to_timestamp(:pageIndex::int8))

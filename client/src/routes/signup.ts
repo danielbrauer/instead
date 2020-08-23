@@ -4,8 +4,8 @@ import { NewUser } from '../../../backend/src/types/auth'
 
 const baseURL = `${config.serverUrl}/signup`
 
-const authorizedAxios = Axios.create({ withCredentials: false, baseURL })
-authorizedAxios.interceptors.response.use(
+const server = Axios.create({ withCredentials: false, baseURL })
+server.interceptors.response.use(
     (response) => {
         return response
     },
@@ -18,7 +18,7 @@ authorizedAxios.interceptors.response.use(
 )
 
 export async function signup(newUser: NewUser) {
-    await authorizedAxios.post('', {
+    await server.post('', {
         ...newUser,
     })
     return

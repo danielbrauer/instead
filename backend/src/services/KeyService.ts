@@ -1,8 +1,10 @@
 import { Service } from 'typedi'
 import DatabaseService from './DatabaseService'
 import * as Keys from '../queries/keys.gen'
+import * as FollowRelationships from '../queries/follow_relationships.gen'
 import UserService from './UserService'
 import { FollowRelationship, EncryptedPostKey } from '../types/api'
+import { ServerError } from '../middleware/errors'
 
 @Service()
 export default class KeyService {
@@ -11,14 +13,11 @@ export default class KeyService {
     }
 
     private async onFollowerLost(followRelationship: FollowRelationship) {
-        await Promise.all([
-            this.removeFollowerKeys(followRelationship.followerId, followRelationship.followeeId),
-            this.invalidateCurrentKeySet(followRelationship.followeeId),
-        ])
+        await this.invalidateCurrentKeySets(followRelationship.followeeId)
     }
 
-    async getCurrentKey(userId: number) {
-        const [key] = await Keys.getCurrentKey.run({ userId }, this.db.pool)
+    async getCurrentPostKey(userId: number) {
+        const [key] = await Keys.getCurrentPostKey.run({ userId }, this.db.pool)
         return key || null
     }
 
@@ -27,8 +26,8 @@ export default class KeyService {
         return key || null
     }
 
-    async getAllKeys(userId: number) {
-        return await Keys.getAllKeys.run({ userId }, this.db.pool)
+    async getAllPostKeys(userId: number) {
+        return await Keys.getAllPostKeys.run({ userId }, this.db.pool)
     }
 
     async getFollowerPublicKeys(userId: number) {
@@ -41,30 +40,66 @@ export default class KeyService {
         return publicKey || null
     }
 
-    async invalidateCurrentKeySet(userId: number) {
+    async invalidateCurrentKeySets(userId: number) {
+        await Keys.endPostKeySetValidity.run({ userId }, this.db.pool)
+    }
+
+    async createCurrentPostKeySet(userId: number, key: string) {
+        const [{ keySetId }] = await Keys.createCurrentPostKeySet.run(
+            { ownerId: userId, key },
+            this.db.pool,
+        )
+        return keySetId
+    }
+
+    async addNewPostKeyForFollowers(followeeId: number, keys: EncryptedPostKey[]) {
         await this.db.transaction(async (client) => {
-            const [key] = await Keys.getCurrentKey.run({ userId }, client)
-            if (key) {
-                await Keys.endKeySetValidity.run({ keySetId: key.keySetId }, client)
+            const followRelationships = await FollowRelationships.getByFolloweeId.run(
+                { followeeId },
+                client,
+            )
+            if (followRelationships.length != keys.length) {
+                throw new ServerError(
+                    `Expecting post keys for ${followRelationships.length} followers, but got ${keys.length}`,
+                )
             }
+            const keysWithFollowerIds = keys.map((key) => {
+                const followRelationship = followRelationships.find(
+                    (x) => x.followerId == key.userId,
+                )
+                if (followRelationship === undefined)
+                    throw new ServerError(
+                        `Cannot save post key for non-follower, id: ${key.userId}`,
+                    )
+                return {
+                    followRelationshipId: followRelationship.id,
+                    ...key,
+                }
+            })
+            await Keys.addPostKeys.run({ keysWithFollowerIds }, this.db.pool)
         })
     }
 
-    async createKeySet(userId: number, key: string) {
-        let returnKeySetId: number = null
+    async addOldPostKeysForFollower(followeeId: number, keys: EncryptedPostKey[]) {
         await this.db.transaction(async (client) => {
-            const [{ id: keySetId }] = await Keys.createKeySet.run({ ownerId: userId }, client)
-            await Keys.addKeys.run({ keys: [{ userId, key, keySetId }] }, client)
-            returnKeySetId = keySetId
+            const [followRelationship] = await FollowRelationships.getExact.run(
+                { followeeId, followerId: keys[0].userId },
+                client,
+            )
+            if (followRelationship === undefined) {
+                throw new ServerError(
+                    `Cannot save post key for non-follower, id: ${keys[0].userId}`,
+                )
+            }
+            const keysWithFollowerIds = keys.map((key) => {
+                if (key.userId !== keys[0].userId)
+                    throw new ServerError(`All submitted post keys must be for the same follower`)
+                return {
+                    followRelationshipId: followRelationship.id,
+                    ...key,
+                }
+            })
+            await Keys.addPostKeys.run({ keysWithFollowerIds }, this.db.pool)
         })
-        return returnKeySetId
-    }
-
-    async addKeys(keys: EncryptedPostKey[]) {
-        await Keys.addKeys.run({ keys }, this.db.pool)
-    }
-
-    async removeFollowerKeys(followerId: number, followeeId: number) {
-        await Keys.removeFollowerKeys.run({ followerId, followeeId }, this.db.pool)
     }
 }

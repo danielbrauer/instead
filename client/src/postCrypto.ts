@@ -56,17 +56,16 @@ export async function createKeysForNewFollower(userId: number) {
         const publicKey = await Routes.getPublicKey(userId)
         return await importPublicKey(publicKey.publicKey as JsonWebKey)
     }
-    const [publicKey, postKeys] = await Promise.all([getAndImportPublicKey(), Routes.getAllKeys()])
+    const [publicKey, postKeys] = await Promise.all([getAndImportPublicKey(), Routes.getAllPostKeys()])
+    if (postKeys.length === 0) return
     const followerPostKeyPromises = postKeys.map(
         async (encryptedPostKey): Promise<EncryptedPostKey> => {
             const postKey = await unwrapKeyAsymmetric(encryptedPostKey.key)
             return await createEncryptedPostKey(postKey, encryptedPostKey.keySetId, publicKey, userId)
         },
     )
-    if (followerPostKeyPromises.length > 0) {
-        const encryptedKeys = await Promise.all(followerPostKeyPromises)
-        await Routes.addKeys(encryptedKeys)
-    }
+    const encryptedKeys = await Promise.all(followerPostKeyPromises)
+    await Routes.addOldPostKeysForFollower(encryptedKeys)
 }
 
 async function createPostKeyAndMakeCurrent(): Promise<PostKey> {
@@ -87,7 +86,7 @@ async function createPostKeyAndMakeCurrent(): Promise<PostKey> {
         Routes.getFollowerPublicKeys(),
     ])
 
-    const keySetId = await Routes.createCurrentKey(authorPostKey)
+    const keySetId = await Routes.createCurrentPostKey(authorPostKey)
 
     const followerPostKeyPromises = followerPublicKeys.map(
         async (publicKey): Promise<EncryptedPostKey> => {
@@ -98,7 +97,7 @@ async function createPostKeyAndMakeCurrent(): Promise<PostKey> {
 
     if (followerPostKeyPromises.length > 0) {
         const encryptedKeys = await Promise.all(followerPostKeyPromises)
-        await Routes.addKeys(encryptedKeys)
+        await Routes.addNewPostKeyForFollowers(encryptedKeys)
     }
 
     return {
@@ -108,7 +107,7 @@ async function createPostKeyAndMakeCurrent(): Promise<PostKey> {
 }
 
 async function getOrCreatePostKey(): Promise<PostKey> {
-    const currentKeyEncrypted = await Routes.getCurrentKey()
+    const currentKeyEncrypted = await Routes.getCurrentPostKey()
     if (currentKeyEncrypted === null) return await createPostKeyAndMakeCurrent()
     const currentKey = await unwrapKeyAsymmetric(currentKeyEncrypted.key)
     return { id: currentKeyEncrypted.keySetId, key: currentKey }

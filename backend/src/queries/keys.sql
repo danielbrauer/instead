@@ -1,14 +1,14 @@
-/* @name GetCurrentKey */
+/* @name GetCurrentPostKey */
 SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
-    SELECT id
-    FROM key_sets
-    WHERE owner_id = :userId AND valid_end IS NULL
+    SELECT current_post_key_set_id
+    FROM users
+    WHERE id = :userId
 );
 
 /* @name GetKey */
 SELECT * FROM keys WHERE user_id = :userId AND key_set_id = :keySetId;
 
-/* @name GetAllKeys */
+/* @name GetAllPostKeys */
 SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
     SELECT id
     FROM key_sets
@@ -18,39 +18,42 @@ SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
 /* @name GetFollowerPublicKeys */
 SELECT id, public_key FROM users WHERE id IN (
     SELECT follower_id
-    FROM followers
+    FROM follow_relationships
     WHERE followee_id = :userId
 );
 
 /* @name GetPublicKey */
 SELECT id, public_key FROM users WHERE id = :userId;
 
-/* @name EndKeySetValidity */
-UPDATE key_sets SET valid_end = now() WHERE id = :keySetId;
+/* @name EndPostKeySetValidity */
+WITH old_post_key AS (
+    SELECT current_post_key_set_id
+    FROM users
+    WHERE id = :userId
+), dummy AS (
+    UPDATE users
+    SET current_post_key_set_id = NULL
+    where id = :userId
+)
+UPDATE key_sets SET valid_end = now() WHERE id = (SELECT * FROM old_post_key);
 
-/* @name CreateKeySet */
-INSERT INTO key_sets (owner_id) VALUES (:ownerId) RETURNING id;
+/* @name CreateCurrentPostKeySet */
+WITH new_key_set_id AS (
+    INSERT INTO key_sets (owner_id)
+    VALUES (:ownerId)
+    RETURNING id
+), dummy AS (
+    UPDATE users
+    SET current_post_key_set_id = (SELECT * FROM new_key_set_id)
+    WHERE id = :ownerId
+)
+INSERT INTO keys (user_id, key_set_id, key)
+VALUES (:ownerId, (SELECT * FROM new_key_set_id), :key)
+RETURNING key_set_id;
 
 /*
-    @name AddKeys
-    @param keys -> ((userId, keySetId, key)...)
+    @name AddPostKeys
+    @param keysWithFollowerIds -> ((userId, keySetId, key, followRelationshipId)...)
 */
-INSERT INTO keys (user_id, key_set_id, key)
-VALUES :keys;
-
-/* @name RemoveFollowerKeys */
-DELETE FROM keys WHERE user_id = :followerId AND key_set_id IN (
-    SELECT key_set_id
-    FROM key_sets
-    WHERE owner_id = :followeeId
-);
-
-/* @name GetInfoKey */
-SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
-    SELECT info_key_set_id
-    FROM users
-    WHERE id = :ownerId
-);
-
-/* @name SetInfoKey */
-UPDATE users SET info_key_set_id = :newKey WHERE id = :userId;
+INSERT INTO keys (user_id, key_set_id, key, follow_relationship_id)
+VALUES :keysWithFollowerIds;

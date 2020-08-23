@@ -4,7 +4,6 @@ import AuthService from '../services/AuthService'
 import { createValidator, ValidatedRequest } from 'express-joi-validation'
 import * as Schema from './signupSchema'
 import delayResponse from '../middleware/delay-response'
-import { forwardErrors } from '../middleware/errors'
 import * as config from '../config/config'
 
 const router = Router()
@@ -20,7 +19,5 @@ router.post('/', validator.query(Schema.empty), validator.body(Schema.signupBody
     await authService.signup(req.body)
     return res.json({ success: true })
 })
-
-router.use(forwardErrors)
 
 export default router

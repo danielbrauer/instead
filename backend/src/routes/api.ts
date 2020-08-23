@@ -3,7 +3,7 @@ import Router from 'express-promise-router'
 import UserService from '../services/UserService'
 import PostService from '../services/PostService'
 import KeyService from '../services/KeyService'
-import { ServerError, forwardErrors } from '../middleware/errors'
+import { ServerError } from '../middleware/errors'
 import { ValidatedRequest, createValidator } from 'express-joi-validation'
 import * as Schema from './apiSchema'
 
@@ -100,21 +100,21 @@ router.delete(
 )
 
 router.get(
-    '/getCurrentKey',
+    '/getCurrentPostKey',
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const currentKey = await keyService.getCurrentKey(req.userId)
+        const currentKey = await keyService.getCurrentPostKey(req.userId)
         return res.json(currentKey)
     },
 )
 
 router.post(
-    '/createCurrentKey',
+    '/createCurrentPostKey',
     validator.query(Schema.empty),
     validator.body(Schema.createCurrentKeyBody),
     async (req: ValidatedRequest<Schema.CreateCurrentKeyRequest>, res) => {
-        const keySetId = await keyService.createKeySet(req.userId, req.body.key)
+        const keySetId = await keyService.createCurrentPostKeySet(req.userId, req.body.key)
         return res.json(keySetId)
     },
 )
@@ -130,21 +130,31 @@ router.get(
 )
 
 router.get(
-    '/getAllKeys',
+    '/getAllPostKeys',
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const keys = await keyService.getAllKeys(req.userId)
+        const keys = await keyService.getAllPostKeys(req.userId)
         return res.json(keys)
     },
 )
 
 router.put(
-    '/addKeys',
+    '/addNewPostKeyForFollowers',
     validator.query(Schema.empty),
-    validator.body(Schema.addKeysBody),
-    async (req: ValidatedRequest<Schema.AddKeysRequest>, res) => {
-        keyService.addKeys(req.body.keys)
+    validator.body(Schema.addPostKeysBody),
+    async (req: ValidatedRequest<Schema.AddPostKeysRequest>, res) => {
+        await keyService.addNewPostKeyForFollowers(req.userId, req.body.keys)
+        return res.json({ success: true })
+    },
+)
+
+router.put(
+    '/addOldPostKeysForFollower',
+    validator.query(Schema.empty),
+    validator.body(Schema.addPostKeysBody),
+    async (req: ValidatedRequest<Schema.AddPostKeysRequest>, res) => {
+        await keyService.addOldPostKeysForFollower(req.userId, req.body.keys)
         return res.json({ success: true })
     },
 )
@@ -175,7 +185,7 @@ router.post(
     validator.query(Schema.empty),
     validator.body(Schema.startPostBody),
     async (req: ValidatedRequest<Schema.StartPostRequest>, res) => {
-        const currentKey = await keyService.getCurrentKey(req.userId)
+        const currentKey = await keyService.getCurrentPostKey(req.userId)
         if (currentKey == null) throw new ServerError('No current key')
         if (currentKey.keySetId !== req.body.keySetId)
             throw new ServerError('Post key does not match current key')
@@ -333,7 +343,5 @@ router.post(
         return res.json(code)
     },
 )
-
-router.use(forwardErrors)
 
 export default router
