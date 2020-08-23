@@ -1,9 +1,9 @@
 import React from 'react'
-import { List, Button, Icon, Label } from 'semantic-ui-react'
+import { List, Button, Label } from 'semantic-ui-react'
 import SafetyButton from './SafetyButton'
-import { useMutation, useQuery } from 'react-query'
-import { rejectFollowRequest, removeFollower, getUser, sendFollowRequestDirect } from './routes/api'
-import InternalLink from './Components/InternalLink'
+import { useMutation } from 'react-query'
+import { rejectFollowRequest, removeFollower, sendFollowRequestDirect } from './routes/api'
+import UserInList from './UserInList'
 
 export interface FollowerItemInfo {
     id: number
@@ -17,7 +17,6 @@ export default function ({ item, onAccept }: { item: FollowerItemInfo; onAccept:
     const [rejectMutation] = useMutation(rejectFollowRequest)
     const [removeFollowerMutation] = useMutation(removeFollower)
     const [sendRequestMutation] = useMutation(sendFollowRequestDirect)
-    const user = useQuery(['user', item.id], getUser, { staleTime: Infinity })
 
     return (
         <List.Item>
@@ -50,10 +49,7 @@ export default function ({ item, onAccept }: { item: FollowerItemInfo; onAccept:
                 )}
             </List.Content>
             <List.Content>
-                <Icon size='big' name='user' />
-                <InternalLink to={`/user/${item.id.toString()}`}>
-                    {user.data ? user.data!.displayName || user.data!.id.toString() : 'loading'}
-                </InternalLink>
+                <UserInList id={item.id} />
             </List.Content>
         </List.Item>
     )

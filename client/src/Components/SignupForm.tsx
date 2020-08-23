@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom'
 
 export default function SignupForm() {
     const history = useHistory()
-    const { value: username, bind: bindUsername } = useInput('')
+    const { value: username, bind: bindUsername } = useInput('', (x) => x.replace(/[^0-9a-zA-Z]/g, ''))
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: agreeTerms, bind: bindAgreeTerms } = useInputBool(false)
     const [missedTerms, setMissedTerms] = useState(false)
