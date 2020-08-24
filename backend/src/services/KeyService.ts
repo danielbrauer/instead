@@ -21,8 +21,8 @@ export default class KeyService {
         return key || null
     }
 
-    async getKey(userId: number, keySetId: number) {
-        const [key] = await Keys.getKey.run({ userId, keySetId }, this.db.pool)
+    async getPostKey(userId: number, keySetId: number) {
+        const [key] = await Keys.getPostKey.run({ userId, keySetId }, this.db.pool)
         return key || null
     }
 

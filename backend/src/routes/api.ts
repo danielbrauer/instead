@@ -120,11 +120,11 @@ router.post(
 )
 
 router.get(
-    '/getKey',
+    '/getPostKey',
     validator.query(Schema.getKeyQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.GetKeyRequest>, res) => {
-        const key = await keyService.getKey(req.userId, req.query.keySetId)
+        const key = await keyService.getPostKey(req.userId, req.query.keySetId)
         return res.json(key)
     },
 )

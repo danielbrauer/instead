@@ -109,8 +109,8 @@ export async function createCurrentPostKey(keyBase64: string) {
     return response.data
 }
 
-export async function getKey(keySetId: number) {
-    const response = await server.get<EncryptedPostKey | ''>('/getKey', {
+export async function getPostKey(keySetId: number) {
+    const response = await server.get<EncryptedPostKey | ''>('/getPostKey', {
         params: {
             keySetId,
         },

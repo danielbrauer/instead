@@ -1,6 +1,3 @@
-/* @name GetKey */
-SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id = :keySetId;
-
 /* @name GetFollowerPublicKeys */
 SELECT id, public_key FROM users WHERE id IN (
     SELECT follower_id
@@ -10,6 +7,9 @@ SELECT id, public_key FROM users WHERE id IN (
 
 /* @name GetPublicKey */
 SELECT id, public_key FROM users WHERE id = :userId;
+
+/* @name GetPostKey */
+SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id = :keySetId;
 
 /* @name GetCurrentPostKey */
 SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id IN (

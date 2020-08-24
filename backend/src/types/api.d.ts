@@ -1,8 +1,8 @@
-import { IGetHomePostsWithKeysResult } from '../queries/posts.gen'
-import { IGetFollowerPublicKeysResult, IGetKeyResult } from '../queries/keys.gen'
-import { IGetCommentsForPostResult } from '../queries/comments.gen'
-import { IGetByIdResult } from '../queries/users.gen'
-import { IGetByRequesterIdResult } from '../queries/follow_requests.gen'
+import * as Posts from '../queries/posts.gen'
+import * as Keys from '../queries/keys.gen'
+import * as Comments from '../queries/comments.gen'
+import * as Users from '../queries/users.gen'
+import * as FollowRequests from '../queries/follow_requests.gen'
 
 export interface FollowRelationship {
     followerId: number
@@ -29,11 +29,11 @@ export interface Comment {
 
 export type FinishPostResult = ActionResult
 
-export type User = IGetByIdResult
+export type User = Users.IGetByIdResult
 
-export type Post = IGetHomePostsWithKeysResult
+export type Post = Posts.IGetHomePostsWithKeysResult
 
-export type EncryptedComment = IGetCommentsForPostResult
+export type EncryptedComment = Comments.IGetCommentsForPostResult
 
 export type EncryptedPostKey = {
     key: string
@@ -41,6 +41,6 @@ export type EncryptedPostKey = {
     postKeySetId: number
 }
 
-export type PublicKey = IGetFollowerPublicKeysResult
+export type PublicKey = Keys.IGetFollowerPublicKeysResult
 
-export type SentRequest = IGetByRequesterIdResult
+export type SentRequest = FollowRequests.IGetByRequesterIdResult
