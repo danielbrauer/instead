@@ -2,19 +2,12 @@ import { Service } from 'typedi'
 import DatabaseService from './DatabaseService'
 import * as Keys from '../queries/keys.gen'
 import * as FollowRelationships from '../queries/follow_relationships.gen'
-import UserService from './UserService'
-import { FollowRelationship, EncryptedPostKey } from '../types/api'
+import { EncryptedPostKey } from '../types/api'
 import { ServerError } from '../middleware/errors'
 
 @Service()
 export default class KeyService {
-    constructor(private userService: UserService, private db: DatabaseService) {
-        this.userService.onUserLostFollower.subscribe((x) => this.onFollowerLost(x))
-    }
-
-    private async onFollowerLost(followRelationship: FollowRelationship) {
-        await this.invalidateCurrentKeySets(followRelationship.followeeId)
-    }
+    constructor(private db: DatabaseService) {}
 
     async getCurrentPostKey(userId: number) {
         const [key] = await Keys.getCurrentPostKey.run({ userId }, this.db.pool)
@@ -38,10 +31,6 @@ export default class KeyService {
     async getPublicKey(userId: number) {
         const [publicKey] = await Keys.getPublicKey.run({ userId }, this.db.pool)
         return publicKey || null
-    }
-
-    async invalidateCurrentKeySets(userId: number) {
-        await Keys.endCurrentPostKeySetValidity.run({ userId }, this.db.pool)
     }
 
     async createCurrentPostKeySet(userId: number, key: string) {
