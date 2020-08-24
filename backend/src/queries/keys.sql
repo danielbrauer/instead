@@ -25,11 +25,6 @@ SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id IN (
     WHERE owner_id = :userId
 );
 
-/* @name EndCurrentPostKeySetValidity */
-UPDATE post_key_sets
-SET valid_end = now()
-WHERE owner_id = :userId AND valid_end IS NULL;
-
 /* @name CreateCurrentPostKeySet */
 WITH new_post_key_set_id AS (
     INSERT INTO post_key_sets (owner_id)
@@ -57,9 +52,6 @@ WHERE profile_keys.owner_id = users.id
 AND profile_keys.recipient_id = :userId
 AND profile_keys.owner_id = :userId
 AND users.profile_key_stale = false;
-
-/* @name MarkProfileKeyStale */
-UPDATE users SET profile_key_stale = true WHERE id = :userId;
 
 /* @name CreateProfileKey */
 WITH dummy AS (
