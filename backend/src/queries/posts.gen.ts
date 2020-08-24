@@ -1,4 +1,4 @@
-/** Types generated for queries found in "src/queries/posts.sql" */
+/** Types generated for queries found in "./src/queries/posts.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
 /** 'CreateAndReturn' parameters type */

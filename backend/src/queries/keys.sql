@@ -46,3 +46,33 @@ RETURNING post_key_set_id;
 */
 INSERT INTO post_keys (recipient_id, post_key_set_id, key, follow_relationship_id)
 VALUES :keysWithFollowerIds;
+
+/* @name GetProfileKey */
+SELECT * FROM profile_keys WHERE recipient_id = :recipientId AND owner_id = :ownerId;
+
+/* @name GetCurrentProfileKey */
+SELECT profile_keys.key
+FROM profile_keys, users
+WHERE profile_keys.owner_id = users.id
+AND profile_keys.recipient_id = :userId
+AND profile_keys.owner_id = :userId
+AND users.profile_key_stale = false;
+
+/* @name MarkProfileKeyStale */
+UPDATE users SET profile_key_stale = true WHERE id = :userId;
+
+/* @name CreateProfileKey */
+WITH dummy AS (
+    DELETE FROM profile_keys WHERE owner_id = :userId
+), dummy2 AS (
+    UPDATE users SET profile_key_stale = false WHERE id = :userId
+)
+INSERT INTO profile_keys (recipient_id, owner_id, key)
+VALUES (:userId, :userId, :key);
+
+/*
+    @name AddProfileKeys
+    @param keysWithSupportingRelationshipIds -> ((recipientId, ownerId, key, outFollowRequestId, outFollowRelationshipId, inFollowRelationshipId)...)
+*/
+INSERT INTO profile_keys (recipient_id, owner_id, key, out_follow_request_id, out_follow_relationship_id, in_follow_relationship_id)
+VALUES :keysWithSupportingRelationshipIds;
