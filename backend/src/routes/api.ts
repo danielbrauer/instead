@@ -187,11 +187,11 @@ router.post(
     async (req: ValidatedRequest<Schema.StartPostRequest>, res) => {
         const currentKey = await keyService.getCurrentPostKey(req.userId)
         if (currentKey == null) throw new ServerError('No current key')
-        if (currentKey.keySetId !== req.body.keySetId)
+        if (currentKey.postKeySetId !== req.body.postKeySetId)
             throw new ServerError('Post key does not match current key')
         const postInfo = await postService.createPost(
             req.userId,
-            req.body.keySetId,
+            req.body.postKeySetId,
             req.body.iv,
             req.body.md5,
             req.body.aspect,

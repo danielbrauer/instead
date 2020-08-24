@@ -41,15 +41,15 @@ export default class KeyService {
     }
 
     async invalidateCurrentKeySets(userId: number) {
-        await Keys.endPostKeySetValidity.run({ userId }, this.db.pool)
+        await Keys.endCurrentPostKeySetValidity.run({ userId }, this.db.pool)
     }
 
     async createCurrentPostKeySet(userId: number, key: string) {
-        const [{ keySetId }] = await Keys.createCurrentPostKeySet.run(
+        const [{ postKeySetId }] = await Keys.createCurrentPostKeySet.run(
             { ownerId: userId, key },
             this.db.pool,
         )
-        return keySetId
+        return postKeySetId
     }
 
     async addNewPostKeyForFollowers(followeeId: number, keys: EncryptedPostKey[]) {
@@ -65,11 +65,11 @@ export default class KeyService {
             }
             const keysWithFollowerIds = keys.map((key) => {
                 const followRelationship = followRelationships.find(
-                    (x) => x.followerId == key.userId,
+                    (x) => x.followerId == key.recipientId,
                 )
                 if (followRelationship === undefined)
                     throw new ServerError(
-                        `Cannot save post key for non-follower, id: ${key.userId}`,
+                        `Cannot save post key for non-follower, id: ${key.recipientId}`,
                     )
                 return {
                     followRelationshipId: followRelationship.id,
@@ -83,16 +83,16 @@ export default class KeyService {
     async addOldPostKeysForFollower(followeeId: number, keys: EncryptedPostKey[]) {
         await this.db.transaction(async (client) => {
             const [followRelationship] = await FollowRelationships.getExact.run(
-                { followeeId, followerId: keys[0].userId },
+                { followeeId, followerId: keys[0].recipientId },
                 client,
             )
             if (followRelationship === undefined) {
                 throw new ServerError(
-                    `Cannot save post key for non-follower, id: ${keys[0].userId}`,
+                    `Cannot save post key for non-follower, id: ${keys[0].recipientId}`,
                 )
             }
             const keysWithFollowerIds = keys.map((key) => {
-                if (key.userId !== keys[0].userId)
+                if (key.recipientId !== keys[0].recipientId)
                     throw new ServerError(`All submitted post keys must be for the same follower`)
                 return {
                     followRelationshipId: followRelationship.id,

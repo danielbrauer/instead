@@ -1,19 +1,5 @@
-/* @name GetCurrentPostKey */
-SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
-    SELECT current_post_key_set_id
-    FROM users
-    WHERE id = :userId
-);
-
 /* @name GetKey */
-SELECT * FROM keys WHERE user_id = :userId AND key_set_id = :keySetId;
-
-/* @name GetAllPostKeys */
-SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
-    SELECT id
-    FROM key_sets
-    WHERE owner_id = :userId
-);
+SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id = :keySetId;
 
 /* @name GetFollowerPublicKeys */
 SELECT id, public_key FROM users WHERE id IN (
@@ -25,35 +11,38 @@ SELECT id, public_key FROM users WHERE id IN (
 /* @name GetPublicKey */
 SELECT id, public_key FROM users WHERE id = :userId;
 
-/* @name EndPostKeySetValidity */
-WITH old_post_key AS (
-    SELECT current_post_key_set_id
-    FROM users
-    WHERE id = :userId
-), dummy AS (
-    UPDATE users
-    SET current_post_key_set_id = NULL
-    where id = :userId
-)
-UPDATE key_sets SET valid_end = now() WHERE id = (SELECT * FROM old_post_key);
+/* @name GetCurrentPostKey */
+SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id IN (
+    SELECT id
+    FROM post_key_sets
+    WHERE owner_id = :userId AND valid_end IS NULL
+);
+
+/* @name GetAllPostKeys */
+SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id IN (
+    SELECT id
+    FROM post_key_sets
+    WHERE owner_id = :userId
+);
+
+/* @name EndCurrentPostKeySetValidity */
+UPDATE post_key_sets
+SET valid_end = now()
+WHERE owner_id = :userId AND valid_end IS NULL;
 
 /* @name CreateCurrentPostKeySet */
-WITH new_key_set_id AS (
-    INSERT INTO key_sets (owner_id)
+WITH new_post_key_set_id AS (
+    INSERT INTO post_key_sets (owner_id)
     VALUES (:ownerId)
     RETURNING id
-), dummy AS (
-    UPDATE users
-    SET current_post_key_set_id = (SELECT * FROM new_key_set_id)
-    WHERE id = :ownerId
 )
-INSERT INTO keys (user_id, key_set_id, key)
-VALUES (:ownerId, (SELECT * FROM new_key_set_id), :key)
-RETURNING key_set_id;
+INSERT INTO post_keys (recipient_id, post_key_set_id, key)
+VALUES (:ownerId, (SELECT * FROM new_post_key_set_id), :key)
+RETURNING post_key_set_id;
 
 /*
     @name AddPostKeys
-    @param keysWithFollowerIds -> ((userId, keySetId, key, followRelationshipId)...)
+    @param keysWithFollowerIds -> ((recipientId, postKeySetId, key, followRelationshipId)...)
 */
-INSERT INTO keys (user_id, key_set_id, key, follow_relationship_id)
+INSERT INTO post_keys (recipient_id, post_key_set_id, key, follow_relationship_id)
 VALUES :keysWithFollowerIds;

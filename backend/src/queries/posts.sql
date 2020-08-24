@@ -1,5 +1,5 @@
 /* @name CreateAndReturn */
-INSERT INTO posts (filename, author_id, key_set_id, iv, aspect) VALUES (:fileName, :authorId, :keySetId, :iv, :aspect) RETURNING id;
+INSERT INTO posts (filename, author_id, post_key_set_id, iv, aspect) VALUES (:fileName, :authorId, :postKeySetId, :iv, :aspect) RETURNING id;
 
 /* @name Publish */
 UPDATE posts SET published = NOW() WHERE id = :postId;
@@ -11,15 +11,15 @@ DELETE FROM posts WHERE id = :postId AND author_id = :authorId RETURNING *;
 DELETE FROM posts WHERE id = :postId AND published IS NULL RETURNING *;
 
 /* @name GetHomePostsWithKeys */
-SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
-       keys.key
-FROM posts, keys
-WHERE posts.key_set_id = keys.key_set_id
-AND keys.user_id = :userId
-AND (posts.author_id = :userId OR posts.author_id IN (
+SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.post_key_set_id,
+       post_keys.key
+FROM posts, post_keys
+WHERE posts.post_key_set_id = post_keys.post_key_set_id
+AND post_keys.recipient_id = :recipientId
+AND (posts.author_id = :recipientId OR posts.author_id IN (
     SELECT followee_id
     FROM follow_relationships
-    WHERE follow_relationships.follower_id = :userId
+    WHERE follow_relationships.follower_id = :recipientId
 ))
 AND posts.published IS NOT NULL
 AND (:pageIndex::int8 IS NULL OR posts.published < int_to_timestamp(:pageIndex::int8))
@@ -27,11 +27,11 @@ ORDER BY posts.published DESC
 LIMIT 2;
 
 /* @name GetUserPostsWithKeys */
-SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
-       keys.key
-FROM posts, keys
-WHERE posts.key_set_id = keys.key_set_id
-AND keys.user_id = :requesterId
+SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.post_key_set_id,
+       post_keys.key
+FROM posts, post_keys
+WHERE posts.post_key_set_id = post_keys.post_key_set_id
+AND post_keys.recipient_id = :recipientId
 AND posts.author_id = :userId
 AND posts.published IS NOT NULL
 AND (:pageIndex::int8 IS NULL OR posts.published < int_to_timestamp(:pageIndex::int8))
@@ -39,10 +39,10 @@ ORDER BY posts.published DESC
 LIMIT 2;
 
 /* @name GetPostWithKey */
-SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.key_set_id,
-       keys.key
-FROM posts, keys
-WHERE posts.key_set_id = keys.key_set_id
-AND keys.user_id = :requesterId
+SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.aspect, posts.post_key_set_id,
+       post_keys.key
+FROM posts, post_keys
+WHERE posts.post_key_set_id = post_keys.post_key_set_id
+AND post_keys.recipient_id = :recipientId
 AND posts.published IS NOT NULL
 AND posts.id = :postId;

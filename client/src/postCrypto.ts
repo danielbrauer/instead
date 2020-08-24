@@ -41,12 +41,17 @@ async function importPublicKey(jwk: JsonWebKey) {
     ])
 }
 
-async function createEncryptedPostKey(postKey: CryptoKey, keySetId: number, publicKey: CryptoKey, userId: number) {
+async function createEncryptedPostKey(
+    postKey: CryptoKey,
+    postKeySetId: number,
+    publicKey: CryptoKey,
+    recipientId: number,
+) {
     const followerVersion = await wrapKeyAsymmetric(postKey, publicKey)
     const encryptedKey: EncryptedPostKey = {
         key: followerVersion,
-        userId,
-        keySetId,
+        recipientId,
+        postKeySetId,
     }
     return encryptedKey
 }
@@ -61,7 +66,7 @@ export async function createKeysForNewFollower(userId: number) {
     const followerPostKeyPromises = postKeys.map(
         async (encryptedPostKey): Promise<EncryptedPostKey> => {
             const postKey = await unwrapKeyAsymmetric(encryptedPostKey.key)
-            return await createEncryptedPostKey(postKey, encryptedPostKey.keySetId, publicKey, userId)
+            return await createEncryptedPostKey(postKey, encryptedPostKey.postKeySetId, publicKey, userId)
         },
     )
     const encryptedKeys = await Promise.all(followerPostKeyPromises)
@@ -110,7 +115,7 @@ async function getOrCreatePostKey(): Promise<PostKey> {
     const currentKeyEncrypted = await Routes.getCurrentPostKey()
     if (currentKeyEncrypted === null) return await createPostKeyAndMakeCurrent()
     const currentKey = await unwrapKeyAsymmetric(currentKeyEncrypted.key)
-    return { id: currentKeyEncrypted.keySetId, key: currentKey }
+    return { id: currentKeyEncrypted.postKeySetId, key: currentKey }
 }
 
 async function encryptSymmetric(arrayBuffer: ArrayBuffer, key: CryptoKey) {
@@ -156,7 +161,7 @@ export async function encryptAndPostComment({ post, content }: { post: Post; con
     const { encrypted, ivBuffer } = await encryptSymmetric(contentBuffer, postKey)
     await Routes.createComment({
         postId: post.id,
-        keySetId: post.keySetId,
+        keySetId: post.postKeySetId,
         content: Buffer.from(encrypted).toString('base64'),
         contentIv: ivBuffer.toString('base64'),
     })

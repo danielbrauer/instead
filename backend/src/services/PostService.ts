@@ -28,19 +28,19 @@ export default class PostService {
         return this.aws.s3ContentUrl()
     }
 
-    async getHomePosts(userId: number, pageIndex?: string) {
-        return await Posts.getHomePostsWithKeys.run({ userId, pageIndex }, this.db.pool)
+    async getHomePosts(recipientId: number, pageIndex?: string) {
+        return await Posts.getHomePostsWithKeys.run({ recipientId, pageIndex }, this.db.pool)
     }
 
-    async getUserPosts(userId: number, requesterId: number, pageIndex?: string) {
+    async getUserPosts(userId: number, recipientId: number, pageIndex?: string) {
         return await Posts.getUserPostsWithKeys.run(
-            { userId, requesterId, pageIndex },
+            { userId, recipientId, pageIndex },
             this.db.pool,
         )
     }
 
-    async getPost(postId: number, requesterId: number) {
-        const [post] = await Posts.getPostWithKey.run({ postId, requesterId }, this.db.pool)
+    async getPost(postId: number, recipientId: number) {
+        const [post] = await Posts.getPostWithKey.run({ postId, recipientId }, this.db.pool)
         return post || null
     }
 
@@ -57,7 +57,7 @@ export default class PostService {
 
     async createPost(
         authorId: number,
-        keySetId: number,
+        postKeySetId: number,
         iv: string,
         md5: string,
         aspect: number,
@@ -65,7 +65,10 @@ export default class PostService {
         const fileName = uuidv1()
         const [signedRequest, [{ id: postId }]] = await Promise.all([
             this.aws.s3GetSignedUploadUrl(fileName, 'application/octet-stream', md5),
-            Posts.createAndReturn.run({ fileName, authorId, keySetId, iv, aspect }, this.db.pool),
+            Posts.createAndReturn.run(
+                { fileName, authorId, postKeySetId, iv, aspect },
+                this.db.pool,
+            ),
         ])
         this._onCreate.dispatchAsync(postId)
         return { signedRequest, postId }

@@ -1,4 +1,4 @@
-/** Types generated for queries found in "src/queries/follow_relationships.sql" */
+/** Types generated for queries found in "./src/queries/follow_relationships.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
 /** 'Create' parameters type */

@@ -3,42 +3,6 @@ import { PreparedQuery } from '@pgtyped/query';
 
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 
-/** 'GetCurrentPostKey' parameters type */
-export interface IGetCurrentPostKeyParams {
-  userId: number | null | void;
-}
-
-/** 'GetCurrentPostKey' return type */
-export interface IGetCurrentPostKeyResult {
-  key: string;
-  userId: number;
-  keySetId: number;
-  id: number;
-  followRequestId: number | null;
-  followRelationshipId: number | null;
-}
-
-/** 'GetCurrentPostKey' query type */
-export interface IGetCurrentPostKeyQuery {
-  params: IGetCurrentPostKeyParams;
-  result: IGetCurrentPostKeyResult;
-}
-
-const getCurrentPostKeyIR: any = {"name":"GetCurrentPostKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":66,"b":71,"line":2,"col":36},{"a":159,"b":164,"line":5,"col":16}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (\n    SELECT current_post_key_set_id\n    FROM users\n    WHERE id = :userId\n)","loc":{"a":30,"b":166,"line":2,"col":0}}};
-
-/**
- * Query generated from SQL:
- * ```
- * SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
- *     SELECT current_post_key_set_id
- *     FROM users
- *     WHERE id = :userId
- * )
- * ```
- */
-export const getCurrentPostKey = new PreparedQuery<IGetCurrentPostKeyParams,IGetCurrentPostKeyResult>(getCurrentPostKeyIR);
-
-
 /** 'GetKey' parameters type */
 export interface IGetKeyParams {
   userId: number | null | void;
@@ -48,10 +12,9 @@ export interface IGetKeyParams {
 /** 'GetKey' return type */
 export interface IGetKeyResult {
   key: string;
-  userId: number;
-  keySetId: number;
+  recipientId: number;
+  postKeySetId: number;
   id: number;
-  followRequestId: number | null;
   followRelationshipId: number | null;
 }
 
@@ -61,51 +24,15 @@ export interface IGetKeyQuery {
   result: IGetKeyResult;
 }
 
-const getKeyIR: any = {"name":"GetKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":225,"b":230,"line":9,"col":36}]}},{"name":"keySetId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":250,"b":257,"line":9,"col":61}]}}],"usedParamSet":{"userId":true,"keySetId":true},"statement":{"body":"SELECT * FROM keys WHERE user_id = :userId AND key_set_id = :keySetId","loc":{"a":189,"b":257,"line":9,"col":0}}};
+const getKeyIR: any = {"name":"GetKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":65,"b":70,"line":2,"col":46}]}},{"name":"keySetId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":95,"b":102,"line":2,"col":76}]}}],"usedParamSet":{"userId":true,"keySetId":true},"statement":{"body":"SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id = :keySetId","loc":{"a":19,"b":102,"line":2,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT * FROM keys WHERE user_id = :userId AND key_set_id = :keySetId
+ * SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id = :keySetId
  * ```
  */
 export const getKey = new PreparedQuery<IGetKeyParams,IGetKeyResult>(getKeyIR);
-
-
-/** 'GetAllPostKeys' parameters type */
-export interface IGetAllPostKeysParams {
-  userId: number | null | void;
-}
-
-/** 'GetAllPostKeys' return type */
-export interface IGetAllPostKeysResult {
-  key: string;
-  userId: number;
-  keySetId: number;
-  id: number;
-  followRequestId: number | null;
-  followRelationshipId: number | null;
-}
-
-/** 'GetAllPostKeys' query type */
-export interface IGetAllPostKeysQuery {
-  params: IGetAllPostKeysParams;
-  result: IGetAllPostKeysResult;
-}
-
-const getAllPostKeysIR: any = {"name":"GetAllPostKeys","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":324,"b":329,"line":12,"col":36},{"a":405,"b":410,"line":15,"col":22}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (\n    SELECT id\n    FROM key_sets\n    WHERE owner_id = :userId\n)","loc":{"a":288,"b":412,"line":12,"col":0}}};
-
-/**
- * Query generated from SQL:
- * ```
- * SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
- *     SELECT id
- *     FROM key_sets
- *     WHERE owner_id = :userId
- * )
- * ```
- */
-export const getAllPostKeys = new PreparedQuery<IGetAllPostKeysParams,IGetAllPostKeysResult>(getAllPostKeysIR);
 
 
 /** 'GetFollowerPublicKeys' parameters type */
@@ -125,7 +52,7 @@ export interface IGetFollowerPublicKeysQuery {
   result: IGetFollowerPublicKeysResult;
 }
 
-const getFollowerPublicKeysIR: any = {"name":"GetFollowerPublicKeys","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":575,"b":580,"line":22,"col":25}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, public_key FROM users WHERE id IN (\n    SELECT follower_id\n    FROM follow_relationships\n    WHERE followee_id = :userId\n)","loc":{"a":450,"b":582,"line":19,"col":0}}};
+const getFollowerPublicKeysIR: any = {"name":"GetFollowerPublicKeys","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":265,"b":270,"line":8,"col":25}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, public_key FROM users WHERE id IN (\n    SELECT follower_id\n    FROM follow_relationships\n    WHERE followee_id = :userId\n)","loc":{"a":140,"b":272,"line":5,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -157,7 +84,7 @@ export interface IGetPublicKeyQuery {
   result: IGetPublicKeyResult;
 }
 
-const getPublicKeyIR: any = {"name":"GetPublicKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":656,"b":661,"line":26,"col":45}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, public_key FROM users WHERE id = :userId","loc":{"a":611,"b":661,"line":26,"col":0}}};
+const getPublicKeyIR: any = {"name":"GetPublicKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":346,"b":351,"line":12,"col":45}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, public_key FROM users WHERE id = :userId","loc":{"a":301,"b":351,"line":12,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -168,38 +95,101 @@ const getPublicKeyIR: any = {"name":"GetPublicKey","params":[{"name":"userId","t
 export const getPublicKey = new PreparedQuery<IGetPublicKeyParams,IGetPublicKeyResult>(getPublicKeyIR);
 
 
-/** 'EndPostKeySetValidity' parameters type */
-export interface IEndPostKeySetValidityParams {
+/** 'GetCurrentPostKey' parameters type */
+export interface IGetCurrentPostKeyParams {
   userId: number | null | void;
 }
 
-/** 'EndPostKeySetValidity' return type */
-export type IEndPostKeySetValidityResult = void;
-
-/** 'EndPostKeySetValidity' query type */
-export interface IEndPostKeySetValidityQuery {
-  params: IEndPostKeySetValidityParams;
-  result: IEndPostKeySetValidityResult;
+/** 'GetCurrentPostKey' return type */
+export interface IGetCurrentPostKeyResult {
+  key: string;
+  recipientId: number;
+  postKeySetId: number;
+  id: number;
+  followRelationshipId: number | null;
 }
 
-const endPostKeySetValidityIR: any = {"name":"EndPostKeySetValidity","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":788,"b":793,"line":32,"col":16},{"a":881,"b":886,"line":36,"col":16}]}}],"usedParamSet":{"userId":true},"statement":{"body":"WITH old_post_key AS (\n    SELECT current_post_key_set_id\n    FROM users\n    WHERE id = :userId\n), dummy AS (\n    UPDATE users\n    SET current_post_key_set_id = NULL\n    where id = :userId\n)\nUPDATE key_sets SET valid_end = now() WHERE id = (SELECT * FROM old_post_key)","loc":{"a":699,"b":966,"line":29,"col":0}}};
+/** 'GetCurrentPostKey' query type */
+export interface IGetCurrentPostKeyQuery {
+  params: IGetCurrentPostKeyParams;
+  result: IGetCurrentPostKeyResult;
+}
+
+const getCurrentPostKeyIR: any = {"name":"GetCurrentPostKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":431,"b":436,"line":15,"col":46},{"a":522,"b":527,"line":18,"col":22}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id IN (\n    SELECT id\n    FROM post_key_sets\n    WHERE owner_id = :userId AND valid_end IS NULL\n)","loc":{"a":385,"b":551,"line":15,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * WITH old_post_key AS (
- *     SELECT current_post_key_set_id
- *     FROM users
- *     WHERE id = :userId
- * ), dummy AS (
- *     UPDATE users
- *     SET current_post_key_set_id = NULL
- *     where id = :userId
+ * SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id IN (
+ *     SELECT id
+ *     FROM post_key_sets
+ *     WHERE owner_id = :userId AND valid_end IS NULL
  * )
- * UPDATE key_sets SET valid_end = now() WHERE id = (SELECT * FROM old_post_key)
  * ```
  */
-export const endPostKeySetValidity = new PreparedQuery<IEndPostKeySetValidityParams,IEndPostKeySetValidityResult>(endPostKeySetValidityIR);
+export const getCurrentPostKey = new PreparedQuery<IGetCurrentPostKeyParams,IGetCurrentPostKeyResult>(getCurrentPostKeyIR);
+
+
+/** 'GetAllPostKeys' parameters type */
+export interface IGetAllPostKeysParams {
+  userId: number | null | void;
+}
+
+/** 'GetAllPostKeys' return type */
+export interface IGetAllPostKeysResult {
+  key: string;
+  recipientId: number;
+  postKeySetId: number;
+  id: number;
+  followRelationshipId: number | null;
+}
+
+/** 'GetAllPostKeys' query type */
+export interface IGetAllPostKeysQuery {
+  params: IGetAllPostKeysParams;
+  result: IGetAllPostKeysResult;
+}
+
+const getAllPostKeysIR: any = {"name":"GetAllPostKeys","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":628,"b":633,"line":22,"col":46},{"a":719,"b":724,"line":25,"col":22}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id IN (\n    SELECT id\n    FROM post_key_sets\n    WHERE owner_id = :userId\n)","loc":{"a":582,"b":726,"line":22,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id IN (
+ *     SELECT id
+ *     FROM post_key_sets
+ *     WHERE owner_id = :userId
+ * )
+ * ```
+ */
+export const getAllPostKeys = new PreparedQuery<IGetAllPostKeysParams,IGetAllPostKeysResult>(getAllPostKeysIR);
+
+
+/** 'EndCurrentPostKeySetValidity' parameters type */
+export interface IEndCurrentPostKeySetValidityParams {
+  userId: number | null | void;
+}
+
+/** 'EndCurrentPostKeySetValidity' return type */
+export type IEndCurrentPostKeySetValidityResult = void;
+
+/** 'EndCurrentPostKeySetValidity' query type */
+export interface IEndCurrentPostKeySetValidityQuery {
+  params: IEndCurrentPostKeySetValidityParams;
+  result: IEndCurrentPostKeySetValidityResult;
+}
+
+const endCurrentPostKeySetValidityIR: any = {"name":"EndCurrentPostKeySetValidity","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":832,"b":837,"line":31,"col":18}]}}],"usedParamSet":{"userId":true},"statement":{"body":"UPDATE post_key_sets\nSET valid_end = now()\nWHERE owner_id = :userId AND valid_end IS NULL","loc":{"a":771,"b":859,"line":29,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * UPDATE post_key_sets
+ * SET valid_end = now()
+ * WHERE owner_id = :userId AND valid_end IS NULL
+ * ```
+ */
+export const endCurrentPostKeySetValidity = new PreparedQuery<IEndCurrentPostKeySetValidityParams,IEndCurrentPostKeySetValidityResult>(endCurrentPostKeySetValidityIR);
 
 
 /** 'CreateCurrentPostKeySet' parameters type */
@@ -210,7 +200,7 @@ export interface ICreateCurrentPostKeySetParams {
 
 /** 'CreateCurrentPostKeySet' return type */
 export interface ICreateCurrentPostKeySetResult {
-  keySetId: number;
+  postKeySetId: number;
 }
 
 /** 'CreateCurrentPostKeySet' query type */
@@ -219,23 +209,19 @@ export interface ICreateCurrentPostKeySetQuery {
   result: ICreateCurrentPostKeySetResult;
 }
 
-const createCurrentPostKeySetIR: any = {"name":"CreateCurrentPostKeySet","params":[{"name":"ownerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1080,"b":1086,"line":43,"col":13},{"a":1218,"b":1224,"line":48,"col":16},{"a":1281,"b":1287,"line":51,"col":9}]}},{"name":"key","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1323,"b":1325,"line":51,"col":51}]}}],"usedParamSet":{"ownerId":true,"key":true},"statement":{"body":"WITH new_key_set_id AS (\n    INSERT INTO key_sets (owner_id)\n    VALUES (:ownerId)\n    RETURNING id\n), dummy AS (\n    UPDATE users\n    SET current_post_key_set_id = (SELECT * FROM new_key_set_id)\n    WHERE id = :ownerId\n)\nINSERT INTO keys (user_id, key_set_id, key)\nVALUES (:ownerId, (SELECT * FROM new_key_set_id), :key)\nRETURNING key_set_id","loc":{"a":1006,"b":1347,"line":41,"col":0}}};
+const createCurrentPostKeySetIR: any = {"name":"CreateCurrentPostKeySet","params":[{"name":"ownerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":983,"b":989,"line":36,"col":13},{"a":1079,"b":1085,"line":40,"col":9}]}},{"name":"key","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1126,"b":1128,"line":40,"col":56}]}}],"usedParamSet":{"ownerId":true,"key":true},"statement":{"body":"WITH new_post_key_set_id AS (\n    INSERT INTO post_key_sets (owner_id)\n    VALUES (:ownerId)\n    RETURNING id\n)\nINSERT INTO post_keys (recipient_id, post_key_set_id, key)\nVALUES (:ownerId, (SELECT * FROM new_post_key_set_id), :key)\nRETURNING post_key_set_id","loc":{"a":899,"b":1155,"line":34,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * WITH new_key_set_id AS (
- *     INSERT INTO key_sets (owner_id)
+ * WITH new_post_key_set_id AS (
+ *     INSERT INTO post_key_sets (owner_id)
  *     VALUES (:ownerId)
  *     RETURNING id
- * ), dummy AS (
- *     UPDATE users
- *     SET current_post_key_set_id = (SELECT * FROM new_key_set_id)
- *     WHERE id = :ownerId
  * )
- * INSERT INTO keys (user_id, key_set_id, key)
- * VALUES (:ownerId, (SELECT * FROM new_key_set_id), :key)
- * RETURNING key_set_id
+ * INSERT INTO post_keys (recipient_id, post_key_set_id, key)
+ * VALUES (:ownerId, (SELECT * FROM new_post_key_set_id), :key)
+ * RETURNING post_key_set_id
  * ```
  */
 export const createCurrentPostKeySet = new PreparedQuery<ICreateCurrentPostKeySetParams,ICreateCurrentPostKeySetResult>(createCurrentPostKeySetIR);
@@ -244,8 +230,8 @@ export const createCurrentPostKeySet = new PreparedQuery<ICreateCurrentPostKeySe
 /** 'AddPostKeys' parameters type */
 export interface IAddPostKeysParams {
   keysWithFollowerIds: Array<{
-    userId: number | null | void,
-    keySetId: number | null | void,
+    recipientId: number | null | void,
+    postKeySetId: number | null | void,
     key: string | null | void,
     followRelationshipId: number | null | void
   }>;
@@ -260,12 +246,12 @@ export interface IAddPostKeysQuery {
   result: IAddPostKeysResult;
 }
 
-const addPostKeysIR: any = {"name":"AddPostKeys","params":[{"name":"keysWithFollowerIds","codeRefs":{"defined":{"a":1387,"b":1405,"line":56,"col":11},"used":[{"a":1540,"b":1558,"line":59,"col":8}]},"transform":{"type":"pick_array_spread","keys":["userId","keySetId","key","followRelationshipId"]}}],"usedParamSet":{"keysWithFollowerIds":true},"statement":{"body":"INSERT INTO keys (user_id, key_set_id, key, follow_relationship_id)\nVALUES :keysWithFollowerIds","loc":{"a":1464,"b":1558,"line":58,"col":0}}};
+const addPostKeysIR: any = {"name":"AddPostKeys","params":[{"name":"keysWithFollowerIds","codeRefs":{"defined":{"a":1195,"b":1213,"line":45,"col":11},"used":[{"a":1372,"b":1390,"line":48,"col":8}]},"transform":{"type":"pick_array_spread","keys":["recipientId","postKeySetId","key","followRelationshipId"]}}],"usedParamSet":{"keysWithFollowerIds":true},"statement":{"body":"INSERT INTO post_keys (recipient_id, post_key_set_id, key, follow_relationship_id)\nVALUES :keysWithFollowerIds","loc":{"a":1281,"b":1390,"line":47,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * INSERT INTO keys (user_id, key_set_id, key, follow_relationship_id)
+ * INSERT INTO post_keys (recipient_id, post_key_set_id, key, follow_relationship_id)
  * VALUES :keysWithFollowerIds
  * ```
  */

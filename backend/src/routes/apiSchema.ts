@@ -45,8 +45,8 @@ export interface GetKeyRequest extends ValidatedRequestSchema {
 
 export const addPostKeysBody = Joi.object({
     keys: Joi.array().min(1).items({
-        userId: Joi.number().integer().required(),
-        keySetId: Joi.number().integer().required(),
+        recipientId: Joi.number().integer().required(),
+        postKeySetId: Joi.number().integer().required(),
         key: Joi.string().base64().required(),
     }),
 })
@@ -57,7 +57,7 @@ export interface AddPostKeysRequest extends ValidatedRequestSchema {
 }
 
 export const startPostBody = Joi.object({
-    keySetId: Joi.number().integer().required(),
+    postKeySetId: Joi.number().integer().required(),
     iv: Joi.string().base64().required(),
     md5: Joi.string().base64().required(),
     aspect: Joi.number().required(),

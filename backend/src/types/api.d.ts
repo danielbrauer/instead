@@ -37,8 +37,8 @@ export type EncryptedComment = IGetCommentsForPostResult
 
 export type EncryptedPostKey = {
     key: string
-    userId: number
-    keySetId: number
+    recipientId: number
+    postKeySetId: number
 }
 
 export type PublicKey = IGetFollowerPublicKeysResult
