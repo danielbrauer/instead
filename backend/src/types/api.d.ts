@@ -29,7 +29,20 @@ export interface Comment {
 
 export type FinishPostResult = ActionResult
 
-export type User = Users.IGetByIdResult
+export type EncryptedUserProfile = Users.IGetProfileWithKeyResult
+
+export type EncryptedProfileKey = Keys.IGetCurrentProfileKeyResult
+
+export type ProfileViewerKeyInfo = Keys.IGetProfileViewerPublicKeysResult
+
+export type EncryptedProfileViewerKey = {
+    recipientId: number
+    ownerId: number
+    key: string
+    outFollowRequestId: number
+    outFollowRelationshipId: number
+    inFollowRelationshipId: number
+}
 
 export type Post = Posts.IGetHomePostsWithKeysResult
 

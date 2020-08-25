@@ -1,5 +1,13 @@
 /* @name Create */
-INSERT INTO follow_relationships (follower_id, followee_id) VALUES (:followerId, :followeeId);
+WITH relationship AS (
+    INSERT INTO follow_relationships (follower_id, followee_id)
+    VALUES (:followerId, :followeeId)
+    RETURNING id
+)
+UPDATE profile_keys
+SET in_follow_relationship_id = (SELECT id FROM relationship)
+WHERE owner_id = :followeeId
+AND recipient_id = :followerId;
 
 /* @name Destroy */
 DELETE FROM follow_relationships WHERE follower_id = :followerId AND followee_id = :followeeId RETURNING follower_id, followee_id;

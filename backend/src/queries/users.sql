@@ -1,5 +1,13 @@
-/* @name GetById */
-SELECT id, display_name, display_name_iv FROM users WHERE id = :userId;
+/* @name GetProfileWithKey */
+SELECT users.id, users.display_name, users.display_name_iv,
+       profile_keys.key
+FROM users, profile_keys
+WHERE users.id = profile_keys.owner_id
+AND users.id = :userId
+AND profile_keys.recipient_id = :requesterId;
+
+/* @name SetProfileData */
+UPDATE users SET display_name = :displayName, display_name_iv = :displayNameIv WHERE id = :userId;
 
 /* @name GetByFriendCode */
 SELECT id FROM users WHERE friend_code = :friendCode;

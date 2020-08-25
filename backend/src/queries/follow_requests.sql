@@ -4,8 +4,8 @@ INSERT INTO follow_requests (requester_id, requestee_id, friend_code) VALUES (:r
 /* @name Destroy */
 DELETE FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId;
 
-/* @name DestroyAndReturn */
-DELETE FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId RETURNING *;
+/* @name GetByIds */
+SELECT id FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId;
 
 /* @name Count */
 SELECT COUNT(*)::int FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId;

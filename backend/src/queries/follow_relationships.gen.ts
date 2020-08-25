@@ -1,4 +1,4 @@
-/** Types generated for queries found in "./src/queries/follow_relationships.sql" */
+/** Types generated for queries found in "src/queries/follow_relationships.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
 /** 'Create' parameters type */
@@ -16,12 +16,20 @@ export interface ICreateQuery {
   result: ICreateResult;
 }
 
-const createIR: any = {"name":"Create","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":88,"b":97,"line":2,"col":69}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":101,"b":110,"line":2,"col":82}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"INSERT INTO follow_relationships (follower_id, followee_id) VALUES (:followerId, :followeeId)","loc":{"a":19,"b":111,"line":2,"col":0}}};
+const createIR: any = {"name":"Create","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":119,"b":128,"line":4,"col":13},{"a":294,"b":303,"line":10,"col":20}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":132,"b":141,"line":4,"col":26},{"a":263,"b":272,"line":9,"col":18}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"WITH relationship AS (\n    INSERT INTO follow_relationships (follower_id, followee_id)\n    VALUES (:followerId, :followeeId)\n    RETURNING id\n)\nUPDATE profile_keys\nSET in_follow_relationship_id = (SELECT id FROM relationship)\nWHERE owner_id = :followeeId\nAND recipient_id = :followerId","loc":{"a":19,"b":303,"line":2,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * INSERT INTO follow_relationships (follower_id, followee_id) VALUES (:followerId, :followeeId)
+ * WITH relationship AS (
+ *     INSERT INTO follow_relationships (follower_id, followee_id)
+ *     VALUES (:followerId, :followeeId)
+ *     RETURNING id
+ * )
+ * UPDATE profile_keys
+ * SET in_follow_relationship_id = (SELECT id FROM relationship)
+ * WHERE owner_id = :followeeId
+ * AND recipient_id = :followerId
  * ```
  */
 export const create = new PreparedQuery<ICreateParams,ICreateResult>(createIR);
@@ -45,7 +53,7 @@ export interface IDestroyQuery {
   result: IDestroyResult;
 }
 
-const destroyIR: any = {"name":"Destroy","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":189,"b":198,"line":5,"col":54}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":219,"b":228,"line":5,"col":84}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"DELETE FROM follow_relationships WHERE follower_id = :followerId AND followee_id = :followeeId RETURNING follower_id, followee_id","loc":{"a":135,"b":263,"line":5,"col":0}}};
+const destroyIR: any = {"name":"Destroy","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":381,"b":390,"line":13,"col":54}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":411,"b":420,"line":13,"col":84}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"DELETE FROM follow_relationships WHERE follower_id = :followerId AND followee_id = :followeeId RETURNING follower_id, followee_id","loc":{"a":327,"b":455,"line":13,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -73,7 +81,7 @@ export interface ICountQuery {
   result: ICountResult;
 }
 
-const countIR: any = {"name":"Count","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":353,"b":362,"line":8,"col":68}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":383,"b":392,"line":8,"col":98}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"SELECT COUNT(*)::int FROM follow_relationships WHERE follower_id = :followerId AND followee_id = :followeeId","loc":{"a":285,"b":392,"line":8,"col":0}}};
+const countIR: any = {"name":"Count","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":545,"b":554,"line":16,"col":68}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":575,"b":584,"line":16,"col":98}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"SELECT COUNT(*)::int FROM follow_relationships WHERE follower_id = :followerId AND followee_id = :followeeId","loc":{"a":477,"b":584,"line":16,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -101,7 +109,7 @@ export interface IGetByFolloweeIdQuery {
   result: IGetByFolloweeIdResult;
 }
 
-const getByFolloweeIdIR: any = {"name":"GetByFolloweeId","params":[{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":494,"b":503,"line":11,"col":70}]}}],"usedParamSet":{"followeeId":true},"statement":{"body":"SELECT id, follower_id FROM follow_relationships WHERE followee_id = :followeeId","loc":{"a":424,"b":503,"line":11,"col":0}}};
+const getByFolloweeIdIR: any = {"name":"GetByFolloweeId","params":[{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":686,"b":695,"line":19,"col":70}]}}],"usedParamSet":{"followeeId":true},"statement":{"body":"SELECT id, follower_id FROM follow_relationships WHERE followee_id = :followeeId","loc":{"a":616,"b":695,"line":19,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -128,7 +136,7 @@ export interface IGetByFollowerIdQuery {
   result: IGetByFollowerIdResult;
 }
 
-const getByFollowerIdIR: any = {"name":"GetByFollowerId","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":601,"b":610,"line":14,"col":66}]}}],"usedParamSet":{"followerId":true},"statement":{"body":"SELECT followee_id FROM follow_relationships WHERE follower_id = :followerId","loc":{"a":535,"b":610,"line":14,"col":0}}};
+const getByFollowerIdIR: any = {"name":"GetByFollowerId","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":793,"b":802,"line":22,"col":66}]}}],"usedParamSet":{"followerId":true},"statement":{"body":"SELECT followee_id FROM follow_relationships WHERE follower_id = :followerId","loc":{"a":727,"b":802,"line":22,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -156,7 +164,7 @@ export interface IGetExactQuery {
   result: IGetExactResult;
 }
 
-const getExactIR: any = {"name":"GetExact","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":692,"b":701,"line":17,"col":57}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":722,"b":731,"line":17,"col":87}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"SELECT id FROM follow_relationships WHERE follower_id = :followerId AND followee_id = :followeeId","loc":{"a":635,"b":731,"line":17,"col":0}}};
+const getExactIR: any = {"name":"GetExact","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":884,"b":893,"line":25,"col":57}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":914,"b":923,"line":25,"col":87}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"SELECT id FROM follow_relationships WHERE follower_id = :followerId AND followee_id = :followeeId","loc":{"a":827,"b":923,"line":25,"col":0}}};
 
 /**
  * Query generated from SQL:

@@ -6,18 +6,19 @@ import NewPost from './NewPost'
 import { Route, Switch, Redirect, useHistory } from 'react-router-dom'
 import { Menu, Dropdown, Label, Icon } from 'semantic-ui-react'
 import { queryCache, useQuery } from 'react-query'
-import { logout, getFollowRequests, getUser } from './routes/api'
+import * as Routes from './routes/api'
 import SinglePost from './SinglePost'
 import UserPosts from './UserPosts'
+import { getProfile } from './postCrypto'
 
 export default function () {
     const history = useHistory()
-    const requests = useQuery('followRequests', getFollowRequests)
-    const currentUserQuery = useQuery(['user', CurrentUser.getId()], getUser)
+    const requests = useQuery('followRequests', Routes.getFollowRequests)
+    const currentUserQuery = useQuery(['user', CurrentUser.getId()], getProfile)
 
     const logOutAndClear = async () => {
         try {
-            await logout()
+            await Routes.logout()
         } finally {
             queryCache.clear()
             CurrentUser.clear()
@@ -47,15 +48,7 @@ export default function () {
                             <Label color='red' size='medium' empty circular corner />
                         ) : null}
                     </Menu.Item>
-                    <Dropdown
-                        item
-                        direction='left'
-                        text={
-                            currentUserQuery.isSuccess
-                                ? currentUserQuery.data!.displayName || currentUserQuery.data!.id.toString()
-                                : 'loading...'
-                        }
-                    >
+                    <Dropdown item direction='left' text={currentUserQuery.data || CurrentUser.getId().toString()}>
                         <Dropdown.Menu>
                             <Dropdown.Item
                                 icon='user'

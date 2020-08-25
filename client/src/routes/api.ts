@@ -1,18 +1,8 @@
 import config from '../config'
 import Axios from 'axios'
-import {
-    User,
-    Post,
-    EncryptedComment,
-    DeletePostResult,
-    StartPostResult,
-    FinishPostResult,
-    EncryptedPostKey,
-    PublicKey,
-    SentRequest,
-} from '../../../backend/src/types/api'
+import * as Types from '../../../backend/src/types/api'
 import { queryCache } from 'react-query'
-import { createKeysForNewFollower } from '../postCrypto'
+import { createKeysForNewFollower, createProfileKeyForViewer } from '../postCrypto'
 
 const baseURL = `${config.serverUrl}/api`
 
@@ -42,7 +32,7 @@ export async function getContentUrl() {
 }
 
 export async function getHomePosts(key: string, pageIndex?: string) {
-    const response = await server.get<Post[]>('/getHomePosts', {
+    const response = await server.get<Types.Post[]>('/getHomePosts', {
         params: {
             pageIndex,
         },
@@ -51,7 +41,7 @@ export async function getHomePosts(key: string, pageIndex?: string) {
 }
 
 export async function getUserPosts(query: string, userId: number, pageIndex?: string) {
-    const response = await server.get<Post[]>('/getUserPosts', {
+    const response = await server.get<Types.Post[]>('/getUserPosts', {
         params: {
             userId,
             pageIndex,
@@ -61,7 +51,7 @@ export async function getUserPosts(query: string, userId: number, pageIndex?: st
 }
 
 export async function getPost(query: string, id: number) {
-    const response = await server.get<Post>('getPost', {
+    const response = await server.get<Types.Post>('getPost', {
         params: {
             id,
         },
@@ -70,7 +60,7 @@ export async function getPost(query: string, id: number) {
 }
 
 export async function getComments(id: number) {
-    const response = await server.get<EncryptedComment[]>('getComments', {
+    const response = await server.get<Types.EncryptedComment[]>('getComments', {
         params: {
             id,
         },
@@ -87,7 +77,7 @@ export async function createComment(comment: { postId: number; keySetId: number;
 }
 
 export async function deletePost(idTodelete: number) {
-    const response = await server.delete<DeletePostResult>('/deletePost', {
+    const response = await server.delete<Types.DeletePostResult>('/deletePost', {
         params: {
             id: idTodelete,
         },
@@ -97,7 +87,7 @@ export async function deletePost(idTodelete: number) {
 }
 
 export async function getCurrentPostKey() {
-    const response = await server.get<EncryptedPostKey | ''>('/getCurrentPostKey')
+    const response = await server.get<Types.EncryptedPostKey | ''>('/getCurrentPostKey')
     if (response.data === '') return null
     return response.data
 }
@@ -110,7 +100,7 @@ export async function createCurrentPostKey(keyBase64: string) {
 }
 
 export async function getPostKey(keySetId: number) {
-    const response = await server.get<EncryptedPostKey | ''>('/getPostKey', {
+    const response = await server.get<Types.EncryptedPostKey | ''>('/getPostKey', {
         params: {
             keySetId,
         },
@@ -120,24 +110,24 @@ export async function getPostKey(keySetId: number) {
 }
 
 export async function getAllPostKeys() {
-    const response = await server.get<EncryptedPostKey[]>('/getAllPostKeys')
+    const response = await server.get<Types.EncryptedPostKey[]>('/getAllPostKeys')
     return response.data
 }
 
-export async function addNewPostKeyForFollowers(keys: EncryptedPostKey[]) {
+export async function addNewPostKeyForFollowers(keys: Types.EncryptedPostKey[]) {
     await server.put('/addNewPostKeyForFollowers', {
         keys,
     })
 }
 
-export async function addOldPostKeysForFollower(keys: EncryptedPostKey[]) {
+export async function addOldPostKeysForFollower(keys: Types.EncryptedPostKey[]) {
     await server.put('/addOldPostKeysForFollower', {
         keys,
     })
 }
 
 export async function getPublicKey(userId: number) {
-    const response = await server.get<PublicKey>('/getPublicKey', {
+    const response = await server.get<Types.PublicKey>('/getPublicKey', {
         params: {
             userId,
         },
@@ -146,12 +136,12 @@ export async function getPublicKey(userId: number) {
 }
 
 export async function getFollowerPublicKeys() {
-    const response = await server.get<PublicKey[]>('/getFollowerPublicKeys')
+    const response = await server.get<Types.PublicKey[]>('/getFollowerPublicKeys')
     return response.data
 }
 
 export async function startPost(postKeySetId: number, ivBase64: string, contentMD5Base64: string, aspect: number) {
-    const postResponse = await server.post<StartPostResult>('/startPost', {
+    const postResponse = await server.post<Types.StartPostResult>('/startPost', {
         postKeySetId,
         iv: ivBase64,
         md5: contentMD5Base64,
@@ -161,24 +151,32 @@ export async function startPost(postKeySetId: number, ivBase64: string, contentM
 }
 
 export async function finishPost(postId: number, success: boolean) {
-    await server.put<FinishPostResult>('/finishPost', {
+    await server.put<Types.FinishPostResult>('/finishPost', {
         postId,
         success,
     })
     queryCache.invalidateQueries('posts')
 }
 
-export async function getUser(key: string, userId: number) {
-    const response = await server.get<User>('/getUserById', {
+export async function getUserProfile(userId: number) {
+    const response = await server.get<Types.EncryptedUserProfile>('/getUserProfile', {
         params: { userId },
     })
-    return response.data
+    return response.data || null
+}
+
+export async function setProfile(displayNameBase64: string, displayNameIvBase64: string) {
+    await server.put('/setProfile', {
+        displayName: displayNameBase64,
+        displayNameIv: displayNameIvBase64,
+    })
 }
 
 export async function sendFollowRequest(friendCode: string) {
-    await server.put('/sendFollowRequest', {
+    const response = await server.put<number>('/sendFollowRequest', {
         friendCode,
     })
+    await createProfileKeyForViewer(response.data)
     queryCache.invalidateQueries('sentFollowRequests')
 }
 
@@ -186,6 +184,7 @@ export async function sendFollowRequestDirect(userId: number) {
     await server.put('/sendFollowRequestDirect', {
         userId,
     })
+    await createProfileKeyForViewer(userId)
     queryCache.invalidateQueries('sentFollowRequests')
 }
 
@@ -237,7 +236,7 @@ export async function getFollowRequests() {
 }
 
 export async function getSentFollowRequests() {
-    const response = await server.get<SentRequest[]>('/getSentFollowRequests')
+    const response = await server.get<Types.SentRequest[]>('/getSentFollowRequests')
     return response.data
 }
 
@@ -250,4 +249,23 @@ export async function regenerateFriendCode() {
     const response = await server.post<string>('/regenerateFriendCode')
     queryCache.invalidateQueries('friendCode')
     return response.data
+}
+
+export async function getCurrentProfileKey() {
+    const response = await server.get<Types.EncryptedProfileKey>('/getProfileKey')
+    return response.data || null
+}
+
+export async function getProfileViewersPublicKeys() {
+    const response = await server.get<Types.ProfileViewerKeyInfo[]>('/getProfileViewersPublicKeys')
+    return response.data
+}
+
+export async function createProfileKey(keyBase64: string, viewerKeys: Types.EncryptedProfileViewerKey[]) {
+    await server.post('/createProfileKey')
+}
+
+export async function getProfileViewerPublicKey(userId: number) {
+    const response = await server.get<Types.ProfileViewerKeyInfo>('/getProfileViewerPublicKey')
+    return response.data || null
 }

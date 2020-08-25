@@ -25,10 +25,14 @@ export default class UserService {
         return this._onUserLostFollower.asEvent()
     }
 
-    async getUserById(userId: number) {
-        const [user] = await Users.getById.run({ userId }, this.db.pool)
+    async getUserProfileById(userId: number, requesterId: number) {
+        const [user] = await Users.getProfileWithKey.run({ userId, requesterId }, this.db.pool)
         if (!user) throw new ServerError('User does not exist')
         return user
+    }
+
+    async setProfile(userId: number, displayName: string, displayNameIv: string) {
+        await Users.setProfileData.run({ userId, displayName, displayNameIv }, this.db.pool)
     }
 
     async addFollowRequestByCode(requesterId: number, friendCode: string) {
@@ -66,13 +70,13 @@ export default class UserService {
 
     async acceptFollowRequest(requesterId: number, requesteeId: number) {
         await this.db.transaction(async (client) => {
-            const [request] = await FollowRequests.destroyAndReturn.run(
+            const [request] = await FollowRequests.getByIds.run(
                 { requesterId, requesteeId },
                 client,
             )
             if (!request) throw new ServerError('No such follow request')
             await FollowRelationships.create.run(
-                { followerId: request.requesterId, followeeId: request.requesteeId },
+                { followerId: requesterId, followeeId: requesteeId },
                 client,
             )
         })

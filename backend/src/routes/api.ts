@@ -215,11 +215,11 @@ router.put(
 )
 
 router.get(
-    '/getUserById',
+    '/getUserProfile',
     validator.query(Schema.getByUserIdQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
-        const user = await userService.getUserById(req.query.userId)
+        const user = await userService.getUserProfileById(req.query.userId, req.userId)
         return res.json(user)
     },
 )

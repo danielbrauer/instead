@@ -1,33 +1,67 @@
 /** Types generated for queries found in "./src/queries/users.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
-/** 'GetById' parameters type */
-export interface IGetByIdParams {
+/** 'GetProfileWithKey' parameters type */
+export interface IGetProfileWithKeyParams {
   userId: number | null | void;
+  requesterId: number | null | void;
 }
 
-/** 'GetById' return type */
-export interface IGetByIdResult {
+/** 'GetProfileWithKey' return type */
+export interface IGetProfileWithKeyResult {
   id: number;
   displayName: string | null;
   displayNameIv: string | null;
+  key: string;
 }
 
-/** 'GetById' query type */
-export interface IGetByIdQuery {
-  params: IGetByIdParams;
-  result: IGetByIdResult;
+/** 'GetProfileWithKey' query type */
+export interface IGetProfileWithKeyQuery {
+  params: IGetProfileWithKeyParams;
+  result: IGetProfileWithKeyResult;
 }
 
-const getByIdIR: any = {"name":"GetById","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":84,"b":89,"line":2,"col":64}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, display_name, display_name_iv FROM users WHERE id = :userId","loc":{"a":20,"b":89,"line":2,"col":0}}};
+const getProfileWithKeyIR: any = {"name":"GetProfileWithKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":194,"b":199,"line":6,"col":16}]}},{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":234,"b":244,"line":7,"col":33}]}}],"usedParamSet":{"userId":true,"requesterId":true},"statement":{"body":"SELECT users.id, users.display_name, users.display_name_iv,\n       profile_keys.key\nFROM users, profile_keys\nWHERE users.id = profile_keys.owner_id\nAND users.id = :userId\nAND profile_keys.recipient_id = :requesterId","loc":{"a":30,"b":244,"line":2,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT id, display_name, display_name_iv FROM users WHERE id = :userId
+ * SELECT users.id, users.display_name, users.display_name_iv,
+ *        profile_keys.key
+ * FROM users, profile_keys
+ * WHERE users.id = profile_keys.owner_id
+ * AND users.id = :userId
+ * AND profile_keys.recipient_id = :requesterId
  * ```
  */
-export const getById = new PreparedQuery<IGetByIdParams,IGetByIdResult>(getByIdIR);
+export const getProfileWithKey = new PreparedQuery<IGetProfileWithKeyParams,IGetProfileWithKeyResult>(getProfileWithKeyIR);
+
+
+/** 'SetProfileData' parameters type */
+export interface ISetProfileDataParams {
+  displayName: string | null | void;
+  displayNameIv: string | null | void;
+  userId: number | null | void;
+}
+
+/** 'SetProfileData' return type */
+export type ISetProfileDataResult = void;
+
+/** 'SetProfileData' query type */
+export interface ISetProfileDataQuery {
+  params: ISetProfileDataParams;
+  result: ISetProfileDataResult;
+}
+
+const setProfileDataIR: any = {"name":"SetProfileData","params":[{"name":"displayName","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":308,"b":318,"line":10,"col":33}]}},{"name":"displayNameIv","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":340,"b":352,"line":10,"col":65}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":366,"b":371,"line":10,"col":91}]}}],"usedParamSet":{"displayName":true,"displayNameIv":true,"userId":true},"statement":{"body":"UPDATE users SET display_name = :displayName, display_name_iv = :displayNameIv WHERE id = :userId","loc":{"a":275,"b":371,"line":10,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * UPDATE users SET display_name = :displayName, display_name_iv = :displayNameIv WHERE id = :userId
+ * ```
+ */
+export const setProfileData = new PreparedQuery<ISetProfileDataParams,ISetProfileDataResult>(setProfileDataIR);
 
 
 /** 'GetByFriendCode' parameters type */
@@ -46,7 +80,7 @@ export interface IGetByFriendCodeQuery {
   result: IGetByFriendCodeResult;
 }
 
-const getByFriendCodeIR: any = {"name":"GetByFriendCode","params":[{"name":"friendCode","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":163,"b":172,"line":5,"col":42}]}}],"usedParamSet":{"friendCode":true},"statement":{"body":"SELECT id FROM users WHERE friend_code = :friendCode","loc":{"a":121,"b":172,"line":5,"col":0}}};
+const getByFriendCodeIR: any = {"name":"GetByFriendCode","params":[{"name":"friendCode","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":445,"b":454,"line":13,"col":42}]}}],"usedParamSet":{"friendCode":true},"statement":{"body":"SELECT id FROM users WHERE friend_code = :friendCode","loc":{"a":403,"b":454,"line":13,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -73,7 +107,7 @@ export interface IGetFriendCodeQuery {
   result: IGetFriendCodeResult;
 }
 
-const getFriendCodeIR: any = {"name":"GetFriendCode","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":244,"b":249,"line":8,"col":42}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT friend_code FROM users WHERE id = :userId","loc":{"a":202,"b":249,"line":8,"col":0}}};
+const getFriendCodeIR: any = {"name":"GetFriendCode","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":526,"b":531,"line":16,"col":42}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT friend_code FROM users WHERE id = :userId","loc":{"a":484,"b":531,"line":16,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -99,7 +133,7 @@ export interface ISetFriendCodeQuery {
   result: ISetFriendCodeResult;
 }
 
-const setFriendCodeIR: any = {"name":"SetFriendCode","params":[{"name":"friendCode","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":311,"b":320,"line":11,"col":32}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":334,"b":339,"line":11,"col":55}]}}],"usedParamSet":{"friendCode":true,"userId":true},"statement":{"body":"UPDATE users SET friend_code = :friendCode WHERE id = :userId","loc":{"a":279,"b":339,"line":11,"col":0}}};
+const setFriendCodeIR: any = {"name":"SetFriendCode","params":[{"name":"friendCode","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":593,"b":602,"line":19,"col":32}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":616,"b":621,"line":19,"col":55}]}}],"usedParamSet":{"friendCode":true,"userId":true},"statement":{"body":"UPDATE users SET friend_code = :friendCode WHERE id = :userId","loc":{"a":561,"b":621,"line":19,"col":0}}};
 
 /**
  * Query generated from SQL:

@@ -1,4 +1,4 @@
-import { User } from 'api'
+import { EncryptedUserProfile } from 'api'
 
 export interface LoginUser {
     id: number
