@@ -115,14 +115,8 @@ export async function getAllPostKeys() {
     return response.data
 }
 
-export async function addNewPostKeyForFollowers(keys: Types.EncryptedPostKey[]) {
-    await server.put('/addNewPostKeyForFollowers', {
-        keys,
-    })
-}
-
-export async function addOldPostKeysForFollower(keys: Types.EncryptedPostKey[]) {
-    await server.put('/addOldPostKeysForFollower', {
+export async function addPostKeys(keys: Types.EncryptedPostKey[]) {
+    await server.put('/addPostKeys', {
         keys,
     })
 }
@@ -267,5 +261,11 @@ export async function createProfileKey(keyBase64: string, viewerKeys: Types.Encr
     await server.post('/createProfileKey', {
         ownerKey: keyBase64,
         viewerKeys,
+    })
+}
+
+export async function addProfileKey(viewerKey: Types.EncryptedProfileViewerKey) {
+    await server.post('/addProfileKey', {
+        viewerKey,
     })
 }

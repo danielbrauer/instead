@@ -140,6 +140,15 @@ export interface CreateProfileKeyRequest extends ValidatedRequestSchema {
     [ContainerTypes.Body]: Joi.extractType<typeof createProfileKeyBody>
 }
 
+export const addProfileKeyBody = Joi.object({
+    viewerKey: profileKey,
+})
+
+export interface AddProfileKeyRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof addProfileKeyBody>
+}
+
 export const setProfileBody = Joi.object({
     displayName: Joi.string().base64().required(),
     displayNameIv: Joi.string().base64().required(),

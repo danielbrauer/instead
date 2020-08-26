@@ -38,6 +38,7 @@ export default class UserService {
         const [requestee] = await Users.getByFriendCode.run({ friendCode }, this.db.pool)
         if (!requestee) throw new ServerError('User does not exist')
         await this.addFollowRequest(requesterId, requestee.id, friendCode)
+        return requestee.id
     }
 
     async addFollowRequestById(requesterId: number, requesteeId: number) {

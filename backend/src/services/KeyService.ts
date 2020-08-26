@@ -1,7 +1,6 @@
 import { Service } from 'typedi'
 import DatabaseService from './DatabaseService'
 import * as Keys from '../queries/keys.gen'
-import * as FollowRelationships from '../queries/follow_relationships.gen'
 import * as Types from '../types/api'
 import { ServerError } from '../middleware/errors'
 
@@ -41,55 +40,15 @@ export default class KeyService {
         return postKeySetId
     }
 
-    async addNewPostKeyForFollowers(followeeId: number, keys: Types.EncryptedPostKey[]) {
-        await this.db.transaction(async (client) => {
-            const followRelationships = await FollowRelationships.getByFolloweeId.run(
-                { followeeId },
-                client,
-            )
-            if (followRelationships.length != keys.length) {
+    async addPostKeys(userId: number, keys: Types.EncryptedPostKey[]) {
+        const postKeySets = await Keys.getAllPostKeys.run({ userId }, this.db.pool)
+        keys.forEach((key) => {
+            if (!postKeySets.some((keySet) => keySet.id === key.postKeySetId))
                 throw new ServerError(
-                    `Expecting post keys for ${followRelationships.length} followers, but got ${keys.length}`,
+                    'Cannot add post keys belonging to key sets owned by other users',
                 )
-            }
-            const keysWithFollowerIds = keys.map((key) => {
-                const followRelationship = followRelationships.find(
-                    (x) => x.followerId == key.recipientId,
-                )
-                if (followRelationship === undefined)
-                    throw new ServerError(
-                        `Cannot save post key for non-follower, id: ${key.recipientId}`,
-                    )
-                return {
-                    followRelationshipId: followRelationship.id,
-                    ...key,
-                }
-            })
-            await Keys.addPostKeys.run({ keysWithFollowerIds }, this.db.pool)
         })
-    }
-
-    async addOldPostKeysForFollower(followeeId: number, keys: Types.EncryptedPostKey[]) {
-        await this.db.transaction(async (client) => {
-            const [followRelationship] = await FollowRelationships.getExact.run(
-                { followeeId, followerId: keys[0].recipientId },
-                client,
-            )
-            if (followRelationship === undefined) {
-                throw new ServerError(
-                    `Cannot save post key for non-follower, id: ${keys[0].recipientId}`,
-                )
-            }
-            const keysWithFollowerIds = keys.map((key) => {
-                if (key.recipientId !== keys[0].recipientId)
-                    throw new ServerError(`All submitted post keys must be for the same follower`)
-                return {
-                    followRelationshipId: followRelationship.id,
-                    ...key,
-                }
-            })
-            await Keys.addPostKeys.run({ keysWithFollowerIds }, this.db.pool)
-        })
+        await Keys.addPostKeys.run({ keys }, this.db.pool)
     }
 
     async getCurrentProfileKey(userId: number) {
@@ -112,5 +71,9 @@ export default class KeyService {
                 throw new ServerError('Keys must all belong to the same owner')
         })
         await Keys.createProfileKey.run({ userId, key: ownerKey, viewerKeys }, this.db.pool)
+    }
+
+    async addProfileKey(viewerKey: Types.EncryptedProfileViewerKey) {
+        await Keys.addProfileKey.run(viewerKey, this.db.pool)
     }
 }

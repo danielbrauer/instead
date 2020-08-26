@@ -246,11 +246,10 @@ export const createCurrentPostKeySet = new PreparedQuery<ICreateCurrentPostKeySe
 
 /** 'AddPostKeys' parameters type */
 export interface IAddPostKeysParams {
-  keysWithFollowerIds: Array<{
+  keys: Array<{
     recipientId: number | null | void,
     postKeySetId: number | null | void,
-    key: string | null | void,
-    followRelationshipId: number | null | void
+    key: string | null | void
   }>;
 }
 
@@ -263,13 +262,13 @@ export interface IAddPostKeysQuery {
   result: IAddPostKeysResult;
 }
 
-const addPostKeysIR: any = {"name":"AddPostKeys","params":[{"name":"keysWithFollowerIds","codeRefs":{"defined":{"a":1464,"b":1482,"line":59,"col":11},"used":[{"a":1641,"b":1659,"line":62,"col":8}]},"transform":{"type":"pick_array_spread","keys":["recipientId","postKeySetId","key","followRelationshipId"]}}],"usedParamSet":{"keysWithFollowerIds":true},"statement":{"body":"INSERT INTO post_keys (recipient_id, post_key_set_id, key, follow_relationship_id)\nVALUES :keysWithFollowerIds","loc":{"a":1550,"b":1659,"line":61,"col":0}}};
+const addPostKeysIR: any = {"name":"AddPostKeys","params":[{"name":"keys","codeRefs":{"defined":{"a":1464,"b":1467,"line":59,"col":11},"used":[{"a":1580,"b":1583,"line":62,"col":8}]},"transform":{"type":"pick_array_spread","keys":["recipientId","postKeySetId","key"]}}],"usedParamSet":{"keys":true},"statement":{"body":"INSERT INTO post_keys (recipient_id, post_key_set_id, key)\nVALUES :keys","loc":{"a":1513,"b":1583,"line":61,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * INSERT INTO post_keys (recipient_id, post_key_set_id, key, follow_relationship_id)
- * VALUES :keysWithFollowerIds
+ * INSERT INTO post_keys (recipient_id, post_key_set_id, key)
+ * VALUES :keys
  * ```
  */
 export const addPostKeys = new PreparedQuery<IAddPostKeysParams,IAddPostKeysResult>(addPostKeysIR);
@@ -292,7 +291,7 @@ export interface IGetCurrentProfileKeyQuery {
   result: IGetCurrentProfileKeyResult;
 }
 
-const getCurrentProfileKeyIR: any = {"name":"GetCurrentProfileKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1849,"b":1854,"line":69,"col":33},{"a":1885,"b":1890,"line":70,"col":29}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT profile_keys.key,\n       users.profile_key_stale\nFROM profile_keys, users\nWHERE profile_keys.owner_id = users.id\nAND profile_keys.recipient_id = :userId\nAND profile_keys.owner_id = :userId","loc":{"a":1696,"b":1890,"line":65,"col":0}}};
+const getCurrentProfileKeyIR: any = {"name":"GetCurrentProfileKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1773,"b":1778,"line":69,"col":33},{"a":1809,"b":1814,"line":70,"col":29}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT profile_keys.key,\n       users.profile_key_stale\nFROM profile_keys, users\nWHERE profile_keys.owner_id = users.id\nAND profile_keys.recipient_id = :userId\nAND profile_keys.owner_id = :userId","loc":{"a":1620,"b":1814,"line":65,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -328,7 +327,7 @@ export interface ICreateProfileKeyQuery {
   result: ICreateProfileKeyResult;
 }
 
-const createProfileKeyIR: any = {"name":"CreateProfileKey","params":[{"name":"viewerKeys","codeRefs":{"defined":{"a":1935,"b":1944,"line":74,"col":11},"used":[{"a":2251,"b":2260,"line":83,"col":12}]},"transform":{"type":"pick_array_spread","keys":["recipientId","ownerId","key"]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":2048,"b":2053,"line":77,"col":47},{"a":2142,"b":2147,"line":80,"col":13},{"a":2151,"b":2156,"line":80,"col":22},{"a":2319,"b":2324,"line":85,"col":55}]}},{"name":"key","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":2160,"b":2162,"line":80,"col":31}]}}],"usedParamSet":{"userId":true,"key":true,"viewerKeys":true},"statement":{"body":"WITH dummy AS (\n    DELETE FROM profile_keys WHERE owner_id = :userId\n), dummy2 AS (\n    INSERT INTO profile_keys (recipient_id, owner_id, key)\n    VALUES (:userId, :userId, :key)\n), dummy3 AS (\n    INSERT INTO profile_keys (recipient_id, owner_id, key)\n    VALUES :viewerKeys\n)\nUPDATE users SET profile_key_stale = false WHERE id = :userId","loc":{"a":1985,"b":2324,"line":76,"col":0}}};
+const createProfileKeyIR: any = {"name":"CreateProfileKey","params":[{"name":"viewerKeys","codeRefs":{"defined":{"a":1859,"b":1868,"line":74,"col":11},"used":[{"a":2175,"b":2184,"line":83,"col":12}]},"transform":{"type":"pick_array_spread","keys":["recipientId","ownerId","key"]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":1972,"b":1977,"line":77,"col":47},{"a":2066,"b":2071,"line":80,"col":13},{"a":2075,"b":2080,"line":80,"col":22},{"a":2243,"b":2248,"line":85,"col":55}]}},{"name":"key","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":2084,"b":2086,"line":80,"col":31}]}}],"usedParamSet":{"userId":true,"key":true,"viewerKeys":true},"statement":{"body":"WITH dummy AS (\n    DELETE FROM profile_keys WHERE owner_id = :userId\n), dummy2 AS (\n    INSERT INTO profile_keys (recipient_id, owner_id, key)\n    VALUES (:userId, :userId, :key)\n), dummy3 AS (\n    INSERT INTO profile_keys (recipient_id, owner_id, key)\n    VALUES :viewerKeys\n)\nUPDATE users SET profile_key_stale = false WHERE id = :userId","loc":{"a":1909,"b":2248,"line":76,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -350,9 +349,8 @@ export const createProfileKey = new PreparedQuery<ICreateProfileKeyParams,ICreat
 
 /** 'AddProfileKey' parameters type */
 export interface IAddProfileKeyParams {
-  userId: number | null | void;
-  recipientId: number | null | void;
   ownerId: number | null | void;
+  recipientId: number | null | void;
   key: string | null | void;
 }
 
@@ -365,13 +363,13 @@ export interface IAddProfileKeyQuery {
   result: IAddProfileKeyResult;
 }
 
-const addProfileKeyIR: any = {"name":"AddProfileKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":2417,"b":2422,"line":89,"col":47}]}},{"name":"recipientId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":2444,"b":2454,"line":89,"col":74},{"a":2522,"b":2532,"line":92,"col":9}]}},{"name":"ownerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":2536,"b":2542,"line":92,"col":23}]}},{"name":"key","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":2546,"b":2548,"line":92,"col":33}]}}],"usedParamSet":{"userId":true,"recipientId":true,"ownerId":true,"key":true},"statement":{"body":"WITH dummy AS (\n    DELETE FROM profile_keys WHERE owner_id = :userId AND recipient_id = :recipientId\n)\nINSERT INTO profile_keys (recipient_id, owner_id, key)\nVALUES (:recipientId, :ownerId, :key)","loc":{"a":2354,"b":2549,"line":88,"col":0}}};
+const addProfileKeyIR: any = {"name":"AddProfileKey","params":[{"name":"ownerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":2341,"b":2347,"line":89,"col":47},{"a":2461,"b":2467,"line":92,"col":23}]}},{"name":"recipientId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":2369,"b":2379,"line":89,"col":75},{"a":2447,"b":2457,"line":92,"col":9}]}},{"name":"key","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":2471,"b":2473,"line":92,"col":33}]}}],"usedParamSet":{"ownerId":true,"recipientId":true,"key":true},"statement":{"body":"WITH dummy AS (\n    DELETE FROM profile_keys WHERE owner_id = :ownerId AND recipient_id = :recipientId\n)\nINSERT INTO profile_keys (recipient_id, owner_id, key)\nVALUES (:recipientId, :ownerId, :key)","loc":{"a":2278,"b":2474,"line":88,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
  * WITH dummy AS (
- *     DELETE FROM profile_keys WHERE owner_id = :userId AND recipient_id = :recipientId
+ *     DELETE FROM profile_keys WHERE owner_id = :ownerId AND recipient_id = :recipientId
  * )
  * INSERT INTO profile_keys (recipient_id, owner_id, key)
  * VALUES (:recipientId, :ownerId, :key)

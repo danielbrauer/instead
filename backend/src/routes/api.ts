@@ -140,21 +140,11 @@ router.get(
 )
 
 router.put(
-    '/addNewPostKeyForFollowers',
+    '/addPostKeys',
     validator.query(Schema.empty),
     validator.body(Schema.addPostKeysBody),
     async (req: ValidatedRequest<Schema.AddPostKeysRequest>, res) => {
-        await keyService.addNewPostKeyForFollowers(req.userId, req.body.keys)
-        return res.json({ success: true })
-    },
-)
-
-router.put(
-    '/addOldPostKeysForFollower',
-    validator.query(Schema.empty),
-    validator.body(Schema.addPostKeysBody),
-    async (req: ValidatedRequest<Schema.AddPostKeysRequest>, res) => {
-        await keyService.addOldPostKeysForFollower(req.userId, req.body.keys)
+        await keyService.addPostKeys(req.userId, req.body.keys)
         return res.json({ success: true })
     },
 )
@@ -239,8 +229,11 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.sendFollowRequestBody),
     async (req: ValidatedRequest<Schema.SendFollowRequestRequest>, res) => {
-        await userService.addFollowRequestByCode(req.userId, req.body.friendCode)
-        return res.send('Sent request!')
+        const requesteeId = await userService.addFollowRequestByCode(
+            req.userId,
+            req.body.friendCode,
+        )
+        return res.json(requesteeId)
     },
 )
 
@@ -380,6 +373,18 @@ router.post(
     validator.body(Schema.createProfileKeyBody),
     async (req: ValidatedRequest<Schema.CreateProfileKeyRequest>, res) => {
         await keyService.createProfileKey(req.userId, req.body.ownerKey, req.body.viewerKeys)
+        return res.json({ success: true })
+    },
+)
+
+router.post(
+    '/addProfileKey',
+    validator.query(Schema.empty),
+    validator.body(Schema.addProfileKeyBody),
+    async (req: ValidatedRequest<Schema.AddProfileKeyRequest>, res) => {
+        if (req.userId !== req.body.viewerKey.ownerId)
+            throw new ServerError("Can't add profile viewers to other peoples' profiles")
+        await keyService.addProfileKey(req.body.viewerKey)
         return res.json({ success: true })
     },
 )

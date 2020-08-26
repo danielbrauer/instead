@@ -56,10 +56,10 @@ RETURNING post_key_set_id;
 
 /*
     @name AddPostKeys
-    @param keysWithFollowerIds -> ((recipientId, postKeySetId, key, followRelationshipId)...)
+    @param keys -> ((recipientId, postKeySetId, key)...)
 */
-INSERT INTO post_keys (recipient_id, post_key_set_id, key, follow_relationship_id)
-VALUES :keysWithFollowerIds;
+INSERT INTO post_keys (recipient_id, post_key_set_id, key)
+VALUES :keys;
 
 /* @name GetCurrentProfileKey */
 SELECT profile_keys.key,
@@ -86,7 +86,7 @@ UPDATE users SET profile_key_stale = false WHERE id = :userId;
 
 /* @name AddProfileKey */
 WITH dummy AS (
-    DELETE FROM profile_keys WHERE owner_id = :userId AND recipient_id = :recipientId
+    DELETE FROM profile_keys WHERE owner_id = :ownerId AND recipient_id = :recipientId
 )
 INSERT INTO profile_keys (recipient_id, owner_id, key)
 VALUES (:recipientId, :ownerId, :key);

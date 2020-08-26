@@ -67,7 +67,8 @@ export async function createProfileKeyForViewer(userId: number) {
             Routes.getPublicKey(userId),
             unwrapKeyAsymmetric(profileKey.key),
         ])
-        await createEncryptedProfileKey(viewerPublicKey, profileKeyUnwrapped)
+        const encrypted = await createEncryptedProfileKey(viewerPublicKey, profileKeyUnwrapped)
+        Routes.addProfileKey(encrypted)
     }
 }
 
@@ -85,7 +86,7 @@ async function createPostKeysForNewFollower(userId: number) {
         },
     )
     const encryptedKeys = await Promise.all(followerPostKeyPromises)
-    await Routes.addOldPostKeysForFollower(encryptedKeys)
+    await Routes.addPostKeys(encryptedKeys)
 }
 
 async function generateSymmetricKey(): Promise<CryptoKey> {
@@ -119,7 +120,7 @@ async function createPostKeyAndMakeCurrent(): Promise<PostKey> {
 
     if (followerPostKeyPromises.length > 0) {
         const encryptedKeys = await Promise.all(followerPostKeyPromises)
-        await Routes.addNewPostKeyForFollowers(encryptedKeys)
+        await Routes.addPostKeys(encryptedKeys)
     }
 
     return {
