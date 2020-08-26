@@ -1,48 +1,49 @@
 import React, { useState } from 'react'
-import { useQuery, useMutation } from 'react-query'
-import CurrentUser from './CurrentUser'
-import { Button, Form, Input, Icon } from 'semantic-ui-react'
+import { useMutation, useQuery } from 'react-query'
+import { Button, Form, Icon, Item, Segment } from 'semantic-ui-react'
 import { useInput } from './Components/useInput'
-import { getProfile, encryptAndUploadProfile } from './postCrypto'
-import InternalLink from './Components/InternalLink'
+import CurrentUser from './CurrentUser'
+import { encryptAndUploadProfile, getProfile } from './postCrypto'
 
 export default function ({ userId }: { userId: number }) {
     const [editing, setEditing] = useState(false)
     const user = useQuery(['userProfile', userId], getProfile, { staleTime: Infinity })
-    const { value: newName, reset: resetNewName, bind: bindNewName } = useInput('')
+    const { value: newName, setValue: setNewName, bind: bindNewName } = useInput('')
     const [setProfileNameMutation, setProfileNameStatus] = useMutation(encryptAndUploadProfile)
 
-    const toggleEditing: React.MouseEventHandler = () => {
-        if (!editing) resetNewName()
-        setEditing(!editing)
+    const startEditing = () => {
+        setNewName(user.data || '')
+        setEditing(true)
     }
 
     const submitForm: React.FormEventHandler = async () => {
-        setEditing(false)
         await setProfileNameMutation(newName)
+        setEditing(false)
     }
 
     return (
-        <>
-            <Icon size='big' name='user' />
+        <Segment>
             {editing ? (
-                <Form onSubmit={submitForm}>
-                    <Input {...bindNewName} />
+                <Form loading={setProfileNameStatus.isLoading} onSubmit={submitForm}>
+                    <Form.Input label='Display Name' {...bindNewName} />
+                    <Button onClick={() => setEditing(false)} content='Cancel' />
+                    <Button floated='right' primary content='Save' />
                 </Form>
             ) : (
-                <InternalLink to={`/user/${userId.toString()}`}>
-                    {user.data ? user.data! : userId.toString()}
-                </InternalLink>
+                <Item.Group>
+                    <Item>
+                        <Item.Header>
+                            <Icon name='user' size='large' />
+                            {user.data ? user.data! : userId.toString()}
+                        </Item.Header>
+                        <Item.Extra>
+                            {userId === CurrentUser.getId() ? (
+                                <Button floated='right' onClick={startEditing} icon='pencil' />
+                            ) : null}
+                        </Item.Extra>
+                    </Item>
+                </Item.Group>
             )}
-            {userId === CurrentUser.getId() ? (
-                <Button
-                    loading={setProfileNameStatus.isLoading}
-                    toggle
-                    active={editing}
-                    onClick={toggleEditing}
-                    icon='pencil'
-                />
-            ) : null}
-        </>
+        </Segment>
     )
 }
