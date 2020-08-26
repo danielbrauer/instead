@@ -14,7 +14,7 @@ import { getProfile } from './postCrypto'
 export default function () {
     const history = useHistory()
     const requests = useQuery('followRequests', Routes.getFollowRequests)
-    const currentUserQuery = useQuery(['user', CurrentUser.getId()], getProfile)
+    const currentUserQuery = useQuery(['userProfile', CurrentUser.getId()], getProfile)
 
     const logOutAndClear = async () => {
         try {

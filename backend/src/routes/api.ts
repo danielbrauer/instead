@@ -380,6 +380,7 @@ router.post(
     validator.body(Schema.createProfileKeyBody),
     async (req: ValidatedRequest<Schema.CreateProfileKeyRequest>, res) => {
         await keyService.createProfileKey(req.userId, req.body.ownerKey, req.body.viewerKeys)
+        return res.json({ success: true })
     },
 )
 

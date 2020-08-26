@@ -78,6 +78,7 @@ export default class UserService {
                 { followerId: requesterId, followeeId: requesteeId },
                 client,
             )
+            await FollowRequests.destroy.run({ requesterId, requesteeId }, client)
         })
         this._onUserAddedFollower.dispatchAsync({
             followerId: requesterId,

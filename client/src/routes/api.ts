@@ -3,6 +3,7 @@ import Axios from 'axios'
 import * as Types from '../../../backend/src/types/api'
 import { queryCache } from 'react-query'
 import { createKeysForNewFollower, createProfileKeyForViewer } from '../postCrypto'
+import CurrentUser from '../CurrentUser'
 
 const baseURL = `${config.serverUrl}/api`
 
@@ -170,6 +171,7 @@ export async function setProfile(displayNameBase64: string, displayNameIvBase64:
         displayName: displayNameBase64,
         displayNameIv: displayNameIvBase64,
     })
+    queryCache.invalidateQueries(['userProfile', CurrentUser.getId()])
 }
 
 export async function sendFollowRequest(friendCode: string) {
