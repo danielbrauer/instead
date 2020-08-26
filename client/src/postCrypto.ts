@@ -4,13 +4,7 @@ import Axios from 'axios'
 import CurrentUser from './CurrentUser'
 import md5 from 'js-md5'
 import { useReducer, useEffect } from 'react'
-import {
-    EncryptedPostKey,
-    Post,
-    Comment,
-    ProfileViewerKeyInfo,
-    EncryptedProfileViewerKey,
-} from '../../backend/src/types/api'
+import * as Types from '../../backend/src/types/api'
 const toBuffer = require('typedarray-to-buffer') as (typedArray: Uint8Array) => Buffer
 require('buffer')
 const Crypto = window.crypto
@@ -54,7 +48,7 @@ async function createEncryptedPostKey(
     recipientId: number,
 ) {
     const followerVersion = await wrapKeyAsymmetric(postKey, publicKey)
-    const encryptedKey: EncryptedPostKey = {
+    const encryptedKey: Types.EncryptedPostKey = {
         key: followerVersion,
         recipientId,
         postKeySetId,
@@ -69,11 +63,11 @@ export async function createKeysForNewFollower(userId: number) {
 export async function createProfileKeyForViewer(userId: number) {
     const profileKey = await Routes.getCurrentProfileKey()
     if (profileKey) {
-        const [profileKeyRequest, profileKeyUnwrapped] = await Promise.all([
-            Routes.getProfileViewerPublicKey(userId),
+        const [viewerPublicKey, profileKeyUnwrapped] = await Promise.all([
+            Routes.getPublicKey(userId),
             unwrapKeyAsymmetric(profileKey.key),
         ])
-        await createEncryptedProfileKey(profileKeyRequest, profileKeyUnwrapped)
+        await createEncryptedProfileKey(viewerPublicKey, profileKeyUnwrapped)
     }
 }
 
@@ -85,7 +79,7 @@ async function createPostKeysForNewFollower(userId: number) {
     const [publicKey, postKeys] = await Promise.all([getAndImportPublicKey(), Routes.getAllPostKeys()])
     if (postKeys.length === 0) return
     const followerPostKeyPromises = postKeys.map(
-        async (encryptedPostKey): Promise<EncryptedPostKey> => {
+        async (encryptedPostKey): Promise<Types.EncryptedPostKey> => {
             const postKey = await unwrapKeyAsymmetric(encryptedPostKey.key)
             return await createEncryptedPostKey(postKey, encryptedPostKey.postKeySetId, publicKey, userId)
         },
@@ -117,7 +111,7 @@ async function createPostKeyAndMakeCurrent(): Promise<PostKey> {
     const keySetId = await Routes.createCurrentPostKey(authorPostKey)
 
     const followerPostKeyPromises = followerPublicKeys.map(
-        async (publicKey): Promise<EncryptedPostKey> => {
+        async (publicKey): Promise<Types.EncryptedPostKey> => {
             const followerPublicKey = await importPublicKey(publicKey.publicKey as JsonWebKey)
             return await createEncryptedPostKey(postKey, keySetId, followerPublicKey, publicKey.id)
         },
@@ -178,7 +172,7 @@ export async function encryptAndUploadImage({ file, aspect }: { file: File; aspe
     return success
 }
 
-export async function encryptAndPostComment({ post, content }: { post: Post; content: string }) {
+export async function encryptAndPostComment({ post, content }: { post: Types.Post; content: string }) {
     const postKey = await unwrapKeyAsymmetric(post.key)
     const contentBuffer = Buffer.from(content, 'utf8')
     const { encrypted, ivBuffer } = await encryptSymmetric(contentBuffer, postKey)
@@ -206,7 +200,7 @@ export async function getComments(query: string, postId: number) {
     const commentsEncrypted = await Routes.getComments(postId)
     const commentsDecrypted = Promise.all(
         commentsEncrypted.map(
-            async (commentEnc): Promise<Comment> => {
+            async (commentEnc): Promise<Types.Comment> => {
                 const postKey = await unwrapKeyAsymmetric(commentEnc.key)
                 const decrypted = await decryptSymmetric(
                     Buffer.from(commentEnc.content, 'base64'),
@@ -226,31 +220,28 @@ export async function getComments(query: string, postId: number) {
 }
 
 export async function createEncryptedProfileKey(
-    request: ProfileViewerKeyInfo,
+    viewerPublicKey: Types.PublicKey,
     profileKey: CryptoKey,
-): Promise<EncryptedProfileViewerKey> {
-    const followerPublicKey = await importPublicKey(request.publicKey as JsonWebKey)
+): Promise<Types.EncryptedProfileViewerKey> {
+    const followerPublicKey = await importPublicKey(viewerPublicKey.publicKey as JsonWebKey)
     const followerVersion = await wrapKeyAsymmetric(profileKey, followerPublicKey)
-    const encryptedKey: EncryptedProfileViewerKey = {
+    const encryptedKey: Types.EncryptedProfileViewerKey = {
         key: followerVersion,
-        outFollowRequestId: request.outFollowRequestId,
-        outFollowRelationshipId: request.outFollowRelationshipId,
-        inFollowRelationshipId: request.inFollowRelationshipId,
-        recipientId: request.recipientId,
+        recipientId: viewerPublicKey.id,
         ownerId: CurrentUser.getId(),
     }
     return encryptedKey
 }
 
 export async function createProfileKey(): Promise<CryptoKey> {
-    const [keyRequests, newKey, accountKeys] = await Promise.all([
+    const [publicKeys, newKey, accountKeys] = await Promise.all([
         Routes.getProfileViewersPublicKeys(),
         generateSymmetricKey(),
         CurrentUser.getAccountKeys(),
     ])
     const ownerWrappedKey = await wrapKeyAsymmetric(newKey, accountKeys.publicKey)
     const viewerWrappedKeys = await Promise.all(
-        keyRequests.map((request) => createEncryptedProfileKey(request, newKey)),
+        publicKeys.map((publicKey) => createEncryptedProfileKey(publicKey, newKey)),
     )
     await Routes.createProfileKey(ownerWrappedKey, viewerWrappedKeys)
     return newKey

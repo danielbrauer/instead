@@ -219,8 +219,18 @@ router.get(
     validator.query(Schema.getByUserIdQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
-        const user = await userService.getUserProfileById(req.query.userId, req.userId)
+        const user = await userService.getUserProfileWithKey(req.query.userId, req.userId)
         return res.json(user)
+    },
+)
+
+router.put(
+    '/setProfile',
+    validator.query(Schema.empty),
+    validator.body(Schema.setProfileBody),
+    async (req: ValidatedRequest<Schema.SetProfileRequest>, res) => {
+        await userService.setProfile(req.userId, req.body.displayName, req.body.displayNameIv)
+        return res.json({ success: true })
     },
 )
 
@@ -341,6 +351,35 @@ router.post(
     async (req, res) => {
         const code = await userService.regenerateFriendCode(req.userId)
         return res.json(code)
+    },
+)
+
+router.get(
+    '/getCurrentProfileKey',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const key = await keyService.getCurrentProfileKey(req.userId)
+        return res.json(key)
+    },
+)
+
+router.get(
+    '/getProfileViewersPublicKeys',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const keys = await keyService.getProfileViewersPublicKeys(req.userId)
+        return res.json(keys)
+    },
+)
+
+router.post(
+    '/createProfileKey',
+    validator.query(Schema.empty),
+    validator.body(Schema.createProfileKeyBody),
+    async (req: ValidatedRequest<Schema.CreateProfileKeyRequest>, res) => {
+        await keyService.createProfileKey(req.userId, req.body.ownerKey, req.body.viewerKeys)
     },
 )
 

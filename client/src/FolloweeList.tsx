@@ -23,7 +23,8 @@ export default function FolloweeList() {
                             <Label basic color='green' content='Requested' />
                         </List.Content>
                         <List.Content>
-                            <Label size='large' content={request.friendCode} />
+                            <UserInList id={request.requesteeId} />
+                            {request.friendCode && <Label size='large' content={request.friendCode} />}
                         </List.Content>
                     </List.Item>
                 ))}

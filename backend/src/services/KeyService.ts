@@ -2,7 +2,7 @@ import { Service } from 'typedi'
 import DatabaseService from './DatabaseService'
 import * as Keys from '../queries/keys.gen'
 import * as FollowRelationships from '../queries/follow_relationships.gen'
-import { EncryptedPostKey } from '../types/api'
+import * as Types from '../types/api'
 import { ServerError } from '../middleware/errors'
 
 @Service()
@@ -41,7 +41,7 @@ export default class KeyService {
         return postKeySetId
     }
 
-    async addNewPostKeyForFollowers(followeeId: number, keys: EncryptedPostKey[]) {
+    async addNewPostKeyForFollowers(followeeId: number, keys: Types.EncryptedPostKey[]) {
         await this.db.transaction(async (client) => {
             const followRelationships = await FollowRelationships.getByFolloweeId.run(
                 { followeeId },
@@ -69,7 +69,7 @@ export default class KeyService {
         })
     }
 
-    async addOldPostKeysForFollower(followeeId: number, keys: EncryptedPostKey[]) {
+    async addOldPostKeysForFollower(followeeId: number, keys: Types.EncryptedPostKey[]) {
         await this.db.transaction(async (client) => {
             const [followRelationship] = await FollowRelationships.getExact.run(
                 { followeeId, followerId: keys[0].recipientId },
@@ -90,5 +90,27 @@ export default class KeyService {
             })
             await Keys.addPostKeys.run({ keysWithFollowerIds }, this.db.pool)
         })
+    }
+
+    async getCurrentProfileKey(userId: number) {
+        const [key] = await Keys.getCurrentProfileKey.run({ userId }, this.db.pool)
+        return key || null
+    }
+
+    async getProfileViewersPublicKeys(userId: number) {
+        const keys = await Keys.getProfileViewerPublicKeys.run({ userId }, this.db.pool)
+        return keys
+    }
+
+    async createProfileKey(
+        userId: number,
+        ownerKey: string,
+        viewerKeys: Types.EncryptedProfileViewerKey[],
+    ) {
+        viewerKeys.forEach((key) => {
+            if (key.ownerId != userId)
+                throw new ServerError('Keys must all belong to the same owner')
+        })
+        await Keys.createProfileKey.run({ userId, key: ownerKey, viewerKeys }, this.db.pool)
     }
 }

@@ -6,60 +6,23 @@ SELECT id, public_key FROM users WHERE id IN (
 );
 
 /* @name GetProfileViewerPublicKeys */
-WITH in_rels AS (
-    SELECT id, follower_id
+SELECT users.id, users.public_key
+FROM users
+WHERE users.id IN (
+    SELECT follower_id
     FROM follow_relationships
     WHERE followee_id = :userId
-),
-out_rels AS (
-    SELECT id, followee_id
+)
+OR users.id IN (
+    SELECT followee_id
     FROM follow_relationships
     WHERE follower_id = :userId
-),
-out_reqs AS (
-    SELECT id, requestee_id
+)
+OR users.id IN (
+    SELECT requestee_id
     FROM follow_requests
     WHERE requester_id = :userId
-)
-SELECT users.id AS recipient_id, users.public_key,
-       in_rels.id AS in_follow_relationship_id,
-       out_rels.id AS out_follow_relationship_id,
-       out_reqs.id AS out_follow_request_id
-FROM ((users FULL JOIN in_rels ON users.id = in_rels.follower_id)
-FULL JOIN out_rels ON users.id = out_rels.followee_id)
-FULL JOIN out_reqs ON users.id = out_reqs.requestee_id
-WHERE in_rels.id IS NOT NULL
-OR out_rels.id IS NOT NULL
-OR out_reqs.id IS NOT NULL;
-
-/* @name GetProfileViewerPublicKey */
-WITH in_rels AS (
-    SELECT id, follower_id
-    FROM follow_relationships
-    WHERE followee_id = :userId
-    AND follower_id = :viewerId
-),
-out_rels AS (
-    SELECT id, followee_id
-    FROM follow_relationships
-    WHERE follower_id = :userId
-    AND followee_id = :viewerId
-),
-out_reqs AS (
-    SELECT id, requestee_id
-    FROM follow_requests
-    WHERE requester_id = :userId
-    AND requestee_id = :viewerId
-)
-SELECT users.id AS recipient_id, users.public_key,
-       in_rels.id AS in_follow_relationship_id,
-       out_rels.id AS out_follow_relationship_id,
-       out_reqs.id AS out_follow_request_id
-FROM ((users FULL JOIN in_rels ON users.id = in_rels.follower_id)
-FULL JOIN out_rels ON users.id = out_rels.followee_id)
-FULL JOIN out_reqs ON users.id = out_reqs.requestee_id
-WHERE users.id = :viewerId;
-
+);
 
 /* @name GetPublicKey */
 SELECT id, public_key FROM users WHERE id = :userId;
@@ -108,7 +71,7 @@ AND profile_keys.owner_id = :userId;
 
 /*
     @name CreateProfileKey
-    @param keysWithSupportingRelationshipIds -> ((recipientId, ownerId, key, outFollowRequestId, outFollowRelationshipId, inFollowRelationshipId)...)
+    @param viewerKeys -> ((recipientId, ownerId, key)...)
 */
 WITH dummy AS (
     DELETE FROM profile_keys WHERE owner_id = :userId
@@ -116,8 +79,8 @@ WITH dummy AS (
     INSERT INTO profile_keys (recipient_id, owner_id, key)
     VALUES (:userId, :userId, :key)
 ), dummy3 AS (
-    INSERT INTO profile_keys (recipient_id, owner_id, key, out_follow_request_id, out_follow_relationship_id, in_follow_relationship_id)
-    VALUES :keysWithSupportingRelationshipIds
+    INSERT INTO profile_keys (recipient_id, owner_id, key)
+    VALUES :viewerKeys
 )
 UPDATE users SET profile_key_stale = false WHERE id = :userId;
 
@@ -125,5 +88,5 @@ UPDATE users SET profile_key_stale = false WHERE id = :userId;
 WITH dummy AS (
     DELETE FROM profile_keys WHERE owner_id = :userId AND recipient_id = :recipientId
 )
-INSERT INTO profile_keys (recipient_id, owner_id, key, out_follow_request_id, out_follow_relationship_id, in_follow_relationship_id)
-VALUES (:recipientId, :ownerId, :key, :outFollowRequestId, :outFollowRelationshipId, :inFollowRelationshipId);
+INSERT INTO profile_keys (recipient_id, owner_id, key)
+VALUES (:recipientId, :ownerId, :key);

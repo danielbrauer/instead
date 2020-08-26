@@ -39,9 +39,6 @@ export type EncryptedProfileViewerKey = {
     recipientId: number
     ownerId: number
     key: string
-    outFollowRequestId: number
-    outFollowRelationshipId: number
-    inFollowRelationshipId: number
 }
 
 export type Post = Posts.IGetHomePostsWithKeysResult

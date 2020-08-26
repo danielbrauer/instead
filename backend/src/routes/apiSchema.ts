@@ -123,3 +123,29 @@ export interface PutByUserIdRequest extends ValidatedRequestSchema {
     [ContainerTypes.Query]: Joi.extractType<typeof empty>
     [ContainerTypes.Body]: Joi.extractType<typeof putByUserIdBody>
 }
+
+const profileKey = Joi.object({
+    recipientId: Joi.number().integer().required(),
+    ownerId: Joi.number().integer().required(),
+    key: Joi.string().base64().required(),
+})
+
+export const createProfileKeyBody = Joi.object({
+    ownerKey: Joi.string().base64().required(),
+    viewerKeys: Joi.array().items(profileKey),
+})
+
+export interface CreateProfileKeyRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof createProfileKeyBody>
+}
+
+export const setProfileBody = Joi.object({
+    displayName: Joi.string().base64().required(),
+    displayNameIv: Joi.string().base64().required(),
+})
+
+export interface SetProfileRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof setProfileBody>
+}

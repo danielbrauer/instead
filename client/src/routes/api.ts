@@ -252,7 +252,7 @@ export async function regenerateFriendCode() {
 }
 
 export async function getCurrentProfileKey() {
-    const response = await server.get<Types.EncryptedProfileKey>('/getProfileKey')
+    const response = await server.get<Types.EncryptedProfileKey>('/getCurrentProfileKey')
     return response.data || null
 }
 
@@ -262,10 +262,8 @@ export async function getProfileViewersPublicKeys() {
 }
 
 export async function createProfileKey(keyBase64: string, viewerKeys: Types.EncryptedProfileViewerKey[]) {
-    await server.post('/createProfileKey')
-}
-
-export async function getProfileViewerPublicKey(userId: number) {
-    const response = await server.get<Types.ProfileViewerKeyInfo>('/getProfileViewerPublicKey')
-    return response.data || null
+    await server.post('/createProfileKey', {
+        ownerKey: keyBase64,
+        viewerKeys,
+    })
 }

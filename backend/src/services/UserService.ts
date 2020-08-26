@@ -25,10 +25,9 @@ export default class UserService {
         return this._onUserLostFollower.asEvent()
     }
 
-    async getUserProfileById(userId: number, requesterId: number) {
+    async getUserProfileWithKey(userId: number, requesterId: number) {
         const [user] = await Users.getProfileWithKey.run({ userId, requesterId }, this.db.pool)
-        if (!user) throw new ServerError('User does not exist')
-        return user
+        return user || null
     }
 
     async setProfile(userId: number, displayName: string, displayNameIv: string) {
