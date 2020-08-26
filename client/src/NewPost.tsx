@@ -1,9 +1,8 @@
-import React, { useCallback, useState } from 'react'
-import { Image, Button, Loader, Segment, Dimmer, Menu, Message } from 'semantic-ui-react'
-import { useDropzone } from 'react-dropzone'
-import { encryptAndUploadImage } from './postCrypto'
+import React, { ChangeEvent, useRef, useState } from 'react'
 import { useMutation } from 'react-query'
 import { Redirect } from 'react-router-dom'
+import { Button, Dimmer, Image, Loader, Menu, Message, Segment } from 'semantic-ui-react'
+import { encryptAndUploadImage } from './postCrypto'
 
 const urls = new WeakMap()
 
@@ -21,30 +20,37 @@ export default function NewPost() {
     const [uploadInput, setUploadInput] = useState<File | null>(null)
     const [aspect, setAspect] = useState<number | null>(null)
     const [uploadMutation, uploadStatus] = useMutation(encryptAndUploadImage)
-    const onDropAccepted = useCallback((acceptedFiles) => {
-        setUploadInput(acceptedFiles[0])
-    }, [])
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        onDropAccepted,
-        accept: ['image/jpeg', 'image/png'],
-    })
+
+    const inputFile = useRef<HTMLInputElement>(null)
 
     async function onSubmit() {
         await uploadMutation({ file: uploadInput!, aspect: aspect! })
+    }
+
+    function onClick() {
+        inputFile.current!.click()
     }
 
     function onCancel() {
         setUploadInput(null)
     }
 
-    function storeImageDimensions({ target }: any) {
-        setAspect(target.height / target.width)
+    function storeImageDimensions(evt: ChangeEvent<HTMLInputElement>) {
+        setAspect(evt.target.height / evt.target.width)
     }
 
     if (uploadStatus.isSuccess) return <Redirect to='/home' />
 
     return (
         <>
+            <input
+                type='file'
+                id='file'
+                accept='image/jpeg, image/png'
+                ref={inputFile}
+                onChange={(evt) => setUploadInput(evt.target.files && evt.target.files[0])}
+                style={{ display: 'none' }}
+            />
             {uploadStatus.error ? (
                 <Message negative>
                     <Message.Header>Sorry, there was an error uploading your post</Message.Header>
@@ -59,14 +65,8 @@ export default function NewPost() {
                 </>
             ) : (
                 <Segment vertical>
-                    <div {...getRootProps()}>
-                        <input {...getInputProps()} />
-                        {isDragActive ? (
-                            <Button fluid size='huge' color='blue' content='Drop here...' />
-                        ) : (
-                            <Button fluid size='huge' content='Drop a photo here' />
-                        )}
-                    </div>
+                    <Button fluid size='huge' onClick={onClick} content='Drop a photo here' />
+                    {/* <input type='file' className='button' onChange={chooseImage} /> */}
                 </Segment>
             )}
             {uploadInput !== null && !uploadStatus.isLoading ? (

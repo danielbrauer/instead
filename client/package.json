@@ -52,7 +52,6 @@
     "promise-file-reader": "jahredhope/promise-file-reader#98d38d0965605ee80208d8a66f913b2279b5852b",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-dropzone": "^11.0.1",
     "react-infinite-scroller": "danbovey/react-infinite-scroller#ba3c5e7b92b19c268073aed69d57fb3328bef6ab",
     "react-query": "^2.5.7-tsnext.1",
     "react-query-devtools": "^2.2.1",
