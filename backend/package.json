@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc --project tsconfig.production.json",
+    "build": "tsc",
     "test": "jest",
     "test-coverage": "jest --coverage",
     "watch": "tsc-watch --noClear --onSuccess \"node --require dotenv/config --inspect dist/src/server.js\" --onFailure \"echo Compilation Failed\"",
