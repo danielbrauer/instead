@@ -8,7 +8,7 @@ import DatabaseService from './DatabaseService'
 import UserService from './UserService'
 
 jest.mock('../queries/users.gen')
-jest.mock('../queries/followers.gen')
+jest.mock('../queries/follow_relationships.gen')
 jest.mock('../queries/follow_requests.gen')
 jest.mock('./DatabaseService')
 jest.mock('./AuthService')
@@ -34,7 +34,10 @@ describe('UserService', () => {
             mocked(Users.getProfileWithKey.run).mockResolvedValueOnce([userInstance])
             const user = await userService.getUserProfileWithKey(0, 1)
             expect(user).toEqual(userInstance)
-            expect(mocked(Users.getProfileWithKey.run).mock.calls[0][0]).toEqual({ userId: 0 })
+            expect(mocked(Users.getProfileWithKey.run).mock.calls[0][0]).toEqual({
+                requesterId: 1,
+                userId: 0,
+            })
         })
     })
 

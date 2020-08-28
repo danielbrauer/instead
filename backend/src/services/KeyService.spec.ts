@@ -1,14 +1,10 @@
 import { mocked } from 'ts-jest/utils'
 import * as Keys from '../queries/keys.gen'
 import { EncryptedPostKey } from '../types/api'
-import AuthService from './AuthService'
 import DatabaseService from './DatabaseService'
 import KeyService from './KeyService'
-import UserService from './UserService'
 
 jest.mock('./DatabaseService')
-jest.mock('./UserService')
-jest.mock('./AuthService')
 jest.mock('../queries/keys.gen')
 
 describe('KeyService', () => {
@@ -16,8 +12,6 @@ describe('KeyService', () => {
 
     beforeAll(() => {
         const db = new DatabaseService()
-        const auth = new AuthService(db)
-        const userService = new UserService(db, auth)
         keyService = new KeyService(db)
     })
 
@@ -80,15 +74,6 @@ describe('KeyService', () => {
                 key: 'key',
                 ownerId: 0,
             })
-            expect(mocked(Keys.addPostKeys.run).mock.calls[0][0]).toEqual({
-                keys: [
-                    {
-                        userId: 0,
-                        key: 'key',
-                        keySetId: 5,
-                    },
-                ],
-            })
             expect(returnedId).toEqual(5)
         })
     })
@@ -102,7 +87,16 @@ describe('KeyService', () => {
                     postKeySetId: 5,
                 },
             ]
+            const keySets: Keys.IGetAllPostKeysResult = {
+                key: 'key',
+                recipientId: 1,
+                postKeySetId: 5,
+                id: 0,
+                followRelationshipId: 9,
+            }
+            mocked(Keys.getAllPostKeys.run).mockResolvedValueOnce([keySets])
             await keyService.addPostKeys(1, keys)
+            expect(mocked(Keys.getAllPostKeys.run).mock.calls[0][0]).toEqual({ userId: 1 })
             expect(mocked(Keys.addPostKeys.run).mock.calls[0][0]).toEqual({ keys })
         })
     })

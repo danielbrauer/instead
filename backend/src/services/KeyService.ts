@@ -41,9 +41,9 @@ export default class KeyService {
     }
 
     async addPostKeys(userId: number, keys: Types.EncryptedPostKey[]) {
-        const postKeySets = await Keys.getAllPostKeys.run({ userId }, this.db.pool)
+        const postKeys = await Keys.getAllPostKeys.run({ userId }, this.db.pool)
         keys.forEach((key) => {
-            if (!postKeySets.some((keySet) => keySet.id === key.postKeySetId))
+            if (!postKeys.some((postKey) => postKey.postKeySetId === key.postKeySetId))
                 throw new ServerError(
                     'Cannot add post keys belonging to key sets owned by other users',
                 )
