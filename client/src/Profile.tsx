@@ -26,8 +26,8 @@ export default function ({ userId }: { userId: number }) {
             {editing ? (
                 <Form loading={setProfileNameStatus.isLoading} onSubmit={submitForm}>
                     <Form.Input label='Display Name' {...bindNewName} />
-                    <Button onClick={() => setEditing(false)} content='Cancel' />
                     <Button floated='right' primary content='Save' />
+                    <Button onClick={() => setEditing(false)} content='Cancel' />
                 </Form>
             ) : (
                 <Item.Group>
