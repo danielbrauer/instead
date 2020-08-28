@@ -1,133 +1,40 @@
 import { mocked } from 'ts-jest/utils'
-import * as Users from '../queries/users.gen'
-import * as Followers from '../queries/followers.gen'
+import * as FollowRelationships from '../queries/follow_relationships.gen'
 import * as FollowRequests from '../queries/follow_requests.gen'
+import * as Users from '../queries/users.gen'
+import { FollowRelationship } from '../types/api'
+import AuthService from './AuthService'
 import DatabaseService from './DatabaseService'
 import UserService from './UserService'
-import { NewUser } from '../types/auth'
-import { FollowRelationship } from '../types/api'
 
 jest.mock('../queries/users.gen')
 jest.mock('../queries/followers.gen')
 jest.mock('../queries/follow_requests.gen')
 jest.mock('./DatabaseService')
+jest.mock('./AuthService')
 
 describe('UserService', () => {
     let userService: UserService
 
     beforeAll(() => {
         const db = new DatabaseService()
-        userService = new UserService(db)
+        const auth = new AuthService(db)
+        userService = new UserService(db, auth)
         jest.useFakeTimers()
     })
 
-    describe('getUserById', () => {
+    describe('getProfileWithKey', () => {
         test('should get user who exists', async () => {
-            const userInstance: Users.IGetByIdResult = {
+            const userInstance: Users.IGetProfileWithKeyResult = {
                 id: 0,
                 displayName: 'someBase64',
                 displayNameIv: 'moreBase64',
+                key: 'someMoreBase85',
             }
-            mocked(Users.getById.run).mockResolvedValueOnce([userInstance])
-            const user = await userService.getUserById(0)
+            mocked(Users.getProfileWithKey.run).mockResolvedValueOnce([userInstance])
+            const user = await userService.getUserProfileWithKey(0, 1)
             expect(user).toEqual(userInstance)
-            expect(mocked(Users.getById.run).mock.calls[0][0]).toEqual({ userId: 0 })
-        })
-
-        test('should throw error if no such user', async () => {
-            mocked(Users.getById.run).mockResolvedValueOnce([])
-            await expect(userService.getUserById(0)).rejects.toThrow()
-        })
-    })
-
-    describe('getLoginInfo', () => {
-        test('should get user who exists', async () => {
-            const userInstance: Users.IGetLoginInfoByNameResult = {
-                id: 0,
-                username: 'AntisocialAardvark',
-                srpSalt: '0FFFF',
-                verifier: '0FFFFF',
-            }
-            mocked(Users.getLoginInfoByName.run).mockResolvedValueOnce([userInstance])
-            const user = await userService.getLoginInfo(userInstance.username)
-            expect(user).toEqual(userInstance)
-            expect(mocked(Users.getLoginInfoByName.run).mock.calls[0][0]).toEqual({
-                username: userInstance.username,
-            })
-        })
-
-        test('should return null if no such user', async () => {
-            mocked(Users.getLoginInfoByName.run).mockResolvedValueOnce([])
-            const user = await userService.getLoginInfo('AntisocialAardvark')
-            expect(user).toBeNull()
-        })
-    })
-
-    describe('getUserInfo', () => {
-        test('should get user who exists', async () => {
-            const userInstance: Users.IGetUserInfoResult = {
-                privateKey: 'aaaa',
-                privateKeyIv: 'aaaaa',
-                mukSalt: '0FFFF',
-                publicKey: 'aaaaa',
-            }
-            mocked(Users.getUserInfo.run).mockResolvedValueOnce([userInstance])
-            const user = await userService.getUserInfo(0)
-            expect(mocked(Users.getUserInfo.run).mock.calls[0][0]).toEqual({ userId: 0 })
-            expect(user).toEqual(userInstance)
-        })
-
-        test('should return null if no such user', async () => {
-            mocked(Users.getUserInfo.run).mockResolvedValueOnce([])
-            const user = await userService.getUserInfo(0)
-            expect(user).toBeNull()
-        })
-    })
-
-    describe('countByName', () => {
-        test('should count user who exists', async () => {
-            mocked(Users.countByName.run).mockResolvedValueOnce([{ count: 1 }])
-            const count = await userService.countByName('AntisocialAardvark')
-            expect(mocked(Users.countByName.run).mock.calls[0][0]).toEqual({
-                username: 'AntisocialAardvark',
-            })
-            expect(count).toEqual(1)
-        })
-
-        test('should return zero if no such user', async () => {
-            mocked(Users.countByName.run).mockResolvedValueOnce([{ count: 0 }])
-            const count = await userService.countByName('AntisocialAardvark')
-            expect(count).toEqual(0)
-        })
-    })
-
-    describe('create', () => {
-        const newUser: NewUser = {
-            username: 'AntisocialAardvark',
-            mukSalt: '0FFFF',
-            srpSalt: '0FFFF',
-            verifier: '0FFFFF',
-            publicKey: { ktyp: 'asfd' },
-            privateKey: 'asdfasdf',
-            privateKeyIv: 'asdfasf',
-        }
-
-        test('should return created user id, and push notification', async () => {
-            const newId: Users.ICreateResult = {
-                id: 1,
-            }
-            let id = -1
-            userService.onUserCreated.subscribe(async (createdId: number) => (id = createdId))
-            mocked(Users.create.run).mockResolvedValueOnce([newId])
-            await userService.create(newUser)
-            expect(mocked(Users.create.run).mock.calls[0][0]).toEqual(newUser)
-            jest.runAllTimers()
-            expect(id).toEqual(newId.id)
-        })
-
-        test('should throw on error', async () => {
-            mocked(Users.create.run).mockRejectedValueOnce(new Error('cant'))
-            await expect(userService.create(newUser)).rejects.toThrow()
+            expect(mocked(Users.getProfileWithKey.run).mock.calls[0][0]).toEqual({ userId: 0 })
         })
     })
 
@@ -138,13 +45,13 @@ describe('UserService', () => {
 
         test('should create a new request', async () => {
             mocked(Users.getByFriendCode.run).mockResolvedValueOnce([requestee])
-            mocked(Followers.count.run).mockResolvedValueOnce([{ count: 0 }])
+            mocked(FollowRelationships.count.run).mockResolvedValueOnce([{ count: 0 }])
             mocked(FollowRequests.count.run).mockResolvedValueOnce([{ count: 0 }])
             await userService.addFollowRequestByCode(0, 'MMM')
             expect(mocked(Users.getByFriendCode.run).mock.calls[0][0]).toEqual({
                 friendCode: 'MMM',
             })
-            expect(mocked(Followers.count.run).mock.calls[0][0]).toEqual({
+            expect(mocked(FollowRelationships.count.run).mock.calls[0][0]).toEqual({
                 followerId: 0,
                 followeeId: requestee.id,
             })
@@ -170,7 +77,7 @@ describe('UserService', () => {
 
         test('should throw if already following', async () => {
             mocked(Users.getByFriendCode.run).mockResolvedValueOnce([requestee])
-            mocked(Followers.count.run).mockResolvedValueOnce([{ count: 1 }])
+            mocked(FollowRelationships.count.run).mockResolvedValueOnce([{ count: 1 }])
             await expect(
                 userService.addFollowRequestByCode(0, 'AntisocialAardvark'),
             ).rejects.toThrow()
@@ -178,7 +85,7 @@ describe('UserService', () => {
 
         test('should throw if already requested', async () => {
             mocked(Users.getByFriendCode.run).mockResolvedValueOnce([requestee])
-            mocked(Followers.count.run).mockResolvedValueOnce([{ count: 0 }])
+            mocked(FollowRelationships.count.run).mockResolvedValueOnce([{ count: 0 }])
             mocked(FollowRequests.count.run).mockResolvedValueOnce([{ count: 1 }])
             await expect(
                 userService.addFollowRequestByCode(0, 'AntisocialAardvark'),
@@ -188,22 +95,20 @@ describe('UserService', () => {
 
     describe('acceptFollowRequest', () => {
         test('should notify if follow is success', async () => {
-            const request: FollowRequests.IDestroyAndReturnResult = {
-                requesterId: 0,
-                requesteeId: 1,
-                friendCode: null,
+            const request: FollowRequests.IGetByIdsResult = {
+                id: 0,
             }
             let notifiedRelationship: FollowRelationship
-            mocked(FollowRequests.destroyAndReturn.run).mockResolvedValueOnce([request])
+            mocked(FollowRequests.getByIds.run).mockResolvedValueOnce([request])
             userService.onUserAddedFollower.subscribe(
                 (relationship) => (notifiedRelationship = relationship),
             )
             await userService.acceptFollowRequest(0, 1)
-            expect(mocked(FollowRequests.destroyAndReturn.run).mock.calls[0][0]).toEqual({
+            expect(mocked(FollowRequests.destroy.run).mock.calls[0][0]).toEqual({
                 requesterId: 0,
                 requesteeId: 1,
             })
-            expect(mocked(Followers.create.run).mock.calls[0][0]).toEqual({
+            expect(mocked(FollowRelationships.create.run).mock.calls[0][0]).toEqual({
                 followerId: 0,
                 followeeId: 1,
             })
@@ -213,7 +118,7 @@ describe('UserService', () => {
         })
 
         test('should throw if there was no such request', async () => {
-            mocked(FollowRequests.destroyAndReturn.run).mockResolvedValueOnce([])
+            mocked(FollowRequests.destroy.run).mockResolvedValueOnce([])
             await expect(userService.acceptFollowRequest(0, 1)).rejects.toThrow()
         })
     })
@@ -247,15 +152,15 @@ describe('UserService', () => {
 
     describe('getFollowers', () => {
         test('should return followers', async () => {
-            const sampleFollowers: Followers.IGetByFolloweeIdResult[] = [
-                { followerId: 0 },
-                { followerId: 2 },
-                { followerId: 3 },
-                { followerId: 4 },
+            const sampleFollowers: FollowRelationships.IGetByFolloweeIdResult[] = [
+                { id: 0, followerId: 0 },
+                { id: 1, followerId: 2 },
+                { id: 2, followerId: 3 },
+                { id: 3, followerId: 4 },
             ]
-            mocked(Followers.getByFolloweeId.run).mockResolvedValueOnce(sampleFollowers)
+            mocked(FollowRelationships.getByFolloweeId.run).mockResolvedValueOnce(sampleFollowers)
             const result = await userService.getFollowers(1)
-            expect(mocked(Followers.getByFolloweeId.run).mock.calls[0][0]).toEqual({
+            expect(mocked(FollowRelationships.getByFolloweeId.run).mock.calls[0][0]).toEqual({
                 followeeId: 1,
             })
             expect(result).toEqual([0, 2, 3, 4])
@@ -264,15 +169,15 @@ describe('UserService', () => {
 
     describe('getFollowers', () => {
         test('should return followers', async () => {
-            const sampleFollowees: Followers.IGetByFollowerIdResult[] = [
+            const sampleFollowees: FollowRelationships.IGetByFollowerIdResult[] = [
                 { followeeId: 0 },
                 { followeeId: 2 },
                 { followeeId: 3 },
                 { followeeId: 4 },
             ]
-            mocked(Followers.getByFollowerId.run).mockResolvedValueOnce(sampleFollowees)
+            mocked(FollowRelationships.getByFollowerId.run).mockResolvedValueOnce(sampleFollowees)
             const result = await userService.getFollowees(1)
-            expect(mocked(Followers.getByFollowerId.run).mock.calls[0][0]).toEqual({
+            expect(mocked(FollowRelationships.getByFollowerId.run).mock.calls[0][0]).toEqual({
                 followerId: 1,
             })
             expect(result).toEqual([0, 2, 3, 4])
@@ -281,17 +186,17 @@ describe('UserService', () => {
 
     describe('removeFollower', () => {
         test('should notify if removal succeeds', async () => {
-            const request: Followers.IDestroyResult = {
+            const request: FollowRelationships.IDestroyResult = {
                 followerId: 0,
                 followeeId: 1,
             }
             let notifiedRelationship: FollowRelationship
-            mocked(Followers.destroy.run).mockResolvedValueOnce([request])
+            mocked(FollowRelationships.destroy.run).mockResolvedValueOnce([request])
             userService.onUserLostFollower.subscribe(
                 (relationship) => (notifiedRelationship = relationship),
             )
             await userService.removeFollower(0, 1)
-            expect(mocked(Followers.destroy.run).mock.calls[0][0]).toEqual(request)
+            expect(mocked(FollowRelationships.destroy.run).mock.calls[0][0]).toEqual(request)
             jest.runAllTimers()
             expect(notifiedRelationship.followerId).toEqual(0)
             expect(notifiedRelationship.followeeId).toEqual(1)

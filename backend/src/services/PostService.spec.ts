@@ -72,7 +72,7 @@ describe('PostService', () => {
             mocked(Posts.getHomePostsWithKeys.run).mockResolvedValueOnce([testPost, secondPost])
             const posts = await postService.getHomePosts(0, '1')
             expect(mocked(Posts.getHomePostsWithKeys.run).mock.calls[0][0]).toEqual({
-                userId: 0,
+                recipientId: 0,
                 pageIndex: '1',
             })
             expect(posts).toHaveLength(2)
@@ -85,7 +85,8 @@ describe('PostService', () => {
             const posts = await postService.getUserPosts(0, 1)
             expect(mocked(Posts.getUserPostsWithKeys.run).mock.calls[0][0]).toEqual({
                 userId: 0,
-                requesterId: 1,
+                recipientId: 1,
+                pageIndex: undefined,
             })
             expect(posts).toHaveLength(1)
         })

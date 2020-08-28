@@ -77,6 +77,7 @@ describe('KeyService', () => {
             mocked(Keys.createCurrentPostKeySet.run).mockResolvedValueOnce([createdKeySet])
             const returnedId = await keyService.createCurrentPostKeySet(0, 'key')
             expect(mocked(Keys.createCurrentPostKeySet.run).mock.calls[0][0]).toEqual({
+                key: 'key',
                 ownerId: 0,
             })
             expect(mocked(Keys.addPostKeys.run).mock.calls[0][0]).toEqual({
@@ -92,7 +93,7 @@ describe('KeyService', () => {
         })
     })
 
-    describe('addKeys', () => {
+    describe('addPostKeys', () => {
         test('adds supplied keys', async () => {
             const keys: EncryptedPostKey[] = [
                 {
