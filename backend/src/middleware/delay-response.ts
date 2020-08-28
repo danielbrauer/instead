@@ -1,22 +1,19 @@
-import { Response, Request, NextFunction } from 'express'
+import { RequestHandler } from 'express'
 
 export default function delayResponse(min: number, max: number) {
-
     const range = max - min
-    return (req: Request, res: Response, next: NextFunction) => {
+    const delay: RequestHandler = function (req, res, next) {
         req.startTime = Date.now()
 
         const send = res.send
-        res.send = body => {
-            const delay = Math.floor(Math.random()*range) + min
+        res.send = (body) => {
+            const delay = Math.floor(Math.random() * range) + min
             const scheduledFinish = req.startTime + delay
             const now = Date.now()
-            console.log(`delay-response delayed: ${delay} actual: ${now - req.startTime}`)
-            if (scheduledFinish > now)
-                setTimeout(() => send.call(res, body), scheduledFinish - now)
-            else
-                return send.call(res, body)
+            if (scheduledFinish > now) setTimeout(() => send.call(res, body), scheduledFinish - now)
+            else return send.call(res, body)
         }
         next()
     }
+    return delay
 }
