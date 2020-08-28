@@ -20,6 +20,3 @@ SELECT id, follower_id FROM follow_relationships WHERE followee_id = :followeeId
 
 /* @name GetByFollowerId */
 SELECT followee_id FROM follow_relationships WHERE follower_id = :followerId;
-
-/* @name GetExact */
-SELECT id FROM follow_relationships WHERE follower_id = :followerId AND followee_id = :followeeId;

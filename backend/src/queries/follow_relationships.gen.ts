@@ -147,31 +147,3 @@ const getByFollowerIdIR: any = {"name":"GetByFollowerId","params":[{"name":"foll
 export const getByFollowerId = new PreparedQuery<IGetByFollowerIdParams,IGetByFollowerIdResult>(getByFollowerIdIR);
 
 
-/** 'GetExact' parameters type */
-export interface IGetExactParams {
-  followerId: number | null | void;
-  followeeId: number | null | void;
-}
-
-/** 'GetExact' return type */
-export interface IGetExactResult {
-  id: number;
-}
-
-/** 'GetExact' query type */
-export interface IGetExactQuery {
-  params: IGetExactParams;
-  result: IGetExactResult;
-}
-
-const getExactIR: any = {"name":"GetExact","params":[{"name":"followerId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":884,"b":893,"line":25,"col":57}]}},{"name":"followeeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":914,"b":923,"line":25,"col":87}]}}],"usedParamSet":{"followerId":true,"followeeId":true},"statement":{"body":"SELECT id FROM follow_relationships WHERE follower_id = :followerId AND followee_id = :followeeId","loc":{"a":827,"b":923,"line":25,"col":0}}};
-
-/**
- * Query generated from SQL:
- * ```
- * SELECT id FROM follow_relationships WHERE follower_id = :followerId AND followee_id = :followeeId
- * ```
- */
-export const getExact = new PreparedQuery<IGetExactParams,IGetExactResult>(getExactIR);
-
-
