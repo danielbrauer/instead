@@ -1,12 +1,14 @@
-import KeyService from './KeyService'
-import DatabaseService from './DatabaseService'
-import UserService from './UserService'
-import * as Keys from '../queries/keys.gen'
 import { mocked } from 'ts-jest/utils'
+import * as Keys from '../queries/keys.gen'
 import { EncryptedPostKey } from '../types/api'
+import AuthService from './AuthService'
+import DatabaseService from './DatabaseService'
+import KeyService from './KeyService'
+import UserService from './UserService'
 
 jest.mock('./DatabaseService')
 jest.mock('./UserService')
+jest.mock('./AuthService')
 jest.mock('../queries/keys.gen')
 
 describe('KeyService', () => {
@@ -14,30 +16,33 @@ describe('KeyService', () => {
 
     beforeAll(() => {
         const db = new DatabaseService()
-        const userService = new UserService(db)
-        keyService = new KeyService(userService, db)
+        const auth = new AuthService(db)
+        const userService = new UserService(db, auth)
+        keyService = new KeyService(db)
     })
 
     beforeEach(() => {
         jest.resetAllMocks()
     })
 
-    describe('getCurrentKey', () => {
+    describe('getCurrentPostKey', () => {
         test('gets key if it exists', async () => {
-            const key: Keys.IGetCurrentKeyResult = {
-                keySetId: 3,
+            const key: Keys.IGetCurrentPostKeyResult = {
+                id: 0,
+                postKeySetId: 3,
                 key: 'FF',
-                userId: 0,
+                recipientId: 0,
+                followRelationshipId: 0,
             }
-            mocked(Keys.getCurrentKey.run).mockResolvedValueOnce([key])
-            const currentKey = await keyService.getCurrentKey(0)
-            expect(mocked(Keys.getCurrentKey.run).mock.calls[0][0]).toEqual({ userId: 0 })
+            mocked(Keys.getCurrentPostKey.run).mockResolvedValueOnce([key])
+            const currentKey = await keyService.getCurrentPostKey(0)
+            expect(mocked(Keys.getCurrentPostKey.run).mock.calls[0][0]).toEqual({ userId: 0 })
             expect(currentKey).toEqual(key)
         })
 
         test("gets null if there isn't one", async () => {
-            mocked(Keys.getCurrentKey.run).mockResolvedValueOnce([])
-            const currentKey = await keyService.getCurrentKey(0)
+            mocked(Keys.getCurrentPostKey.run).mockResolvedValueOnce([])
+            const currentKey = await keyService.getCurrentPostKey(0)
             expect(currentKey).toBeNull()
         })
     })
@@ -64,35 +69,17 @@ describe('KeyService', () => {
         })
     })
 
-    describe('invalidateCurrentKeySet', () => {
-        test('makes the expected database queries when there is a key', async () => {
-            const key: Keys.IGetCurrentKeyResult = {
-                keySetId: 3,
-                key: 'FF',
-                userId: 0,
-            }
-            mocked(Keys.getCurrentKey.run).mockResolvedValueOnce([key])
-            await keyService.invalidateCurrentKeySet(0)
-            expect(mocked(Keys.getCurrentKey.run).mock.calls[0][0]).toEqual({ userId: 0 })
-            expect(mocked(Keys.endKeySetValidity.run).mock.calls[0][0]).toEqual({ keySetId: 3 })
-        })
-
-        test("throws if the key isn't valid", async () => {
-            mocked(Keys.getCurrentKey.run).mockResolvedValueOnce([])
-            await keyService.invalidateCurrentKeySet(0)
-            expect(mocked(Keys.endKeySetValidity.run)).toHaveBeenCalledTimes(0)
-        })
-    })
-
-    describe('createKeySet', () => {
+    describe('createCurrentPostKeySet', () => {
         test('creates key set with user copy, and returns id', async () => {
-            const createdKeySet: Keys.ICreateKeySetResult = {
-                id: 5,
+            const createdKeySet: Keys.ICreateCurrentPostKeySetResult = {
+                postKeySetId: 5,
             }
-            mocked(Keys.createKeySet.run).mockResolvedValueOnce([createdKeySet])
-            const returnedId = await keyService.createKeySet(0, 'key')
-            expect(mocked(Keys.createKeySet.run).mock.calls[0][0]).toEqual({ ownerId: 0 })
-            expect(mocked(Keys.addKeys.run).mock.calls[0][0]).toEqual({
+            mocked(Keys.createCurrentPostKeySet.run).mockResolvedValueOnce([createdKeySet])
+            const returnedId = await keyService.createCurrentPostKeySet(0, 'key')
+            expect(mocked(Keys.createCurrentPostKeySet.run).mock.calls[0][0]).toEqual({
+                ownerId: 0,
+            })
+            expect(mocked(Keys.addPostKeys.run).mock.calls[0][0]).toEqual({
                 keys: [
                     {
                         userId: 0,
@@ -109,23 +96,13 @@ describe('KeyService', () => {
         test('adds supplied keys', async () => {
             const keys: EncryptedPostKey[] = [
                 {
-                    userId: 0,
+                    recipientId: 0,
                     key: 'key',
-                    keySetId: 5,
+                    postKeySetId: 5,
                 },
             ]
-            await keyService.addKeys(keys)
-            expect(mocked(Keys.addKeys.run).mock.calls[0][0]).toEqual({ keys })
-        })
-    })
-
-    describe('removeFollowerKeys', () => {
-        test('removes keys for relationship', async () => {
-            await keyService.removeFollowerKeys(0, 1)
-            expect(mocked(Keys.removeFollowerKeys.run).mock.calls[0][0]).toEqual({
-                followerId: 0,
-                followeeId: 1,
-            })
+            await keyService.addPostKeys(1, keys)
+            expect(mocked(Keys.addPostKeys.run).mock.calls[0][0]).toEqual({ keys })
         })
     })
 })
