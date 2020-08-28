@@ -1,8 +1,8 @@
 import { Service } from 'typedi'
-import DatabaseService from './DatabaseService'
+import { ServerError } from '../middleware/errors'
 import * as Keys from '../queries/keys.gen'
 import * as Types from '../types/api'
-import { ServerError } from '../middleware/errors'
+import DatabaseService from './DatabaseService'
 
 @Service()
 export default class KeyService {
@@ -61,19 +61,15 @@ export default class KeyService {
         return keys
     }
 
-    async createProfileKey(
-        userId: number,
-        ownerKey: string,
-        viewerKeys: Types.EncryptedProfileViewerKey[],
-    ) {
-        viewerKeys.forEach((key) => {
-            if (key.ownerId != userId)
-                throw new ServerError('Keys must all belong to the same owner')
-        })
-        await Keys.createProfileKey.run({ userId, key: ownerKey, viewerKeys }, this.db.pool)
+    async createProfileKey(userId: number, ownerKey: string) {
+        await Keys.createProfileKey.run({ userId, key: ownerKey }, this.db.pool)
     }
 
-    async addProfileKey(viewerKey: Types.EncryptedProfileViewerKey) {
-        await Keys.addProfileKey.run(viewerKey, this.db.pool)
+    async addProfileKeys(viewerKeys: Types.EncryptedProfileViewerKey[]) {
+        await Keys.addProfileKeys.run({ viewerKeys }, this.db.pool)
+    }
+
+    async addOrReplaceProfileKey(viewerKey: Types.EncryptedProfileViewerKey) {
+        await Keys.addOrReplaceProfileKey.run(viewerKey, this.db.pool)
     }
 }

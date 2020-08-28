@@ -1,5 +1,5 @@
-import { ContainerTypes, ValidatedRequestSchema } from 'express-joi-validation'
 import * as Joi from '@hapi/joi'
+import { ContainerTypes, ValidatedRequestSchema } from 'express-joi-validation'
 import 'joi-extract-type'
 
 export const empty = Joi.object()
@@ -140,13 +140,22 @@ export interface CreateProfileKeyRequest extends ValidatedRequestSchema {
     [ContainerTypes.Body]: Joi.extractType<typeof createProfileKeyBody>
 }
 
-export const addProfileKeyBody = Joi.object({
+export const addProfileKeysBody = Joi.object({
+    viewerKeys: Joi.array().items(profileKey),
+})
+
+export interface AddProfileKeysRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof addProfileKeysBody>
+}
+
+export const addOrReplaceProfileKeyBody = Joi.object({
     viewerKey: profileKey,
 })
 
-export interface AddProfileKeyRequest extends ValidatedRequestSchema {
+export interface AddOrReplaceProfileKeyRequest extends ValidatedRequestSchema {
     [ContainerTypes.Query]: Joi.extractType<typeof empty>
-    [ContainerTypes.Body]: Joi.extractType<typeof addProfileKeyBody>
+    [ContainerTypes.Body]: Joi.extractType<typeof addOrReplaceProfileKeyBody>
 }
 
 export const setProfileBody = Joi.object({

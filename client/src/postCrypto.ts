@@ -1,10 +1,10 @@
-import * as Routes from './routes/api'
-import { readAsArrayBuffer } from 'promise-file-reader'
 import Axios from 'axios'
-import CurrentUser from './CurrentUser'
 import md5 from 'js-md5'
-import { useReducer, useEffect } from 'react'
+import { readAsArrayBuffer } from 'promise-file-reader'
+import { useEffect, useReducer } from 'react'
 import * as Types from '../../backend/src/types/api'
+import CurrentUser from './CurrentUser'
+import * as Routes from './routes/api'
 const toBuffer = require('typedarray-to-buffer') as (typedArray: Uint8Array) => Buffer
 require('buffer')
 const Crypto = window.crypto
@@ -68,7 +68,7 @@ export async function createProfileKeyForViewer(userId: number) {
             unwrapKeyAsymmetric(profileKey.key),
         ])
         const encrypted = await createEncryptedProfileKey(viewerPublicKey, profileKeyUnwrapped)
-        Routes.addProfileKey(encrypted)
+        Routes.addOrReplaceProfileKey(encrypted)
     }
 }
 
@@ -241,10 +241,13 @@ export async function createProfileKey(): Promise<CryptoKey> {
         CurrentUser.getAccountKeys(),
     ])
     const ownerWrappedKey = await wrapKeyAsymmetric(newKey, accountKeys.publicKey)
-    const viewerWrappedKeys = await Promise.all(
-        publicKeys.map((publicKey) => createEncryptedProfileKey(publicKey, newKey)),
-    )
-    await Routes.createProfileKey(ownerWrappedKey, viewerWrappedKeys)
+    await Routes.createProfileKey(ownerWrappedKey)
+    if (publicKeys.length > 0) {
+        const viewerWrappedKeys = await Promise.all(
+            publicKeys.map((publicKey) => createEncryptedProfileKey(publicKey, newKey)),
+        )
+        await Routes.addProfileKeys(viewerWrappedKeys)
+    }
     return newKey
 }
 

@@ -69,22 +69,23 @@ WHERE profile_keys.owner_id = users.id
 AND profile_keys.recipient_id = :userId
 AND profile_keys.owner_id = :userId;
 
-/*
-    @name CreateProfileKey
-    @param viewerKeys -> ((recipientId, ownerId, key)...)
-*/
+/* @name CreateProfileKey */
 WITH dummy AS (
     DELETE FROM profile_keys WHERE owner_id = :userId
 ), dummy2 AS (
     INSERT INTO profile_keys (recipient_id, owner_id, key)
     VALUES (:userId, :userId, :key)
-), dummy3 AS (
-    INSERT INTO profile_keys (recipient_id, owner_id, key)
-    VALUES :viewerKeys
 )
 UPDATE users SET profile_key_stale = false WHERE id = :userId;
 
-/* @name AddProfileKey */
+/*
+    @name AddProfileKeys
+    @param viewerKeys -> ((recipientId, ownerId, key)...)
+*/
+INSERT INTO profile_keys (recipient_id, owner_id, key)
+VALUES :viewerKeys;
+
+/* @name AddOrReplaceProfileKey */
 WITH dummy AS (
     DELETE FROM profile_keys WHERE owner_id = :ownerId AND recipient_id = :recipientId
 )

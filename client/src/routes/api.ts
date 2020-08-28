@@ -1,9 +1,9 @@
-import config from '../config'
 import Axios from 'axios'
-import * as Types from '../../../backend/src/types/api'
 import { queryCache } from 'react-query'
-import { createKeysForNewFollower, createProfileKeyForViewer } from '../postCrypto'
+import * as Types from '../../../backend/src/types/api'
+import config from '../config'
 import CurrentUser from '../CurrentUser'
+import { createKeysForNewFollower, createProfileKeyForViewer } from '../postCrypto'
 
 const baseURL = `${config.serverUrl}/api`
 
@@ -257,15 +257,20 @@ export async function getProfileViewersPublicKeys() {
     return response.data
 }
 
-export async function createProfileKey(keyBase64: string, viewerKeys: Types.EncryptedProfileViewerKey[]) {
+export async function createProfileKey(keyBase64: string) {
     await server.post('/createProfileKey', {
         ownerKey: keyBase64,
+    })
+}
+
+export async function addProfileKeys(viewerKeys: Types.EncryptedProfileViewerKey[]) {
+    await server.post('/addProfileKeys', {
         viewerKeys,
     })
 }
 
-export async function addProfileKey(viewerKey: Types.EncryptedProfileViewerKey) {
-    await server.post('/addProfileKey', {
+export async function addOrReplaceProfileKey(viewerKey: Types.EncryptedProfileViewerKey) {
+    await server.post('/addOrReplaceProfileKey', {
         viewerKey,
     })
 }

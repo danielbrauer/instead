@@ -1,10 +1,10 @@
-import { Container } from 'typedi'
+import { createValidator, ValidatedRequest } from 'express-joi-validation'
 import Router from 'express-promise-router'
-import UserService from '../services/UserService'
-import PostService from '../services/PostService'
-import KeyService from '../services/KeyService'
+import { Container } from 'typedi'
 import { ServerError } from '../middleware/errors'
-import { ValidatedRequest, createValidator } from 'express-joi-validation'
+import KeyService from '../services/KeyService'
+import PostService from '../services/PostService'
+import UserService from '../services/UserService'
 import * as Schema from './apiSchema'
 
 const router = Router()
@@ -372,21 +372,34 @@ router.post(
     validator.query(Schema.empty),
     validator.body(Schema.createProfileKeyBody),
     async (req: ValidatedRequest<Schema.CreateProfileKeyRequest>, res) => {
-        await keyService.createProfileKey(req.userId, req.body.ownerKey, req.body.viewerKeys)
+        await keyService.createProfileKey(req.userId, req.body.ownerKey)
         return res.json({ success: true })
     },
 )
 
 router.post(
-    '/addProfileKey',
+    '/addProfileKeys',
     validator.query(Schema.empty),
-    validator.body(Schema.addProfileKeyBody),
-    async (req: ValidatedRequest<Schema.AddProfileKeyRequest>, res) => {
-        if (req.userId !== req.body.viewerKey.ownerId)
-            throw new ServerError("Can't add profile viewers to other peoples' profiles")
-        await keyService.addProfileKey(req.body.viewerKey)
+    validator.body(Schema.addProfileKeysBody),
+    async (req: ValidatedRequest<Schema.AddProfileKeysRequest>, res) => {
+        req.body.viewerKeys.forEach((key) => {
+            if (key.ownerId != req.userId)
+                throw new ServerError('Keys must all belong to the same owner')
+        })
+        await keyService.addProfileKeys(req.body.viewerKeys)
         return res.json({ success: true })
     },
 )
 
+router.post(
+    '/addOrReplaceProfileKey',
+    validator.query(Schema.empty),
+    validator.body(Schema.addOrReplaceProfileKeyBody),
+    async (req: ValidatedRequest<Schema.AddOrReplaceProfileKeyRequest>, res) => {
+        if (req.userId !== req.body.viewerKey.ownerId)
+            throw new ServerError("Can't add profile viewers to other peoples' profiles")
+        await keyService.addOrReplaceProfileKey(req.body.viewerKey)
+        return res.json({ success: true })
+    },
+)
 export default router
