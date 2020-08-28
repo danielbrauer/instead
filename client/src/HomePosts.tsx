@@ -14,7 +14,8 @@ export default function () {
         <>
             {posts.data === undefined || posts.data[0].length === 0 ? (
                 <Message>
-                    <Message.Header>No posts yet! Use the menu at the top to:</Message.Header>
+                    <Message.Header>Welcome!</Message.Header>
+                    Posts will appear here. Use the menu to:
                     <Message.List>
                         <Message.Item>
                             <Icon name='user' />

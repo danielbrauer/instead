@@ -270,7 +270,7 @@ export async function encryptAndUploadProfile(displayName: string) {
 
 export async function getProfile(query: string, userId: number) {
     const profileEncrypted = await Routes.getUserProfile(userId)
-    if (!profileEncrypted || !profileEncrypted.displayName) return userId.toString()
+    if (!profileEncrypted || !profileEncrypted.displayName) return null
     const profileKey = await unwrapKeyAsymmetric(profileEncrypted.key)
     const profileDecrypted = await decryptSymmetric(
         Buffer.from(profileEncrypted.displayName, 'base64'),

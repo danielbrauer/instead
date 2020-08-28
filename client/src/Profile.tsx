@@ -37,9 +37,21 @@ export default function ({ userId }: { userId: number }) {
                             {user.data ? user.data! : userId.toString()}
                         </Item.Header>
                         <Item.Extra>
-                            {userId === CurrentUser.getId() ? (
-                                <Button floated='right' onClick={startEditing} icon='pencil' />
-                            ) : null}
+                            {userId === CurrentUser.getId() && (
+                                <Button
+                                    {...(user.data === null
+                                        ? {
+                                              labelPosition: 'left',
+                                              label: {
+                                                  content: 'Add a display name which other people can see',
+                                              },
+                                          }
+                                        : null)}
+                                    floated='right'
+                                    onClick={startEditing}
+                                    icon='pencil'
+                                />
+                            )}
                         </Item.Extra>
                     </Item>
                 </Item.Group>
