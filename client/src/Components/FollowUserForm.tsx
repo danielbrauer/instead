@@ -1,9 +1,9 @@
 import React from 'react'
-import { useInput } from './useInput'
-import { Form, Message } from 'semantic-ui-react'
 import { useMutation } from 'react-query'
+import { Form, Message } from 'semantic-ui-react'
 import { sendFollowRequest } from '../routes/api'
 import './FollowUserForm.css'
+import { useInput } from './useInput'
 
 export default function FollowUserForm() {
     const { value: code, bind: bindCode, reset: resetCode } = useInput('', (x) =>
@@ -28,18 +28,16 @@ export default function FollowUserForm() {
                 loading={sendFollowRequestQuery.isLoading}
                 size='large'
             >
-                <Form.Input
-                    className='follow-user-form-form'
-                    placeholder='XXX'
-                    name='friendCode'
-                    action={{
-                        primary: true,
-                        content: 'Request',
-                        disabled: code.length < 3,
-                        onClick: handleSubmit,
-                    }}
-                    {...bindCode}
-                />
+                <Form.Group>
+                    <Form.Input className='follow-user-form-form' placeholder='XXX' name='friendCode' {...bindCode} />
+                    <Form.Button
+                        primary
+                        content='Request'
+                        disabled={code.length < 3}
+                        onClick={handleSubmit}
+                        size='large'
+                    />
+                </Form.Group>
                 <Message
                     error
                     header={"Can't follow"}
