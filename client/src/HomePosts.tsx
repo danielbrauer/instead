@@ -1,7 +1,8 @@
 import React from 'react'
 import { useInfiniteQuery } from 'react-query'
-import { getHomePosts } from './routes/api'
+import { Icon, Message } from 'semantic-ui-react'
 import Posts from './Posts'
+import { getHomePosts } from './routes/api'
 
 export default function () {
     const posts = useInfiniteQuery('posts', getHomePosts, {
@@ -9,5 +10,29 @@ export default function () {
         staleTime: Infinity,
     })
 
-    return <Posts posts={posts} />
+    return (
+        <>
+            {posts.data === undefined || posts.data[0].length === 0 ? (
+                <Message>
+                    <Message.Header>No posts yet! Use the menu at the top to:</Message.Header>
+                    <Message.List>
+                        <Message.Item>
+                            <Icon name='user' />
+                            Edit your profile
+                        </Message.Item>
+                        <Message.Item>
+                            <Icon name='users' />
+                            Follow friends
+                        </Message.Item>
+                        <Message.Item>
+                            <Icon name='camera' />
+                            Post a photo
+                        </Message.Item>
+                    </Message.List>
+                </Message>
+            ) : null}
+
+            <Posts posts={posts} />
+        </>
+    )
 }

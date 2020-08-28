@@ -1,20 +1,18 @@
 import React, { useEffect } from 'react'
+import { queryCache, useQuery } from 'react-query'
+import { Redirect, Route, Switch, useHistory } from 'react-router-dom'
+import { Dropdown, Icon, Label, Menu } from 'semantic-ui-react'
 import CurrentUser from './CurrentUser'
 import FollowerPage from './FollowerPage'
 import HomePosts from './HomePosts'
 import NewPost from './NewPost'
-import { Route, Switch, Redirect, useHistory } from 'react-router-dom'
-import { Menu, Dropdown, Label, Icon } from 'semantic-ui-react'
-import { queryCache, useQuery } from 'react-query'
 import * as Routes from './routes/api'
 import SinglePost from './SinglePost'
 import UserPosts from './UserPosts'
-import { getProfile } from './postCrypto'
 
 export default function () {
     const history = useHistory()
     const requests = useQuery('followRequests', Routes.getFollowRequests)
-    const currentUserQuery = useQuery(['userProfile', CurrentUser.getId()], getProfile)
 
     const logOutAndClear = async () => {
         try {
@@ -43,12 +41,12 @@ export default function () {
                 </Menu.Item>
                 <Menu.Menu position='right'>
                     <Menu.Item onClick={() => history.push('/followers')}>
-                        <Icon fitted name='user' />
+                        <Icon fitted name='users' />
                         {requests.isSuccess && requests.data!.length > 0 ? (
                             <Label color='red' size='medium' empty circular corner />
                         ) : null}
                     </Menu.Item>
-                    <Dropdown item direction='left' text={currentUserQuery.data || CurrentUser.getId().toString()}>
+                    <Dropdown item direction='left' text={CurrentUser.getUsername()}>
                         <Dropdown.Menu>
                             <Dropdown.Item
                                 icon='user'
