@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { queryCache, useQuery } from 'react-query'
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom'
 import { Dropdown, Icon, Label, Menu } from 'semantic-ui-react'
@@ -11,8 +11,27 @@ import SinglePost from './SinglePost'
 import UserPosts from './UserPosts'
 
 export default function () {
+    const [uploadInput, setUploadInput] = useState<File | null>(null)
+    const [previousPage, setPreviousPage] = useState('')
+
+    const inputFile = useRef<HTMLInputElement>(null)
+
     const history = useHistory()
     const requests = useQuery('followRequests', Routes.getFollowRequests)
+
+    function onSelect(evt: React.ChangeEvent<HTMLInputElement>) {
+        const file = evt.target.files && evt.target.files[0]
+        if (file) {
+            setUploadInput(file)
+            setPreviousPage(history.location.pathname)
+            history.push('/new')
+        }
+    }
+
+    function onCancel() {
+        setUploadInput(null)
+        history.push(previousPage)
+    }
 
     const logOutAndClear = async () => {
         try {
@@ -32,11 +51,19 @@ export default function () {
 
     return (
         <div>
+            <input
+                type='file'
+                id='file'
+                accept='image/jpeg, image/png'
+                ref={inputFile}
+                onChange={onSelect}
+                style={{ display: 'none' }}
+            />
             <Menu inverted fixed='top' size='small'>
                 <Menu.Item header onClick={() => history.location.pathname !== '/home' && history.push('/home')}>
                     Instead
                 </Menu.Item>
-                <Menu.Item onClick={() => history.push('/new')}>
+                <Menu.Item onClick={() => inputFile.current!.click()}>
                     <Icon fitted name='camera' />
                 </Menu.Item>
                 <Menu.Menu position='right'>
@@ -64,7 +91,9 @@ export default function () {
             <Switch>
                 <Route path={['/followers', '/following']} component={FollowerPage} />
                 <Route path='/home' component={HomePosts} />
-                <Route path='/new' component={NewPost} />
+                <Route path='/new'>
+                    <NewPost uploadInput={uploadInput!} onCancel={onCancel} />
+                </Route>
                 <Route path='/post/:id' component={SinglePost} />
                 <Route path='/user/:id' component={UserPosts} />
             </Switch>
