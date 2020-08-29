@@ -1,183 +1,146 @@
 /** Types generated for queries found in "./src/queries/users.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
-export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
+/** 'GetProfileWithKey' parameters type */
+export interface IGetProfileWithKeyParams {
+  userId: number | null | void;
+  requesterId: number | null | void;
+}
 
-/** 'Create' parameters type */
-export interface ICreateParams {
-  username: string | null | void;
+/** 'GetProfileWithKey' return type */
+export interface IGetProfileWithKeyResult {
+  id: number;
+  displayName: string | null;
+  displayNameIv: string | null;
+  key: string;
+}
+
+/** 'GetProfileWithKey' query type */
+export interface IGetProfileWithKeyQuery {
+  params: IGetProfileWithKeyParams;
+  result: IGetProfileWithKeyResult;
+}
+
+const getProfileWithKeyIR: any = {"name":"GetProfileWithKey","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":194,"b":199,"line":6,"col":16}]}},{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":234,"b":244,"line":7,"col":33}]}}],"usedParamSet":{"userId":true,"requesterId":true},"statement":{"body":"SELECT users.id, users.display_name, users.display_name_iv,\n       profile_keys.key\nFROM users, profile_keys\nWHERE users.id = profile_keys.owner_id\nAND users.id = :userId\nAND profile_keys.recipient_id = :requesterId","loc":{"a":30,"b":244,"line":2,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT users.id, users.display_name, users.display_name_iv,
+ *        profile_keys.key
+ * FROM users, profile_keys
+ * WHERE users.id = profile_keys.owner_id
+ * AND users.id = :userId
+ * AND profile_keys.recipient_id = :requesterId
+ * ```
+ */
+export const getProfileWithKey = new PreparedQuery<IGetProfileWithKeyParams,IGetProfileWithKeyResult>(getProfileWithKeyIR);
+
+
+/** 'SetProfileData' parameters type */
+export interface ISetProfileDataParams {
   displayName: string | null | void;
-  verifier: string | null | void;
-  srpSalt: string | null | void;
-  mukSalt: string | null | void;
-  publicKey: Json | null | void;
-  privateKey: string | null | void;
-  privateKeyIv: string | null | void;
-}
-
-/** 'Create' return type */
-export interface ICreateResult {
-  id: number;
-}
-
-/** 'Create' query type */
-export interface ICreateQuery {
-  params: ICreateParams;
-  result: ICreateResult;
-}
-
-const createIR: any = {"name":"Create","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":142,"b":149,"line":2,"col":123}]}},{"name":"displayName","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":153,"b":163,"line":2,"col":134}]}},{"name":"verifier","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":167,"b":174,"line":2,"col":148}]}},{"name":"srpSalt","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":178,"b":184,"line":2,"col":159}]}},{"name":"mukSalt","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":188,"b":194,"line":2,"col":169}]}},{"name":"publicKey","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":198,"b":206,"line":2,"col":179}]}},{"name":"privateKey","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":210,"b":219,"line":2,"col":191}]}},{"name":"privateKeyIv","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":223,"b":234,"line":2,"col":204}]}}],"usedParamSet":{"username":true,"displayName":true,"verifier":true,"srpSalt":true,"mukSalt":true,"publicKey":true,"privateKey":true,"privateKeyIv":true},"statement":{"body":"INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key, private_key_iv) VALUES (:username, :displayName, :verifier, :srpSalt, :mukSalt, :publicKey, :privateKey, :privateKeyIv) RETURNING id","loc":{"a":19,"b":248,"line":2,"col":0}}};
-
-/**
- * Query generated from SQL:
- * ```
- * INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key, private_key_iv) VALUES (:username, :displayName, :verifier, :srpSalt, :mukSalt, :publicKey, :privateKey, :privateKeyIv) RETURNING id
- * ```
- */
-export const create = new PreparedQuery<ICreateParams,ICreateResult>(createIR);
-
-
-/** 'GetUserInfo' parameters type */
-export interface IGetUserInfoParams {
+  displayNameIv: string | null | void;
   userId: number | null | void;
 }
 
-/** 'GetUserInfo' return type */
-export interface IGetUserInfoResult {
-  privateKey: string;
-  privateKeyIv: string;
-  publicKey: Json;
-  mukSalt: string;
+/** 'SetProfileData' return type */
+export type ISetProfileDataResult = void;
+
+/** 'SetProfileData' query type */
+export interface ISetProfileDataQuery {
+  params: ISetProfileDataParams;
+  result: ISetProfileDataResult;
 }
 
-/** 'GetUserInfo' query type */
-export interface IGetUserInfoQuery {
-  params: IGetUserInfoParams;
-  result: IGetUserInfoResult;
-}
-
-const getUserInfoIR: any = {"name":"GetUserInfo","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":356,"b":361,"line":5,"col":80}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT private_key, private_key_iv, public_key, muk_salt FROM users WHERE id = :userId","loc":{"a":276,"b":361,"line":5,"col":0}}};
+const setProfileDataIR: any = {"name":"SetProfileData","params":[{"name":"displayName","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":308,"b":318,"line":10,"col":33}]}},{"name":"displayNameIv","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":340,"b":352,"line":10,"col":65}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":366,"b":371,"line":10,"col":91}]}}],"usedParamSet":{"displayName":true,"displayNameIv":true,"userId":true},"statement":{"body":"UPDATE users SET display_name = :displayName, display_name_iv = :displayNameIv WHERE id = :userId","loc":{"a":275,"b":371,"line":10,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT private_key, private_key_iv, public_key, muk_salt FROM users WHERE id = :userId
+ * UPDATE users SET display_name = :displayName, display_name_iv = :displayNameIv WHERE id = :userId
  * ```
  */
-export const getUserInfo = new PreparedQuery<IGetUserInfoParams,IGetUserInfoResult>(getUserInfoIR);
+export const setProfileData = new PreparedQuery<ISetProfileDataParams,ISetProfileDataResult>(setProfileDataIR);
 
 
-/** 'CountByName' parameters type */
-export interface ICountByNameParams {
-  username: string | null | void;
+/** 'GetByFriendCode' parameters type */
+export interface IGetByFriendCodeParams {
+  friendCode: string | null | void;
 }
 
-/** 'CountByName' return type */
-export interface ICountByNameResult {
-  count: number | null;
+/** 'GetByFriendCode' return type */
+export interface IGetByFriendCodeResult {
+  id: number;
 }
 
-/** 'CountByName' query type */
-export interface ICountByNameQuery {
-  params: ICountByNameParams;
-  result: ICountByNameResult;
+/** 'GetByFriendCode' query type */
+export interface IGetByFriendCodeQuery {
+  params: IGetByFriendCodeParams;
+  result: IGetByFriendCodeResult;
 }
 
-const countByNameIR: any = {"name":"CountByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":439,"b":446,"line":8,"col":50}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT COUNT(*)::int FROM users WHERE username = :username","loc":{"a":389,"b":446,"line":8,"col":0}}};
+const getByFriendCodeIR: any = {"name":"GetByFriendCode","params":[{"name":"friendCode","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":445,"b":454,"line":13,"col":42}]}}],"usedParamSet":{"friendCode":true},"statement":{"body":"SELECT id FROM users WHERE friend_code = :friendCode","loc":{"a":403,"b":454,"line":13,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT COUNT(*)::int FROM users WHERE username = :username
+ * SELECT id FROM users WHERE friend_code = :friendCode
  * ```
  */
-export const countByName = new PreparedQuery<ICountByNameParams,ICountByNameResult>(countByNameIR);
+export const getByFriendCode = new PreparedQuery<IGetByFriendCodeParams,IGetByFriendCodeResult>(getByFriendCodeIR);
 
 
-/** 'GetById' parameters type */
-export interface IGetByIdParams {
+/** 'GetFriendCode' parameters type */
+export interface IGetFriendCodeParams {
   userId: number | null | void;
 }
 
-/** 'GetById' return type */
-export interface IGetByIdResult {
-  id: number;
-  username: string;
-  displayName: string;
+/** 'GetFriendCode' return type */
+export interface IGetFriendCodeResult {
+  friendCode: string | null;
 }
 
-/** 'GetById' query type */
-export interface IGetByIdQuery {
-  params: IGetByIdParams;
-  result: IGetByIdResult;
+/** 'GetFriendCode' query type */
+export interface IGetFriendCodeQuery {
+  params: IGetFriendCodeParams;
+  result: IGetFriendCodeResult;
 }
 
-const getByIdIR: any = {"name":"GetById","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":527,"b":532,"line":11,"col":57}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, username, display_name FROM users WHERE id = :userId","loc":{"a":470,"b":532,"line":11,"col":0}}};
+const getFriendCodeIR: any = {"name":"GetFriendCode","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":526,"b":531,"line":16,"col":42}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT friend_code FROM users WHERE id = :userId","loc":{"a":484,"b":531,"line":16,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT id, username, display_name FROM users WHERE id = :userId
+ * SELECT friend_code FROM users WHERE id = :userId
  * ```
  */
-export const getById = new PreparedQuery<IGetByIdParams,IGetByIdResult>(getByIdIR);
+export const getFriendCode = new PreparedQuery<IGetFriendCodeParams,IGetFriendCodeResult>(getFriendCodeIR);
 
 
-/** 'GetByName' parameters type */
-export interface IGetByNameParams {
-  username: string | null | void;
+/** 'SetFriendCode' parameters type */
+export interface ISetFriendCodeParams {
+  friendCode: string | null | void;
+  userId: number | null | void;
 }
 
-/** 'GetByName' return type */
-export interface IGetByNameResult {
-  id: number;
+/** 'SetFriendCode' return type */
+export type ISetFriendCodeResult = void;
+
+/** 'SetFriendCode' query type */
+export interface ISetFriendCodeQuery {
+  params: ISetFriendCodeParams;
+  result: ISetFriendCodeResult;
 }
 
-/** 'GetByName' query type */
-export interface IGetByNameQuery {
-  params: IGetByNameParams;
-  result: IGetByNameResult;
-}
-
-const getByNameIR: any = {"name":"GetByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":597,"b":604,"line":14,"col":39}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT id FROM users WHERE username = :username","loc":{"a":558,"b":604,"line":14,"col":0}}};
+const setFriendCodeIR: any = {"name":"SetFriendCode","params":[{"name":"friendCode","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":593,"b":602,"line":19,"col":32}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":616,"b":621,"line":19,"col":55}]}}],"usedParamSet":{"friendCode":true,"userId":true},"statement":{"body":"UPDATE users SET friend_code = :friendCode WHERE id = :userId","loc":{"a":561,"b":621,"line":19,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT id FROM users WHERE username = :username
+ * UPDATE users SET friend_code = :friendCode WHERE id = :userId
  * ```
  */
-export const getByName = new PreparedQuery<IGetByNameParams,IGetByNameResult>(getByNameIR);
-
-
-/** 'GetLoginInfoByName' parameters type */
-export interface IGetLoginInfoByNameParams {
-  username: string | null | void;
-}
-
-/** 'GetLoginInfoByName' return type */
-export interface IGetLoginInfoByNameResult {
-  id: number;
-  username: string;
-  srpSalt: string;
-  verifier: string;
-  displayName: string;
-}
-
-/** 'GetLoginInfoByName' query type */
-export interface IGetLoginInfoByNameQuery {
-  params: IGetLoginInfoByNameParams;
-  result: IGetLoginInfoByNameResult;
-}
-
-const getLoginInfoByNameIR: any = {"name":"GetLoginInfoByName","params":[{"name":"username","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":722,"b":729,"line":17,"col":83}]}}],"usedParamSet":{"username":true},"statement":{"body":"SELECT id, username, srp_salt, verifier, display_name FROM users WHERE username = :username","loc":{"a":639,"b":729,"line":17,"col":0}}};
-
-/**
- * Query generated from SQL:
- * ```
- * SELECT id, username, srp_salt, verifier, display_name FROM users WHERE username = :username
- * ```
- */
-export const getLoginInfoByName = new PreparedQuery<IGetLoginInfoByNameParams,IGetLoginInfoByNameResult>(getLoginInfoByNameIR);
+export const setFriendCode = new PreparedQuery<ISetFriendCodeParams,ISetFriendCodeResult>(setFriendCodeIR);
 
 

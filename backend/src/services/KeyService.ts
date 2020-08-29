@@ -1,38 +1,25 @@
-import Container, { Service } from 'typedi'
-import DatabaseService from './DatabaseService'
+import { Service } from 'typedi'
+import { ServerError } from '../middleware/errors'
 import * as Keys from '../queries/keys.gen'
-import UserService from './UserService'
-import { FollowRelationship, EncryptedPostKey } from '../types/api'
+import * as Types from '../types/api'
+import DatabaseService from './DatabaseService'
 
 @Service()
 export default class KeyService {
-    constructor(private userService: UserService, private db: DatabaseService) {
-        this.userService.onUserLostFollower.subscribe(KeyService.onFollowerLost)
-    }
+    constructor(private db: DatabaseService) {}
 
-    private static async onFollowerLost(followRelationship: FollowRelationship) {
-        const keyService = Container.get(KeyService)
-        await Promise.all([
-            keyService.removeFollowerKeys(
-                followRelationship.followerId,
-                followRelationship.followeeId,
-            ),
-            keyService.invalidateCurrentKeySet(followRelationship.followeeId),
-        ])
-    }
-
-    async getCurrentKey(userId: number) {
-        const [key] = await Keys.getCurrentKey.run({ userId }, this.db.pool)
+    async getCurrentPostKey(userId: number) {
+        const [key] = await Keys.getCurrentPostKey.run({ userId }, this.db.pool)
         return key || null
     }
 
-    async getKey(userId: number, keySetId: number) {
-        const [key] = await Keys.getKey.run({ userId, keySetId }, this.db.pool)
+    async getPostKey(userId: number, keySetId: number) {
+        const [key] = await Keys.getPostKey.run({ userId, keySetId }, this.db.pool)
         return key || null
     }
 
-    async getAllKeys(userId: number) {
-        return await Keys.getAllKeys.run({ userId }, this.db.pool)
+    async getAllPostKeys(userId: number) {
+        return await Keys.getAllPostKeys.run({ userId }, this.db.pool)
     }
 
     async getFollowerPublicKeys(userId: number) {
@@ -45,30 +32,44 @@ export default class KeyService {
         return publicKey || null
     }
 
-    async invalidateCurrentKeySet(userId: number) {
-        await this.db.transaction(async (client) => {
-            const [key] = await Keys.getCurrentKey.run({ userId }, client)
-            if (key) {
-                await Keys.endKeySetValidity.run({ keySetId: key.keySetId }, client)
-            }
+    async createCurrentPostKeySet(userId: number, key: string) {
+        const [{ postKeySetId }] = await Keys.createCurrentPostKeySet.run(
+            { ownerId: userId, key },
+            this.db.pool,
+        )
+        return postKeySetId
+    }
+
+    async addPostKeys(userId: number, keys: Types.EncryptedPostKey[]) {
+        const postKeys = await Keys.getAllPostKeys.run({ userId }, this.db.pool)
+        keys.forEach((key) => {
+            if (!postKeys.some((postKey) => postKey.postKeySetId === key.postKeySetId))
+                throw new ServerError(
+                    'Cannot add post keys belonging to key sets owned by other users',
+                )
         })
+        await Keys.addPostKeys.run({ keys }, this.db.pool)
     }
 
-    async createKeySet(userId: number, key: string) {
-        let returnKeySetId: number = null
-        await this.db.transaction(async (client) => {
-            const [{ id: keySetId }] = await Keys.createKeySet.run({ ownerId: userId }, client)
-            await Keys.addKeys.run({ keys: [{ userId, key, keySetId }] }, client)
-            returnKeySetId = keySetId
-        })
-        return returnKeySetId
+    async getCurrentProfileKey(userId: number) {
+        const [key] = await Keys.getCurrentProfileKey.run({ userId }, this.db.pool)
+        return key || null
     }
 
-    async addKeys(keys: EncryptedPostKey[]) {
-        await Keys.addKeys.run({ keys }, this.db.pool)
+    async getProfileViewersPublicKeys(userId: number) {
+        const keys = await Keys.getProfileViewerPublicKeys.run({ userId }, this.db.pool)
+        return keys
     }
 
-    async removeFollowerKeys(followerId: number, followeeId: number) {
-        await Keys.removeFollowerKeys.run({ followerId, followeeId }, this.db.pool)
+    async createProfileKey(userId: number, ownerKey: string) {
+        await Keys.createProfileKey.run({ userId, key: ownerKey }, this.db.pool)
+    }
+
+    async addProfileKeys(viewerKeys: Types.EncryptedProfileViewerKey[]) {
+        await Keys.addProfileKeys.run({ viewerKeys }, this.db.pool)
+    }
+
+    async addOrReplaceProfileKey(viewerKey: Types.EncryptedProfileViewerKey) {
+        await Keys.addOrReplaceProfileKey.run(viewerKey, this.db.pool)
     }
 }

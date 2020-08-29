@@ -5,6 +5,7 @@ import { PreparedQuery } from '@pgtyped/query';
 export interface ICreateParams {
   requesterId: number | null | void;
   requesteeId: number | null | void;
+  friendCode: string | null | void;
 }
 
 /** 'Create' return type */
@@ -16,12 +17,12 @@ export interface ICreateQuery {
   result: ICreateResult;
 }
 
-const createIR: any = {"name":"Create","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":85,"b":95,"line":2,"col":66}]}},{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":99,"b":109,"line":2,"col":80}]}}],"usedParamSet":{"requesterId":true,"requesteeId":true},"statement":{"body":"INSERT INTO follow_requests (requester_id, requestee_id) VALUES (:requesterId, :requesteeId)","loc":{"a":19,"b":110,"line":2,"col":0}}};
+const createIR: any = {"name":"Create","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":98,"b":108,"line":2,"col":79}]}},{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":112,"b":122,"line":2,"col":93}]}},{"name":"friendCode","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":126,"b":135,"line":2,"col":107}]}}],"usedParamSet":{"requesterId":true,"requesteeId":true,"friendCode":true},"statement":{"body":"INSERT INTO follow_requests (requester_id, requestee_id, friend_code) VALUES (:requesterId, :requesteeId, :friendCode)","loc":{"a":19,"b":136,"line":2,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * INSERT INTO follow_requests (requester_id, requestee_id) VALUES (:requesterId, :requesteeId)
+ * INSERT INTO follow_requests (requester_id, requestee_id, friend_code) VALUES (:requesterId, :requesteeId, :friendCode)
  * ```
  */
 export const create = new PreparedQuery<ICreateParams,ICreateResult>(createIR);
@@ -42,7 +43,7 @@ export interface IDestroyQuery {
   result: IDestroyResult;
 }
 
-const destroyIR: any = {"name":"Destroy","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":184,"b":194,"line":5,"col":50}]}},{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":216,"b":226,"line":5,"col":82}]}}],"usedParamSet":{"requesterId":true,"requesteeId":true},"statement":{"body":"DELETE FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId","loc":{"a":134,"b":226,"line":5,"col":0}}};
+const destroyIR: any = {"name":"Destroy","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":210,"b":220,"line":5,"col":50}]}},{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":242,"b":252,"line":5,"col":82}]}}],"usedParamSet":{"requesterId":true,"requesteeId":true},"statement":{"body":"DELETE FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId","loc":{"a":160,"b":252,"line":5,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -53,33 +54,32 @@ const destroyIR: any = {"name":"Destroy","params":[{"name":"requesterId","transf
 export const destroy = new PreparedQuery<IDestroyParams,IDestroyResult>(destroyIR);
 
 
-/** 'DestroyAndReturn' parameters type */
-export interface IDestroyAndReturnParams {
+/** 'GetByIds' parameters type */
+export interface IGetByIdsParams {
   requesterId: number | null | void;
   requesteeId: number | null | void;
 }
 
-/** 'DestroyAndReturn' return type */
-export interface IDestroyAndReturnResult {
-  requesterId: number;
-  requesteeId: number;
+/** 'GetByIds' return type */
+export interface IGetByIdsResult {
+  id: number;
 }
 
-/** 'DestroyAndReturn' query type */
-export interface IDestroyAndReturnQuery {
-  params: IDestroyAndReturnParams;
-  result: IDestroyAndReturnResult;
+/** 'GetByIds' query type */
+export interface IGetByIdsQuery {
+  params: IGetByIdsParams;
+  result: IGetByIdsResult;
 }
 
-const destroyAndReturnIR: any = {"name":"DestroyAndReturn","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":309,"b":319,"line":8,"col":50}]}},{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":341,"b":351,"line":8,"col":82}]}}],"usedParamSet":{"requesterId":true,"requesteeId":true},"statement":{"body":"DELETE FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId RETURNING *","loc":{"a":259,"b":363,"line":8,"col":0}}};
+const getByIdsIR: any = {"name":"GetByIds","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":330,"b":340,"line":8,"col":53}]}},{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":362,"b":372,"line":8,"col":85}]}}],"usedParamSet":{"requesterId":true,"requesteeId":true},"statement":{"body":"SELECT id FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId","loc":{"a":277,"b":372,"line":8,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * DELETE FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId RETURNING *
+ * SELECT id FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId
  * ```
  */
-export const destroyAndReturn = new PreparedQuery<IDestroyAndReturnParams,IDestroyAndReturnResult>(destroyAndReturnIR);
+export const getByIds = new PreparedQuery<IGetByIdsParams,IGetByIdsResult>(getByIdsIR);
 
 
 /** 'Count' parameters type */
@@ -99,7 +99,7 @@ export interface ICountQuery {
   result: ICountResult;
 }
 
-const countIR: any = {"name":"Count","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":449,"b":459,"line":11,"col":64}]}},{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":481,"b":491,"line":11,"col":96}]}}],"usedParamSet":{"requesterId":true,"requesteeId":true},"statement":{"body":"SELECT COUNT(*)::int FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId","loc":{"a":385,"b":491,"line":11,"col":0}}};
+const countIR: any = {"name":"Count","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":458,"b":468,"line":11,"col":64}]}},{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":490,"b":500,"line":11,"col":96}]}}],"usedParamSet":{"requesterId":true,"requesteeId":true},"statement":{"body":"SELECT COUNT(*)::int FROM follow_requests WHERE requester_id = :requesterId AND requestee_id = :requesteeId","loc":{"a":394,"b":500,"line":11,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -126,7 +126,7 @@ export interface IGetByRequesteeIdQuery {
   result: IGetByRequesteeIdResult;
 }
 
-const getByRequesteeIdIR: any = {"name":"GetByRequesteeId","params":[{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":587,"b":597,"line":14,"col":63}]}}],"usedParamSet":{"requesteeId":true},"statement":{"body":"SELECT requester_id FROM follow_requests WHERE requestee_id = :requesteeId","loc":{"a":524,"b":597,"line":14,"col":0}}};
+const getByRequesteeIdIR: any = {"name":"GetByRequesteeId","params":[{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":596,"b":606,"line":14,"col":63}]}}],"usedParamSet":{"requesteeId":true},"statement":{"body":"SELECT requester_id FROM follow_requests WHERE requestee_id = :requesteeId","loc":{"a":533,"b":606,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -145,6 +145,7 @@ export interface IGetByRequesterIdParams {
 /** 'GetByRequesterId' return type */
 export interface IGetByRequesterIdResult {
   requesteeId: number;
+  friendCode: string | null;
 }
 
 /** 'GetByRequesterId' query type */
@@ -153,12 +154,12 @@ export interface IGetByRequesterIdQuery {
   result: IGetByRequesterIdResult;
 }
 
-const getByRequesterIdIR: any = {"name":"GetByRequesterId","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":693,"b":703,"line":17,"col":63}]}}],"usedParamSet":{"requesterId":true},"statement":{"body":"SELECT requestee_id FROM follow_requests WHERE requester_id = :requesterId","loc":{"a":630,"b":703,"line":17,"col":0}}};
+const getByRequesterIdIR: any = {"name":"GetByRequesterId","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":715,"b":725,"line":17,"col":76}]}}],"usedParamSet":{"requesterId":true},"statement":{"body":"SELECT requestee_id, friend_code FROM follow_requests WHERE requester_id = :requesterId","loc":{"a":639,"b":725,"line":17,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT requestee_id FROM follow_requests WHERE requester_id = :requesterId
+ * SELECT requestee_id, friend_code FROM follow_requests WHERE requester_id = :requesterId
  * ```
  */
 export const getByRequesterId = new PreparedQuery<IGetByRequesterIdParams,IGetByRequesterIdResult>(getByRequesterIdIR);

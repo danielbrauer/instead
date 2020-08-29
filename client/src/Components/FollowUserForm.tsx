@@ -1,22 +1,25 @@
 import React from 'react'
-import { useInput } from './useInput'
-import { Form, Message } from 'semantic-ui-react'
 import { useMutation } from 'react-query'
-import { sendFollowRequest } from '../RoutesAuthenticated'
+import { Form, Message } from 'semantic-ui-react'
+import { sendFollowRequest } from '../routes/api'
+import './FollowUserForm.css'
+import { useInput } from './useInput'
 
 export default function FollowUserForm() {
-    const { value: username, bind: bindUsername, reset: resetUsername } = useInput('')
-    const [sendFollowRequestMutation, sendFollowRequestQuery] = useMutation(sendFollowRequest)
+    const { value: code, bind: bindCode, reset: resetCode } = useInput('', (x) =>
+        x.toUpperCase().replace(/[^2-9A-HJ-NP-Z]/g, ''),
+    )
+    const [sendFollowRequestMutation, sendFollowRequestQuery] = useMutation(sendFollowRequest, { throwOnError: false })
 
     async function handleSubmit() {
         sendFollowRequestQuery.reset()
-        await sendFollowRequestMutation(username)
-        resetUsername()
+        await sendFollowRequestMutation(code)
+        resetCode()
     }
 
     return (
-        <>
-            To follow a user, enter their username:
+        <div className='follow-user-form-container'>
+            To follow a user, enter their Friend Code:
             <br />
             <br />
             <Form
@@ -25,17 +28,16 @@ export default function FollowUserForm() {
                 loading={sendFollowRequestQuery.isLoading}
                 size='large'
             >
-                <Form.Input
-                    placeholder='AdjectiveAnimal'
-                    name='username'
-                    action={{
-                        primary: true,
-                        content: 'Request',
-                        disabled: username === '',
-                        onClick: handleSubmit,
-                    }}
-                    {...bindUsername}
-                />
+                <Form.Group>
+                    <Form.Input className='follow-user-form-form' placeholder='A1C' name='friendCode' {...bindCode} />
+                    <Form.Button
+                        primary
+                        content='Request'
+                        disabled={code.length < 3}
+                        onClick={handleSubmit}
+                        size='large'
+                    />
+                </Form.Group>
                 <Message
                     error
                     header={"Can't follow"}
@@ -43,6 +45,6 @@ export default function FollowUserForm() {
                 />
                 <Message success header={'Success'} content={'Follow request sent'} />
             </Form>
-        </>
+        </div>
     )
 }

@@ -41,7 +41,7 @@ export default function LoginForm() {
                 <Header textAlign='center' content='Instead' />
                 <Form.Input
                     fluid
-                    icon='paw'
+                    icon='user'
                     iconPosition='left'
                     placeholder='Username'
                     autoComplete='username'
@@ -56,14 +56,7 @@ export default function LoginForm() {
                     autoComplete='current-password'
                     {...bindPassword}
                 />
-                <Form.Input
-                    fluid
-                    icon='key'
-                    iconPosition='left'
-                    placeholder='Secret Key'
-                    // autoComplete="current-password"
-                    {...bindSecretKey}
-                />
+                <Form.Input fluid icon='key' iconPosition='left' placeholder='Secret Key' {...bindSecretKey} />
                 <Message error header='Could not log in' content={loginErrorMessage} />
                 <Button size='large' content='Log in' />
             </Form>

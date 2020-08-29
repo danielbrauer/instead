@@ -1,10 +1,10 @@
-import { Container } from 'typedi'
+import { createValidator, ValidatedRequest } from 'express-joi-validation'
 import Router from 'express-promise-router'
-import UserService from '../services/UserService'
-import PostService from '../services/PostService'
-import KeyService from '../services/KeyService'
+import { Container } from 'typedi'
 import { ServerError } from '../middleware/errors'
-import { ValidatedRequest, createValidator } from 'express-joi-validation'
+import KeyService from '../services/KeyService'
+import PostService from '../services/PostService'
+import UserService from '../services/UserService'
 import * as Schema from './apiSchema'
 
 const router = Router()
@@ -40,7 +40,7 @@ router.get(
     validator.query(Schema.getHomePostsQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.GetHomePostsRequest>, res) => {
-        const posts = await postService.getHomePosts(req.user.id, req.query.pageIndex)
+        const posts = await postService.getHomePosts(req.userId, req.query.pageIndex)
         return res.json(posts)
     },
 )
@@ -52,7 +52,7 @@ router.get(
     async (req: ValidatedRequest<Schema.GetUserPostsRequest>, res) => {
         const posts = await postService.getUserPosts(
             req.query.userId,
-            req.user.id,
+            req.userId,
             req.query.pageIndex,
         )
         return res.json(posts)
@@ -64,7 +64,7 @@ router.get(
     validator.query(Schema.postByIdQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.PostByIdRequest>, res) => {
-        const post = await postService.getPost(req.query.id, req.user.id)
+        const post = await postService.getPost(req.query.id, req.userId)
         return res.json(post)
     },
 )
@@ -74,7 +74,7 @@ router.get(
     validator.query(Schema.postByIdQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.PostByIdRequest>, res) => {
-        const comments = await postService.getCommentsForPost(req.query.id, req.user.id)
+        const comments = await postService.getCommentsForPost(req.query.id, req.userId)
         return res.json(comments)
     },
 )
@@ -84,7 +84,7 @@ router.post(
     validator.query(Schema.empty),
     validator.body(Schema.createCommentBody),
     async (req: ValidatedRequest<Schema.CreateCommentRequest>, res) => {
-        const result = await postService.addCommentToPost({ authorId: req.user.id, ...req.body })
+        const result = await postService.addCommentToPost({ authorId: req.userId, ...req.body })
         return res.json(result)
     },
 )
@@ -94,57 +94,57 @@ router.delete(
     validator.query(Schema.postByIdQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.PostByIdRequest>, res) => {
-        const result = await postService.deletePost(req.query.id, req.user.id)
+        const result = await postService.deletePost(req.query.id, req.userId)
         return res.json(result)
     },
 )
 
 router.get(
-    '/getCurrentKey',
+    '/getCurrentPostKey',
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const currentKey = await keyService.getCurrentKey(req.user.id)
+        const currentKey = await keyService.getCurrentPostKey(req.userId)
         return res.json(currentKey)
     },
 )
 
 router.post(
-    '/createCurrentKey',
+    '/createCurrentPostKey',
     validator.query(Schema.empty),
     validator.body(Schema.createCurrentKeyBody),
     async (req: ValidatedRequest<Schema.CreateCurrentKeyRequest>, res) => {
-        const keySetId = await keyService.createKeySet(req.user.id, req.body.key)
+        const keySetId = await keyService.createCurrentPostKeySet(req.userId, req.body.key)
         return res.json(keySetId)
     },
 )
 
 router.get(
-    '/getKey',
+    '/getPostKey',
     validator.query(Schema.getKeyQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.GetKeyRequest>, res) => {
-        const key = await keyService.getKey(req.user.id, req.query.keySetId)
+        const key = await keyService.getPostKey(req.userId, req.query.keySetId)
         return res.json(key)
     },
 )
 
 router.get(
-    '/getAllKeys',
+    '/getAllPostKeys',
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const keys = await keyService.getAllKeys(req.user.id)
+        const keys = await keyService.getAllPostKeys(req.userId)
         return res.json(keys)
     },
 )
 
 router.put(
-    '/addKeys',
+    '/addPostKeys',
     validator.query(Schema.empty),
-    validator.body(Schema.addKeysBody),
-    async (req: ValidatedRequest<Schema.AddKeysRequest>, res) => {
-        keyService.addKeys(req.body.keys)
+    validator.body(Schema.addPostKeysBody),
+    async (req: ValidatedRequest<Schema.AddPostKeysRequest>, res) => {
+        await keyService.addPostKeys(req.userId, req.body.keys)
         return res.json({ success: true })
     },
 )
@@ -165,7 +165,7 @@ router.get(
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const keys = await keyService.getFollowerPublicKeys(req.user.id)
+        const keys = await keyService.getFollowerPublicKeys(req.userId)
         return res.json(keys)
     },
 )
@@ -175,13 +175,13 @@ router.post(
     validator.query(Schema.empty),
     validator.body(Schema.startPostBody),
     async (req: ValidatedRequest<Schema.StartPostRequest>, res) => {
-        const currentKey = await keyService.getCurrentKey(req.user.id)
+        const currentKey = await keyService.getCurrentPostKey(req.userId)
         if (currentKey == null) throw new ServerError('No current key')
-        if (currentKey.keySetId !== req.body.keySetId)
+        if (currentKey.postKeySetId !== req.body.postKeySetId)
             throw new ServerError('Post key does not match current key')
         const postInfo = await postService.createPost(
-            req.user.id,
-            req.body.keySetId,
+            req.userId,
+            req.body.postKeySetId,
             req.body.iv,
             req.body.md5,
             req.body.aspect,
@@ -198,19 +198,29 @@ router.put(
         if (req.body.success) {
             await postService.publishPost(req.body.postId)
         } else {
-            await postService.deletePost(req.body.postId, req.user.id)
+            await postService.deletePost(req.body.postId, req.userId)
         }
         return res.json({ success: true })
     },
 )
 
 router.get(
-    '/getUserById',
+    '/getUserProfile',
     validator.query(Schema.getByUserIdQuery),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.GetByUserIdRequest>, res) => {
-        const user = await userService.getUserById(req.query.userId)
+        const user = await userService.getUserProfileWithKey(req.query.userId, req.userId)
         return res.json(user)
+    },
+)
+
+router.put(
+    '/setProfile',
+    validator.query(Schema.empty),
+    validator.body(Schema.setProfileBody),
+    async (req: ValidatedRequest<Schema.SetProfileRequest>, res) => {
+        await userService.setProfile(req.userId, req.body.displayName, req.body.displayNameIv)
+        return res.json({ success: true })
     },
 )
 
@@ -219,8 +229,11 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.sendFollowRequestBody),
     async (req: ValidatedRequest<Schema.SendFollowRequestRequest>, res) => {
-        await userService.addFollowRequestByName(req.user.id, req.body.username)
-        return res.send('Sent request!')
+        const requesteeId = await userService.addFollowRequestByCode(
+            req.userId,
+            req.body.friendCode,
+        )
+        return res.json(requesteeId)
     },
 )
 
@@ -229,7 +242,7 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.putByUserIdBody),
     async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
-        await userService.addFollowRequestById(req.user.id, req.body.userId)
+        await userService.addFollowRequestById(req.userId, req.body.userId)
         return res.send('Sent request!')
     },
 )
@@ -239,7 +252,7 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.putByUserIdBody),
     async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
-        await userService.removeFollowRequest(req.body.userId, req.user.id)
+        await userService.removeFollowRequest(req.body.userId, req.userId)
         return res.json({ success: true })
     },
 )
@@ -249,7 +262,7 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.putByUserIdBody),
     async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
-        await userService.removeFollower(req.user.id, req.body.userId)
+        await userService.removeFollower(req.userId, req.body.userId)
         return res.json({ success: true })
     },
 )
@@ -259,7 +272,7 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.putByUserIdBody),
     async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
-        await userService.removeFollower(req.body.userId, req.user.id)
+        await userService.removeFollower(req.body.userId, req.userId)
         return res.json({ success: true })
     },
 )
@@ -269,7 +282,7 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.putByUserIdBody),
     async (req: ValidatedRequest<Schema.PutByUserIdRequest>, res) => {
-        await userService.acceptFollowRequest(req.body.userId, req.user.id)
+        await userService.acceptFollowRequest(req.body.userId, req.userId)
         return res.json({ success: true })
     },
 )
@@ -279,7 +292,7 @@ router.get(
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const requests = await userService.getFollowRequests(req.user.id)
+        const requests = await userService.getFollowRequests(req.userId)
         return res.json(requests)
     },
 )
@@ -289,7 +302,7 @@ router.get(
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const requests = await userService.getSentFollowRequests(req.user.id)
+        const requests = await userService.getSentFollowRequests(req.userId)
         return res.json(requests)
     },
 )
@@ -299,7 +312,7 @@ router.get(
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const followers = await userService.getFollowers(req.user.id)
+        const followers = await userService.getFollowers(req.userId)
         return res.json(followers)
     },
 )
@@ -309,9 +322,84 @@ router.get(
     validator.query(Schema.empty),
     validator.body(Schema.empty),
     async (req, res) => {
-        const followees = await userService.getFollowees(req.user.id)
+        const followees = await userService.getFollowees(req.userId)
         return res.json(followees)
     },
 )
 
+router.get(
+    '/getFriendCode',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const code = await userService.getFriendCode(req.userId)
+        return res.json(code)
+    },
+)
+
+router.post(
+    '/regenerateFriendCode',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const code = await userService.regenerateFriendCode(req.userId)
+        return res.json(code)
+    },
+)
+
+router.get(
+    '/getCurrentProfileKey',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const key = await keyService.getCurrentProfileKey(req.userId)
+        return res.json(key)
+    },
+)
+
+router.get(
+    '/getProfileViewersPublicKeys',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const keys = await keyService.getProfileViewersPublicKeys(req.userId)
+        return res.json(keys)
+    },
+)
+
+router.post(
+    '/createProfileKey',
+    validator.query(Schema.empty),
+    validator.body(Schema.createProfileKeyBody),
+    async (req: ValidatedRequest<Schema.CreateProfileKeyRequest>, res) => {
+        await keyService.createProfileKey(req.userId, req.body.ownerKey)
+        return res.json({ success: true })
+    },
+)
+
+router.post(
+    '/addProfileKeys',
+    validator.query(Schema.empty),
+    validator.body(Schema.addProfileKeysBody),
+    async (req: ValidatedRequest<Schema.AddProfileKeysRequest>, res) => {
+        req.body.viewerKeys.forEach((key) => {
+            if (key.ownerId != req.userId)
+                throw new ServerError('Keys must all belong to the same owner')
+        })
+        await keyService.addProfileKeys(req.body.viewerKeys)
+        return res.json({ success: true })
+    },
+)
+
+router.post(
+    '/addOrReplaceProfileKey',
+    validator.query(Schema.empty),
+    validator.body(Schema.addOrReplaceProfileKeyBody),
+    async (req: ValidatedRequest<Schema.AddOrReplaceProfileKeyRequest>, res) => {
+        if (req.userId !== req.body.viewerKey.ownerId)
+            throw new ServerError("Can't add profile viewers to other peoples' profiles")
+        await keyService.addOrReplaceProfileKey(req.body.viewerKey)
+        return res.json({ success: true })
+    },
+)
 export default router

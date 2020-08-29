@@ -1,9 +1,9 @@
 import { mocked } from 'ts-jest/utils'
-import PostService from './PostService'
-import DatabaseService from './DatabaseService'
-import AWSService from './AWSService'
 import * as Posts from '../queries/posts.gen'
 import { IGetPostWithKeyResult } from '../queries/posts.gen'
+import AWSService from './AWSService'
+import DatabaseService from './DatabaseService'
+import PostService from './PostService'
 
 jest.mock('../queries/posts.gen')
 jest.mock('../queries/comments.gen')
@@ -36,7 +36,7 @@ describe('PostService', () => {
         index: '0',
         filename: 'abcd',
         aspect: 1.2,
-        keySetId: 0,
+        postKeySetId: 0,
         key: 'someBase64',
         iv: 'moreBase64',
     }
@@ -48,7 +48,7 @@ describe('PostService', () => {
         index: '1',
         filename: 'abcd',
         aspect: 1.2,
-        keySetId: 1,
+        postKeySetId: 1,
         key: 'someBase64',
         iv: 'moreBase64',
     }
@@ -72,7 +72,7 @@ describe('PostService', () => {
             mocked(Posts.getHomePostsWithKeys.run).mockResolvedValueOnce([testPost, secondPost])
             const posts = await postService.getHomePosts(0, '1')
             expect(mocked(Posts.getHomePostsWithKeys.run).mock.calls[0][0]).toEqual({
-                userId: 0,
+                recipientId: 0,
                 pageIndex: '1',
             })
             expect(posts).toHaveLength(2)
@@ -85,7 +85,8 @@ describe('PostService', () => {
             const posts = await postService.getUserPosts(0, 1)
             expect(mocked(Posts.getUserPostsWithKeys.run).mock.calls[0][0]).toEqual({
                 userId: 0,
-                requesterId: 1,
+                recipientId: 1,
+                pageIndex: undefined,
             })
             expect(posts).toHaveLength(1)
         })

@@ -1,28 +1,21 @@
-import { User } from "api"
-
 export interface LoginUser {
-    id: number;
-    username: string;
-    srpSalt: string;
-    verifier: string;
-    displayName: string;
+    id: number
+    username: string
+    srpSalt: string
+    verifier: string
 }
 
 export interface LoginInfo {
-    loginFake: boolean,
-    user?: LoginUser,
-    clientEphemeralPublic?: string,
-    serverEphemeralSecret?: string,
-}
-
-export interface SignupInfo {
-    username: string,
+    loginFake: boolean
+    user?: LoginUser
+    clientEphemeralPublic?: string
+    serverEphemeralSecret?: string
 }
 
 declare module 'express-serve-static-core' {
     interface Request {
-        user?: User,
-        startTime?: number,
+        userId?: number
+        startTime?: number
     }
 }
 
@@ -30,8 +23,7 @@ declare global {
     namespace Express {
         interface Session {
             loginInfo?: LoginInfo
-            signupInfo?: SignupInfo
-            user?: User
+            userId?: number
         }
     }
 }

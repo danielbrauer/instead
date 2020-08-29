@@ -1,46 +1,93 @@
-/* @name GetCurrentKey */
-SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
-    SELECT id
-    FROM key_sets
-    WHERE owner_id = :userId AND valid_end IS NULL
-);
-
-/* @name GetKey */
-SELECT * FROM keys WHERE user_id = :userId AND key_set_id = :keySetId;
-
-/* @name GetAllKeys */
-SELECT * FROM keys WHERE user_id = :userId AND key_set_id IN (
-    SELECT id
-    FROM key_sets
-    WHERE owner_id = :userId
-);
-
 /* @name GetFollowerPublicKeys */
 SELECT id, public_key FROM users WHERE id IN (
     SELECT follower_id
-    FROM followers
+    FROM follow_relationships
     WHERE followee_id = :userId
+);
+
+/* @name GetProfileViewerPublicKeys */
+SELECT users.id, users.public_key
+FROM users
+WHERE users.id IN (
+    SELECT follower_id
+    FROM follow_relationships
+    WHERE followee_id = :userId
+)
+OR users.id IN (
+    SELECT followee_id
+    FROM follow_relationships
+    WHERE follower_id = :userId
+)
+OR users.id IN (
+    SELECT requestee_id
+    FROM follow_requests
+    WHERE requester_id = :userId
 );
 
 /* @name GetPublicKey */
 SELECT id, public_key FROM users WHERE id = :userId;
 
-/* @name EndKeySetValidity */
-UPDATE key_sets SET valid_end = now() WHERE id = :keySetId;
+/* @name GetPostKey */
+SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id = :keySetId;
 
-/* @name CreateKeySet */
-INSERT INTO key_sets (owner_id) VALUES (:ownerId) RETURNING id;
+/* @name GetCurrentPostKey */
+SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id IN (
+    SELECT id
+    FROM post_key_sets
+    WHERE owner_id = :userId AND valid_end IS NULL
+);
+
+/* @name GetAllPostKeys */
+SELECT * FROM post_keys WHERE recipient_id = :userId AND post_key_set_id IN (
+    SELECT id
+    FROM post_key_sets
+    WHERE owner_id = :userId
+);
+
+/* @name CreateCurrentPostKeySet */
+WITH new_post_key_set_id AS (
+    INSERT INTO post_key_sets (owner_id)
+    VALUES (:ownerId)
+    RETURNING id
+)
+INSERT INTO post_keys (recipient_id, post_key_set_id, key)
+VALUES (:ownerId, (SELECT * FROM new_post_key_set_id), :key)
+RETURNING post_key_set_id;
 
 /*
-    @name AddKeys
-    @param keys -> ((userId, keySetId, key)...)
+    @name AddPostKeys
+    @param keys -> ((recipientId, postKeySetId, key)...)
 */
-INSERT INTO keys (user_id, key_set_id, key)
+INSERT INTO post_keys (recipient_id, post_key_set_id, key)
 VALUES :keys;
 
-/* @name RemoveFollowerKeys */
-DELETE FROM keys WHERE user_id = :followerId AND key_set_id IN (
-    SELECT key_set_id
-    FROM key_sets
-    WHERE owner_id = :followeeId
-);
+/* @name GetCurrentProfileKey */
+SELECT profile_keys.key,
+       users.profile_key_stale
+FROM profile_keys, users
+WHERE profile_keys.owner_id = users.id
+AND profile_keys.recipient_id = :userId
+AND profile_keys.owner_id = :userId;
+
+/* @name CreateProfileKey */
+WITH dummy AS (
+    DELETE FROM profile_keys WHERE owner_id = :userId
+), dummy2 AS (
+    INSERT INTO profile_keys (recipient_id, owner_id, key)
+    VALUES (:userId, :userId, :key)
+)
+UPDATE users SET profile_key_stale = false WHERE id = :userId;
+
+/*
+    @name AddProfileKeys
+    @param viewerKeys -> ((recipientId, ownerId, key)...)
+*/
+INSERT INTO profile_keys (recipient_id, owner_id, key)
+VALUES :viewerKeys;
+
+/* @name AddOrReplaceProfileKey */
+WITH dummy AS (
+    DELETE FROM profile_keys WHERE owner_id = :ownerId AND recipient_id = :recipientId
+)
+INSERT INTO profile_keys (recipient_id, owner_id, key)
+VALUES (:recipientId, :ownerId, :key);

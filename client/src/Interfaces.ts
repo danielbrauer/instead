@@ -1,5 +1,3 @@
-import { ButtonProps } from 'semantic-ui-react'
-
 export interface LoginInfo {
     username: string
     password: string
@@ -7,11 +5,10 @@ export interface LoginInfo {
 }
 
 export interface NewUserInfo {
-    displayName: string
+    username: string
     password: string
 }
 
 export interface SignupResult {
-    username: string
     secretKey: string
 }

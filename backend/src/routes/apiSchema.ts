@@ -1,5 +1,5 @@
-import { ContainerTypes, ValidatedRequestSchema } from 'express-joi-validation'
 import * as Joi from '@hapi/joi'
+import { ContainerTypes, ValidatedRequestSchema } from 'express-joi-validation'
 import 'joi-extract-type'
 
 export const empty = Joi.object()
@@ -43,21 +43,21 @@ export interface GetKeyRequest extends ValidatedRequestSchema {
     [ContainerTypes.Body]: Joi.extractType<typeof empty>
 }
 
-export const addKeysBody = Joi.object({
+export const addPostKeysBody = Joi.object({
     keys: Joi.array().min(1).items({
-        userId: Joi.number().integer().required(),
-        keySetId: Joi.number().integer().required(),
+        recipientId: Joi.number().integer().required(),
+        postKeySetId: Joi.number().integer().required(),
         key: Joi.string().base64().required(),
     }),
 })
 
-export interface AddKeysRequest extends ValidatedRequestSchema {
+export interface AddPostKeysRequest extends ValidatedRequestSchema {
     [ContainerTypes.Query]: Joi.extractType<typeof empty>
-    [ContainerTypes.Body]: Joi.extractType<typeof addKeysBody>
+    [ContainerTypes.Body]: Joi.extractType<typeof addPostKeysBody>
 }
 
 export const startPostBody = Joi.object({
-    keySetId: Joi.number().integer().required(),
+    postKeySetId: Joi.number().integer().required(),
     iv: Joi.string().base64().required(),
     md5: Joi.string().base64().required(),
     aspect: Joi.number().required(),
@@ -107,7 +107,7 @@ export interface GetUserPostsRequest extends ValidatedRequestSchema {
 }
 
 export const sendFollowRequestBody = Joi.object({
-    username: Joi.string().regex(/^[a-zA-Z]+$/, 'alphabetical'),
+    friendCode: Joi.string().regex(/^[A-HJ-NP-Z2-9]+$/, 'friend code'),
 })
 
 export interface SendFollowRequestRequest extends ValidatedRequestSchema {
@@ -122,4 +122,48 @@ export const putByUserIdBody = Joi.object({
 export interface PutByUserIdRequest extends ValidatedRequestSchema {
     [ContainerTypes.Query]: Joi.extractType<typeof empty>
     [ContainerTypes.Body]: Joi.extractType<typeof putByUserIdBody>
+}
+
+const profileKey = Joi.object({
+    recipientId: Joi.number().integer().required(),
+    ownerId: Joi.number().integer().required(),
+    key: Joi.string().base64().required(),
+})
+
+export const createProfileKeyBody = Joi.object({
+    ownerKey: Joi.string().base64().required(),
+    viewerKeys: Joi.array().items(profileKey),
+})
+
+export interface CreateProfileKeyRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof createProfileKeyBody>
+}
+
+export const addProfileKeysBody = Joi.object({
+    viewerKeys: Joi.array().items(profileKey),
+})
+
+export interface AddProfileKeysRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof addProfileKeysBody>
+}
+
+export const addOrReplaceProfileKeyBody = Joi.object({
+    viewerKey: profileKey,
+})
+
+export interface AddOrReplaceProfileKeyRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof addOrReplaceProfileKeyBody>
+}
+
+export const setProfileBody = Joi.object({
+    displayName: Joi.string().base64().required(),
+    displayNameIv: Joi.string().base64().required(),
+})
+
+export interface SetProfileRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof setProfileBody>
 }

@@ -35,16 +35,3 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
         END`,
     )
 }
-
-export async function down(pgm: MigrationBuilder): Promise<void> {
-    pgm.dropFunction('timestamp_to_int', [
-        {
-            type: 'timestamp without time zone',
-        },
-    ])
-    pgm.dropFunction('int_to_timestamp', [
-        {
-            type: 'int8',
-        },
-    ])
-}

@@ -1,18 +1,19 @@
-/* @name Create */
-INSERT INTO users (username, display_name, verifier, srp_salt, muk_salt, public_key, private_key, private_key_iv) VALUES (:username, :displayName, :verifier, :srpSalt, :mukSalt, :publicKey, :privateKey, :privateKeyIv) RETURNING id;
+/* @name GetProfileWithKey */
+SELECT users.id, users.display_name, users.display_name_iv,
+       profile_keys.key
+FROM users, profile_keys
+WHERE users.id = profile_keys.owner_id
+AND users.id = :userId
+AND profile_keys.recipient_id = :requesterId;
 
-/* @name GetUserInfo */
-SELECT private_key, private_key_iv, public_key, muk_salt FROM users WHERE id = :userId;
+/* @name SetProfileData */
+UPDATE users SET display_name = :displayName, display_name_iv = :displayNameIv WHERE id = :userId;
 
-/* @name CountByName */
-SELECT COUNT(*)::int FROM users WHERE username = :username;
+/* @name GetByFriendCode */
+SELECT id FROM users WHERE friend_code = :friendCode;
 
-/* @name GetById */
-SELECT id, username, display_name FROM users WHERE id = :userId;
+/* @name GetFriendCode */
+SELECT friend_code FROM users WHERE id = :userId;
 
-/* @name GetByName */
-SELECT id FROM users WHERE username = :username;
-
-/* @name GetLoginInfoByName */
-SELECT id, username, srp_salt, verifier, display_name FROM users WHERE username = :username;
-
+/* @name SetFriendCode */
+UPDATE users SET friend_code = :friendCode WHERE id = :userId;

@@ -1,21 +1,22 @@
-import { Service, Inject } from 'typedi'
+import { Service } from 'typedi'
+import DatabaseService from './DatabaseService'
+import * as UsersAuth from '../queries/users-auth.gen'
 import srp from 'secure-remote-password/server'
 import crypto from '../util/crypto-promise'
-import { generateCombination } from '../util/animalGenerator'
 import * as config from '../config/config'
-import UserService from './UserService'
-import {
-    StartLoginResult,
-    FinishLoginResult,
-    StartSignupResult,
-    FinishSignupResult,
-    NewUser,
-} from 'auth'
+import { StartLoginResult, FinishLoginResult, NewUser } from 'auth'
+import { SimpleEventDispatcher } from 'strongly-typed-events'
+import { ServerError } from '../middleware/errors'
 
 @Service()
 export default class AuthService {
-    @Inject()
-    private userService: UserService
+    private _onUserCreated = new SimpleEventDispatcher<number>()
+
+    public get onUserCreated() {
+        return this._onUserCreated.asEvent()
+    }
+
+    constructor(private db: DatabaseService) {}
 
     async startLogin(
         session: Express.Session,
@@ -23,7 +24,7 @@ export default class AuthService {
         clientEphemeralPublic: string,
     ): Promise<StartLoginResult> {
         if (session.loginInfo) throw new Error('Session already started logging in')
-        const user = await this.userService.getLoginInfo(username)
+        const [user] = await UsersAuth.getLoginInfoByName.run({ username }, this.db.pool)
         if (user) {
             const serverEphemeral = srp.generateEphemeral(user.verifier)
             session.loginInfo = {
@@ -67,19 +68,16 @@ export default class AuthService {
             loginInfo.user.verifier,
             clientSessionProof,
         )
-        session.user = {
-            id: loginInfo.user.id,
-            username: loginInfo.user.username,
-            displayName: loginInfo.user.displayName,
-        }
-        const { privateKey, privateKeyIv, publicKey, mukSalt } = await this.userService.getUserInfo(
-            session.user.id,
+        session.userId = loginInfo.user.id
+        const [{ privateKey, privateKeyIv, publicKey, mukSalt }] = await UsersAuth.getUserInfo.run(
+            { userId: session.userId },
+            this.db.pool,
         )
+        if (privateKey === undefined) throw new Error('Could not find info for user')
         delete session.loginInfo
         return {
-            userId: session.user.id,
+            userId: session.userId,
             serverSessionProof: serverSession.proof,
-            displayName: loginInfo.user.displayName,
             privateKey,
             privateKeyIv,
             publicKey: publicKey as JsonWebKey,
@@ -87,28 +85,15 @@ export default class AuthService {
         }
     }
 
-    async startSignup(session: Express.Session): Promise<StartSignupResult> {
-        let username = ''
-        for (let i = 0; i < 5; ++i) {
-            username = generateCombination(1, '', true)
-            const count = await this.userService.countByName(username)
-            if (count == 0) {
-                session.signupInfo = { username }
-                return { username }
-            }
-        }
-        throw new Error('Too many user name collisions!')
-    }
-
-    async finishSignup(session: Express.Session, newUser: NewUser): Promise<FinishSignupResult> {
-        if (!session.signupInfo) throw new Error("Session hasn't started signing in")
-        const newUserResult = await this.userService.create(newUser)
-        const user = {
-            username: session.signupInfo.username,
-            id: newUserResult.id,
-            displayName: newUser.displayName as string,
-        }
-        delete session.signupInfo
-        return { user }
+    async signup(newUser: NewUser) {
+        await this.db.transaction(async (client) => {
+            const [{ count }] = await UsersAuth.countByName.run(
+                { username: newUser.username },
+                client,
+            )
+            if (count > 0) throw new ServerError(`Username '${newUser.username}' is already taken`)
+            const [user] = await UsersAuth.create.run(newUser, client)
+            this._onUserCreated.dispatchAsync(user.id)
+        })
     }
 }

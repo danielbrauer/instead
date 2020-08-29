@@ -10,8 +10,8 @@ export const startLoginBody = Joi.object({
 })
 
 export interface StartLoginRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof empty>;
-    [ContainerTypes.Body]: Joi.extractType<typeof startLoginBody>;
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof startLoginBody>
 }
 
 export const finishLoginBody = Joi.object({
@@ -19,17 +19,12 @@ export const finishLoginBody = Joi.object({
 })
 
 export interface FinishLoginRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof empty>;
-    [ContainerTypes.Body]: Joi.extractType<typeof finishLoginBody>;
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof finishLoginBody>
 }
 
-export interface StartSignupRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof empty>;
-    [ContainerTypes.Body]: Joi.extractType<typeof empty>;
-}
-
-export const finishSignupBody = Joi.object({
-    displayName: Joi.string().min(1).max(100).required(),
+export const signupBody = Joi.object({
+    username: Joi.string().alphanum().min(1).max(200).required(),
     verifier: Joi.string().hex().required(),
     srpSalt: Joi.string().hex().required(),
     mukSalt: Joi.string().hex().required(),
@@ -38,7 +33,7 @@ export const finishSignupBody = Joi.object({
     privateKeyIv: Joi.string().base64().required(),
 })
 
-export interface FinishSignupRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof empty>;
-    [ContainerTypes.Body]: Joi.extractType<typeof finishSignupBody>;
+export interface SignupRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof signupBody>
 }

@@ -2,13 +2,8 @@ import React, { useState } from 'react'
 import { List, Message, Loader } from 'semantic-ui-react'
 import { useQuery, useMutation } from 'react-query'
 import FollowerListItem, { FollowerItemInfo } from './FollowerListItem'
-import {
-    getFollowers,
-    getFollowRequests,
-    acceptFollowRequest,
-    getFollowees,
-    getSentFollowRequests,
-} from './RoutesAuthenticated'
+import { getFollowers, getFollowRequests, acceptFollowRequest, getFollowees, getSentFollowRequests } from './routes/api'
+import FriendCodeDisplay from './Components/FriendCodeDisplay'
 
 export default function FollowerList() {
     const requests = useQuery('followRequests', getFollowRequests)
@@ -46,9 +41,9 @@ export default function FollowerList() {
                     return {
                         id,
                         type: 'follower',
-                        justAccepted: accepted.indexOf(id) >= 0,
-                        following: following.data!.indexOf(id) >= 0,
-                        requested: sentRequests.data!.indexOf(id) >= 0,
+                        justAccepted: accepted.includes(id),
+                        following: following.data!.includes(id),
+                        requested: sentRequests.data!.some((x) => x.requesteeId === id),
                     }
                 },
             ),
@@ -62,6 +57,7 @@ export default function FollowerList() {
 
     return (
         <>
+            <FriendCodeDisplay />
             {requests.data!.length + followers.data!.length === 0 ? (
                 <Message>You don't have any followers yet</Message>
             ) : null}
