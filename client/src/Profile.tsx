@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { useMutation, useQuery } from 'react-query'
-import { Button, Form, Icon, Item, Segment } from 'semantic-ui-react'
+import { Button, Form, Item, Segment } from 'semantic-ui-react'
 import { useInput } from './Components/useInput'
 import CurrentUser from './CurrentUser'
 import { encryptAndUploadProfile, getProfile } from './postCrypto'
 import { longLivedQuery } from './QuerySettings'
+import UserInList from './UserInList'
 
 export default function ({ userId }: { userId: number }) {
     const [editing, setEditing] = useState(false)
@@ -34,8 +35,7 @@ export default function ({ userId }: { userId: number }) {
                 <Item.Group>
                     <Item>
                         <Item.Header>
-                            <Icon name='user' size='large' />
-                            {user.data ? user.data! : userId.toString()}
+                            <UserInList id={userId} />
                         </Item.Header>
                         <Item.Extra>
                             {userId === CurrentUser.getId() && (
