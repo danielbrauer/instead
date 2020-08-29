@@ -1,5 +1,3 @@
-import { EncryptedUserProfile } from 'api'
-
 export interface LoginUser {
     id: number
     username: string

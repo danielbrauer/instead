@@ -4,10 +4,11 @@ import { Button, Form, Icon, Item, Segment } from 'semantic-ui-react'
 import { useInput } from './Components/useInput'
 import CurrentUser from './CurrentUser'
 import { encryptAndUploadProfile, getProfile } from './postCrypto'
+import { longLivedQuery } from './QuerySettings'
 
 export default function ({ userId }: { userId: number }) {
     const [editing, setEditing] = useState(false)
-    const user = useQuery(['userProfile', userId], getProfile, { staleTime: Infinity })
+    const user = useQuery(['userProfile', userId], getProfile, longLivedQuery)
     const { value: newName, setValue: setNewName, bind: bindNewName } = useInput('')
     const [setProfileNameMutation, setProfileNameStatus] = useMutation(encryptAndUploadProfile)
 

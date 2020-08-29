@@ -2,12 +2,13 @@ import React from 'react'
 import { useInfiniteQuery } from 'react-query'
 import { Icon, Message } from 'semantic-ui-react'
 import Posts from './Posts'
+import { longLivedQuery } from './QuerySettings'
 import { getHomePosts } from './routes/api'
 
 export default function () {
     const posts = useInfiniteQuery('posts', getHomePosts, {
         getFetchMore: (lastGroup, allGroups) => lastGroup.length > 0 && lastGroup[lastGroup.length - 1].index,
-        staleTime: Infinity,
+        ...longLivedQuery,
     })
 
     return (

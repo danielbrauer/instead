@@ -29,7 +29,7 @@ export default function FollowUserForm() {
                 size='large'
             >
                 <Form.Group>
-                    <Form.Input className='follow-user-form-form' placeholder='XXX' name='friendCode' {...bindCode} />
+                    <Form.Input className='follow-user-form-form' placeholder='A1C' name='friendCode' {...bindCode} />
                     <Form.Button
                         primary
                         content='Request'
