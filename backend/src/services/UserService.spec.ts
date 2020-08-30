@@ -107,13 +107,12 @@ describe('UserService', () => {
                 (relationship) => (notifiedRelationship = relationship),
             )
             await userService.acceptFollowRequest(0, 1)
-            expect(mocked(FollowRequests.destroy.run).mock.calls[0][0]).toEqual({
+            expect(mocked(FollowRequests.getByIds.run).mock.calls[0][0]).toEqual({
                 requesterId: 0,
                 requesteeId: 1,
             })
-            expect(mocked(FollowRelationships.create.run).mock.calls[0][0]).toEqual({
-                followerId: 0,
-                followeeId: 1,
+            expect(mocked(FollowRequests.acceptFollowRequest.run).mock.calls[0][0]).toEqual({
+                requestId: request.id,
             })
             jest.runAllTimers()
             expect(notifiedRelationship.followerId).toEqual(0)
@@ -121,7 +120,7 @@ describe('UserService', () => {
         })
 
         test('should throw if there was no such request', async () => {
-            mocked(FollowRequests.destroy.run).mockResolvedValueOnce([])
+            mocked(FollowRequests.getByIds.run).mockResolvedValueOnce([])
             await expect(userService.acceptFollowRequest(0, 1)).rejects.toThrow()
         })
     })
