@@ -1,13 +1,13 @@
+import { SimpleEventDispatcher } from 'strongly-typed-events'
 import { Service } from 'typedi'
-import DatabaseService from './DatabaseService'
-import * as Users from '../queries/users.gen'
+import { ServerError } from '../middleware/errors'
 import * as FollowRelationships from '../queries/follow_relationships.gen'
 import * as FollowRequests from '../queries/follow_requests.gen'
-import unambiguousString from '../util/unambiguousString'
-import { SimpleEventDispatcher } from 'strongly-typed-events'
+import * as Users from '../queries/users.gen'
 import { FollowRelationship } from '../types/api'
-import { ServerError } from '../middleware/errors'
+import unambiguousString from '../util/unambiguousString'
 import AuthService from './AuthService'
+import DatabaseService from './DatabaseService'
 
 @Service()
 export default class UserService {
@@ -75,11 +75,7 @@ export default class UserService {
                 client,
             )
             if (!request) throw new ServerError('No such follow request')
-            await FollowRelationships.create.run(
-                { followerId: requesterId, followeeId: requesteeId },
-                client,
-            )
-            await FollowRequests.destroy.run({ requesterId, requesteeId }, client)
+            await FollowRequests.acceptFollowRequest.run({ requestId: request.id }, client)
         })
         this._onUserAddedFollower.dispatchAsync({
             followerId: requesterId,
@@ -126,9 +122,8 @@ export default class UserService {
 
     async regenerateFriendCode(userId: number) {
         const codeLength = Math.floor(Math.log2(userId) / 5.0) + 3 //three digits plus 1 for every power of 32
-        let code = ''
         for (let i = 0; i < 5; ++i) {
-            code = await unambiguousString(codeLength)
+            const code = await unambiguousString(codeLength)
             try {
                 await Users.setFriendCode.run({ friendCode: code, userId }, this.db.pool)
                 return code

@@ -165,3 +165,41 @@ const getByRequesterIdIR: any = {"name":"GetByRequesterId","params":[{"name":"re
 export const getByRequesterId = new PreparedQuery<IGetByRequesterIdParams,IGetByRequesterIdResult>(getByRequesterIdIR);
 
 
+/** 'AcceptFollowRequest' parameters type */
+export interface IAcceptFollowRequestParams {
+  requestId: number | null | void;
+}
+
+/** 'AcceptFollowRequest' return type */
+export type IAcceptFollowRequestResult = void;
+
+/** 'AcceptFollowRequest' query type */
+export interface IAcceptFollowRequestQuery {
+  params: IAcceptFollowRequestParams;
+  result: IAcceptFollowRequestResult;
+}
+
+const acceptFollowRequestIR: any = {"name":"AcceptFollowRequest","params":[{"name":"requestId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":858,"b":866,"line":22,"col":16},{"a":1225,"b":1233,"line":33,"col":12}]}}],"usedParamSet":{"requestId":true},"statement":{"body":"WITH request AS (\n    SELECT id, requester_id, requestee_id FROM follow_requests\n    WHERE id = :requestId\n), relationship AS (\n    INSERT INTO follow_relationships (follower_id, followee_id)\n    SELECT requester_id, requestee_id FROM request\n    RETURNING id\n), key AS (\n    UPDATE profile_keys\n    SET out_follow_relationship_id = (SELECT id FROM relationship)\n    WHERE out_follow_request_id = (SELECT id FROM request)\n)\nDELETE FROM follow_requests\nWHERE id = :requestId","loc":{"a":761,"b":1233,"line":20,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * WITH request AS (
+ *     SELECT id, requester_id, requestee_id FROM follow_requests
+ *     WHERE id = :requestId
+ * ), relationship AS (
+ *     INSERT INTO follow_relationships (follower_id, followee_id)
+ *     SELECT requester_id, requestee_id FROM request
+ *     RETURNING id
+ * ), key AS (
+ *     UPDATE profile_keys
+ *     SET out_follow_relationship_id = (SELECT id FROM relationship)
+ *     WHERE out_follow_request_id = (SELECT id FROM request)
+ * )
+ * DELETE FROM follow_requests
+ * WHERE id = :requestId
+ * ```
+ */
+export const acceptFollowRequest = new PreparedQuery<IAcceptFollowRequestParams,IAcceptFollowRequestResult>(acceptFollowRequestIR);
+
+
