@@ -1,5 +1,4 @@
-import { importAccountKeysFromJwks, exportAccountKeysToJwks } from './auth'
-import { UserInfo } from './auth'
+import { exportAccountKeysToJwks, importAccountKeysFromJwks, UserInfo } from './auth'
 
 export interface CurrentUserInfo extends UserInfo {
     accountKeysJwk?: {
@@ -12,7 +11,7 @@ const kUserInfoKey = 'userInfoKey'
 const kSecretKeyKey = 'secretKey'
 
 class CurrentUser {
-    private static _info: CurrentUserInfo
+    private static _info?: CurrentUserInfo
 
     private static get info(): CurrentUserInfo {
         if (!CurrentUser._info) {
@@ -21,7 +20,7 @@ class CurrentUser {
                 CurrentUser._info = JSON.parse(sessionUser)
             }
         }
-        return CurrentUser._info
+        return CurrentUser._info!
     }
 
     static getId(): number {
@@ -38,7 +37,7 @@ class CurrentUser {
 
     static async getAccountKeys() {
         if ((CurrentUser.info.accountKeys.privateKey as any).kty === undefined)
-            CurrentUser._info.accountKeys = await importAccountKeysFromJwks(CurrentUser._info.accountKeysJwk!)
+            CurrentUser._info!.accountKeys = await importAccountKeysFromJwks(CurrentUser._info!.accountKeysJwk!)
         return CurrentUser.info.accountKeys
     }
 

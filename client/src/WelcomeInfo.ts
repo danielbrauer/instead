@@ -5,7 +5,7 @@ interface Info {
 const kWelcomeInfoKey = 'welcomeInfoKey'
 
 class WelcomeInfo {
-    private static _info: Info
+    private static _info?: Info
 
     private static get info(): Info {
         if (!WelcomeInfo._info) {
@@ -14,7 +14,7 @@ class WelcomeInfo {
                 WelcomeInfo._info = JSON.parse(sessionUser)
             }
         }
-        return WelcomeInfo._info
+        return WelcomeInfo._info!
     }
 
     static getUsername(): string {
