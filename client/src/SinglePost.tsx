@@ -1,16 +1,16 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
-import PostHeader from './PostHeader'
-import EncryptedImage from './EncryptedImage'
 import { useQuery } from 'react-query'
-import { Message, Loader } from 'semantic-ui-react'
-import { getPost } from './routes/api'
+import { useParams } from 'react-router-dom'
+import { Loader, Message } from 'semantic-ui-react'
 import Comments from './Comments'
+import EncryptedImage from './EncryptedImage'
 import NewComment from './NewComment'
+import PostHeader from './PostHeader'
 import { longLivedQuery } from './QuerySettings'
+import { getPost } from './routes/api'
 
 export default function () {
-    const { id: postId } = useParams()
+    const { id: postId } = useParams<{ id: string }>()
     const postQuery = useQuery(['post', postId], getPost, longLivedQuery)
 
     if (postQuery.isError)
