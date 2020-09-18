@@ -1,4 +1,4 @@
-/** Types generated for queries found in "./src/queries/users-auth.sql" */
+/** Types generated for queries found in "src/queries/users-auth.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
