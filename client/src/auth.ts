@@ -1,11 +1,10 @@
+import { pwnedPassword } from 'hibp'
 import scrypt, { ScryptOptions } from 'scrypt-async-modern'
 import srp from 'secure-remote-password/client'
-import { LoginInfo, SignupResult } from './Interfaces'
+import { Json } from '../../backend/src/queries/users-auth.gen'
+import { LoginInfo, NewUserInfo, SignupResult } from './Interfaces'
 import * as Auth from './routes/auth'
 import * as Signup from './routes/signup'
-import { NewUserInfo } from './Interfaces'
-import { pwnedPassword } from 'hibp'
-import { Json } from '../../backend/src/queries/users-auth.gen'
 const toBuffer = require('typedarray-to-buffer') as (x: Uint8Array) => Buffer
 const hkdf = require('futoin-hkdf') as (
     ikm: string,
@@ -24,7 +23,7 @@ async function derivePrivateKey(salt: string, password: string, secretKey: strin
         dkLen: 32,
         encoding: 'binary',
     }
-    const keyParts = secretKey.split('-')
+    const keyParts = secretKey.split(versionSeparator)
     const version = keyParts.shift()!
     const key = keyParts.shift()!
 
@@ -118,17 +117,94 @@ export async function login(info: LoginInfo): Promise<UserInfo> {
     }
 }
 
+const unambiguousCharacters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+const versionString = 'A1'
+const versionSeparator = '-'
+const plaintextPrefix = 2
+
 export function createSecureUnambiguousString(length: number) {
-    const characters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'
     const values = Crypto.getRandomValues(new Uint8Array(length))
     let output = ''
-    values.forEach((x) => (output += characters.charAt(x % 32)))
+    values.forEach((x) => (output += unambiguousCharacters.charAt(x % 32)))
     return output
+}
+
+export type EncryptedSecretKey = {
+    encrypted: string
+    counter: string
+    prefix: string
+}
+
+async function simplePasswordKey(version: string, username: string, password: string) {
+    const options = {
+        salt: username,
+        info: version,
+        hash: 'SHA-256',
+    }
+    const key = hkdf(password.trim().normalize('NFKC'), 32, options)
+    return await Crypto.subtle.importKey('raw', key, { name: 'AES-CTR' }, false, ['encrypt', 'decrypt'])
+}
+
+async function encryptSecretKey(key: string, username: string, password: string): Promise<EncryptedSecretKey> {
+    const keyParts = key.split(versionSeparator)
+    const version = keyParts.shift()!
+    const keyPart = keyParts.shift()!
+    const prefix = version + versionSeparator + keyPart.substr(0, plaintextPrefix)
+    const remainder = keyPart.substr(plaintextPrefix)
+    let bits = ''
+
+    for (var i = 0; i < remainder.length; ++i) {
+        const binary = unambiguousCharacters.indexOf(remainder.charAt(i)).toString(2)
+        bits += binary.padStart(5, '0')
+    }
+
+    const bytes = new Uint8Array((24 * 5) / 8)
+
+    for (var i = 0; i < bits.length; ++i) {
+        bytes[i] = parseInt(bits.substr(i * 8, 8), 2)
+    }
+
+    const [passwordKey, counter] = await Promise.all([
+        simplePasswordKey(versionString, username, password),
+        Crypto.getRandomValues(new Uint8Array(16)),
+    ])
+
+    const encrypted = await Crypto.subtle.encrypt({ name: 'AES-CTR', counter, length: 64 }, passwordKey, bytes)
+
+    return {
+        encrypted: Buffer.from(encrypted).toString('base64'),
+        counter: Buffer.from(counter).toString('base64'),
+        prefix,
+    }
+}
+
+async function decryptSecretKey(encrypted: EncryptedSecretKey, username: string, password: string) {
+    const passwordKey = await simplePasswordKey(versionString, username, password)
+
+    const byteBuffer = await Crypto.subtle.decrypt(
+        { name: 'AES-CTR', counter: Buffer.from(encrypted.counter, 'base64'), length: 64 },
+        passwordKey,
+        Buffer.from(encrypted.encrypted, 'base64'),
+    )
+
+    const bytes = new Uint8Array(byteBuffer)
+    let bits = ''
+    for (var i = 0; i < bytes.length; ++i) {
+        bits += bytes[i].toString(2).padStart(8, '0')
+    }
+
+    let decrypted = ''
+    for (var i = 0; i < bits.length; i += 5) {
+        const index = parseInt(bits.substr(i, 5), 2)
+        decrypted += unambiguousCharacters.charAt(index)
+    }
+
+    return encrypted.prefix + decrypted
 }
 
 function createSecretKey() {
     const output = createSecureUnambiguousString(26)
-    return 'A1-' + output
+    return versionString + versionSeparator + output
 }
 
 export async function signup(info: NewUserInfo): Promise<SignupResult> {
