@@ -12,7 +12,6 @@ const hkdf = require('futoin-hkdf') as (
     { salt, info, hash }: { salt: string; info: string; hash: string },
 ) => Buffer
 const xor = require('buffer-xor') as (a: Buffer, b: Buffer) => Buffer
-const Crypto = window.crypto
 const RSAOAEP_SHA256: RsaHashedImportParams = { name: 'RSA-OAEP', hash: 'SHA-256' }
 
 async function derivePrivateKey(salt: string, password: string, secretKey: string, username: string) {
@@ -37,14 +36,14 @@ async function derivePrivateKey(salt: string, password: string, secretKey: strin
 }
 
 async function importMukFromHex(keyAsHex: string) {
-    return await Crypto.subtle.importKey('raw', Buffer.from(keyAsHex, 'hex'), { name: 'AES-GCM' }, false, [
+    return await window.crypto.subtle.importKey('raw', Buffer.from(keyAsHex, 'hex'), { name: 'AES-GCM' }, false, [
         'wrapKey',
         'unwrapKey',
     ])
 }
 
 async function importExtractableRsaKeyFromJwk(jwk: JsonWebKey, usages: KeyUsage[]) {
-    return Crypto.subtle.importKey('jwk', jwk, RSAOAEP_SHA256, true, usages)
+    return window.crypto.subtle.importKey('jwk', jwk, RSAOAEP_SHA256, true, usages)
 }
 
 export async function importAccountKeysFromJwks(jwks: { privateKey: JsonWebKey; publicKey: JsonWebKey }) {
@@ -57,8 +56,8 @@ export async function importAccountKeysFromJwks(jwks: { privateKey: JsonWebKey; 
 
 export async function exportAccountKeysToJwks(keys: CryptoKeyPair) {
     const [privateKey, publicKey] = await Promise.all([
-        Crypto.subtle.exportKey('jwk', keys.privateKey),
-        Crypto.subtle.exportKey('jwk', keys.publicKey),
+        window.crypto.subtle.exportKey('jwk', keys.privateKey),
+        window.crypto.subtle.exportKey('jwk', keys.publicKey),
     ])
     return { privateKey, publicKey }
 }
@@ -95,7 +94,7 @@ export async function login(info: LoginInfo): Promise<UserInfo> {
 
     const mukHex = await derivePrivateKey(mukSalt, info.password, info.secretKey, info.username)
     const muk = await importMukFromHex(mukHex)
-    const privateKey = await Crypto.subtle.unwrapKey(
+    const privateKey = await window.crypto.subtle.unwrapKey(
         'jwk',
         Buffer.from(privateKeyEnc, 'base64'),
         muk,
@@ -123,7 +122,7 @@ const versionSeparator = '-'
 const plaintextPrefix = 2
 
 export function createSecureUnambiguousString(length: number) {
-    const values = Crypto.getRandomValues(new Uint8Array(length))
+    const values = window.crypto.getRandomValues(new Uint8Array(length))
     let output = ''
     values.forEach((x) => (output += unambiguousCharacters.charAt(x % 32)))
     return output
@@ -142,10 +141,10 @@ async function simplePasswordKey(version: string, username: string, password: st
         hash: 'SHA-256',
     }
     const key = hkdf(password.trim().normalize('NFKC'), 32, options)
-    return await Crypto.subtle.importKey('raw', key, { name: 'AES-CTR' }, false, ['encrypt', 'decrypt'])
+    return await window.crypto.subtle.importKey('raw', key, { name: 'AES-CTR' }, false, ['encrypt', 'decrypt'])
 }
 
-async function encryptSecretKey(key: string, username: string, password: string): Promise<EncryptedSecretKey> {
+export async function encryptSecretKey(key: string, username: string, password: string): Promise<EncryptedSecretKey> {
     const keyParts = key.split(versionSeparator)
     const version = keyParts.shift()!
     const keyPart = keyParts.shift()!
@@ -166,10 +165,10 @@ async function encryptSecretKey(key: string, username: string, password: string)
 
     const [passwordKey, counter] = await Promise.all([
         simplePasswordKey(versionString, username, password),
-        Crypto.getRandomValues(new Uint8Array(16)),
+        new Uint8Array(16),
     ])
 
-    const encrypted = await Crypto.subtle.encrypt({ name: 'AES-CTR', counter, length: 64 }, passwordKey, bytes)
+    const encrypted = await window.crypto.subtle.encrypt({ name: 'AES-CTR', counter, length: 64 }, passwordKey, bytes)
 
     return {
         encrypted: Buffer.from(encrypted).toString('base64'),
@@ -178,10 +177,10 @@ async function encryptSecretKey(key: string, username: string, password: string)
     }
 }
 
-async function decryptSecretKey(encrypted: EncryptedSecretKey, username: string, password: string) {
+export async function decryptSecretKey(encrypted: EncryptedSecretKey, username: string, password: string) {
     const passwordKey = await simplePasswordKey(versionString, username, password)
 
-    const byteBuffer = await Crypto.subtle.decrypt(
+    const byteBuffer = await window.crypto.subtle.decrypt(
         { name: 'AES-CTR', counter: Buffer.from(encrypted.counter, 'base64'), length: 64 },
         passwordKey,
         Buffer.from(encrypted.encrypted, 'base64'),
@@ -210,12 +209,12 @@ function createSecretKey() {
 export async function signup(info: NewUserInfo): Promise<SignupResult> {
     console.log('creating user')
 
-    const srpSalt = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
+    const srpSalt = toBuffer(window.crypto.getRandomValues(new Uint8Array(16))).toString('hex')
     const secretKey = createSecretKey()
     const srpKey = await derivePrivateKey(srpSalt, info.password, secretKey, info.username)
     const verifier = srp.deriveVerifier(srpKey)
 
-    const mukSalt = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
+    const mukSalt = toBuffer(window.crypto.getRandomValues(new Uint8Array(16))).toString('hex')
     const mukHex = await derivePrivateKey(mukSalt, info.password, secretKey, info.username)
     const muk = await importMukFromHex(mukHex)
     const keyParams: RsaHashedKeyGenParams = {
@@ -223,15 +222,15 @@ export async function signup(info: NewUserInfo): Promise<SignupResult> {
         modulusLength: 4096,
         publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
     }
-    const accountKeys = (await Crypto.subtle.generateKey(keyParams, true, [
+    const accountKeys = (await window.crypto.subtle.generateKey(keyParams, true, [
         'encrypt',
         'decrypt',
         'wrapKey',
         'unwrapKey',
     ])) as CryptoKeyPair
-    const exportedPublic = await Crypto.subtle.exportKey('jwk', accountKeys.publicKey)
-    const accountPrivateIv = Crypto.getRandomValues(new Uint8Array(12))
-    const wrappedPrivate = await Crypto.subtle.wrapKey('jwk', accountKeys.privateKey, muk, {
+    const exportedPublic = await window.crypto.subtle.exportKey('jwk', accountKeys.publicKey)
+    const accountPrivateIv = window.crypto.getRandomValues(new Uint8Array(12))
+    const wrappedPrivate = await window.crypto.subtle.wrapKey('jwk', accountKeys.privateKey, muk, {
         name: 'AES-GCM',
         iv: accountPrivateIv,
     })
