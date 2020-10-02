@@ -163,10 +163,9 @@ export async function encryptSecretKey(key: string, username: string, password: 
         bytes[i] = parseInt(bits.substr(i * 8, 8), 2)
     }
 
-    const [passwordKey, counter] = await Promise.all([
-        simplePasswordKey(versionString, username, password),
-        new Uint8Array(16),
-    ])
+    const counter = window.crypto.getRandomValues(new Uint8Array(16))
+
+    const passwordKey = await simplePasswordKey(versionString, username, password)
 
     const encrypted = await window.crypto.subtle.encrypt({ name: 'AES-CTR', counter, length: 64 }, passwordKey, bytes)
 
