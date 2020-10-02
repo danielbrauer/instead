@@ -2,7 +2,7 @@ import { pwnedPassword } from 'hibp'
 import scrypt, { ScryptOptions } from 'scrypt-async-modern'
 import srp from 'secure-remote-password/client'
 import { Json } from '../../backend/src/queries/users-auth.gen'
-import { LoginInfo, NewUserInfo, SignupResult } from './Interfaces'
+import { EncryptedSecretKey, LoginInfo, NewUserInfo, SignupResult } from './Interfaces'
 import * as Auth from './routes/auth'
 import * as Signup from './routes/signup'
 const toBuffer = require('typedarray-to-buffer') as (x: Uint8Array) => Buffer
@@ -65,11 +65,37 @@ export async function exportAccountKeysToJwks(keys: CryptoKeyPair) {
 export interface UserInfo {
     id: number
     username: string
-    secretKey: string
+    encryptedSecretKey: EncryptedSecretKey
     accountKeys: CryptoKeyPair
 }
 
-export async function login(info: LoginInfo): Promise<UserInfo> {
+export async function loginWithEncryptedSecretKey(info: {
+    username: string
+    password: string
+    encryptedSecretKey: EncryptedSecretKey
+}): Promise<UserInfo> {
+    const secretKey = await decryptSecretKey(info.encryptedSecretKey, info.username, info.password)
+    const loginInfo = await login({
+        username: info.username,
+        password: info.password,
+        secretKey,
+    })
+    return {
+        encryptedSecretKey: info.encryptedSecretKey,
+        ...loginInfo,
+    }
+}
+
+export async function loginFull(info: LoginInfo): Promise<UserInfo> {
+    const loginInfo = await login(info)
+    const encryptedSecretKey = await encryptSecretKey(info.secretKey, info.username, info.password)
+    return {
+        encryptedSecretKey,
+        ...loginInfo,
+    }
+}
+
+async function login(info: LoginInfo) {
     console.log('logging in')
     const clientEphemeral = srp.generateEphemeral()
     const startResponse = await Auth.startLogin(info.username, clientEphemeral.public)
@@ -111,7 +137,6 @@ export async function login(info: LoginInfo): Promise<UserInfo> {
     return {
         id: userId,
         username: info.username,
-        secretKey: info.secretKey,
         accountKeys,
     }
 }
@@ -126,12 +151,6 @@ export function createSecureUnambiguousString(length: number) {
     let output = ''
     values.forEach((x) => (output += unambiguousCharacters.charAt(x % 32)))
     return output
-}
-
-export type EncryptedSecretKey = {
-    encrypted: string
-    counter: string
-    prefix: string
 }
 
 async function simplePasswordKey(version: string, username: string, password: string) {
@@ -243,8 +262,9 @@ export async function signup(info: NewUserInfo): Promise<SignupResult> {
         privateKey: Buffer.from(wrappedPrivate).toString('base64'),
         privateKeyIv: Buffer.from(accountPrivateIv).toString('base64'),
     })
+    const encryptedSecretKey = await encryptSecretKey(secretKey, info.username, info.password)
     return {
-        secretKey,
+        encryptedSecretKey,
     }
 }
 

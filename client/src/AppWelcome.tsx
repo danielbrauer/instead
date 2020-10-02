@@ -1,8 +1,8 @@
 import React from 'react'
-import { Menu, Segment, Header, Button, Message, Icon, Label } from 'semantic-ui-react'
+import { useHistory } from 'react-router-dom'
+import { Button, Header, Icon, Label, Menu, Message, Segment } from 'semantic-ui-react'
 import CurrentUser from './CurrentUser'
 import WelcomeInfo from './WelcomeInfo'
-import { useHistory } from 'react-router-dom'
 
 export default function AppWelcome() {
     const history = useHistory()
@@ -34,7 +34,7 @@ export default function AppWelcome() {
                 <Header as='h5'>Secret Key</Header>
                 <Label color='black' size='large'>
                     <Icon name='key' />
-                    {CurrentUser.getSecretKey()}
+                    {CurrentUser.getEncryptedSecretKey()}
                 </Label>
                 <br />
                 <br />

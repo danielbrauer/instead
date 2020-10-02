@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
-import { useInput, useInputBool } from './useInput'
-import { Button, Form, Message, Header } from 'semantic-ui-react'
-import CurrentUser from '../CurrentUser'
-import { signup, passwordCheck } from '../auth'
 import { useMutation } from 'react-query'
+import { useHistory } from 'react-router-dom'
+import { Button, Form, Header, Message } from 'semantic-ui-react'
+import { passwordCheck, signup } from '../auth'
+import CurrentUser from '../CurrentUser'
 import WelcomeInfo from '../WelcomeInfo'
 import InternalLink from './InternalLink'
-import { useHistory } from 'react-router-dom'
+import { useInput, useInputBool } from './useInput'
 
 export default function SignupForm() {
     const history = useHistory()
@@ -27,7 +27,7 @@ export default function SignupForm() {
         try {
             await passwordCheckMutation(password)
             const userInfo = await signupMutation({ username, password })
-            CurrentUser.setSecretKey(userInfo!.secretKey)
+            CurrentUser.setEncryptedSecretKey(userInfo!.encryptedSecretKey)
             WelcomeInfo.set({ username })
             history.push('/welcome')
         } catch (error) {

@@ -1,4 +1,5 @@
 import { exportAccountKeysToJwks, importAccountKeysFromJwks, UserInfo } from './auth'
+import { EncryptedSecretKey } from './Interfaces'
 
 export interface CurrentUserInfo extends UserInfo {
     accountKeysJwk?: {
@@ -8,7 +9,8 @@ export interface CurrentUserInfo extends UserInfo {
 }
 
 const kUserInfoKey = 'userInfoKey'
-const kSecretKeyKey = 'secretKey'
+const kOldUnencryptedSecretKeyKey = 'secretKey'
+const kEncryptedSecretKeyKey = 'secretKeyEnc'
 
 class CurrentUser {
     private static _info?: CurrentUserInfo
@@ -31,18 +33,24 @@ class CurrentUser {
         return CurrentUser.info.username
     }
 
-    static getSecretKey(): string | null {
-        return (CurrentUser.info && CurrentUser.info.secretKey) || localStorage.getItem(kSecretKeyKey)
-    }
-
     static async getAccountKeys() {
         if ((CurrentUser.info.accountKeys.privateKey as any).kty === undefined)
             CurrentUser._info!.accountKeys = await importAccountKeysFromJwks(CurrentUser._info!.accountKeysJwk!)
         return CurrentUser.info.accountKeys
     }
 
-    static async setSecretKey(secretKey: string) {
-        localStorage.setItem(kSecretKeyKey, secretKey)
+    static getOldSecretKey() {
+        return localStorage.getItem(kOldUnencryptedSecretKeyKey)
+    }
+
+    static setEncryptedSecretKey(encryptedSecretKey: EncryptedSecretKey) {
+        localStorage.setItem(kEncryptedSecretKeyKey, JSON.stringify(encryptedSecretKey))
+        localStorage.removeItem(kOldUnencryptedSecretKeyKey)
+    }
+
+    static getEncryptedSecretKey() {
+        const keyJson = localStorage.getItem(kEncryptedSecretKeyKey)
+        return keyJson ? JSON.parse(keyJson) : null
     }
 
     static async set(info: CurrentUserInfo) {
@@ -50,7 +58,7 @@ class CurrentUser {
         const accountKeysJwk = await exportAccountKeysToJwks(CurrentUser._info.accountKeys)
         CurrentUser._info.accountKeysJwk = accountKeysJwk
         sessionStorage.setItem(kUserInfoKey, JSON.stringify(CurrentUser._info))
-        localStorage.setItem(kSecretKeyKey, CurrentUser._info.secretKey)
+        CurrentUser.setEncryptedSecretKey(CurrentUser._info.encryptedSecretKey)
     }
 
     static clear() {
@@ -59,7 +67,8 @@ class CurrentUser {
     }
 
     static clearSecretKey() {
-        localStorage.removeItem(kSecretKeyKey)
+        localStorage.removeItem(kEncryptedSecretKeyKey)
+        localStorage.removeItem(kOldUnencryptedSecretKeyKey)
     }
 
     static loggedIn() {

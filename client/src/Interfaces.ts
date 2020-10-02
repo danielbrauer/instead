@@ -1,3 +1,9 @@
+export type EncryptedSecretKey = {
+    encrypted: string
+    counter: string
+    prefix: string
+}
+
 export interface LoginInfo {
     username: string
     password: string
@@ -10,5 +16,5 @@ export interface NewUserInfo {
 }
 
 export interface SignupResult {
-    secretKey: string
+    encryptedSecretKey: EncryptedSecretKey
 }
