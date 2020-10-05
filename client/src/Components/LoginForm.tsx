@@ -20,7 +20,11 @@ export default function LoginForm() {
     const { value: sharedComputer, bind: bindSharedComputer } = useInputBool(false)
     const [loginFullMutation, loginFullQuery] = useMutation(loginFull)
     const [loginStoredMutation, loginStoredQuery] = useMutation(loginWithEncryptedSecretKey)
-    const loginErrorMessage = loginFullQuery.error ? (loginFullQuery.error as Error).message : ''
+    const loginErrorMessage = loginFullQuery.error
+        ? (loginFullQuery.error as Error).message
+        : loginStoredQuery.error
+        ? (loginStoredQuery.error as Error).message
+        : ''
     const [cancelMutation] = useMutation(cancel)
 
     async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
@@ -52,7 +56,7 @@ export default function LoginForm() {
             <Form
                 className='attached inverted segment'
                 size='large'
-                error={loginFullQuery.isError}
+                error={loginFullQuery.isError || loginStoredQuery.isError}
                 loading={
                     loginFullQuery.isLoading ||
                     loginFullQuery.isSuccess ||
