@@ -7,7 +7,7 @@ import CurrentUser from '../CurrentUser'
 import { EncryptedSecretKey } from '../Interfaces'
 import InternalLink from './InternalLink'
 import './LoginForm.css'
-import { useInput } from './useInput'
+import { useInput, useInputBool } from './useInput'
 
 export default function LoginForm() {
     const history = useHistory()
@@ -17,6 +17,7 @@ export default function LoginForm() {
     const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: secretKey, bind: bindSecretKey } = useInput(CurrentUser.getOldSecretKey() || '')
+    const { value: sharedComputer, bind: bindSharedComputer } = useInputBool(false)
     const [loginFullMutation, loginFullQuery] = useMutation(loginFull)
     const [loginStoredMutation, loginStoredQuery] = useMutation(loginWithEncryptedSecretKey)
     const loginErrorMessage = loginFullQuery.error ? (loginFullQuery.error as Error).message : ''
@@ -32,7 +33,7 @@ export default function LoginForm() {
             } else {
                 userInfo = await loginFullMutation({ username, password, secretKey })
             }
-            CurrentUser.set(userInfo!)
+            CurrentUser.set(userInfo!, !sharedComputer)
             history.push('/home')
         } catch (error) {
             resetPassword()
@@ -91,7 +92,10 @@ export default function LoginForm() {
                         </Button.Group>
                     </div>
                 ) : (
-                    <Form.Input fluid icon='key' iconPosition='left' placeholder='Secret Key' {...bindSecretKey} />
+                    <>
+                        <Form.Input fluid icon='key' iconPosition='left' placeholder='Secret Key' {...bindSecretKey} />
+                        <Form.Checkbox label='This is a public or shared computer' {...bindSharedComputer} />
+                    </>
                 )}
                 <Message error header='Could not log in' content={loginErrorMessage} />
                 <Button size='large' content='Log in' />

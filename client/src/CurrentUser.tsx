@@ -53,12 +53,14 @@ class CurrentUser {
         return keyJson ? JSON.parse(keyJson) : null
     }
 
-    static async set(info: CurrentUserInfo) {
+    static async set(info: CurrentUserInfo, saveKey: boolean) {
         CurrentUser._info = info
         const accountKeysJwk = await exportAccountKeysToJwks(CurrentUser._info.accountKeys)
         CurrentUser._info.accountKeysJwk = accountKeysJwk
         sessionStorage.setItem(kUserInfoKey, JSON.stringify(CurrentUser._info))
-        CurrentUser.setEncryptedSecretKey(CurrentUser._info.encryptedSecretKey)
+        if (saveKey) {
+            CurrentUser.setEncryptedSecretKey(CurrentUser._info.encryptedSecretKey)
+        }
     }
 
     static clear() {
