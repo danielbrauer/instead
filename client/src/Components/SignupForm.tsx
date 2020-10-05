@@ -28,7 +28,7 @@ export default function SignupForm() {
             await passwordCheckMutation(password)
             const userInfo = await signupMutation({ username, password })
             CurrentUser.setEncryptedSecretKey(userInfo!.encryptedSecretKey)
-            WelcomeInfo.set({ username })
+            WelcomeInfo.set({ username, secretKey: userInfo!.unencryptedSecretKey })
             history.push('/welcome')
         } catch (error) {
             resetPassword()

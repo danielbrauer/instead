@@ -17,4 +17,5 @@ export interface NewUserInfo {
 
 export interface SignupResult {
     encryptedSecretKey: EncryptedSecretKey
+    unencryptedSecretKey: string
 }

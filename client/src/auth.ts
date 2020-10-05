@@ -265,6 +265,7 @@ export async function signup(info: NewUserInfo): Promise<SignupResult> {
     const encryptedSecretKey = await encryptSecretKey(secretKey, info.username, info.password)
     return {
         encryptedSecretKey,
+        unencryptedSecretKey: secretKey,
     }
 }
 

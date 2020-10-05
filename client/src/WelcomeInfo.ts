@@ -1,5 +1,6 @@
 interface Info {
     username: string
+    secretKey: string
 }
 
 const kWelcomeInfoKey = 'welcomeInfoKey'
@@ -19,6 +20,10 @@ class WelcomeInfo {
 
     static getUsername(): string {
         return WelcomeInfo.info.username
+    }
+
+    static getSecretKey(): string {
+        return WelcomeInfo.info.secretKey
     }
 
     static set(info: Info) {
