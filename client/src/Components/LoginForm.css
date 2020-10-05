@@ -7,3 +7,7 @@
     text-align: left;
     font-weight: 400;
 }
+
+.ui.icon.button.saved-secret-key-clear-button {
+    flex: 0 0 32px;
+}

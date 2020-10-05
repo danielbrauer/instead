@@ -87,7 +87,7 @@ export default function LoginForm() {
                                 disabled
                                 content={`${encryptedSecretKey.prefix}•••••••••••••••`}
                             />
-                            <Button icon='delete' onClick={clearSecretKey} />
+                            <Button className='saved-secret-key-clear-button' icon='delete' onClick={clearSecretKey} />
                         </Button.Group>
                     </div>
                 ) : (
