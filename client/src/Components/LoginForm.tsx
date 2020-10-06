@@ -2,41 +2,28 @@ import React, { useState } from 'react'
 import { useMutation } from 'react-query'
 import { useHistory } from 'react-router-dom'
 import { Button, ButtonProps, Form, Header, Message } from 'semantic-ui-react'
-import { cancel, loginFull, loginWithEncryptedSecretKey, UserInfo } from '../auth'
+import { cancel, loginWithPlainOrEncryptedSecretKey } from '../auth'
 import CurrentUser from '../CurrentUser'
-import { EncryptedSecretKey } from '../Interfaces'
 import InternalLink from './InternalLink'
 import './LoginForm.css'
 import { useInput, useInputBool } from './useInput'
 
 export default function LoginForm() {
     const history = useHistory()
-    const [encryptedSecretKey, setEncryptedSecretKey] = useState<EncryptedSecretKey | undefined>(
-        CurrentUser.getEncryptedSecretKey(),
-    )
+    const [encryptedSecretKey, setEncryptedSecretKey] = useState(() => CurrentUser.getEncryptedSecretKey())
     const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: secretKey, bind: bindSecretKey } = useInput(CurrentUser.getOldSecretKey() || '')
     const { value: sharedComputer, bind: bindSharedComputer } = useInputBool(false)
-    const [loginFullMutation, loginFullQuery] = useMutation(loginFull)
-    const [loginStoredMutation, loginStoredQuery] = useMutation(loginWithEncryptedSecretKey)
-    const loginErrorMessage = loginFullQuery.error
-        ? (loginFullQuery.error as Error).message
-        : loginStoredQuery.error
-        ? (loginStoredQuery.error as Error).message
-        : ''
+    const [loginMutation, loginQuery] = useMutation(loginWithPlainOrEncryptedSecretKey)
+    const loginErrorMessage = loginQuery.error ? (loginQuery.error as Error).message : ''
     const [cancelMutation] = useMutation(cancel)
 
     async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
         evt.preventDefault()
-        loginFullQuery.reset()
+        loginQuery.reset()
         try {
-            let userInfo: UserInfo | undefined
-            if (encryptedSecretKey) {
-                userInfo = await loginStoredMutation({ username, password, encryptedSecretKey })
-            } else {
-                userInfo = await loginFullMutation({ username, password, secretKey })
-            }
+            const userInfo = await loginMutation({ username, password, secretKey, encryptedSecretKey })
             CurrentUser.set(userInfo!, !sharedComputer)
             history.push('/home')
         } catch (error) {
@@ -48,7 +35,7 @@ export default function LoginForm() {
     function clearSecretKey(evt: React.MouseEvent<HTMLButtonElement>, data: ButtonProps) {
         evt.preventDefault()
         CurrentUser.clearSecretKey()
-        setEncryptedSecretKey(undefined)
+        setEncryptedSecretKey(null)
     }
 
     return (
@@ -56,13 +43,8 @@ export default function LoginForm() {
             <Form
                 className='attached inverted segment'
                 size='large'
-                error={loginFullQuery.isError || loginStoredQuery.isError}
-                loading={
-                    loginFullQuery.isLoading ||
-                    loginFullQuery.isSuccess ||
-                    loginStoredQuery.isLoading ||
-                    loginStoredQuery.isSuccess
-                }
+                error={loginQuery.isError}
+                loading={loginQuery.isLoading || loginQuery.isSuccess}
                 onSubmit={handleSubmit}
             >
                 <Header textAlign='center' content='Instead' />

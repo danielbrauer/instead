@@ -1,7 +1,7 @@
-import { exportAccountKeysToJwks, importAccountKeysFromJwks, UserInfo } from './auth'
+import { exportAccountKeysToJwks, importAccountKeysFromJwks, LoginResult } from './auth'
 import { EncryptedSecretKey } from './Interfaces'
 
-export interface CurrentUserInfo extends UserInfo {
+export interface CurrentUserInfo extends LoginResult {
     accountKeysJwk?: {
         privateKey: JsonWebKey
         publicKey: JsonWebKey
@@ -50,7 +50,7 @@ class CurrentUser {
 
     static getEncryptedSecretKey() {
         const keyJson = localStorage.getItem(kEncryptedSecretKeyKey)
-        return keyJson ? JSON.parse(keyJson) : null
+        return keyJson ? (JSON.parse(keyJson) as EncryptedSecretKey) : null
     }
 
     static async set(info: CurrentUserInfo, saveKey: boolean) {

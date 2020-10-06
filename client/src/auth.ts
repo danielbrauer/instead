@@ -62,33 +62,27 @@ export async function exportAccountKeysToJwks(keys: CryptoKeyPair) {
     return { privateKey, publicKey }
 }
 
-export interface UserInfo {
+export interface LoginResult {
     id: number
     username: string
     encryptedSecretKey: EncryptedSecretKey
     accountKeys: CryptoKeyPair
 }
 
-export async function loginWithEncryptedSecretKey(info: {
+export async function loginWithPlainOrEncryptedSecretKey(info: {
     username: string
     password: string
-    encryptedSecretKey: EncryptedSecretKey
-}): Promise<UserInfo> {
-    const secretKey = await decryptSecretKey(info.encryptedSecretKey, info.username, info.password)
+    secretKey: string | null
+    encryptedSecretKey: EncryptedSecretKey | null
+}): Promise<LoginResult> {
+    const secretKey = info.secretKey || (await decryptSecretKey(info.encryptedSecretKey!, info.username, info.password))
     const loginInfo = await login({
         username: info.username,
         password: info.password,
         secretKey,
     })
-    return {
-        encryptedSecretKey: info.encryptedSecretKey,
-        ...loginInfo,
-    }
-}
-
-export async function loginFull(info: LoginInfo): Promise<UserInfo> {
-    const loginInfo = await login(info)
-    const encryptedSecretKey = await encryptSecretKey(info.secretKey, info.username, info.password)
+    const encryptedSecretKey =
+        info.encryptedSecretKey || (await encryptSecretKey(info.secretKey!, info.username, info.password))
     return {
         encryptedSecretKey,
         ...loginInfo,
