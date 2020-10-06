@@ -1,11 +1,10 @@
+import { pwnedPassword } from 'hibp'
 import scrypt, { ScryptOptions } from 'scrypt-async-modern'
 import srp from 'secure-remote-password/client'
-import { LoginInfo, SignupResult } from './Interfaces'
+import { Json } from '../../backend/src/queries/users-auth.gen'
+import { EncryptedSecretKey, LoginInfo, NewUserInfo, SignupResult } from './Interfaces'
 import * as Auth from './routes/auth'
 import * as Signup from './routes/signup'
-import { NewUserInfo } from './Interfaces'
-import { pwnedPassword } from 'hibp'
-import { Json } from '../../backend/src/queries/users-auth.gen'
 const toBuffer = require('typedarray-to-buffer') as (x: Uint8Array) => Buffer
 const hkdf = require('futoin-hkdf') as (
     ikm: string,
@@ -13,7 +12,6 @@ const hkdf = require('futoin-hkdf') as (
     { salt, info, hash }: { salt: string; info: string; hash: string },
 ) => Buffer
 const xor = require('buffer-xor') as (a: Buffer, b: Buffer) => Buffer
-const Crypto = window.crypto
 const RSAOAEP_SHA256: RsaHashedImportParams = { name: 'RSA-OAEP', hash: 'SHA-256' }
 
 async function derivePrivateKey(salt: string, password: string, secretKey: string, username: string) {
@@ -24,7 +22,7 @@ async function derivePrivateKey(salt: string, password: string, secretKey: strin
         dkLen: 32,
         encoding: 'binary',
     }
-    const keyParts = secretKey.split('-')
+    const keyParts = secretKey.split(versionSeparator)
     const version = keyParts.shift()!
     const key = keyParts.shift()!
 
@@ -38,14 +36,14 @@ async function derivePrivateKey(salt: string, password: string, secretKey: strin
 }
 
 async function importMukFromHex(keyAsHex: string) {
-    return await Crypto.subtle.importKey('raw', Buffer.from(keyAsHex, 'hex'), { name: 'AES-GCM' }, false, [
+    return await window.crypto.subtle.importKey('raw', Buffer.from(keyAsHex, 'hex'), { name: 'AES-GCM' }, false, [
         'wrapKey',
         'unwrapKey',
     ])
 }
 
 async function importExtractableRsaKeyFromJwk(jwk: JsonWebKey, usages: KeyUsage[]) {
-    return Crypto.subtle.importKey('jwk', jwk, RSAOAEP_SHA256, true, usages)
+    return window.crypto.subtle.importKey('jwk', jwk, RSAOAEP_SHA256, true, usages)
 }
 
 export async function importAccountKeysFromJwks(jwks: { privateKey: JsonWebKey; publicKey: JsonWebKey }) {
@@ -58,20 +56,40 @@ export async function importAccountKeysFromJwks(jwks: { privateKey: JsonWebKey; 
 
 export async function exportAccountKeysToJwks(keys: CryptoKeyPair) {
     const [privateKey, publicKey] = await Promise.all([
-        Crypto.subtle.exportKey('jwk', keys.privateKey),
-        Crypto.subtle.exportKey('jwk', keys.publicKey),
+        window.crypto.subtle.exportKey('jwk', keys.privateKey),
+        window.crypto.subtle.exportKey('jwk', keys.publicKey),
     ])
     return { privateKey, publicKey }
 }
 
-export interface UserInfo {
+export interface LoginResult {
     id: number
     username: string
-    secretKey: string
+    encryptedSecretKey: EncryptedSecretKey
     accountKeys: CryptoKeyPair
 }
 
-export async function login(info: LoginInfo): Promise<UserInfo> {
+export async function loginWithPlainOrEncryptedSecretKey(info: {
+    username: string
+    password: string
+    secretKey: string | null
+    encryptedSecretKey: EncryptedSecretKey | null
+}): Promise<LoginResult> {
+    const secretKey = info.secretKey || (await decryptSecretKey(info.encryptedSecretKey!, info.username, info.password))
+    const loginInfo = await login({
+        username: info.username,
+        password: info.password,
+        secretKey,
+    })
+    const encryptedSecretKey =
+        info.encryptedSecretKey || (await encryptSecretKey(info.secretKey!, info.username, info.password))
+    return {
+        encryptedSecretKey,
+        ...loginInfo,
+    }
+}
+
+async function login(info: LoginInfo) {
     console.log('logging in')
     const clientEphemeral = srp.generateEphemeral()
     const startResponse = await Auth.startLogin(info.username, clientEphemeral.public)
@@ -96,7 +114,7 @@ export async function login(info: LoginInfo): Promise<UserInfo> {
 
     const mukHex = await derivePrivateKey(mukSalt, info.password, info.secretKey, info.username)
     const muk = await importMukFromHex(mukHex)
-    const privateKey = await Crypto.subtle.unwrapKey(
+    const privateKey = await window.crypto.subtle.unwrapKey(
         'jwk',
         Buffer.from(privateKeyEnc, 'base64'),
         muk,
@@ -113,33 +131,102 @@ export async function login(info: LoginInfo): Promise<UserInfo> {
     return {
         id: userId,
         username: info.username,
-        secretKey: info.secretKey,
         accountKeys,
     }
 }
 
+const unambiguousCharacters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+const versionString = 'A1'
+const versionSeparator = '-'
+const plaintextPrefix = 2
+
 export function createSecureUnambiguousString(length: number) {
-    const characters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'
-    const values = Crypto.getRandomValues(new Uint8Array(length))
+    const values = window.crypto.getRandomValues(new Uint8Array(length))
     let output = ''
-    values.forEach((x) => (output += characters.charAt(x % 32)))
+    values.forEach((x) => (output += unambiguousCharacters.charAt(x % 32)))
     return output
+}
+
+async function simplePasswordKey(version: string, username: string, password: string) {
+    const options = {
+        salt: username,
+        info: version,
+        hash: 'SHA-256',
+    }
+    const key = hkdf(password.trim().normalize('NFKC'), 32, options)
+    return await window.crypto.subtle.importKey('raw', key, { name: 'AES-CTR' }, false, ['encrypt', 'decrypt'])
+}
+
+export async function encryptSecretKey(key: string, username: string, password: string): Promise<EncryptedSecretKey> {
+    const keyParts = key.split(versionSeparator)
+    const version = keyParts.shift()!
+    const keyPart = keyParts.shift()!
+    const prefix = version + versionSeparator + keyPart.substr(0, plaintextPrefix)
+    const remainder = keyPart.substr(plaintextPrefix)
+    let bits = ''
+
+    for (var i = 0; i < remainder.length; ++i) {
+        const binary = unambiguousCharacters.indexOf(remainder.charAt(i)).toString(2)
+        bits += binary.padStart(5, '0')
+    }
+
+    const bytes = new Uint8Array((24 * 5) / 8)
+
+    for (var i = 0; i < bits.length; ++i) {
+        bytes[i] = parseInt(bits.substr(i * 8, 8), 2)
+    }
+
+    const counter = window.crypto.getRandomValues(new Uint8Array(16))
+
+    const passwordKey = await simplePasswordKey(versionString, username, password)
+
+    const encrypted = await window.crypto.subtle.encrypt({ name: 'AES-CTR', counter, length: 64 }, passwordKey, bytes)
+
+    return {
+        encrypted: Buffer.from(encrypted).toString('base64'),
+        counter: Buffer.from(counter).toString('base64'),
+        prefix,
+    }
+}
+
+export async function decryptSecretKey(encrypted: EncryptedSecretKey, username: string, password: string) {
+    const passwordKey = await simplePasswordKey(versionString, username, password)
+
+    const byteBuffer = await window.crypto.subtle.decrypt(
+        { name: 'AES-CTR', counter: Buffer.from(encrypted.counter, 'base64'), length: 64 },
+        passwordKey,
+        Buffer.from(encrypted.encrypted, 'base64'),
+    )
+
+    const bytes = new Uint8Array(byteBuffer)
+    let bits = ''
+    for (var i = 0; i < bytes.length; ++i) {
+        bits += bytes[i].toString(2).padStart(8, '0')
+    }
+
+    let decrypted = ''
+    for (var i = 0; i < bits.length; i += 5) {
+        const index = parseInt(bits.substr(i, 5), 2)
+        decrypted += unambiguousCharacters.charAt(index)
+    }
+
+    return encrypted.prefix + decrypted
 }
 
 function createSecretKey() {
     const output = createSecureUnambiguousString(26)
-    return 'A1-' + output
+    return versionString + versionSeparator + output
 }
 
 export async function signup(info: NewUserInfo): Promise<SignupResult> {
     console.log('creating user')
 
-    const srpSalt = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
+    const srpSalt = toBuffer(window.crypto.getRandomValues(new Uint8Array(16))).toString('hex')
     const secretKey = createSecretKey()
     const srpKey = await derivePrivateKey(srpSalt, info.password, secretKey, info.username)
     const verifier = srp.deriveVerifier(srpKey)
 
-    const mukSalt = toBuffer(Crypto.getRandomValues(new Uint8Array(16))).toString('hex')
+    const mukSalt = toBuffer(window.crypto.getRandomValues(new Uint8Array(16))).toString('hex')
     const mukHex = await derivePrivateKey(mukSalt, info.password, secretKey, info.username)
     const muk = await importMukFromHex(mukHex)
     const keyParams: RsaHashedKeyGenParams = {
@@ -147,15 +234,15 @@ export async function signup(info: NewUserInfo): Promise<SignupResult> {
         modulusLength: 4096,
         publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
     }
-    const accountKeys = (await Crypto.subtle.generateKey(keyParams, true, [
+    const accountKeys = (await window.crypto.subtle.generateKey(keyParams, true, [
         'encrypt',
         'decrypt',
         'wrapKey',
         'unwrapKey',
     ])) as CryptoKeyPair
-    const exportedPublic = await Crypto.subtle.exportKey('jwk', accountKeys.publicKey)
-    const accountPrivateIv = Crypto.getRandomValues(new Uint8Array(12))
-    const wrappedPrivate = await Crypto.subtle.wrapKey('jwk', accountKeys.privateKey, muk, {
+    const exportedPublic = await window.crypto.subtle.exportKey('jwk', accountKeys.publicKey)
+    const accountPrivateIv = window.crypto.getRandomValues(new Uint8Array(12))
+    const wrappedPrivate = await window.crypto.subtle.wrapKey('jwk', accountKeys.privateKey, muk, {
         name: 'AES-GCM',
         iv: accountPrivateIv,
     })
@@ -169,8 +256,10 @@ export async function signup(info: NewUserInfo): Promise<SignupResult> {
         privateKey: Buffer.from(wrappedPrivate).toString('base64'),
         privateKeyIv: Buffer.from(accountPrivateIv).toString('base64'),
     })
+    const encryptedSecretKey = await encryptSecretKey(secretKey, info.username, info.password)
     return {
-        secretKey,
+        encryptedSecretKey,
+        unencryptedSecretKey: secretKey,
     }
 }
 

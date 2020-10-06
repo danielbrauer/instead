@@ -1,0 +1,13 @@
+.saved-secret-key-container {
+    margin-bottom: 1em;
+}
+
+.ui.disabled.button.saved-secret-key-field {
+    padding-left: 1em;
+    text-align: left;
+    font-weight: 400;
+}
+
+.ui.icon.button.saved-secret-key-clear-button {
+    flex: 0 0 32px;
+}
