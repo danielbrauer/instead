@@ -13,11 +13,11 @@ export default function () {
     const { id: postId } = useParams<{ id: string }>()
     const postQuery = useQuery(['post', postId], getPost, longLivedQuery)
 
-    if (postQuery.isError)
+    if (postQuery.isError || !postQuery.data)
         return (
             <div>
                 <Message negative>
-                    <Message.Header>Error fetching posts</Message.Header>
+                    <Message.Header>Error fetching post</Message.Header>
                 </Message>
             </div>
         )
