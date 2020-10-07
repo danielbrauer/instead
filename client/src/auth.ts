@@ -165,14 +165,14 @@ export async function encryptSecretKey(key: string, username: string, password: 
     const remainder = keyPart.substr(plaintextPrefix)
     let bits = ''
 
-    for (var i = 0; i < remainder.length; ++i) {
+    for (let i = 0; i < remainder.length; ++i) {
         const binary = unambiguousCharacters.indexOf(remainder.charAt(i)).toString(2)
         bits += binary.padStart(5, '0')
     }
 
     const bytes = new Uint8Array((24 * 5) / 8)
 
-    for (var i = 0; i < bits.length; ++i) {
+    for (let i = 0; i < bits.length; ++i) {
         bytes[i] = parseInt(bits.substr(i * 8, 8), 2)
     }
 
@@ -200,12 +200,12 @@ export async function decryptSecretKey(encrypted: EncryptedSecretKey, username: 
 
     const bytes = new Uint8Array(byteBuffer)
     let bits = ''
-    for (var i = 0; i < bytes.length; ++i) {
+    for (let i = 0; i < bytes.length; ++i) {
         bits += bytes[i].toString(2).padStart(8, '0')
     }
 
     let decrypted = ''
-    for (var i = 0; i < bits.length; i += 5) {
+    for (let i = 0; i < bits.length; i += 5) {
         const index = parseInt(bits.substr(i, 5), 2)
         decrypted += unambiguousCharacters.charAt(index)
     }
