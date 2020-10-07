@@ -1,11 +1,11 @@
 import React from 'react'
+import InfiniteScroll from 'react-infinite-scroller'
 import { InfiniteQueryResult } from 'react-query'
-import { List, Message, Loader } from 'semantic-ui-react'
+import { List, Loader, Message } from 'semantic-ui-react'
+import { IGetHomePostsWithKeysResult } from '../../backend/src/queries/posts.gen'
+import InternalLink from './Components/InternalLink'
 import EncryptedImage from './EncryptedImage'
 import PostHeader from './PostHeader'
-import InternalLink from './Components/InternalLink'
-import InfiniteScroll from 'react-infinite-scroller'
-import { IGetHomePostsWithKeysResult } from '../../backend/src/queries/posts.gen'
 
 export default function ({ posts }: { posts: InfiniteQueryResult<IGetHomePostsWithKeysResult[], unknown> }) {
     if (posts.isError) return <Message negative content='Error fetching posts' />
@@ -14,19 +14,21 @@ export default function ({ posts }: { posts: InfiniteQueryResult<IGetHomePostsWi
         <InfiniteScroll
             loadMore={() => posts.canFetchMore && posts.fetchMore()}
             hasMore={posts.canFetchMore}
-            loader={<Loader />}
+            loader={<Loader key='0' />}
             initialLoad={false}
         >
-            {posts.data!.map((group) =>
-                group.map((post) => (
-                    <List.Item key={post.id}>
-                        <PostHeader post={post} />
-                        <InternalLink to={`/post/${post.id.toString()}`}>
-                            <EncryptedImage post={post} />
-                        </InternalLink>
-                    </List.Item>
-                )),
-            )}
+            {posts
+                .data!.map((group) =>
+                    group.map((post) => (
+                        <List.Item key={post.id}>
+                            <PostHeader post={post} />
+                            <InternalLink to={`/post/${post.id.toString()}`}>
+                                <EncryptedImage post={post} />
+                            </InternalLink>
+                        </List.Item>
+                    )),
+                )
+                .flat()}
         </InfiniteScroll>
     )
 }
