@@ -33,6 +33,7 @@ export default function LoginForm() {
     }
 
     function clearSecretKey(evt: React.MouseEvent<HTMLButtonElement>, data: ButtonProps) {
+        console.trace()
         evt.preventDefault()
         CurrentUser.clearSecretKey()
         setEncryptedSecretKey(null)
