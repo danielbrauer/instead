@@ -33,7 +33,6 @@ export default function LoginForm() {
     }
 
     function clearSecretKey(evt: React.MouseEvent<HTMLButtonElement>, data: ButtonProps) {
-        console.trace()
         evt.preventDefault()
         CurrentUser.clearSecretKey()
         setEncryptedSecretKey(null)
@@ -75,7 +74,12 @@ export default function LoginForm() {
                                 disabled
                                 content={`${encryptedSecretKey.prefix}•••••••••••••••`}
                             />
-                            <Button className='saved-secret-key-clear-button' icon='delete' onClick={clearSecretKey} />
+                            <Button
+                                type='button'
+                                className='saved-secret-key-clear-button'
+                                icon='delete'
+                                onClick={clearSecretKey}
+                            />
                         </Button.Group>
                     </div>
                 ) : (
@@ -85,7 +89,7 @@ export default function LoginForm() {
                     </>
                 )}
                 <Message error header='Could not log in' content={loginErrorMessage} />
-                <Button size='large' content='Log in' />
+                <Button type='submit' size='large' content='Log in' />
             </Form>
             <Message attached='bottom' warning>
                 New to Instead?&nbsp;<InternalLink to='/signup'>Sign up</InternalLink>&nbsp;here.
