@@ -23,18 +23,19 @@ export default function SignupForm() {
         evt.preventDefault()
         passwordCheckQuery.reset()
         signupQuery.reset()
-        setDidMissTerms(!agreeTerms)
         setDidMissUsername(!username)
         setDidMissPassword(!password)
-        if (!agreeTerms || !username || !password) return
-        try {
-            await passwordCheckMutation(password)
-            const userInfo = await signupMutation({ username, password })
-            CurrentUser.setEncryptedSecretKey(userInfo!.encryptedSecretKey)
-            WelcomeInfo.set({ username, secretKey: userInfo!.unencryptedSecretKey })
-            history.push('/welcome')
-        } catch (error) {
-            resetPassword()
+        setDidMissTerms(!agreeTerms)
+        if (username && password && agreeTerms) {
+            try {
+                await passwordCheckMutation(password)
+                const userInfo = await signupMutation({ username, password })
+                CurrentUser.setEncryptedSecretKey(userInfo!.encryptedSecretKey)
+                WelcomeInfo.set({ username, secretKey: userInfo!.unencryptedSecretKey })
+                history.push('/welcome')
+            } catch (error) {
+                resetPassword()
+            }
         }
     }
 
@@ -55,7 +56,7 @@ export default function SignupForm() {
                     placeholder='Username'
                     type='username'
                     autoComplete='off'
-                    error={didMissUsername && 'Username cannot be blank'}
+                    error={!username && didMissUsername && 'Please provide a username'}
                     {...bindUsername}
                 />
                 <Form.Input
@@ -66,7 +67,7 @@ export default function SignupForm() {
                     type='password'
                     autoComplete='off'
                     error={
-                        (didMissPassword && 'Password cannot be blank') ||
+                        (!password && didMissPassword && 'Please provide a password') ||
                         (passwordCheckQuery.isError && (passwordCheckQuery.error as Error).message)
                     }
                     {...bindPassword}
