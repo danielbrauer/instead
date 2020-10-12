@@ -14,7 +14,7 @@ export default function LoginForm() {
     const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: secretKey, bind: bindSecretKey } = useInput(CurrentUser.getOldSecretKey() || '', (x) =>
-        x.replace(/[^0-9a-zA-Z\-]/g, ''),
+        x.replace(/[^0-9a-zA-Z-]/g, ''),
     )
     const { value: sharedComputer, bind: bindSharedComputer } = useInputBool(false)
     const [didMissUsername, setDidMissUsername] = useState(false)
