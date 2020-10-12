@@ -9,7 +9,7 @@ export default function NewPost({ uploadInput, onCancel }: { uploadInput: File; 
     const [uploadMutation, uploadStatus] = useMutation(encryptAndUploadImage)
     const [blobUrl, dispatch] = useReducer((state: string, action: File | null) => {
         if (state) URL.revokeObjectURL(state)
-        return URL.createObjectURL(action)
+        return action ? URL.createObjectURL(action) : ''
     }, '')
     useEffect(() => {
         dispatch(uploadInput)
