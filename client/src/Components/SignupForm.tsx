@@ -14,6 +14,7 @@ export default function SignupForm() {
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: agreeTerms, bind: bindAgreeTerms } = useInputBool(false)
     const [didMissUsername, setDidMissUsername] = useState(false)
+    const [didMissPassword, setDidMissPassword] = useState(false)
     const [didMissTerms, setDidMissTerms] = useState(false)
     const [passwordCheckMutation, passwordCheckQuery] = useMutation(passwordCheck)
     const [signupMutation, signupQuery] = useMutation(signup)
@@ -24,7 +25,8 @@ export default function SignupForm() {
         signupQuery.reset()
         setDidMissTerms(!agreeTerms)
         setDidMissUsername(!username)
-        if (!agreeTerms || !username) return
+        setDidMissPassword(!password)
+        if (!agreeTerms || !username || !password) return
         try {
             await passwordCheckMutation(password)
             const userInfo = await signupMutation({ username, password })
@@ -63,7 +65,10 @@ export default function SignupForm() {
                     placeholder='Password'
                     type='password'
                     autoComplete='off'
-                    error={passwordCheckQuery.isError && (passwordCheckQuery.error as Error).message}
+                    error={
+                        (didMissPassword && 'Password cannot be blank') ||
+                        (passwordCheckQuery.isError && (passwordCheckQuery.error as Error).message)
+                    }
                     {...bindPassword}
                 />
                 <Form.Checkbox
