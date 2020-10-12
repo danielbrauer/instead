@@ -13,7 +13,9 @@ export default function SignupForm() {
     const { value: username, bind: bindUsername } = useInput('', (x) => x.replace(/[^0-9a-zA-Z]/g, ''))
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
     const { value: agreeTerms, bind: bindAgreeTerms } = useInputBool(false)
-    const [missedTerms, setMissedTerms] = useState(false)
+    const [didMissUsername, setDidMissUsername] = useState(false)
+    const [didMissPassword, setDidMissPassword] = useState(false)
+    const [didMissTerms, setDidMissTerms] = useState(false)
     const [passwordCheckMutation, passwordCheckQuery] = useMutation(passwordCheck)
     const [signupMutation, signupQuery] = useMutation(signup)
 
@@ -21,17 +23,19 @@ export default function SignupForm() {
         evt.preventDefault()
         passwordCheckQuery.reset()
         signupQuery.reset()
-        const userMissedTerms = !agreeTerms
-        setMissedTerms(userMissedTerms)
-        if (userMissedTerms) return
-        try {
-            await passwordCheckMutation(password)
-            const userInfo = await signupMutation({ username, password })
-            CurrentUser.setEncryptedSecretKey(userInfo!.encryptedSecretKey)
-            WelcomeInfo.set({ username, secretKey: userInfo!.unencryptedSecretKey })
-            history.push('/welcome')
-        } catch (error) {
-            resetPassword()
+        setDidMissUsername(!username)
+        setDidMissPassword(!password)
+        setDidMissTerms(!agreeTerms)
+        if (username && password && agreeTerms) {
+            try {
+                await passwordCheckMutation(password)
+                const userInfo = await signupMutation({ username, password })
+                CurrentUser.setEncryptedSecretKey(userInfo!.encryptedSecretKey)
+                WelcomeInfo.set({ username, secretKey: userInfo!.unencryptedSecretKey })
+                history.push('/welcome')
+            } catch (error) {
+                resetPassword()
+            }
         }
     }
 
@@ -52,6 +56,7 @@ export default function SignupForm() {
                     placeholder='Username'
                     type='username'
                     autoComplete='off'
+                    error={!username && didMissUsername && 'Please provide a username'}
                     {...bindUsername}
                 />
                 <Form.Input
@@ -61,13 +66,16 @@ export default function SignupForm() {
                     placeholder='Password'
                     type='password'
                     autoComplete='off'
-                    error={passwordCheckQuery.isError && (passwordCheckQuery.error as Error).message}
+                    error={
+                        (!password && didMissPassword && 'Please provide a password') ||
+                        (passwordCheckQuery.isError && (passwordCheckQuery.error as Error).message)
+                    }
                     {...bindPassword}
                 />
                 <Form.Checkbox
                     label='I agree to the Terms and Conditions'
                     error={
-                        missedTerms && !agreeTerms
+                        didMissTerms && !agreeTerms
                             ? {
                                   content: 'You must agree to the terms and conditions',
                               }

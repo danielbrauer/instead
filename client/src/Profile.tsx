@@ -26,7 +26,7 @@ export default function ({ userId }: { userId: number }) {
     return (
         <Segment>
             {editing ? (
-                <Form loading={setProfileNameStatus.isLoading} onSubmit={submitForm}>
+                <Form size='large' loading={setProfileNameStatus.isLoading} onSubmit={submitForm}>
                     <Form.Input label='Display Name' {...bindNewName} />
                     <Button floated='right' primary content='Save' />
                     <Button onClick={() => setEditing(false)} content='Cancel' />

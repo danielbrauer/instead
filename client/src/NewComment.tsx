@@ -1,9 +1,9 @@
 import React from 'react'
-import { Post } from '../../backend/src/types/api'
-import { Form } from 'semantic-ui-react'
 import { useMutation } from 'react-query'
-import { encryptAndPostComment } from './postCrypto'
+import { Form } from 'semantic-ui-react'
+import { Post } from '../../backend/src/types/api'
 import { useInput } from './Components/useInput'
+import { encryptAndPostComment } from './postCrypto'
 
 export default function ({ post }: { post: Post }) {
     const contentInput = useInput('')
@@ -15,7 +15,7 @@ export default function ({ post }: { post: Post }) {
     }
 
     return (
-        <Form reply loading={commentStatus.isLoading}>
+        <Form size='large' reply loading={commentStatus.isLoading}>
             <Form.Input
                 action={{
                     primary: true,

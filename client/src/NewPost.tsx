@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, useEffect, useReducer, useState } from 'react'
 import { useMutation } from 'react-query'
 import { Redirect } from 'react-router-dom'
 import { Button, Dimmer, Image, Loader, Menu, Message } from 'semantic-ui-react'
@@ -7,13 +7,14 @@ import { encryptAndUploadImage } from './postCrypto'
 export default function NewPost({ uploadInput, onCancel }: { uploadInput: File; onCancel: () => void }) {
     const [aspect, setAspect] = useState<number | null>(null)
     const [uploadMutation, uploadStatus] = useMutation(encryptAndUploadImage)
-    const [blobUrl, setBlobUrl] = useState('')
+    const [blobUrl, dispatch] = useReducer((state: string, action: File | null) => {
+        if (state) URL.revokeObjectURL(state)
+        return action ? URL.createObjectURL(action) : ''
+    }, '')
     useEffect(() => {
-        setBlobUrl(URL.createObjectURL(uploadInput))
-        return () => {
-            URL.revokeObjectURL(blobUrl)
-        }
-    }, [])
+        dispatch(uploadInput)
+        return () => dispatch(null)
+    }, [uploadInput])
 
     if (!uploadInput) {
         onCancel()

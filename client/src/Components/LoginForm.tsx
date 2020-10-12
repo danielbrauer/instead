@@ -13,8 +13,13 @@ export default function LoginForm() {
     const [encryptedSecretKey, setEncryptedSecretKey] = useState(() => CurrentUser.getEncryptedSecretKey())
     const { value: username, bind: bindUsername } = useInput('')
     const { value: password, bind: bindPassword, reset: resetPassword } = useInput('')
-    const { value: secretKey, bind: bindSecretKey } = useInput(CurrentUser.getOldSecretKey() || '')
+    const { value: secretKey, bind: bindSecretKey } = useInput(CurrentUser.getOldSecretKey() || '', (x) =>
+        x.replace(/[^0-9a-zA-Z-]/g, ''),
+    )
     const { value: sharedComputer, bind: bindSharedComputer } = useInputBool(false)
+    const [didMissUsername, setDidMissUsername] = useState(false)
+    const [didMissPassword, setDidMissPassword] = useState(false)
+    const [didMissSecretKey, setDidMissSecretKey] = useState(false)
     const [loginMutation, loginQuery] = useMutation(loginWithPlainOrEncryptedSecretKey)
     const loginErrorMessage = loginQuery.error ? (loginQuery.error as Error).message : ''
     const [cancelMutation] = useMutation(cancel)
@@ -22,13 +27,19 @@ export default function LoginForm() {
     async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
         evt.preventDefault()
         loginQuery.reset()
-        try {
-            const userInfo = await loginMutation({ username, password, secretKey, encryptedSecretKey })
-            CurrentUser.set(userInfo!, !sharedComputer)
-            history.push('/home')
-        } catch (error) {
-            resetPassword()
-            await cancelMutation()
+        const hasSecretKey = encryptedSecretKey || secretKey
+        setDidMissUsername(!username)
+        setDidMissPassword(!password)
+        setDidMissSecretKey(!hasSecretKey)
+        if (username && password && hasSecretKey) {
+            try {
+                const userInfo = await loginMutation({ username, password, secretKey, encryptedSecretKey })
+                CurrentUser.set(userInfo!, !sharedComputer)
+                history.push('/home')
+            } catch (error) {
+                resetPassword()
+                await cancelMutation()
+            }
         }
     }
 
@@ -54,6 +65,7 @@ export default function LoginForm() {
                     iconPosition='left'
                     placeholder='Username'
                     autoComplete='username'
+                    error={!username && didMissUsername && 'Please enter your username'}
                     {...bindUsername}
                 />
                 <Form.Input
@@ -63,6 +75,7 @@ export default function LoginForm() {
                     placeholder='Password'
                     type='password'
                     autoComplete='current-password'
+                    error={!password && didMissPassword && 'Please enter your password'}
                     {...bindPassword}
                 />
                 {encryptedSecretKey ? (
@@ -84,7 +97,14 @@ export default function LoginForm() {
                     </div>
                 ) : (
                     <>
-                        <Form.Input fluid icon='key' iconPosition='left' placeholder='Secret Key' {...bindSecretKey} />
+                        <Form.Input
+                            fluid
+                            icon='key'
+                            iconPosition='left'
+                            placeholder='Secret Key'
+                            error={!secretKey && didMissSecretKey && 'Please enter your Secret Key'}
+                            {...bindSecretKey}
+                        />
                         <Form.Checkbox label='This is a public or shared computer' {...bindSharedComputer} />
                     </>
                 )}
