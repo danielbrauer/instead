@@ -82,6 +82,7 @@ export default function LoginForm() {
                     <div className='saved-secret-key-container'>
                         <Button.Group fluid size='large'>
                             <Button
+                                as='a'
                                 className='saved-secret-key-field'
                                 icon='key'
                                 disabled
