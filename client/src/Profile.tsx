@@ -5,9 +5,10 @@ import { useInput } from './Components/useInput'
 import CurrentUser from './CurrentUser'
 import { encryptAndUploadProfile, getProfile } from './postCrypto'
 import { longLivedQuery } from './QuerySettings'
+import SafetyButton from './SafetyButton'
 import UserInList from './UserInList'
 
-export default function ({ userId }: { userId: number }) {
+export default function ({ userId, logout }: { userId: number; logout: () => void }) {
     const [editing, setEditing] = useState(false)
     const user = useQuery(['userProfile', userId], getProfile, longLivedQuery)
     const { value: newName, setValue: setNewName, bind: bindNewName } = useInput('')
@@ -39,19 +40,22 @@ export default function ({ userId }: { userId: number }) {
                         </Item.Header>
                         <Item.Extra>
                             {userId === CurrentUser.getId() && (
-                                <Button
-                                    {...(user.data === null
-                                        ? {
-                                              labelPosition: 'left',
-                                              label: {
-                                                  content: 'Add a display name which other people can see',
-                                              },
-                                          }
-                                        : null)}
-                                    floated='right'
-                                    onClick={startEditing}
-                                    icon='pencil'
-                                />
+                                <>
+                                    <SafetyButton icon='sign-out' floated='right' onClick={logout} />
+                                    <Button
+                                        {...(user.data === null
+                                            ? {
+                                                  labelPosition: 'left',
+                                                  label: {
+                                                      content: 'Add a display name which other people can see',
+                                                  },
+                                              }
+                                            : null)}
+                                        floated='right'
+                                        onClick={startEditing}
+                                        icon='pencil'
+                                    />
+                                </>
                             )}
                         </Item.Extra>
                     </Item>

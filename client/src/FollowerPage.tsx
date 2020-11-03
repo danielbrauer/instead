@@ -1,8 +1,8 @@
 import React from 'react'
-import FollowerList from './FollowerList'
-import FolloweeList from './FolloweeList'
+import { Route, Switch, useHistory } from 'react-router'
 import { Menu, MenuItem, Segment } from 'semantic-ui-react'
-import { Switch, Route, useHistory } from 'react-router'
+import FolloweeList from './FolloweeList'
+import FollowerList from './FollowerList'
 
 export default function FollowerPage() {
     const history = useHistory()

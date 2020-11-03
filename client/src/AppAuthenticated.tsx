@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { queryCache, useQuery } from 'react-query'
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom'
-import { Dropdown, Icon, Label, Menu } from 'semantic-ui-react'
+import { Icon, Label, Menu } from 'semantic-ui-react'
 import CurrentUser from './CurrentUser'
 import FollowerPage from './FollowerPage'
 import HomePosts from './HomePosts'
@@ -28,9 +28,14 @@ export default function () {
         }
     }
 
-    function onCancel() {
+    function afterUpload() {
         setUploadInput(null)
-        history.push(previousPage)
+        history.push('/home')
+    }
+
+    function cancelUpload() {
+        setUploadInput(null)
+        history.push(previousPage || '/home')
     }
 
     const logOutAndClear = async () => {
@@ -45,9 +50,15 @@ export default function () {
 
     useEffect(() => {
         if (!CurrentUser.loggedIn()) logOutAndClear()
+        if (history.location.pathname === '/new' && !uploadInput) cancelUpload()
     })
 
     if (!CurrentUser.loggedIn()) return <Redirect to='/login' />
+
+    const homeActive = history.location.pathname === '/home'
+    const newActive = history.location.pathname === '/new'
+    const followersActive = history.location.pathname === '/followers' || history.location.pathname === '/following'
+    const profileActive = history.location.pathname === `/user/${CurrentUser.getId()}`
 
     return (
         <div>
@@ -59,43 +70,43 @@ export default function () {
                 onChange={onSelect}
                 style={{ display: 'none' }}
             />
-            <Menu inverted fixed='top' size='small'>
-                <Menu.Item header onClick={() => history.location.pathname !== '/home' && history.push('/home')}>
-                    Instead
-                </Menu.Item>
-                <Menu.Item onClick={() => inputFile.current!.click()}>
-                    <Icon fitted name='camera' />
-                </Menu.Item>
-                <Menu.Menu position='right'>
-                    <Menu.Item onClick={() => history.push('/followers')}>
-                        <Icon fitted name='users' />
+            {!uploadInput ? (
+                <Menu inverted borderless widths={4} fixed='bottom'>
+                    <Menu.Item icon='home' active={homeActive} onClick={() => !homeActive && history.push('/home')} />
+                    <Menu.Item
+                        icon='camera'
+                        active={newActive}
+                        onClick={() => !newActive && inputFile.current!.click()}
+                    />
+                    <Menu.Item active={followersActive} onClick={() => history.push('/followers')}>
+                        <Icon name='users' />
                         {requests.isSuccess && requests.data!.length > 0 ? (
-                            <Label color='red' size='medium' empty circular corner />
+                            <Label
+                                content={requests.data!.length.toString()}
+                                color='red'
+                                size='small'
+                                circular
+                                floating
+                            />
                         ) : null}
                     </Menu.Item>
-                    <Dropdown item direction='left' text={CurrentUser.getUsername()}>
-                        <Dropdown.Menu>
-                            <Dropdown.Item
-                                icon='user'
-                                text='Profile'
-                                onClick={() => history.push(`/user/${CurrentUser.getId()}`)}
-                            />
-                            <Dropdown.Divider />
-                            <Dropdown.Item icon='sign-out' text='Log Out' onClick={logOutAndClear} />
-                        </Dropdown.Menu>
-                    </Dropdown>
-                </Menu.Menu>
-            </Menu>
-            <br />
-            <br />
+                    <Menu.Item
+                        active={profileActive}
+                        icon='user'
+                        onClick={() => !profileActive && history.push(`/user/${CurrentUser.getId()}`)}
+                    />
+                </Menu>
+            ) : null}
             <Switch>
                 <Route path={['/followers', '/following']} component={FollowerPage} />
                 <Route path='/home' component={HomePosts} />
                 <Route path='/new'>
-                    <NewPost uploadInput={uploadInput!} onCancel={onCancel} />
+                    <NewPost uploadInput={uploadInput!} onCancel={cancelUpload} onSuccess={afterUpload} />
                 </Route>
                 <Route path='/post/:id' component={SinglePost} />
-                <Route path='/user/:id' component={UserPosts} />
+                <Route path='/user/:id'>
+                    <UserPosts logout={logOutAndClear} />
+                </Route>
             </Switch>
         </div>
     )

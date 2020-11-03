@@ -5,7 +5,7 @@ import Posts from './Posts'
 import Profile from './Profile'
 import { getUserPosts } from './routes/api'
 
-export default function () {
+export default function ({ logout }: { logout: () => void }) {
     const { id: userIdString } = useParams<{ id: string }>()
     const userId = parseInt(userIdString)
 
@@ -17,7 +17,7 @@ export default function () {
 
     return (
         <>
-            <Profile userId={userId} />
+            <Profile userId={userId} logout={logout} />
             <Posts posts={posts} />
         </>
     )
