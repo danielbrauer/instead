@@ -59,7 +59,7 @@ export default function () {
                 onChange={onSelect}
                 style={{ display: 'none' }}
             />
-            <Menu inverted fixed='top' size='small'>
+            <Menu inverted fixed='bottom' size='small'>
                 <Menu.Item header onClick={() => history.location.pathname !== '/home' && history.push('/home')}>
                     Instead
                 </Menu.Item>
@@ -73,21 +73,19 @@ export default function () {
                             <Label color='red' size='medium' empty circular corner />
                         ) : null}
                     </Menu.Item>
-                    <Dropdown item direction='left' text={CurrentUser.getUsername()}>
+                    <Dropdown item upward={true} direction='left' text={CurrentUser.getUsername()}>
                         <Dropdown.Menu>
+                            <Dropdown.Item icon='sign-out' text='Log Out' onClick={logOutAndClear} />
+                            <Dropdown.Divider />
                             <Dropdown.Item
                                 icon='user'
                                 text='Profile'
                                 onClick={() => history.push(`/user/${CurrentUser.getId()}`)}
                             />
-                            <Dropdown.Divider />
-                            <Dropdown.Item icon='sign-out' text='Log Out' onClick={logOutAndClear} />
                         </Dropdown.Menu>
                     </Dropdown>
                 </Menu.Menu>
             </Menu>
-            <br />
-            <br />
             <Switch>
                 <Route path={['/followers', '/following']} component={FollowerPage} />
                 <Route path='/home' component={HomePosts} />
