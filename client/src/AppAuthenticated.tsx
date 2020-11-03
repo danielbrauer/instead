@@ -28,9 +28,9 @@ export default function () {
         }
     }
 
-    function onCancel() {
+    function cancelUpload() {
         setUploadInput(null)
-        history.push(previousPage)
+        history.push(previousPage || '/home')
     }
 
     const logOutAndClear = async () => {
@@ -45,6 +45,7 @@ export default function () {
 
     useEffect(() => {
         if (!CurrentUser.loggedIn()) logOutAndClear()
+        if (history.location.pathname === '/new' && !uploadInput) cancelUpload()
     })
 
     if (!CurrentUser.loggedIn()) return <Redirect to='/login' />
@@ -64,26 +65,38 @@ export default function () {
                 onChange={onSelect}
                 style={{ display: 'none' }}
             />
-            <Menu inverted widths={4} fixed='bottom' size='small'>
-                <Menu.Item icon='home' active={homeActive} onClick={() => !homeActive && history.push('/home')} />
-                <Menu.Item icon='camera' active={newActive} onClick={() => !newActive && inputFile.current!.click()} />
-                <Menu.Item active={followersActive} onClick={() => history.push('/followers')}>
-                    <Icon name='users' />
-                    {requests.isSuccess && requests.data!.length > 0 ? (
-                        <Label content={requests.data!.length.toString()} color='red' size='small' circular floating />
-                    ) : null}
-                </Menu.Item>
-                <Menu.Item
-                    active={profileActive}
-                    icon='user'
-                    onClick={() => !profileActive && history.push(`/user/${CurrentUser.getId()}`)}
-                />
-            </Menu>
+            {!uploadInput ? (
+                <Menu inverted widths={4} fixed='bottom' size='small'>
+                    <Menu.Item icon='home' active={homeActive} onClick={() => !homeActive && history.push('/home')} />
+                    <Menu.Item
+                        icon='camera'
+                        active={newActive}
+                        onClick={() => !newActive && inputFile.current!.click()}
+                    />
+                    <Menu.Item active={followersActive} onClick={() => history.push('/followers')}>
+                        <Icon name='users' />
+                        {requests.isSuccess && requests.data!.length > 0 ? (
+                            <Label
+                                content={requests.data!.length.toString()}
+                                color='red'
+                                size='small'
+                                circular
+                                floating
+                            />
+                        ) : null}
+                    </Menu.Item>
+                    <Menu.Item
+                        active={profileActive}
+                        icon='user'
+                        onClick={() => !profileActive && history.push(`/user/${CurrentUser.getId()}`)}
+                    />
+                </Menu>
+            ) : null}
             <Switch>
                 <Route path={['/followers', '/following']} component={FollowerPage} />
                 <Route path='/home' component={HomePosts} />
                 <Route path='/new'>
-                    <NewPost uploadInput={uploadInput!} onCancel={onCancel} />
+                    <NewPost uploadInput={uploadInput!} onCancel={cancelUpload} />
                 </Route>
                 <Route path='/post/:id' component={SinglePost} />
                 <Route path='/user/:id'>
