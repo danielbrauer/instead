@@ -5,6 +5,7 @@ import { useInput } from './Components/useInput'
 import CurrentUser from './CurrentUser'
 import { encryptAndUploadProfile, getProfile } from './postCrypto'
 import { longLivedQuery } from './QuerySettings'
+import SafetyButton from './SafetyButton'
 import UserInList from './UserInList'
 
 export default function ({ userId, logout }: { userId: number; logout: () => void }) {
@@ -40,7 +41,7 @@ export default function ({ userId, logout }: { userId: number; logout: () => voi
                         <Item.Extra>
                             {userId === CurrentUser.getId() && (
                                 <>
-                                    <Button icon='sign-out' floated='right' onClick={logout} />
+                                    <SafetyButton icon='sign-out' floated='right' onClick={logout} />
                                     <Button
                                         {...(user.data === null
                                             ? {
