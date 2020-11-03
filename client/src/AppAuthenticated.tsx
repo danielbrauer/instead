@@ -28,6 +28,11 @@ export default function () {
         }
     }
 
+    function afterUpload() {
+        setUploadInput(null)
+        history.push('/home')
+    }
+
     function cancelUpload() {
         setUploadInput(null)
         history.push(previousPage || '/home')
@@ -96,7 +101,7 @@ export default function () {
                 <Route path={['/followers', '/following']} component={FollowerPage} />
                 <Route path='/home' component={HomePosts} />
                 <Route path='/new'>
-                    <NewPost uploadInput={uploadInput!} onCancel={cancelUpload} />
+                    <NewPost uploadInput={uploadInput!} onCancel={cancelUpload} onSuccess={afterUpload} />
                 </Route>
                 <Route path='/post/:id' component={SinglePost} />
                 <Route path='/user/:id'>

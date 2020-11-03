@@ -4,7 +4,15 @@ import { Redirect } from 'react-router-dom'
 import { Button, Dimmer, Image, Loader, Menu, Message } from 'semantic-ui-react'
 import { encryptAndUploadImage } from './postCrypto'
 
-export default function NewPost({ uploadInput, onCancel }: { uploadInput: File; onCancel: () => void }) {
+export default function NewPost({
+    uploadInput,
+    onCancel,
+    onSuccess,
+}: {
+    uploadInput: File
+    onCancel: () => void
+    onSuccess: () => void
+}) {
     const [aspect, setAspect] = useState<number | null>(null)
     const [uploadMutation, uploadStatus] = useMutation(encryptAndUploadImage)
     const [blobUrl, dispatch] = useReducer((state: string, action: File | null) => {
@@ -16,19 +24,16 @@ export default function NewPost({ uploadInput, onCancel }: { uploadInput: File; 
         return () => dispatch(null)
     }, [uploadInput])
 
-    if (!uploadInput) {
-        onCancel()
-    }
-
     async function onSubmit() {
-        await uploadMutation({ file: uploadInput!, aspect: aspect! })
+        const success = await uploadMutation({ file: uploadInput!, aspect: aspect! })
+        if (success) onSuccess()
     }
 
     function storeImageDimensions(evt: ChangeEvent<HTMLInputElement>) {
         setAspect(evt.target.height / evt.target.width)
     }
 
-    if (uploadStatus.isSuccess) return <Redirect to='/home' />
+    if (!uploadInput || uploadStatus.isSuccess) return <Redirect to='/home' />
 
     return (
         <>
