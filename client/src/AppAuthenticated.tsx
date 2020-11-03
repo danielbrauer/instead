@@ -49,6 +49,11 @@ export default function () {
 
     if (!CurrentUser.loggedIn()) return <Redirect to='/login' />
 
+    const homeActive = history.location.pathname === '/home'
+    const newActive = history.location.pathname === '/new'
+    const followersActive = history.location.pathname === '/followers' || history.location.pathname === '/following'
+    const profileActive = history.location.pathname === `/user/${CurrentUser.getId()}`
+
     return (
         <div>
             <input
@@ -59,24 +64,20 @@ export default function () {
                 onChange={onSelect}
                 style={{ display: 'none' }}
             />
-            <Menu inverted fixed='bottom' size='small'>
-                <Menu.Item header onClick={() => history.location.pathname !== '/home' && history.push('/home')}>
-                    <Icon fitted name='home' />
+            <Menu inverted widths={4} fixed='bottom' size='small'>
+                <Menu.Item icon='home' active={homeActive} onClick={() => !homeActive && history.push('/home')} />
+                <Menu.Item icon='camera' active={newActive} onClick={() => !newActive && inputFile.current!.click()} />
+                <Menu.Item active={followersActive} onClick={() => history.push('/followers')}>
+                    <Icon name='users' />
+                    {requests.isSuccess && requests.data!.length > 0 ? (
+                        <Label content={requests.data!.length.toString()} color='red' size='small' circular floating />
+                    ) : null}
                 </Menu.Item>
-                <Menu.Item onClick={() => inputFile.current!.click()}>
-                    <Icon fitted name='camera' />
-                </Menu.Item>
-                <Menu.Menu position='right'>
-                    <Menu.Item onClick={() => history.push('/followers')}>
-                        <Icon fitted name='users' />
-                        {requests.isSuccess && requests.data!.length > 0 ? (
-                            <Label color='red' size='medium' empty circular corner />
-                        ) : null}
-                    </Menu.Item>
-                    <Menu.Item onClick={() => history.push(`/user/${CurrentUser.getId()}`)}>
-                        <Icon fitted name='user' />
-                    </Menu.Item>
-                </Menu.Menu>
+                <Menu.Item
+                    active={profileActive}
+                    icon='user'
+                    onClick={() => !profileActive && history.push(`/user/${CurrentUser.getId()}`)}
+                />
             </Menu>
             <Switch>
                 <Route path={['/followers', '/following']} component={FollowerPage} />
