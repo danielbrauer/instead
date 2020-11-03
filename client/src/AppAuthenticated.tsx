@@ -66,7 +66,7 @@ export default function () {
                 style={{ display: 'none' }}
             />
             {!uploadInput ? (
-                <Menu inverted widths={4} fixed='bottom' size='small'>
+                <Menu inverted borderless widths={4} fixed='bottom'>
                     <Menu.Item icon='home' active={homeActive} onClick={() => !homeActive && history.push('/home')} />
                     <Menu.Item
                         icon='camera'
