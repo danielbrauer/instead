@@ -7,7 +7,6 @@ import Comments from './Comments'
 import InternalLink from './Components/InternalLink'
 import EncryptedImage from './EncryptedImage'
 import PostHeader from './PostHeader'
-import './Posts.css'
 
 export default function ({ posts }: { posts: InfiniteQueryResult<IGetHomePostsWithKeysResult[], unknown> }) {
     if (posts.isError) return <Message negative content='Error fetching posts' />

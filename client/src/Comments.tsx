@@ -1,7 +1,6 @@
 import React from 'react'
 import { useQuery } from 'react-query'
 import { Comment, Loader, Message } from 'semantic-ui-react'
-import './Comments.css'
 import { getComments } from './postCrypto'
 import SingleComment from './SingleComment'
 
