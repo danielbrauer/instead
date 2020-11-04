@@ -27,16 +27,16 @@ export default function ({ postId, limit, compact }: CommentsProps) {
                 <Loader active></Loader>
             </div>
         )
-    const data = commentsQuery.data!
+    const { comments, fullCount } = commentsQuery.data!
     return (
         <Comment.Group className={'post-metadata' + (compact ? ' compact' : '')}>
-            {data.comments.map((comment) => (
+            {comments.map((comment) => (
                 <SingleComment key={comment.id} comment={comment} />
             ))}
-            {limit && limit < data.fullCount ? (
+            {limit && limit < fullCount ? (
                 <Comment>
                     <Comment.Content>
-                        <InternalLink to={`/post/${postId.toString()}`}>See all {data.fullCount} comments</InternalLink>
+                        <InternalLink to={`/post/${postId.toString()}`}>See all {fullCount} comments</InternalLink>
                     </Comment.Content>
                 </Comment>
             ) : null}

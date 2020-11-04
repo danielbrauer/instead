@@ -11,7 +11,7 @@ export default function (props: LinkProps) {
     }
 
     return (
-        <Link {...props} to={props.to} onClick={linkAction}>
+        <Link {...props} onClick={linkAction}>
             {props.children}
         </Link>
     )

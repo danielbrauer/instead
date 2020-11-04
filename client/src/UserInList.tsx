@@ -4,11 +4,7 @@ import { Icon, Label } from 'semantic-ui-react'
 import InternalLink from './Components/InternalLink'
 import { getProfile } from './postCrypto'
 
-interface UserInListProps {
-    id: number
-}
-
-export default function UserInList({ id }: UserInListProps) {
+export default function UserInList({ id }: { id: number }) {
     const user = useQuery(['userProfile', id], getProfile)
     return (
         <>
