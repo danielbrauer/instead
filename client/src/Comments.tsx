@@ -13,20 +13,9 @@ interface CommentsProps {
 
 export default function ({ postId, limit, compact }: CommentsProps) {
     const commentsQuery = useQuery(['comments', postId, limit], getComments)
-    if (commentsQuery.isError)
-        return (
-            <div>
-                <Message negative>
-                    <Message.Header>Error fetching comments</Message.Header>
-                </Message>
-            </div>
-        )
+    if (commentsQuery.isError) return <Message negative header='Error fetching comments' />
     if (commentsQuery.isLoading)
-        return (
-            <div className='comment-loader'>
-                <Loader active inline='centered' content='Loading comments...' />
-            </div>
-        )
+        return <Loader className='comment-loader' active inline='centered' content='Loading comments...' />
     const { comments, fullCount } = commentsQuery.data!
     return (
         <Comment.Group className={compact ? 'compact' : undefined}>
@@ -34,11 +23,12 @@ export default function ({ postId, limit, compact }: CommentsProps) {
                 <SingleComment key={comment.id} comment={comment} />
             ))}
             {limit && limit < fullCount ? (
-                <Comment>
-                    <Comment.Content>
+                <Comment
+                    className='see-comments-link'
+                    content={
                         <InternalLink to={`/post/${postId.toString()}`}>See all {fullCount} comments</InternalLink>
-                    </Comment.Content>
-                </Comment>
+                    }
+                />
             ) : null}
         </Comment.Group>
     )

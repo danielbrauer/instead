@@ -17,13 +17,13 @@ div.post-header {
 
 div.post-header div.timestamp {
     display: inline;
-    opacity: 0.5;
-    font-size: 90%;
+    color: rgba(0,0,0,.4);
+    font-size: .875em;
     margin-left: auto;
 }
 
 div.post-top, div.post-bottom {
-    margin: 1em;
+    margin: 0.75em;
 }
 
 div.post-top {
@@ -60,6 +60,11 @@ div.ui.comments.compact i.icon {
 
 div.comment-loader {
     margin-bottom: 1em;
+}
+
+div.see-comments-link a {
+    color: gray;
+    font-size: 90%;
 }
 
 /* New Post */
