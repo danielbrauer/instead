@@ -12,6 +12,7 @@ div.item.post {
 div.post-header {
     display: flex;
     align-items: center;
+    flex-grow: 1;
 }
 
 div.post-header div.timestamp {
@@ -23,6 +24,11 @@ div.post-header div.timestamp {
 
 div.post-top, div.post-bottom {
     margin: 1em;
+}
+
+div.post-top {
+    display: flex;
+    flex-direction: row;
 }
 
 /* Comments */
