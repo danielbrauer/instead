@@ -22,11 +22,15 @@ export default function ({ posts }: { posts: InfiniteQueryResult<IGetHomePostsWi
                 .data!.map((group) =>
                     group.map((post) => (
                         <List.Item className='post' key={post.id}>
-                            <PostHeader post={post} />
+                            <div className='post-metadata'>
+                                <PostHeader post={post} />
+                            </div>
                             <InternalLink to={`/post/${post.id.toString()}`}>
                                 <EncryptedImage post={post} />
                             </InternalLink>
-                            <Comments postId={post.id} limit={3} compact />
+                            <div className='post-metadata'>
+                                <Comments postId={post.id} limit={3} compact />
+                            </div>
                         </List.Item>
                     )),
                 )

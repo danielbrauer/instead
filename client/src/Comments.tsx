@@ -27,7 +27,7 @@ export default function ({ postId, limit, compact }: CommentsProps) {
             </div>
         )
     return (
-        <Comment.Group className={compact ? 'compact' : undefined}>
+        <Comment.Group className={'post-metadata' + (compact ? ' compact' : '')}>
             {commentsQuery.data!.map((comment) => (
                 <SingleComment key={comment.id} comment={comment} />
             ))}

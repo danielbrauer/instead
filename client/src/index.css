@@ -6,7 +6,6 @@ div.item.post {
 }
 
 div.post-header {
-    margin: 0.5em;
     display: flex;
     align-items: center;
 }
@@ -18,7 +17,7 @@ div.post-header div.timestamp {
     margin-left: auto;
 }
 
-div.post div.ui.comments {
+div.post div.post-metadata {
     margin: 0.5em;
 }
 
