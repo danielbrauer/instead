@@ -17,19 +17,19 @@ export default function ({ postId, limit, compact }: CommentsProps) {
         return (
             <div>
                 <Message negative>
-                    <Message.Header>Error fetching posts</Message.Header>
+                    <Message.Header>Error fetching comments</Message.Header>
                 </Message>
             </div>
         )
     if (commentsQuery.isLoading)
         return (
-            <div>
-                <Loader active></Loader>
+            <div className='comment-loader'>
+                <Loader active inline='centered' content='Loading comments...' />
             </div>
         )
     const { comments, fullCount } = commentsQuery.data!
     return (
-        <Comment.Group className={'post-metadata' + (compact ? ' compact' : '')}>
+        <Comment.Group className={compact ? 'compact' : undefined}>
             {comments.map((comment) => (
                 <SingleComment key={comment.id} comment={comment} />
             ))}

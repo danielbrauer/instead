@@ -52,6 +52,10 @@ div.ui.comments.compact i.icon {
     display: none;
 }
 
+div.comment-loader {
+    margin-bottom: 1em;
+}
+
 /* New Post */
 
 div.new-post-form {
