@@ -1,6 +1,7 @@
 {
   "short_name": "Instead",
   "name": "Instead",
+  "description": "Securely share photos with friends",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,6 +11,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#ffffff",
   "background_color": "#ffffff"
 }
