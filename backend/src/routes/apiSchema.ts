@@ -15,7 +15,7 @@ export interface PostByIdRequest extends ValidatedRequestSchema {
 
 export const commentsForPostIdQuery = Joi.object({
     id: Joi.number().integer().required(),
-    limit: Joi.number().integer(),
+    limit: Joi.number().integer().positive(),
 })
 
 export interface CommentsForPostIdRequest extends ValidatedRequestSchema {
