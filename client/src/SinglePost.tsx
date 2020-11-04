@@ -31,10 +31,14 @@ export default function () {
 
     return (
         <div className='post'>
-            <PostHeader post={post} />
+            <div className='post-top'>
+                <PostHeader post={post} />
+            </div>
             <EncryptedImage post={post} />
-            <Comments postId={post.id} />
-            <NewComment post={post} />
+            <div className='post-bottom'>
+                <Comments postId={post.id} />
+                <NewComment post={post} />
+            </div>
         </div>
     )
 }

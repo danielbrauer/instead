@@ -1,6 +1,10 @@
+div.root {
+    padding: 0 0 3em 0;
+}
+
 /* Posts */
 
-div.post {
+div.item.post {
     padding: 0 0 3em 0;
     line-height: 0;
 }
@@ -17,7 +21,7 @@ div.post-header div.timestamp {
     margin-left: auto;
 }
 
-div.post div.post-metadata {
+div.post-top, div.post-bottom {
     margin: 1em;
 }
 

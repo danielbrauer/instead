@@ -63,7 +63,7 @@ export default function () {
     const profileActive = history.location.pathname === `/user/${CurrentUser.getId()}`
 
     return (
-        <div>
+        <div className='root'>
             <input
                 type='file'
                 id='file'
