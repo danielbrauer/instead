@@ -3,6 +3,7 @@ import InfiniteScroll from 'react-infinite-scroller'
 import { InfiniteQueryResult } from 'react-query'
 import { List, Loader, Message } from 'semantic-ui-react'
 import { IGetHomePostsWithKeysResult } from '../../backend/src/queries/posts.gen'
+import Comments from './Comments'
 import InternalLink from './Components/InternalLink'
 import EncryptedImage from './EncryptedImage'
 import PostHeader from './PostHeader'
@@ -20,11 +21,16 @@ export default function ({ posts }: { posts: InfiniteQueryResult<IGetHomePostsWi
             {posts
                 .data!.map((group) =>
                     group.map((post) => (
-                        <List.Item key={post.id}>
-                            <PostHeader post={post} />
+                        <List.Item className='post' key={post.id}>
+                            <div className='post-metadata'>
+                                <PostHeader post={post} />
+                            </div>
                             <InternalLink to={`/post/${post.id.toString()}`}>
                                 <EncryptedImage post={post} />
                             </InternalLink>
+                            <div className='post-metadata'>
+                                <Comments postId={post.id} limit={3} compact />
+                            </div>
                         </List.Item>
                     )),
                 )

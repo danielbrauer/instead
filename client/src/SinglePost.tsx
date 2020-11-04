@@ -13,6 +13,12 @@ export default function () {
     const { id: postId } = useParams<{ id: string }>()
     const postQuery = useQuery(['post', postId], getPost, longLivedQuery)
 
+    if (postQuery.isLoading)
+        return (
+            <div>
+                <Loader active></Loader>
+            </div>
+        )
     if (postQuery.isError || !postQuery.data)
         return (
             <div>
@@ -21,16 +27,10 @@ export default function () {
                 </Message>
             </div>
         )
-    if (postQuery.isLoading)
-        return (
-            <div>
-                <Loader active></Loader>
-            </div>
-        )
     const post = postQuery.data!
 
     return (
-        <div>
+        <div className='post'>
             <PostHeader post={post} />
             <EncryptedImage post={post} />
             <Comments postId={post.id} />

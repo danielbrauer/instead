@@ -14,7 +14,7 @@ export default function () {
     const [uploadInput, setUploadInput] = useState<File | null>(null)
     const [previousPage, setPreviousPage] = useState('')
 
-    const inputFile = useRef<HTMLInputElement>(null)
+    const fileInputElement = useRef<HTMLInputElement>(null)
 
     const history = useHistory()
     const requests = useQuery('followRequests', Routes.getFollowRequests)
@@ -30,11 +30,13 @@ export default function () {
 
     function afterUpload() {
         setUploadInput(null)
+        fileInputElement.current!.value = ''
         history.push('/home')
     }
 
     function cancelUpload() {
         setUploadInput(null)
+        fileInputElement.current!.value = ''
         history.push(previousPage || '/home')
     }
 
@@ -66,7 +68,7 @@ export default function () {
                 type='file'
                 id='file'
                 accept='image/jpeg, image/png'
-                ref={inputFile}
+                ref={fileInputElement}
                 onChange={onSelect}
                 style={{ display: 'none' }}
             />
@@ -76,7 +78,7 @@ export default function () {
                     <Menu.Item
                         icon='camera'
                         active={newActive}
-                        onClick={() => !newActive && inputFile.current!.click()}
+                        onClick={() => !newActive && fileInputElement.current!.click()}
                     />
                     <Menu.Item active={followersActive} onClick={() => history.push('/followers')}>
                         <Icon name='users' />

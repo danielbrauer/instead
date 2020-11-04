@@ -5,6 +5,7 @@ import 'semantic-ui-css/semantic.min.css'
 import AppAuthenticated from './AppAuthenticated'
 import AppUnauthenticated from './AppUnauthenticated'
 import AppWelcome from './AppWelcome'
+import './index.css'
 
 const routing = (
     <BrowserRouter>

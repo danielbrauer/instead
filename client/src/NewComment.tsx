@@ -10,7 +10,7 @@ export default function ({ post }: { post: Post }) {
     const [commentMutation, commentStatus] = useMutation(encryptAndPostComment)
 
     async function onSubmit() {
-        await commentMutation({ post, content: contentInput.value })
+        await commentMutation({ post, comment: contentInput.value })
         contentInput.reset()
     }
 
@@ -19,6 +19,7 @@ export default function ({ post }: { post: Post }) {
             <Form.Input
                 action={{
                     primary: true,
+                    type: 'submit',
                     content: 'Reply',
                     disabled: contentInput.value === '',
                     onClick: onSubmit,

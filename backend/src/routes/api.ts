@@ -71,10 +71,14 @@ router.get(
 
 router.get(
     '/getComments',
-    validator.query(Schema.postByIdQuery),
+    validator.query(Schema.commentsForPostIdQuery),
     validator.body(Schema.empty),
-    async (req: ValidatedRequest<Schema.PostByIdRequest>, res) => {
-        const comments = await postService.getCommentsForPost(req.query.id, req.userId)
+    async (req: ValidatedRequest<Schema.CommentsForPostIdRequest>, res) => {
+        const comments = await postService.getCommentsForPost(
+            req.query.id,
+            req.userId,
+            req.query.limit,
+        )
         return res.json(comments)
     },
 )

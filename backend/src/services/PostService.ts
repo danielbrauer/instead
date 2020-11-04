@@ -1,12 +1,12 @@
-import Container, { Service } from 'typedi'
-import Database from './DatabaseService'
-import AWSService from './AWSService'
-import * as Posts from '../queries/posts.gen'
-import * as Comments from '../queries/comments.gen'
-import uuidv1 from 'uuid/v1'
-import { SimpleEventDispatcher } from 'strongly-typed-events'
-import * as config from '../config/config'
 import { DeletePostResult, StartPostResult } from 'api'
+import { SimpleEventDispatcher } from 'strongly-typed-events'
+import Container, { Service } from 'typedi'
+import uuidv1 from 'uuid/v1'
+import * as config from '../config/config'
+import * as Comments from '../queries/comments.gen'
+import * as Posts from '../queries/posts.gen'
+import AWSService from './AWSService'
+import Database from './DatabaseService'
 
 @Service()
 export default class PostService {
@@ -91,8 +91,8 @@ export default class PostService {
         await Comments.destroy.run({ commentId, authorId }, this.db.pool)
     }
 
-    async getCommentsForPost(postId: number, userId: number) {
-        return await Comments.getCommentsForPost.run({ postId, userId }, this.db.pool)
+    async getCommentsForPost(postId: number, userId: number, limit?: number) {
+        return await Comments.getCommentsForPost.run({ postId, userId, limit }, this.db.pool)
     }
 
     onPostCreated(postId: number) {

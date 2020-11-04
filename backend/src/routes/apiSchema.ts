@@ -13,6 +13,16 @@ export interface PostByIdRequest extends ValidatedRequestSchema {
     [ContainerTypes.Body]: Joi.extractType<typeof empty>
 }
 
+export const commentsForPostIdQuery = Joi.object({
+    id: Joi.number().integer().required(),
+    limit: Joi.number().integer().positive(),
+})
+
+export interface CommentsForPostIdRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof commentsForPostIdQuery>
+    [ContainerTypes.Body]: Joi.extractType<typeof empty>
+}
+
 export const createCommentBody = Joi.object({
     postId: Joi.number().integer().required(),
     keySetId: Joi.number().integer().required(),
