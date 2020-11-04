@@ -150,7 +150,27 @@ async function encryptSymmetric(arrayBuffer: ArrayBuffer, key: CryptoKey) {
     return { encrypted, ivBuffer }
 }
 
-export async function encryptAndUploadImage({ file, aspect }: { file: File; aspect: number }) {
+async function postCommentWithKey({ postId, postKey, comment }: { postId: number; postKey: PostKey; comment: string }) {
+    const contentBuffer = Buffer.from(comment, 'utf8')
+    const { encrypted, ivBuffer } = await encryptSymmetric(contentBuffer, postKey.key)
+    await Routes.createComment({
+        postId: postId,
+        keySetId: postKey.id,
+        content: Buffer.from(encrypted).toString('base64'),
+        contentIv: ivBuffer.toString('base64'),
+    })
+    return true
+}
+
+export async function encryptAndUploadImage({
+    file,
+    aspect,
+    comment,
+}: {
+    file: File
+    aspect: number
+    comment?: string
+}) {
     const [fileBuffer, postKey] = await Promise.all([readAsArrayBuffer(file), getOrCreatePostKey()])
     const { encrypted, ivBuffer } = await encryptSymmetric(fileBuffer, postKey.key)
     const contentMD5 = md5.base64(encrypted)
@@ -170,20 +190,18 @@ export async function encryptAndUploadImage({ file, aspect }: { file: File; aspe
         success = false
     }
     await Routes.finishPost(postInfo.postId, success)
+
+    if (comment) {
+        await postCommentWithKey({ postId: postInfo.postId, postKey, comment })
+    }
+
     return success
 }
 
-export async function encryptAndPostComment({ post, content }: { post: Types.Post; content: string }) {
-    const postKey = await unwrapKeyAsymmetric(post.key)
-    const contentBuffer = Buffer.from(content, 'utf8')
-    const { encrypted, ivBuffer } = await encryptSymmetric(contentBuffer, postKey)
-    await Routes.createComment({
-        postId: post.id,
-        keySetId: post.postKeySetId,
-        content: Buffer.from(encrypted).toString('base64'),
-        contentIv: ivBuffer.toString('base64'),
-    })
-    return true
+export async function encryptAndPostComment({ post, comment }: { post: Types.Post; comment: string }) {
+    const key = await unwrapKeyAsymmetric(post.key)
+    const postKey: PostKey = { key, id: post.postKeySetId }
+    return await postCommentWithKey({ postId: post.id, postKey, comment })
 }
 
 async function decryptSymmetric(buffer: ArrayBuffer, ivBase64: string, key: CryptoKey) {

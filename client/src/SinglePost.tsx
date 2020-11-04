@@ -13,18 +13,18 @@ export default function () {
     const { id: postId } = useParams<{ id: string }>()
     const postQuery = useQuery(['post', postId], getPost, longLivedQuery)
 
+    if (postQuery.isLoading)
+        return (
+            <div>
+                <Loader active></Loader>
+            </div>
+        )
     if (postQuery.isError || !postQuery.data)
         return (
             <div>
                 <Message negative>
                     <Message.Header>Error fetching post</Message.Header>
                 </Message>
-            </div>
-        )
-    if (postQuery.isLoading)
-        return (
-            <div>
-                <Loader active></Loader>
             </div>
         )
     const post = postQuery.data!

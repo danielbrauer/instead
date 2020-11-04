@@ -1,7 +1,7 @@
 /* Posts */
 
 div.item.post {
-    margin: 0 0 2em 0;
+    padding: 0 0 3em 0;
     line-height: 0;
 }
 
@@ -18,7 +18,7 @@ div.post-header div.timestamp {
 }
 
 div.post div.post-metadata {
-    margin: 0.5em;
+    margin: 1em;
 }
 
 /* Comments */
@@ -46,4 +46,17 @@ div.ui.comments.compact div.metadata {
 
 div.ui.comments.compact i.icon {
     display: none;
+}
+
+/* New Post */
+
+div.new-post-form {
+    bottom: 0;
+    position: fixed;
+    padding: 1em;
+    width: 100vw;
+}
+
+div.new-post-form div.fields {
+    justify-content: space-between;
 }

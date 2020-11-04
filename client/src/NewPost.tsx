@@ -1,7 +1,8 @@
 import React, { ChangeEvent, useEffect, useReducer, useState } from 'react'
 import { useMutation } from 'react-query'
 import { Redirect } from 'react-router-dom'
-import { Button, Dimmer, Image, Loader, Menu, Message } from 'semantic-ui-react'
+import { Dimmer, Form, Image, Loader, Message } from 'semantic-ui-react'
+import { useInput } from './Components/useInput'
 import { encryptAndUploadImage } from './postCrypto'
 
 export default function NewPost({
@@ -13,6 +14,7 @@ export default function NewPost({
     onCancel: () => void
     onSuccess: () => void
 }) {
+    const commentInput = useInput('')
     const [aspect, setAspect] = useState<number | null>(null)
     const [uploadMutation, uploadStatus] = useMutation(encryptAndUploadImage)
     const [blobUrl, dispatch] = useReducer((state: string, action: File | null) => {
@@ -24,8 +26,9 @@ export default function NewPost({
         return () => dispatch(null)
     }, [uploadInput])
 
-    async function onSubmit() {
-        const success = await uploadMutation({ file: uploadInput!, aspect: aspect! })
+    async function onSubmit(event: React.MouseEvent) {
+        event.preventDefault()
+        const success = await uploadMutation({ file: uploadInput!, aspect: aspect!, comment: commentInput.value })
         if (success) onSuccess()
     }
 
@@ -49,15 +52,15 @@ export default function NewPost({
                 <Image fluid onLoad={storeImageDimensions} src={blobUrl} alt={uploadInput.name} />
             </>
             {!uploadStatus.isLoading ? (
-                <Menu secondary fluid fixed='bottom'>
-                    <Menu.Item>
-                        <Button negative onClick={onCancel} content='Cancel' />
-                    </Menu.Item>
-
-                    <Menu.Item position='right'>
-                        <Button positive onClick={onSubmit} content='Upload' />
-                    </Menu.Item>
-                </Menu>
+                <div className='new-post-form'>
+                    <Form>
+                        <Form.Input placeholder='Comment' {...commentInput.bind} />
+                        <Form.Group>
+                            <Form.Button type='button' negative onClick={onCancel} content='Cancel' />
+                            <Form.Button type='submit' positive onClick={onSubmit} content='Upload' />
+                        </Form.Group>
+                    </Form>
+                </div>
             ) : null}
         </>
     )
