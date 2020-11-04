@@ -61,6 +61,7 @@ export const destroy = new PreparedQuery<IDestroyParams,IDestroyResult>(destroyI
 export interface IGetCommentsForPostParams {
   postId: number | null | void;
   userId: number | null | void;
+  limit: number | null | void;
 }
 
 /** 'GetCommentsForPost' return type */
@@ -79,7 +80,7 @@ export interface IGetCommentsForPostQuery {
   result: IGetCommentsForPostResult;
 }
 
-const getCommentsForPostIR: any = {"name":"GetCommentsForPost","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":455,"b":460,"line":12,"col":26}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":549,"b":554,"line":14,"col":30}]}}],"usedParamSet":{"postId":true,"userId":true},"statement":{"body":"SELECT comments.id, comments.author_id, comments.content, comments.content_iv, comments.published,\n       post_keys.key\nFROM comments, post_keys\nWHERE comments.post_id = :postId\nAND comments.post_key_set_id = post_keys.post_key_set_id\nAND post_keys.recipient_id = :userId\nORDER BY published","loc":{"a":284,"b":573,"line":9,"col":0}}};
+const getCommentsForPostIR: any = {"name":"GetCommentsForPost","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":455,"b":460,"line":12,"col":26}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":549,"b":554,"line":14,"col":30}]}},{"name":"limit","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":593,"b":597,"line":16,"col":18},{"a":610,"b":614,"line":16,"col":35}]}}],"usedParamSet":{"postId":true,"userId":true,"limit":true},"statement":{"body":"SELECT comments.id, comments.author_id, comments.content, comments.content_iv, comments.published,\n       post_keys.key\nFROM comments, post_keys\nWHERE comments.post_id = :postId\nAND comments.post_key_set_id = post_keys.post_key_set_id\nAND post_keys.recipient_id = :userId\nORDER BY published\nLIMIT CASE WHEN (:limit > 0) THEN :limit END","loc":{"a":284,"b":618,"line":9,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -91,6 +92,7 @@ const getCommentsForPostIR: any = {"name":"GetCommentsForPost","params":[{"name"
  * AND comments.post_key_set_id = post_keys.post_key_set_id
  * AND post_keys.recipient_id = :userId
  * ORDER BY published
+ * LIMIT CASE WHEN (:limit > 0) THEN :limit END
  * ```
  */
 export const getCommentsForPost = new PreparedQuery<IGetCommentsForPostParams,IGetCommentsForPostResult>(getCommentsForPostIR);

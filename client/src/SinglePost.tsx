@@ -30,10 +30,10 @@ export default function () {
     const post = postQuery.data!
 
     return (
-        <div>
+        <div className='post'>
             <PostHeader post={post} />
             <EncryptedImage post={post} />
-            <Comments postId={post.id} />
+            <Comments postId={post.id} limit={0} />
             <NewComment post={post} />
         </div>
     )

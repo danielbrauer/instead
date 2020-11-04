@@ -1,0 +1,24 @@
+div.ui.comments.compact {
+    margin: 0;
+}
+
+div.ui.comments.compact div.comment {
+    margin: 0;
+}
+
+div.ui.comments.compact a.display-name {
+    display: inline;
+    margin-right: 0.25em;
+}
+
+div.ui.comments.compact div.text {
+    display: inline;
+}
+
+div.ui.comments.compact div.metadata {
+    display: none;
+}
+
+div.ui.comments.compact i.icon {
+    display: none;
+}

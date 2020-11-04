@@ -197,8 +197,8 @@ async function decryptSymmetric(buffer: ArrayBuffer, ivBase64: string, key: Cryp
     )
 }
 
-export async function getComments(query: string, postId: number) {
-    const commentsEncrypted = await Routes.getComments(postId)
+export async function getComments(query: string, postId: number, limit: number) {
+    const commentsEncrypted = await Routes.getComments(postId, limit)
     const commentsDecrypted = Promise.all(
         commentsEncrypted.map(
             async (commentEnc): Promise<Types.Comment> => {

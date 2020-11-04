@@ -1,11 +1,18 @@
 import React from 'react'
-import { Message, Loader, Comment } from 'semantic-ui-react'
 import { useQuery } from 'react-query'
+import { Comment, Loader, Message } from 'semantic-ui-react'
+import './Comments.css'
 import { getComments } from './postCrypto'
 import SingleComment from './SingleComment'
 
-export default function ({ postId }: { postId: number }) {
-    const commentsQuery = useQuery(['comments', postId], getComments)
+interface CommentsProps {
+    postId: number
+    limit: number
+    compact?: boolean
+}
+
+export default function ({ postId, limit, compact }: CommentsProps) {
+    const commentsQuery = useQuery(['comments', postId, limit], getComments)
     if (commentsQuery.isError)
         return (
             <div>
@@ -21,7 +28,7 @@ export default function ({ postId }: { postId: number }) {
             </div>
         )
     return (
-        <Comment.Group>
+        <Comment.Group className={compact ? 'compact' : undefined}>
             {commentsQuery.data!.map((comment) => (
                 <SingleComment key={comment.id} comment={comment} />
             ))}

@@ -60,10 +60,11 @@ export async function getPost(query: string, id: number) {
     return response.data
 }
 
-export async function getComments(id: number) {
+export async function getComments(id: number, limit: number) {
     const response = await server.get<Types.EncryptedComment[]>('getComments', {
         params: {
             id,
+            limit,
         },
     })
     return response.data
