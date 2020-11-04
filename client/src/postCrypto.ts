@@ -217,7 +217,7 @@ async function decryptSymmetric(buffer: ArrayBuffer, ivBase64: string, key: Cryp
 
 export async function getComments(query: string, postId: number, limit: number) {
     const commentsEncrypted = await Routes.getComments(postId, limit)
-    const commentsDecrypted = Promise.all(
+    const commentsDecrypted = await Promise.all(
         commentsEncrypted.map(
             async (commentEnc): Promise<Types.Comment> => {
                 const postKey = await unwrapKeyAsymmetric(commentEnc.key)
@@ -235,7 +235,8 @@ export async function getComments(query: string, postId: number, limit: number) 
             },
         ),
     )
-    return commentsDecrypted
+    const fullCount = commentsEncrypted.length > 0 ? commentsEncrypted[0].fullCount! : 0
+    return { comments: commentsDecrypted, fullCount }
 }
 
 async function encryptProfileKeyForViewer(

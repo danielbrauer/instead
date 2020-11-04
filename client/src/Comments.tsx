@@ -1,6 +1,7 @@
 import React from 'react'
 import { useQuery } from 'react-query'
 import { Comment, Loader, Message } from 'semantic-ui-react'
+import InternalLink from './Components/InternalLink'
 import { getComments } from './postCrypto'
 import SingleComment from './SingleComment'
 
@@ -26,11 +27,19 @@ export default function ({ postId, limit, compact }: CommentsProps) {
                 <Loader active></Loader>
             </div>
         )
+    const data = commentsQuery.data!
     return (
         <Comment.Group className={'post-metadata' + (compact ? ' compact' : '')}>
-            {commentsQuery.data!.map((comment) => (
+            {data.comments.map((comment) => (
                 <SingleComment key={comment.id} comment={comment} />
             ))}
+            {limit && limit < data.fullCount ? (
+                <Comment>
+                    <Comment.Content>
+                        <InternalLink to={`/post/${postId.toString()}`}>See all {data.fullCount} comments</InternalLink>
+                    </Comment.Content>
+                </Comment>
+            ) : null}
         </Comment.Group>
     )
 }

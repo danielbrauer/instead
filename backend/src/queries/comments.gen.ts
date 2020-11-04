@@ -72,6 +72,7 @@ export interface IGetCommentsForPostResult {
   contentIv: string;
   published: Date;
   key: string;
+  fullCount: number | null;
 }
 
 /** 'GetCommentsForPost' query type */
@@ -80,13 +81,14 @@ export interface IGetCommentsForPostQuery {
   result: IGetCommentsForPostResult;
 }
 
-const getCommentsForPostIR: any = {"name":"GetCommentsForPost","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":455,"b":460,"line":12,"col":26}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":549,"b":554,"line":14,"col":30}]}},{"name":"limit","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":582,"b":586,"line":16,"col":7}]}}],"usedParamSet":{"postId":true,"userId":true,"limit":true},"statement":{"body":"SELECT comments.id, comments.author_id, comments.content, comments.content_iv, comments.published,\n       post_keys.key\nFROM comments, post_keys\nWHERE comments.post_id = :postId\nAND comments.post_key_set_id = post_keys.post_key_set_id\nAND post_keys.recipient_id = :userId\nORDER BY published\nLIMIT :limit::int","loc":{"a":284,"b":591,"line":9,"col":0}}};
+const getCommentsForPostIR: any = {"name":"GetCommentsForPost","params":[{"name":"postId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":498,"b":503,"line":13,"col":26}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":592,"b":597,"line":15,"col":30}]}},{"name":"limit","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":625,"b":629,"line":17,"col":7}]}}],"usedParamSet":{"postId":true,"userId":true,"limit":true},"statement":{"body":"SELECT comments.id, comments.author_id, comments.content, comments.content_iv, comments.published,\n       post_keys.key,\n       count(*) OVER()::int AS full_count\nFROM comments, post_keys\nWHERE comments.post_id = :postId\nAND comments.post_key_set_id = post_keys.post_key_set_id\nAND post_keys.recipient_id = :userId\nORDER BY published\nLIMIT :limit::int","loc":{"a":284,"b":634,"line":9,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
  * SELECT comments.id, comments.author_id, comments.content, comments.content_iv, comments.published,
- *        post_keys.key
+ *        post_keys.key,
+ *        count(*) OVER()::int AS full_count
  * FROM comments, post_keys
  * WHERE comments.post_id = :postId
  * AND comments.post_key_set_id = post_keys.post_key_set_id
