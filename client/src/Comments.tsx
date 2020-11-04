@@ -6,7 +6,7 @@ import SingleComment from './SingleComment'
 
 interface CommentsProps {
     postId: number
-    limit: number
+    limit?: number
     compact?: boolean
 }
 

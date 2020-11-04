@@ -13,4 +13,4 @@ WHERE comments.post_id = :postId
 AND comments.post_key_set_id = post_keys.post_key_set_id
 AND post_keys.recipient_id = :userId
 ORDER BY published
-LIMIT CASE WHEN (:limit > 0) THEN :limit END;
+LIMIT :limit::int;

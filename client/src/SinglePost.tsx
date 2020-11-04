@@ -33,7 +33,7 @@ export default function () {
         <div className='post'>
             <PostHeader post={post} />
             <EncryptedImage post={post} />
-            <Comments postId={post.id} limit={0} />
+            <Comments postId={post.id} />
             <NewComment post={post} />
         </div>
     )

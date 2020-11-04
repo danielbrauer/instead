@@ -91,7 +91,7 @@ export default class PostService {
         await Comments.destroy.run({ commentId, authorId }, this.db.pool)
     }
 
-    async getCommentsForPost(postId: number, userId: number, limit: number) {
+    async getCommentsForPost(postId: number, userId: number, limit?: number) {
         return await Comments.getCommentsForPost.run({ postId, userId, limit }, this.db.pool)
     }
 
