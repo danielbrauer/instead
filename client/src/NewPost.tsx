@@ -54,7 +54,7 @@ export default function NewPost({
             {!uploadStatus.isLoading ? (
                 <div className='new-post-form'>
                     <Form>
-                        <Form.Input placeholder='Comment' {...commentInput.bind} />
+                        <Form.Input size='large' placeholder='Comment' {...commentInput.bind} />
                         <Form.Group>
                             <Form.Button type='button' negative onClick={onCancel} content='Cancel' />
                             <Form.Button type='submit' positive onClick={onSubmit} content='Upload' />
