@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { queryCache, useQuery } from 'react-query'
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom'
 import { Icon, Label, Menu } from 'semantic-ui-react'
+import Activity from './Activity'
 import CurrentUser from './CurrentUser'
 import FollowerPage from './FollowerPage'
 import HomePosts from './HomePosts'
@@ -59,6 +60,7 @@ export default function () {
 
     const homeActive = history.location.pathname === '/home'
     const newActive = history.location.pathname === '/new'
+    const activityActive = history.location.pathname === '/activity'
     const followersActive = history.location.pathname === '/followers' || history.location.pathname === '/following'
     const profileActive = history.location.pathname === `/user/${CurrentUser.getId()}`
 
@@ -73,8 +75,13 @@ export default function () {
                 style={{ display: 'none' }}
             />
             {!uploadInput ? (
-                <Menu inverted borderless widths={4} fixed='bottom'>
+                <Menu inverted borderless widths='5' fixed='bottom'>
                     <Menu.Item icon='home' active={homeActive} onClick={() => !homeActive && history.push('/home')} />
+                    <Menu.Item
+                        icon='chat'
+                        active={activityActive}
+                        onClick={() => !activityActive && history.push('/activity')}
+                    />
                     <Menu.Item
                         icon='camera'
                         active={newActive}
@@ -102,6 +109,7 @@ export default function () {
             <Switch>
                 <Route path={['/followers', '/following']} component={FollowerPage} />
                 <Route path='/home' component={HomePosts} />
+                <Route path='/activity' component={Activity} />
                 <Route path='/new'>
                     <NewPost uploadInput={uploadInput!} onCancel={cancelUpload} onSuccess={afterUpload} />
                 </Route>
