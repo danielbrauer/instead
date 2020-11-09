@@ -104,6 +104,16 @@ router.delete(
 )
 
 router.get(
+    '/activity',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const activity = await postService.getActivity(req.userId)
+        return res.json(activity)
+    },
+)
+
+router.get(
     '/getCurrentPostKey',
     validator.query(Schema.empty),
     validator.body(Schema.empty),

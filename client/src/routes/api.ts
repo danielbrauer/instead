@@ -78,6 +78,11 @@ export async function createComment(comment: { postId: number; keySetId: number;
     return response.data
 }
 
+export async function getActivity() {
+    const response = await server.get<Types.ActivityItem[]>('/activity')
+    return response.data
+}
+
 export async function deletePost(idTodelete: number) {
     const response = await server.delete<Types.DeletePostResult>('/deletePost', {
         params: {

@@ -3,6 +3,7 @@ import { SimpleEventDispatcher } from 'strongly-typed-events'
 import Container, { Service } from 'typedi'
 import uuidv1 from 'uuid/v1'
 import * as config from '../config/config'
+import * as Activity from '../queries/activity.gen'
 import * as Comments from '../queries/comments.gen'
 import * as Posts from '../queries/posts.gen'
 import AWSService from './AWSService'
@@ -93,6 +94,10 @@ export default class PostService {
 
     async getCommentsForPost(postId: number, userId: number, limit?: number) {
         return await Comments.getCommentsForPost.run({ postId, userId, limit }, this.db.pool)
+    }
+
+    async getActivity(userId: number) {
+        return await Activity.getActivityForUser.run({ userId }, this.db.pool)
     }
 
     onPostCreated(postId: number) {

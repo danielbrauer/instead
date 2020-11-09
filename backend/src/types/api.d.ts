@@ -1,8 +1,8 @@
-import * as Posts from '../queries/posts.gen'
-import * as Keys from '../queries/keys.gen'
 import * as Comments from '../queries/comments.gen'
-import * as Users from '../queries/users.gen'
 import * as FollowRequests from '../queries/follow_requests.gen'
+import * as Keys from '../queries/keys.gen'
+import * as Posts from '../queries/posts.gen'
+import * as Users from '../queries/users.gen'
 
 export interface FollowRelationship {
     followerId: number
@@ -49,6 +49,13 @@ export type EncryptedPostKey = {
     key: string
     recipientId: number
     postKeySetId: number
+}
+
+export type ActivityItem = {
+    id: number
+    postId: number
+    authorId: number
+    published: Date
 }
 
 export type PublicKey = Keys.IGetFollowerPublicKeysResult
