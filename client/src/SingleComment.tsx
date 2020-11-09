@@ -1,11 +1,8 @@
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
 import React from 'react'
 import { Comment } from 'semantic-ui-react'
 import * as Types from '../../backend/src/types/api'
+import dayjs from './relativeTime'
 import UserInList from './UserInList'
-
-dayjs.extend(relativeTime)
 
 export default function ({ comment }: { comment: Types.Comment }) {
     return (
