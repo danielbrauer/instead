@@ -1,6 +1,6 @@
 import React from 'react'
 import { useHistory } from 'react-router-dom'
-import { Button, Header, Icon, Label, Menu, Message, Segment } from 'semantic-ui-react'
+import { Button, Header, Message, Segment } from 'semantic-ui-react'
 import WelcomeInfo from './WelcomeInfo'
 
 export default function AppWelcome() {
@@ -13,35 +13,15 @@ export default function AppWelcome() {
 
     return (
         <div>
-            <Menu inverted fixed='top' size='small'>
-                <Menu.Item header>Instead</Menu.Item>
-            </Menu>
-            <br />
-            <br />
             <Segment>
-                Welcome to Instead!
+                Welcome to Instead, {WelcomeInfo.getUsername()}! Here is your Secret Key:
                 <br />
-                <br />
-                Here is your login information:
-            </Segment>
-            <Segment>
-                <Header as='h5'>Username</Header>
-                <Label color='black' size='large'>
-                    <Icon name='user' />
-                    {WelcomeInfo.getUsername()}
-                </Label>
-                <Header as='h5'>Secret Key</Header>
-                <Label color='black' size='large'>
-                    <Icon name='key' />
-                    {WelcomeInfo.getSecretKey()}
-                </Label>
-                <br />
+                <Header as='h5'>{WelcomeInfo.getSecretKey()}</Header>
                 <br />
                 <Message warning>
-                    <Message.Header>Important</Message.Header>
+                    <Message.Header>What's a Secret Key?</Message.Header>
                     <p>
-                        You will need this information to log in on the next page. Please take a screenshot, put it in
-                        your password manager, or write it down and store it somewhere safe.
+                        You will need this if you get a new phone or want to log in from another browser. Please make a copy and put it somewhere safe.
                     </p>
 
                     <Button onClick={ok}>I've made a copy</Button>
