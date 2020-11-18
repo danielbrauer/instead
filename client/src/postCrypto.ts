@@ -191,8 +191,10 @@ async function createMipsAndEncrypt(original: File) {
     while (mipSize >= minMipSize || buffers.length === 0) {
         console.log(mipSize)
         const mip = await reducer.toBlob(original, {max: mipSize})
+        console.log('reduced')
         const mipBuffer = await readAsArrayBuffer(mip)
         const { encrypted: encryptedMip, ivBuffer: returnedIvBuffer } = await encryptSymmetric(mipBuffer, postKey.key, ivBuffer)
+        console.log('encrypted')
         ivBuffer = returnedIvBuffer
         postInfo.imageSizes.push({
             width: wideImage ? mipSize : Math.round(mipSize/postInfo.aspect),
