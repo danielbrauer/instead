@@ -52,7 +52,8 @@ export type EncryptedPostKey = {
 }
 
 export type ImageSize = {
-    maxPixelSize: number
+    width: number
+    height: number
     byteOffset: number
     byteLength: number
 }
