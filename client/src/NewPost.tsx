@@ -3,7 +3,7 @@ import { useMutation } from 'react-query'
 import { Redirect } from 'react-router-dom'
 import { Dimmer, Form, Image, Loader, Message } from 'semantic-ui-react'
 import { useInput } from './Components/useInput'
-import { encryptAndUploadImage } from './postCrypto'
+import { ImageInfo, encryptAndUploadImage } from './postCrypto'
 
 export default function NewPost({
     uploadInput,
@@ -15,7 +15,7 @@ export default function NewPost({
     onSuccess: () => void
 }) {
     const commentInput = useInput('')
-    const [aspect, setAspect] = useState<number | null>(null)
+    const [imageInfo, setImageInfo] = useState<ImageInfo | null>(null)
     const [uploadMutation, uploadStatus] = useMutation(encryptAndUploadImage)
     const [blobUrl, dispatch] = useReducer((state: string, action: File | null) => {
         if (state) URL.revokeObjectURL(state)
@@ -28,12 +28,12 @@ export default function NewPost({
 
     async function onSubmit(event: React.MouseEvent) {
         event.preventDefault()
-        const success = await uploadMutation({ file: uploadInput!, aspect: aspect!, comment: commentInput.value })
+        const success = await uploadMutation({ file: uploadInput!, info: imageInfo!, comment: commentInput.value })
         if (success) onSuccess()
     }
 
     function storeImageDimensions(evt: ChangeEvent<HTMLInputElement>) {
-        setAspect(evt.target.height / evt.target.width)
+        setImageInfo({height: evt.target.height, width: evt.target.width})
     }
 
     if (!uploadInput || uploadStatus.isSuccess) return <Redirect to='/home' />

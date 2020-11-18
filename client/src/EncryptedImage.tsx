@@ -11,12 +11,14 @@ export default function (props: { post: Post }) {
     const decryptedPost = useEncryptedImage(
         props.post.key,
         props.post.iv,
+        props.post.encryptedInfo,
         contentUrl.isSuccess ? contentUrl.data + props.post.filename : '',
+        77
     )
 
     if (decryptedPost.isLoading)
         return (
-            <Placeholder fluid style={{ height: `${100 * props.post.aspect}vw` }}>
+            <Placeholder fluid>
                 <Placeholder.Image />
             </Placeholder>
         )

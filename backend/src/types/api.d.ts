@@ -51,6 +51,17 @@ export type EncryptedPostKey = {
     postKeySetId: number
 }
 
+export type ImageSize = {
+    maxPixelSize: number
+    byteOffset: number
+    byteLength: number
+}
+
+export type PostInfo = {
+    aspect: number
+    imageSizes: ImageSize[]
+}
+
 export type PublicKey = Keys.IGetFollowerPublicKeysResult
 
 export type SentRequest = FollowRequests.IGetByRequesterIdResult

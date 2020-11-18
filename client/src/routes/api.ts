@@ -136,12 +136,12 @@ export async function getFollowerPublicKeys() {
     return response.data
 }
 
-export async function startPost(postKeySetId: number, ivBase64: string, contentMD5Base64: string, aspect: number) {
+export async function startPost(postKeySetId: number, ivBase64: string, contentMD5Base64: string, encryptedInfoBase64: string) {
     const postResponse = await server.post<Types.StartPostResult>('/startPost', {
         postKeySetId,
         iv: ivBase64,
         md5: contentMD5Base64,
-        aspect,
+        encryptedInfo: encryptedInfoBase64,
     })
     return postResponse.data
 }

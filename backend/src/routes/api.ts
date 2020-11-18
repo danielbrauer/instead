@@ -188,7 +188,7 @@ router.post(
             req.body.postKeySetId,
             req.body.iv,
             req.body.md5,
-            req.body.aspect,
+            req.body.encryptedInfo,
         )
         return res.json(postInfo)
     },
