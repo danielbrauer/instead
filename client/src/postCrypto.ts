@@ -7,12 +7,14 @@ import { PostInfo } from '../../backend/src/types/api'
 import CurrentUser from './CurrentUser'
 import * as Routes from './routes/api'
 import sizeOfImage from 'image-size'
+import Pica from 'pica'
 import ImageBlobReduce from 'image-blob-reduce'
 const typedArrayToBuffer = require('typedarray-to-buffer') as (typedArray: Uint8Array) => Buffer
 require('buffer')
 const Crypto = window.crypto
 const kBinaryContentType = 'application/octet-stream'
-const reducer = ImageBlobReduce()
+const pica = Pica({ features: [ 'js', 'wasm' ]})
+const reducer = ImageBlobReduce({pica})
 
 interface PostKey {
     key: CryptoKey
