@@ -15,6 +15,13 @@ const Crypto = window.crypto
 const kBinaryContentType = 'application/octet-stream'
 const pica = Pica({ features: [ 'js', 'wasm' ]})
 const reducer = ImageBlobReduce({pica})
+reducer._create_blob = function (env: any) {
+    return this.pica.toBlob(env.out_canvas, 'image/jpeg', 0.93)
+    .then(function (blob: any) {
+        env.out_blob = blob
+        return env
+    })
+}
 
 interface PostKey {
     key: CryptoKey
