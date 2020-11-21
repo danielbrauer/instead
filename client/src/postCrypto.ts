@@ -3,16 +3,34 @@ import md5 from 'js-md5'
 import { readAsArrayBuffer } from 'promise-file-reader'
 import { useEffect, useReducer } from 'react'
 import * as Types from '../../backend/src/types/api'
+import { PostInfo } from '../../backend/src/types/api'
 import CurrentUser from './CurrentUser'
 import * as Routes from './routes/api'
-const toBuffer = require('typedarray-to-buffer') as (typedArray: Uint8Array) => Buffer
+import sizeOfImage from 'image-size'
+import Pica from 'pica'
+import ImageBlobReduce from 'image-blob-reduce'
+const typedArrayToBuffer = require('typedarray-to-buffer') as (typedArray: Uint8Array) => Buffer
 require('buffer')
 const Crypto = window.crypto
 const kBinaryContentType = 'application/octet-stream'
+const pica = Pica({ features: [ 'js', 'wasm' ]})
+const reducer = ImageBlobReduce({pica})
+reducer._create_blob = function (env: any) {
+    return this.pica.toBlob(env.out_canvas, 'image/jpeg', 0.93)
+    .then(function (blob: any) {
+        env.out_blob = blob
+        return env
+    })
+}
 
 interface PostKey {
     key: CryptoKey
     id: number
+}
+
+export interface ImageInfo {
+    width: number
+    height: number
 }
 
 async function unwrapKeyAsymmetric(wrappedKeyBase64: string) {
@@ -136,13 +154,15 @@ async function getOrCreatePostKey(): Promise<PostKey> {
     return { id: currentKeyEncrypted.postKeySetId, key: currentKey }
 }
 
-async function encryptSymmetric(arrayBuffer: ArrayBuffer, key: CryptoKey) {
-    const iv = Crypto.getRandomValues(new Uint8Array(12))
-    const ivBuffer = toBuffer(iv)
+async function encryptSymmetric(arrayBuffer: ArrayBuffer, key: CryptoKey, ivBuffer?: Buffer) {
+    if (!ivBuffer) {
+        const iv = Crypto.getRandomValues(new Uint8Array(12))
+        ivBuffer = typedArrayToBuffer(iv)
+    }
     const encrypted = await Crypto.subtle.encrypt(
         {
             name: 'AES-GCM',
-            iv,
+            iv: ivBuffer,
         },
         key,
         arrayBuffer,
@@ -162,20 +182,61 @@ async function postCommentWithKey({ postId, postKey, comment }: { postId: number
     return true
 }
 
+const minMipSize = 32
+
+async function createMipsAndEncrypt(original: File) {
+    const [originalArrayBuffer, postKey] = await Promise.all([readAsArrayBuffer(original), getOrCreatePostKey()])
+    const originalBuffer = new Buffer(originalArrayBuffer)
+    const dimensions = sizeOfImage(originalBuffer)
+    const { encrypted: encryptedOriginal, ivBuffer } = await encryptSymmetric(originalArrayBuffer, postKey.key)
+    let encryptedBuffers: Buffer[] = [Buffer.from(encryptedOriginal)]
+    const postInfo: PostInfo = {
+        aspect: dimensions.height!/dimensions.width!,
+        imageSizes: [{
+            width: dimensions.width!,
+            height: dimensions.height!,
+            byteOffset: 0,
+            byteLength: encryptedOriginal.byteLength
+        }]
+    }
+    let byteOffset = encryptedOriginal.byteLength
+    const wideImage = postInfo.aspect < 1
+    const maxDimension = wideImage ? dimensions.width! : dimensions.height!
+    let mipSize = maxDimension*0.5
+    while (mipSize >= minMipSize) {
+        console.log(mipSize)
+        const mip = await reducer.toBlob(original, {max: mipSize})
+        console.log('reduced')
+        const mipArrayBuffer = await readAsArrayBuffer(mip)
+        const { encrypted: encryptedMip } = await encryptSymmetric(mipArrayBuffer, postKey.key, ivBuffer)
+        console.log('encrypted')
+        const mipDimensions = sizeOfImage(Buffer.from(mipArrayBuffer))
+        postInfo.imageSizes.push({
+            width: mipDimensions.width!,
+            height: mipDimensions.height!,
+            byteOffset,
+            byteLength: encryptedMip.byteLength
+        })
+        encryptedBuffers.push(Buffer.from(encryptedMip))
+        mipSize = mipSize*0.5
+        byteOffset += encryptedMip.byteLength
+    }
+    const serialBlob = Buffer.concat(encryptedBuffers, byteOffset)
+    return { serialBlob, postInfo, postKey, ivBuffer }
+}
+
 export async function encryptAndUploadImage({
     file,
-    aspect,
     comment,
 }: {
     file: File
-    aspect: number
     comment?: string
 }) {
-    const [fileBuffer, postKey] = await Promise.all([readAsArrayBuffer(file), getOrCreatePostKey()])
-    const { encrypted, ivBuffer } = await encryptSymmetric(fileBuffer, postKey.key)
-    const contentMD5 = md5.base64(encrypted)
-    const postInfo = await Routes.startPost(postKey.id, ivBuffer.toString('base64'), contentMD5, aspect)
-    const signedRequest = postInfo.signedRequest
+    const { serialBlob, postInfo, postKey, ivBuffer } = await createMipsAndEncrypt(file)
+    const contentMD5 = md5.base64(serialBlob)
+    const encryptedPostInfo = await encryptSymmetric(Buffer.from(JSON.stringify(postInfo)), postKey.key, ivBuffer)
+    const postStartResult = await Routes.startPost(postKey.id, ivBuffer!.toString('base64'), contentMD5, Buffer.from(encryptedPostInfo.encrypted).toString('base64'))
+    const signedRequest = postStartResult.signedRequest
 
     const options = {
         headers: {
@@ -185,14 +246,14 @@ export async function encryptAndUploadImage({
     }
     let success = true
     try {
-        await Axios.put(signedRequest, encrypted, options)
+        await Axios.put(signedRequest, serialBlob, options)
     } catch (error) {
         success = false
     }
-    await Routes.finishPost(postInfo.postId, success)
+    await Routes.finishPost(postStartResult.postId, success)
 
     if (comment) {
-        await postCommentWithKey({ postId: postInfo.postId, postKey, comment })
+        await postCommentWithKey({ postId: postStartResult.postId, postKey, comment })
     }
 
     return success
@@ -318,7 +379,17 @@ function asyncReducer(state: AsyncState, action: AsyncAction): AsyncState {
     }
 }
 
-export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, encryptedUrl: string) {
+function getClosestImageSize(imageSizes: Types.ImageSize[], desiredSize: number | undefined): Types.ImageSize {
+    let chosenIndex = 0 // Starting at the big end
+    if (desiredSize) { // choose the next smallest image if it's at least as big as the desired size
+        while (chosenIndex < imageSizes.length - 1 && imageSizes[chosenIndex + 1].width >= desiredSize) {
+            ++chosenIndex
+        }
+    }
+    return imageSizes[chosenIndex]
+}
+
+export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, encryptedPostInfo: string | null, encryptedUrl: string, desiredSize: number | undefined) {
     const [state, dispatch] = useReducer(asyncReducer, { isLoading: false })
 
     useEffect(() => {
@@ -329,10 +400,15 @@ export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, en
         const decrypt = async () => {
             dispatch({ type: 'request' })
             try {
-                const [postKey, encryptedImage] = await Promise.all([
-                    unwrapKeyAsymmetric(wrappedKeyBase64),
-                    Axios.get<ArrayBuffer>(encryptedUrl, { responseType: 'arraybuffer' }),
-                ])
+                const postKey = await unwrapKeyAsymmetric(wrappedKeyBase64)
+                let range: string | undefined
+                if (encryptedPostInfo) {
+                    const decryptedInfo = await decryptSymmetric(Buffer.from(encryptedPostInfo, 'base64'), ivBase64, postKey)
+                    const postInfo: PostInfo = JSON.parse(Buffer.from(decryptedInfo).toString('utf-8'))
+                    const imageSize = getClosestImageSize(postInfo.imageSizes, desiredSize)
+                    range = `bytes=${imageSize.byteOffset}-${imageSize.byteOffset+imageSize.byteLength-1}`
+                }
+                const encryptedImage = await Axios.get<ArrayBuffer>(encryptedUrl, { responseType: 'arraybuffer', headers: {'Range': range} })
                 if (cancelRequest) return
                 const decrypted = await decryptSymmetric(encryptedImage.data, ivBase64, postKey)
                 if (cancelRequest) return
@@ -341,6 +417,7 @@ export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, en
                 dispatch({ type: 'success', results: decryptedUrl })
                 return
             } catch (error) {
+                console.log(error)
                 dispatch({ type: 'failure', error })
             }
         }
@@ -351,7 +428,7 @@ export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, en
             cancelRequest = true
             if (decryptedUrl) URL.revokeObjectURL(decryptedUrl)
         }
-    }, [encryptedUrl, ivBase64, wrappedKeyBase64])
+    }, [encryptedUrl, ivBase64, wrappedKeyBase64, encryptedPostInfo, desiredSize])
 
     return state
 }

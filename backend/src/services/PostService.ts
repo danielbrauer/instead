@@ -61,13 +61,13 @@ export default class PostService {
         postKeySetId: number,
         iv: string,
         md5: string,
-        aspect: number,
+        encryptedInfo: string,
     ): Promise<StartPostResult> {
         const fileName = uuidv1()
         const [signedRequest, [{ id: postId }]] = await Promise.all([
             this.aws.s3GetSignedUploadUrl(fileName, 'application/octet-stream', md5),
             Posts.createAndReturn.run(
-                { fileName, authorId, postKeySetId, iv, aspect },
+                { fileName, authorId, postKeySetId, iv, encryptedInfo },
                 this.db.pool,
             ),
         ])

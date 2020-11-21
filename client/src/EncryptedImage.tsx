@@ -8,15 +8,18 @@ import { longLivedQuery } from './QuerySettings'
 
 export default function (props: { post: Post }) {
     const contentUrl = useQuery('contentUrl', getContentUrl, longLivedQuery)
+    const vw = window.devicePixelRatio*Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
     const decryptedPost = useEncryptedImage(
         props.post.key,
         props.post.iv,
+        props.post.encryptedInfo,
         contentUrl.isSuccess ? contentUrl.data + props.post.filename : '',
+        vw
     )
 
     if (decryptedPost.isLoading)
         return (
-            <Placeholder fluid style={{ height: `${100 * props.post.aspect}vw` }}>
+            <Placeholder fluid>
                 <Placeholder.Image />
             </Placeholder>
         )

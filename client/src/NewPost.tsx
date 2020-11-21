@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useReducer, useState } from 'react'
+import React, { useEffect, useReducer } from 'react'
 import { useMutation } from 'react-query'
 import { Redirect } from 'react-router-dom'
 import { Dimmer, Form, Image, Loader, Message } from 'semantic-ui-react'
@@ -15,7 +15,6 @@ export default function NewPost({
     onSuccess: () => void
 }) {
     const commentInput = useInput('')
-    const [aspect, setAspect] = useState<number | null>(null)
     const [uploadMutation, uploadStatus] = useMutation(encryptAndUploadImage)
     const [blobUrl, dispatch] = useReducer((state: string, action: File | null) => {
         if (state) URL.revokeObjectURL(state)
@@ -28,12 +27,8 @@ export default function NewPost({
 
     async function onSubmit(event: React.MouseEvent) {
         event.preventDefault()
-        const success = await uploadMutation({ file: uploadInput!, aspect: aspect!, comment: commentInput.value })
+        const success = await uploadMutation({ file: uploadInput!, comment: commentInput.value })
         if (success) onSuccess()
-    }
-
-    function storeImageDimensions(evt: ChangeEvent<HTMLInputElement>) {
-        setAspect(evt.target.height / evt.target.width)
     }
 
     if (!uploadInput || uploadStatus.isSuccess) return <Redirect to='/home' />
@@ -49,7 +44,7 @@ export default function NewPost({
                 <Dimmer inverted active={uploadStatus.isLoading || uploadStatus.isSuccess}>
                     <Loader inverted />
                 </Dimmer>
-                <Image fluid onLoad={storeImageDimensions} src={blobUrl} alt={uploadInput.name} />
+                <Image fluid src={blobUrl} alt={uploadInput.name} />
             </>
             {!uploadStatus.isLoading ? (
                 <div className='new-post-form'>

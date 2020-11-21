@@ -51,6 +51,18 @@ export type EncryptedPostKey = {
     postKeySetId: number
 }
 
+export type ImageSize = {
+    width: number
+    height: number
+    byteOffset: number
+    byteLength: number
+}
+
+export type PostInfo = {
+    aspect: number
+    imageSizes: ImageSize[]
+}
+
 export type ActivityItem = {
     id: number
     postId: number

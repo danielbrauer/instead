@@ -70,7 +70,7 @@ export const startPostBody = Joi.object({
     postKeySetId: Joi.number().integer().required(),
     iv: Joi.string().base64().required(),
     md5: Joi.string().base64().required(),
-    aspect: Joi.number().required(),
+    encryptedInfo: Joi.string().base64().required(),
 })
 
 export interface StartPostRequest extends ValidatedRequestSchema {
