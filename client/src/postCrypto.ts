@@ -178,37 +178,38 @@ async function postCommentWithKey({ postId, postKey, comment }: { postId: number
 const minMipSize = 32
 
 async function createMipsAndEncrypt(original: File) {
-    const dimensions = sizeOfImage(Buffer.from(await readAsArrayBuffer(original)))
-    const postKey = await getOrCreatePostKey()
+    const [originalArrayBuffer, postKey] = await Promise.all([readAsArrayBuffer(original), getOrCreatePostKey()])
+    const originalBuffer = new Buffer(originalArrayBuffer)
+    const dimensions = sizeOfImage(originalBuffer)
+    const { encrypted: encryptedOriginal, ivBuffer } = await encryptSymmetric(originalArrayBuffer, postKey.key)
+    let byteOffset = encryptedOriginal.byteLength
+    let encryptedBuffers: Buffer[] = [Buffer.from(encryptedOriginal)]
     const postInfo: PostInfo = {
         aspect: dimensions.height!/dimensions.width!,
         imageSizes: []
     }
     const wideImage = postInfo.aspect < 1
     const maxDimension = wideImage ? dimensions.width! : dimensions.height!
-    let mipSize = maxDimension
-    let ivBuffer: Buffer | undefined
-    let byteOffset = 0
-    let buffers: Buffer[] = []
-    while (mipSize >= minMipSize || buffers.length === 0) {
+    let mipSize = maxDimension*0.5
+    while (mipSize >= minMipSize) {
         console.log(mipSize)
         const mip = await reducer.toBlob(original, {max: mipSize})
         console.log('reduced')
-        const mipBuffer = await readAsArrayBuffer(mip)
-        const { encrypted: encryptedMip, ivBuffer: returnedIvBuffer } = await encryptSymmetric(mipBuffer, postKey.key, ivBuffer)
+        const mipArrayBuffer = await readAsArrayBuffer(mip)
+        const { encrypted: encryptedMip } = await encryptSymmetric(mipArrayBuffer, postKey.key, ivBuffer)
         console.log('encrypted')
-        ivBuffer = returnedIvBuffer
+        const mipDimensions = sizeOfImage(Buffer.from(mipArrayBuffer))
         postInfo.imageSizes.push({
-            width: wideImage ? mipSize : Math.round(mipSize/postInfo.aspect),
-            height: wideImage ? Math.round(mipSize*postInfo.aspect) : mipSize,
+            width: mipDimensions.width!,
+            height: mipDimensions.height!,
             byteOffset,
             byteLength: encryptedMip.byteLength
         })
-        buffers.push(Buffer.from(encryptedMip))
-        mipSize = Math.floor(mipSize*0.5)
+        encryptedBuffers.push(Buffer.from(encryptedMip))
+        mipSize = mipSize*0.5
         byteOffset += encryptedMip.byteLength
     }
-    const serialBlob = Buffer.concat(buffers, byteOffset)
+    const serialBlob = Buffer.concat(encryptedBuffers, byteOffset)
     return { serialBlob, postInfo, postKey, ivBuffer }
 }
 
