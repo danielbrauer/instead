@@ -189,12 +189,17 @@ async function createMipsAndEncrypt(original: File) {
     const originalBuffer = new Buffer(originalArrayBuffer)
     const dimensions = sizeOfImage(originalBuffer)
     const { encrypted: encryptedOriginal, ivBuffer } = await encryptSymmetric(originalArrayBuffer, postKey.key)
-    let byteOffset = encryptedOriginal.byteLength
     let encryptedBuffers: Buffer[] = [Buffer.from(encryptedOriginal)]
     const postInfo: PostInfo = {
         aspect: dimensions.height!/dimensions.width!,
-        imageSizes: []
+        imageSizes: [{
+            width: dimensions.width!,
+            height: dimensions.height!,
+            byteOffset: 0,
+            byteLength: encryptedOriginal.byteLength
+        }]
     }
+    let byteOffset = encryptedOriginal.byteLength
     const wideImage = postInfo.aspect < 1
     const maxDimension = wideImage ? dimensions.width! : dimensions.height!
     let mipSize = maxDimension*0.5
