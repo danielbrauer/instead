@@ -90,6 +90,7 @@ export async function getActivityCount() {
 
 export async function setActivityLastCheckedDate() {
     const response = await server.post('/activityLastCheckedDate')
+    queryCache.invalidateQueries('activityCount')
     return response.data
 }
 

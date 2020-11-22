@@ -1,14 +1,19 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useQuery } from 'react-query'
 import { Feed, Message } from 'semantic-ui-react'
 import InternalLink from './Components/InternalLink'
 import dayjs from './relativeTime'
-import { getActivity } from './routes/api'
+import { getActivity, setActivityLastCheckedDate } from './routes/api'
 import UserInList from './UserInList'
 import PostThumbnail from './PostThumbnail'
 
 export default function () {
     const activityQuery = useQuery(['activity'], getActivity)
+    useEffect(() => {
+        return () => {
+            setActivityLastCheckedDate()
+        }
+    }, [])
     if (!activityQuery.isSuccess) return <Message content='loading' />
     return (
         <div className={'activity-feed'}>
