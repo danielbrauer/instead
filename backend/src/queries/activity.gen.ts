@@ -20,7 +20,7 @@ export interface IGetActivityForUserQuery {
   result: IGetActivityForUserResult;
 }
 
-const getActivityForUserIR: any = {"name":"GetActivityForUser","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":196,"b":201,"line":6,"col":23}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT comments.id, comments.author_id, comments.published,\n       posts.id AS post_id\nFROM comments, posts\nWHERE comments.post_id = posts.id\nAND posts.author_id = :userId\nORDER BY comments.published DESC","loc":{"a":31,"b":234,"line":2,"col":0}}};
+const getActivityForUserIR: any = {"name":"GetActivityForUser","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":196,"b":201,"line":6,"col":23},{"a":230,"b":235,"line":7,"col":27}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT comments.id, comments.author_id, comments.published,\n       posts.id AS post_id\nFROM comments, posts\nWHERE comments.post_id = posts.id\nAND posts.author_id = :userId\nAND comments.author_id <> :userId\nORDER BY comments.published DESC","loc":{"a":31,"b":268,"line":2,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -30,6 +30,7 @@ const getActivityForUserIR: any = {"name":"GetActivityForUser","params":[{"name"
  * FROM comments, posts
  * WHERE comments.post_id = posts.id
  * AND posts.author_id = :userId
+ * AND comments.author_id <> :userId
  * ORDER BY comments.published DESC
  * ```
  */
