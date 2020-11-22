@@ -1,6 +1,6 @@
 import React from 'react'
 import { useQuery } from 'react-query'
-import { Feed, Message, Header } from 'semantic-ui-react'
+import { Feed, Message } from 'semantic-ui-react'
 import InternalLink from './Components/InternalLink'
 import dayjs from './relativeTime'
 import { getActivity } from './routes/api'
@@ -12,7 +12,6 @@ export default function () {
     if (!activityQuery.isSuccess) return <Message content='loading' />
     return (
         <div className={'activity-feed'}>
-            <Header as='h1'>Activity</Header>
             <Feed>
                 {activityQuery.data!.map((item) => (
                     <Feed.Event key={item.postId.toString() + item.id.toString()}>
