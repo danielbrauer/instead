@@ -114,6 +114,26 @@ router.get(
 )
 
 router.get(
+    '/activityCount',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const count = await postService.getActivityCount(req.userId)
+        return res.json(count)
+    },
+)
+
+router.post(
+    '/activityLastCheckedDate',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        await userService.setActivityLastCheckedDate(req.userId)
+        return res.json({success: true})
+    },
+)
+
+router.get(
     '/getCurrentPostKey',
     validator.query(Schema.empty),
     validator.body(Schema.empty),

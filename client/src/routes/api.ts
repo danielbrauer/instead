@@ -83,6 +83,16 @@ export async function getActivity() {
     return response.data
 }
 
+export async function getActivityCount() {
+    const response = await server.get<number>('/activityCount')
+    return response.data
+}
+
+export async function setActivityLastCheckedDate() {
+    const response = await server.post('/activityLastCheckedDate')
+    return response.data
+}
+
 export async function deletePost(idTodelete: number) {
     const response = await server.delete<Types.DeletePostResult>('/deletePost', {
         params: {

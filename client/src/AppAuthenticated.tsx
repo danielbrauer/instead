@@ -18,7 +18,8 @@ export default function () {
     const fileInputElement = useRef<HTMLInputElement>(null)
 
     const history = useHistory()
-    const requests = useQuery('followRequestCount', Routes.getFollowRequestCount)
+    const requestCount = useQuery('followRequestCount', Routes.getFollowRequestCount)
+    const activityCount = useQuery('activityCount', Routes.getActivityCount)
 
     function onSelect(evt: React.ChangeEvent<HTMLInputElement>) {
         const file = evt.target.files && evt.target.files[0]
@@ -77,11 +78,18 @@ export default function () {
             {!uploadInput ? (
                 <Menu inverted borderless widths='5' fixed='bottom'>
                     <Menu.Item icon='home' active={homeActive} onClick={() => !homeActive && history.push('/home')} />
-                    <Menu.Item
-                        icon='chat'
-                        active={activityActive}
-                        onClick={() => !activityActive && history.push('/activity')}
-                    />
+                    <Menu.Item active={activityActive} onClick={() => !activityActive && history.push('/activity')}>
+                        <Icon name='chat' />
+                        {activityCount.isSuccess && activityCount.data! > 0 ? (
+                            <Label
+                                content={activityCount.data!.toString()}
+                                color='red'
+                                size='small'
+                                circular
+                                floating
+                            />
+                        ) : null}
+                        </Menu.Item>
                     <Menu.Item
                         icon='camera'
                         active={newActive}
@@ -89,9 +97,9 @@ export default function () {
                     />
                     <Menu.Item active={followersActive} onClick={() => history.push('/followers')}>
                         <Icon name='users' />
-                        {requests.isSuccess && requests.data! > 0 ? (
+                        {requestCount.isSuccess && requestCount.data! > 0 ? (
                             <Label
-                                content={requests.data!.toString()}
+                                content={requestCount.data!.toString()}
                                 color='red'
                                 size='small'
                                 circular

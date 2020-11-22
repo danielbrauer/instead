@@ -138,4 +138,8 @@ export default class UserService {
         }
         throw new ServerError('Too many hits. Please try again.')
     }
+
+    async setActivityLastCheckedDate(userId: number) {
+        return await Users.setActivityLastCheckedDate.run({ userId }, this.db.pool)
+    }
 }

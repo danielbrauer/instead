@@ -100,6 +100,11 @@ export default class PostService {
         return await Activity.getActivityForUser.run({ userId }, this.db.pool)
     }
 
+    async getActivityCount(userId: number) {
+        const [{count}] = await Activity.getRecentActivityCount.run({ userId }, this.db.pool)
+        return count
+    }
+
     onPostCreated(postId: number) {
         setTimeout(
             () => Container.get(PostService).removePostIfNotPublished(postId),

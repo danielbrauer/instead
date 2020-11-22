@@ -177,3 +177,12 @@ export interface SetProfileRequest extends ValidatedRequestSchema {
     [ContainerTypes.Query]: Joi.extractType<typeof empty>
     [ContainerTypes.Body]: Joi.extractType<typeof setProfileBody>
 }
+
+export const getActivityCountQuery = Joi.object({
+    afterDate: Joi.date().required(),
+})
+
+export interface GetActivityCountRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof getActivityCountQuery>
+    [ContainerTypes.Body]: Joi.extractType<typeof empty>
+}
