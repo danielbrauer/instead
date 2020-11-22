@@ -6,7 +6,13 @@ import { useQuery } from 'react-query'
 import { getContentUrl } from './routes/api'
 import { longLivedQuery } from './QuerySettings'
 
-export default function (props: { post: Post }) {
+export type EncryptedImageProps = {
+    post: Post
+    size?: number
+    className?: string
+}
+
+export default function (props: EncryptedImageProps) {
     const contentUrl = useQuery('contentUrl', getContentUrl, longLivedQuery)
     const vw = window.devicePixelRatio*Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
     const decryptedPost = useEncryptedImage(
@@ -14,15 +20,15 @@ export default function (props: { post: Post }) {
         props.post.iv,
         props.post.encryptedInfo,
         contentUrl.isSuccess ? contentUrl.data + props.post.filename : '',
-        vw
+        props.size || vw
     )
 
     if (decryptedPost.isLoading)
         return (
-            <Placeholder fluid>
+            <Placeholder className={props.className} fluid>
                 <Placeholder.Image />
             </Placeholder>
         )
 
-    return <Image fluid src={decryptedPost.results} alt={props.post.filename} />
+    return <Image className={props.className} fluid src={decryptedPost.results} alt={props.post.filename} />
 }
