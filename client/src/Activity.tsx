@@ -15,6 +15,10 @@ export default function () {
         }
     }, [])
     if (!activityQuery.isSuccess) return <Message content='loading' />
+    if (!activityQuery.data) return <Message>
+        <Message.Header content={'No activity'} />
+        <Message.Item content={'Comments on your posts will appear here'} />
+    </Message>
     return (
         <div className={'activity-feed'}>
             <Feed>
