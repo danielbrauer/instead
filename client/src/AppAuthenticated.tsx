@@ -18,7 +18,7 @@ export default function () {
     const fileInputElement = useRef<HTMLInputElement>(null)
 
     const history = useHistory()
-    const requests = useQuery('followRequests', Routes.getFollowRequests)
+    const requests = useQuery('followRequestCount', Routes.getFollowRequestCount)
 
     function onSelect(evt: React.ChangeEvent<HTMLInputElement>) {
         const file = evt.target.files && evt.target.files[0]
@@ -89,9 +89,9 @@ export default function () {
                     />
                     <Menu.Item active={followersActive} onClick={() => history.push('/followers')}>
                         <Icon name='users' />
-                        {requests.isSuccess && requests.data!.length > 0 ? (
+                        {requests.isSuccess && requests.data! > 0 ? (
                             <Label
-                                content={requests.data!.length.toString()}
+                                content={requests.data!.toString()}
                                 color='red'
                                 size='small'
                                 circular

@@ -87,6 +87,11 @@ export default class UserService {
         await FollowRequests.destroy.run({ requesterId, requesteeId }, this.db.pool)
     }
 
+    async getFollowRequestCount(requesteeId: number) {
+        const [{count}] = await FollowRequests.countByRequesteeId.run({ requesteeId }, this.db.pool)
+        return count
+    }
+
     async getFollowRequests(requesteeId: number) {
         const requests = await FollowRequests.getByRequesteeId.run({ requesteeId }, this.db.pool)
         return requests.map((r) => r.requesterId)

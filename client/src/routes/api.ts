@@ -232,6 +232,11 @@ export async function getFollowees() {
     return response.data
 }
 
+export async function getFollowRequestCount() {
+    const response = await server.get<number>('/getFollowRequestCount')
+    return response.data
+}
+
 export async function getFollowRequests() {
     const response = await server.get<number[]>('/getFollowRequests')
     return response.data

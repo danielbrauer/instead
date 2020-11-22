@@ -110,6 +110,33 @@ const countIR: any = {"name":"Count","params":[{"name":"requesterId","transform"
 export const count = new PreparedQuery<ICountParams,ICountResult>(countIR);
 
 
+/** 'CountByRequesteeId' parameters type */
+export interface ICountByRequesteeIdParams {
+  requesteeId: number | null | void;
+}
+
+/** 'CountByRequesteeId' return type */
+export interface ICountByRequesteeIdResult {
+  count: number | null;
+}
+
+/** 'CountByRequesteeId' query type */
+export interface ICountByRequesteeIdQuery {
+  params: ICountByRequesteeIdParams;
+  result: ICountByRequesteeIdResult;
+}
+
+const countByRequesteeIdIR: any = {"name":"CountByRequesteeId","params":[{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":599,"b":609,"line":14,"col":64}]}}],"usedParamSet":{"requesteeId":true},"statement":{"body":"SELECT COUNT(*)::int FROM follow_requests WHERE requestee_id = :requesteeId","loc":{"a":535,"b":609,"line":14,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT COUNT(*)::int FROM follow_requests WHERE requestee_id = :requesteeId
+ * ```
+ */
+export const countByRequesteeId = new PreparedQuery<ICountByRequesteeIdParams,ICountByRequesteeIdResult>(countByRequesteeIdIR);
+
+
 /** 'GetByRequesteeId' parameters type */
 export interface IGetByRequesteeIdParams {
   requesteeId: number | null | void;
@@ -126,7 +153,7 @@ export interface IGetByRequesteeIdQuery {
   result: IGetByRequesteeIdResult;
 }
 
-const getByRequesteeIdIR: any = {"name":"GetByRequesteeId","params":[{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":596,"b":606,"line":14,"col":63}]}}],"usedParamSet":{"requesteeId":true},"statement":{"body":"SELECT requester_id FROM follow_requests WHERE requestee_id = :requesteeId","loc":{"a":533,"b":606,"line":14,"col":0}}};
+const getByRequesteeIdIR: any = {"name":"GetByRequesteeId","params":[{"name":"requesteeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":705,"b":715,"line":17,"col":63}]}}],"usedParamSet":{"requesteeId":true},"statement":{"body":"SELECT requester_id FROM follow_requests WHERE requestee_id = :requesteeId","loc":{"a":642,"b":715,"line":17,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -154,7 +181,7 @@ export interface IGetByRequesterIdQuery {
   result: IGetByRequesterIdResult;
 }
 
-const getByRequesterIdIR: any = {"name":"GetByRequesterId","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":715,"b":725,"line":17,"col":76}]}}],"usedParamSet":{"requesterId":true},"statement":{"body":"SELECT requestee_id, friend_code FROM follow_requests WHERE requester_id = :requesterId","loc":{"a":639,"b":725,"line":17,"col":0}}};
+const getByRequesterIdIR: any = {"name":"GetByRequesterId","params":[{"name":"requesterId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":824,"b":834,"line":20,"col":76}]}}],"usedParamSet":{"requesterId":true},"statement":{"body":"SELECT requestee_id, friend_code FROM follow_requests WHERE requester_id = :requesterId","loc":{"a":748,"b":834,"line":20,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -179,7 +206,7 @@ export interface IAcceptFollowRequestQuery {
   result: IAcceptFollowRequestResult;
 }
 
-const acceptFollowRequestIR: any = {"name":"AcceptFollowRequest","params":[{"name":"requestId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":858,"b":866,"line":22,"col":16},{"a":1225,"b":1233,"line":33,"col":12}]}}],"usedParamSet":{"requestId":true},"statement":{"body":"WITH request AS (\n    SELECT id, requester_id, requestee_id FROM follow_requests\n    WHERE id = :requestId\n), relationship AS (\n    INSERT INTO follow_relationships (follower_id, followee_id)\n    SELECT requester_id, requestee_id FROM request\n    RETURNING id\n), key AS (\n    UPDATE profile_keys\n    SET out_follow_relationship_id = (SELECT id FROM relationship)\n    WHERE out_follow_request_id = (SELECT id FROM request)\n)\nDELETE FROM follow_requests\nWHERE id = :requestId","loc":{"a":761,"b":1233,"line":20,"col":0}}};
+const acceptFollowRequestIR: any = {"name":"AcceptFollowRequest","params":[{"name":"requestId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":967,"b":975,"line":25,"col":16},{"a":1334,"b":1342,"line":36,"col":12}]}}],"usedParamSet":{"requestId":true},"statement":{"body":"WITH request AS (\n    SELECT id, requester_id, requestee_id FROM follow_requests\n    WHERE id = :requestId\n), relationship AS (\n    INSERT INTO follow_relationships (follower_id, followee_id)\n    SELECT requester_id, requestee_id FROM request\n    RETURNING id\n), key AS (\n    UPDATE profile_keys\n    SET out_follow_relationship_id = (SELECT id FROM relationship)\n    WHERE out_follow_request_id = (SELECT id FROM request)\n)\nDELETE FROM follow_requests\nWHERE id = :requestId","loc":{"a":870,"b":1342,"line":23,"col":0}}};
 
 /**
  * Query generated from SQL:

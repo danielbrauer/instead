@@ -312,6 +312,16 @@ router.get(
 )
 
 router.get(
+    '/getFollowRequestCount',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const requests = await userService.getFollowRequestCount(req.userId)
+        return res.json(requests)
+    },
+)
+
+router.get(
     '/getSentFollowRequests',
     validator.query(Schema.empty),
     validator.body(Schema.empty),
