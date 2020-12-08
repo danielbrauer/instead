@@ -1,0 +1,15 @@
+{
+  "summary": {
+    "title": "Web Client to Server"
+  },
+  "detail": {
+    "contributors": [],
+    "diagrams": [
+      {
+        "title": "Web Client to Server",
+        "thumbnail": "./public/content/images/thumbnail.jpg",
+        "id": 0
+      }
+    ]
+  }
+}
