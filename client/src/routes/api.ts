@@ -1,11 +1,11 @@
 import Axios from 'axios'
 import { queryCache } from 'react-query'
 import * as Types from '../../../backend/src/types/api'
-import config from '../config'
 import CurrentUser from '../CurrentUser'
 import { createKeysForNewFollower, createProfileKeyForViewer } from '../postCrypto'
+import devUrl from './devUrl'
 
-const baseURL = `${config.serverUrl}/api`
+const baseURL = `${devUrl}/api`
 
 const server = Axios.create({ withCredentials: true, baseURL })
 server.interceptors.response.use(
