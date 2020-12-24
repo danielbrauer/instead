@@ -1,8 +1,8 @@
-import config from '../config'
 import Axios from 'axios'
-import { StartLoginResult, FinishLoginResult } from '../../../backend/src/types/auth'
+import { FinishLoginResult, StartLoginResult } from '../../../backend/src/types/auth'
+import devUrl from './devUrl'
 
-const baseURL = `${config.serverUrl}/auth`
+const baseURL = `${devUrl}/auth`
 
 const server = Axios.create({ withCredentials: true, baseURL })
 server.interceptors.response.use(
