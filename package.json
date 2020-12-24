@@ -2,8 +2,8 @@
   "name": "instead",
   "version": "0.1.0",
   "engines": {
-    "node": "12.13.1",
-    "yarn": "1.22.5"
+    "node": "12.20.0",
+    "yarn": "1.22.10"
   },
   "description": "",
   "main": "index.js",
