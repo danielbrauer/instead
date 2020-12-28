@@ -3,7 +3,7 @@ INSERT INTO post_upgrades (post_id, encrypted_info, filename, version) VALUES (:
 
 /* @name ApplyAndDelete */
 WITH post_upgrade AS (
-    SELECT post_id, encrypted_info, filename, version FROM post_upgrades
+    SELECT id, post_id, encrypted_info, filename, version FROM post_upgrades
     WHERE id = :upgradeId
 ), post AS (
     UPDATE posts SET (encrypted_info, filename, version) = (SELECT encrypted_info, filename, version FROM post_upgrade)

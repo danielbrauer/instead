@@ -45,13 +45,13 @@ export interface IApplyAndDeleteQuery {
   result: IApplyAndDeleteResult;
 }
 
-const applyAndDeleteIR: any = {"name":"ApplyAndDelete","params":[{"name":"upgradeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":307,"b":315,"line":7,"col":16}]}}],"usedParamSet":{"upgradeId":true},"statement":{"body":"WITH post_upgrade AS (\n    SELECT post_id, encrypted_info, filename, version FROM post_upgrades\n    WHERE id = :upgradeId\n), post AS (\n    UPDATE posts SET (encrypted_info, filename, version) = (SELECT encrypted_info, filename, version FROM post_upgrade)\n    WHERE id = (SELECT post_id FROM post_upgrade)\n)\nDELETE FROM post_upgrades\nWHERE id = (SELECT id FROM post_upgrade)","loc":{"a":195,"b":567,"line":5,"col":0}}};
+const applyAndDeleteIR: any = {"name":"ApplyAndDelete","params":[{"name":"upgradeId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":311,"b":319,"line":7,"col":16}]}}],"usedParamSet":{"upgradeId":true},"statement":{"body":"WITH post_upgrade AS (\n    SELECT id, post_id, encrypted_info, filename, version FROM post_upgrades\n    WHERE id = :upgradeId\n), post AS (\n    UPDATE posts SET (encrypted_info, filename, version) = (SELECT encrypted_info, filename, version FROM post_upgrade)\n    WHERE id = (SELECT post_id FROM post_upgrade)\n)\nDELETE FROM post_upgrades\nWHERE id = (SELECT id FROM post_upgrade)","loc":{"a":195,"b":571,"line":5,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
  * WITH post_upgrade AS (
- *     SELECT post_id, encrypted_info, filename, version FROM post_upgrades
+ *     SELECT id, post_id, encrypted_info, filename, version FROM post_upgrades
  *     WHERE id = :upgradeId
  * ), post AS (
  *     UPDATE posts SET (encrypted_info, filename, version) = (SELECT encrypted_info, filename, version FROM post_upgrade)
