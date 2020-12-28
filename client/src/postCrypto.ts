@@ -204,12 +204,9 @@ async function createMipsAndEncrypt(original: Blob, postKey: PostKey, iv?: Buffe
     const maxDimension = wideImage ? dimensions.width! : dimensions.height!
     let mipSize = maxDimension*0.5
     while (mipSize >= minMipSize) {
-        console.log(mipSize)
         const mip = await reducer.toBlob(original, {max: mipSize})
-        console.log('reduced')
         const mipArrayBuffer = await readAsArrayBuffer(mip)
         const { encrypted: encryptedMip } = await encryptSymmetric(mipArrayBuffer, postKey.key, ivBuffer)
-        console.log('encrypted')
         const mipDimensions = sizeOfImage(Buffer.from(mipArrayBuffer))
         postInfo.imageSizes.push({
             width: mipDimensions.width!,
@@ -389,8 +386,6 @@ function getClosestImageSize(imageSizes: Types.ImageSize[], desiredSize: number 
     }
     return imageSizes[chosenIndex]
 }
-
-
 
 export function useEncryptedImage(post: Types.Post, basePostDataUrl: string, desiredSize: number | undefined) {
     const [state, dispatch] = useReducer(asyncReducer, { isLoading: false })
