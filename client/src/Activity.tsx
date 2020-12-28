@@ -1,11 +1,19 @@
 import React, { useEffect } from 'react'
 import { useQuery } from 'react-query'
-import { Feed, Message } from 'semantic-ui-react'
+import { Button, Feed, Message } from 'semantic-ui-react'
 import InternalLink from './Components/InternalLink'
+import PostThumbnail from './PostThumbnail'
 import dayjs from './relativeTime'
 import { getActivity, setActivityLastCheckedDate } from './routes/api'
+import Worker from './UpgradeWorker'
 import UserInList from './UserInList'
-import PostThumbnail from './PostThumbnail'
+
+const worker = new Worker()
+
+const onClick = async () => {
+    const outputo = await worker.processData('smallies')
+    console.log(outputo)
+}
 
 export default function () {
     const activityQuery = useQuery(['activity'], getActivity)
@@ -21,6 +29,7 @@ export default function () {
     </Message>
     return (
         <div className={'activity-feed'}>
+            <Button onClick={onClick}>Trap</Button>
             <Feed>
                 {activityQuery.data!.map((item) => (
                     <Feed.Event key={item.postId.toString() + item.id.toString()}>
