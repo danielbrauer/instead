@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node backend/dist/src/server.js",
     "build": "cd backend && yarn install && yarn build && yarn migrate-up && cd ../client && yarn install && yarn build",
-    "install": "cd backend && yarn install && yarn migrate up && yarn types && yarn install && cd ../client && yarn install",
+    "install-local": "cd backend && yarn install && yarn migrate up && yarn types && yarn install && cd ../client && yarn install",
     "local": "concurrently --kill-others \"cd backend && yarn watch-debug\" \"cd client && yarn start\""
   },
   "keywords": [],
