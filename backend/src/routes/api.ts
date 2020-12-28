@@ -61,7 +61,7 @@ router.get(
 
 router.get(
     '/getPost',
-    validator.query(Schema.postByIdQuery),
+    validator.query(Schema.postByIdParams),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.PostByIdRequest>, res) => {
         const post = await postService.getPost(req.query.id, req.userId)
@@ -95,7 +95,7 @@ router.post(
 
 router.delete(
     '/deletePost',
-    validator.query(Schema.postByIdQuery),
+    validator.query(Schema.postByIdParams),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.PostByIdRequest>, res) => {
         const result = await postService.deletePost(req.query.id, req.userId)
@@ -236,6 +236,26 @@ router.put(
         }
         return res.json({ success: true })
     },
+)
+
+router.put(
+    '/createPostUpgrade',
+    validator.query(Schema.empty),
+    validator.body(Schema.createPostUpgradeBody),
+    async (req: ValidatedRequest<Schema.CreatePostUpgradeRequest>, res) => {
+        const result = await postService.createPostUpgrade(req.body.postId, req.body.md5, req.body.encryptedInfo)
+        return res.json(result)
+    }
+)
+
+router.put(
+    '/applyPostUpgrade',
+    validator.query(Schema.empty),
+    validator.body(Schema.applyPostUpgradeBody),
+    async (req: ValidatedRequest<Schema.ApplyPostUpgradeRequest>, res) => {
+        await postService.applyPostUpgrade(req.body.postUpgradeId)
+        return res.json({ success: true })
+    }
 )
 
 router.get(

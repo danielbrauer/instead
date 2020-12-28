@@ -170,6 +170,21 @@ export async function finishPost(postId: number, success: boolean) {
     queryCache.invalidateQueries('posts')
 }
 
+export async function createPostUpgrade(postId: number, encryptedInfo: string, md5: string) {
+    const response = await server.put<Types.PostUpgradeResult>('/createPostUpgrade', {
+        postId,
+        encryptedInfo,
+        md5,
+    })
+    return response.data
+}
+
+export async function applyPostUpgrade(postUpgradeId: number, success: boolean) {
+    await server.put('/applyPostUpgrade', {
+        postUpgradeId,
+    })
+}
+
 export async function getUserProfile(userId: number) {
     const response = await server.get<Types.EncryptedUserProfile>('/getUserProfile', {
         params: { userId },

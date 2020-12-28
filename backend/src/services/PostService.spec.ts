@@ -31,6 +31,8 @@ describe('PostService', () => {
 
     const testPost: IGetPostWithKeyResult = {
         id: 0,
+        version: 0,
+        encryptedInfo: null,
         authorId: 0,
         published: new Date(2012, 1),
         index: '0',
@@ -43,6 +45,8 @@ describe('PostService', () => {
 
     const secondPost: IGetPostWithKeyResult = {
         id: 1,
+        version: 0,
+        encryptedInfo: null,
         authorId: 1,
         published: new Date(2012, 2),
         index: '1',

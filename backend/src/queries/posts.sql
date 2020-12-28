@@ -11,7 +11,7 @@ DELETE FROM posts WHERE id = :postId AND author_id = :authorId RETURNING *;
 DELETE FROM posts WHERE id = :postId AND published IS NULL RETURNING *;
 
 /* @name GetHomePostsWithKeys */
-SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.encrypted_info, posts.aspect, posts.post_key_set_id,
+SELECT posts.id, posts.version, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.encrypted_info, posts.aspect, posts.post_key_set_id,
        post_keys.key
 FROM posts, post_keys
 WHERE posts.post_key_set_id = post_keys.post_key_set_id
@@ -27,7 +27,7 @@ ORDER BY posts.published DESC
 LIMIT 2;
 
 /* @name GetUserPostsWithKeys */
-SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.encrypted_info, posts.aspect, posts.post_key_set_id,
+SELECT posts.id, posts.version, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.encrypted_info, posts.aspect, posts.post_key_set_id,
        post_keys.key
 FROM posts, post_keys
 WHERE posts.post_key_set_id = post_keys.post_key_set_id
@@ -39,7 +39,7 @@ ORDER BY posts.published DESC
 LIMIT 2;
 
 /* @name GetPostWithKey */
-SELECT posts.id, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.encrypted_info, posts.aspect, posts.post_key_set_id,
+SELECT posts.id, posts.version, posts.published, timestamp_to_int(posts.published) AS index, posts.author_id, posts.filename, posts.iv, posts.encrypted_info, posts.aspect, posts.post_key_set_id,
        post_keys.key
 FROM posts, post_keys
 WHERE posts.post_key_set_id = post_keys.post_key_set_id

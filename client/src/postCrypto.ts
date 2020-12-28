@@ -1,14 +1,14 @@
 import Axios from 'axios'
+import ImageBlobReduce from 'image-blob-reduce'
+import sizeOfImage from 'image-size'
 import md5 from 'js-md5'
+import Pica from 'pica'
 import { readAsArrayBuffer } from 'promise-file-reader'
 import { useEffect, useReducer } from 'react'
 import * as Types from '../../backend/src/types/api'
 import { PostInfo } from '../../backend/src/types/api'
 import CurrentUser from './CurrentUser'
 import * as Routes from './routes/api'
-import sizeOfImage from 'image-size'
-import Pica from 'pica'
-import ImageBlobReduce from 'image-blob-reduce'
 const typedArrayToBuffer = require('typedarray-to-buffer') as (typedArray: Uint8Array) => Buffer
 require('buffer')
 const Crypto = window.crypto
@@ -184,11 +184,11 @@ async function postCommentWithKey({ postId, postKey, comment }: { postId: number
 
 const minMipSize = 32
 
-async function createMipsAndEncrypt(original: File) {
-    const [originalArrayBuffer, postKey] = await Promise.all([readAsArrayBuffer(original), getOrCreatePostKey()])
+async function createMipsAndEncrypt(original: Blob, postKey: PostKey, iv?: Buffer) {
+    const originalArrayBuffer = await readAsArrayBuffer(original)
     const originalBuffer = new Buffer(originalArrayBuffer)
     const dimensions = sizeOfImage(originalBuffer)
-    const { encrypted: encryptedOriginal, ivBuffer } = await encryptSymmetric(originalArrayBuffer, postKey.key)
+    const { encrypted: encryptedOriginal, ivBuffer } = await encryptSymmetric(originalArrayBuffer, postKey.key, iv)
     let encryptedBuffers: Buffer[] = [Buffer.from(encryptedOriginal)]
     const postInfo: PostInfo = {
         aspect: dimensions.height!/dimensions.width!,
@@ -222,7 +222,7 @@ async function createMipsAndEncrypt(original: File) {
         byteOffset += encryptedMip.byteLength
     }
     const serialBlob = Buffer.concat(encryptedBuffers, byteOffset)
-    return { serialBlob, postInfo, postKey, ivBuffer }
+    return { serialBlob, postInfo, ivBuffer }
 }
 
 export async function encryptAndUploadImage({
@@ -232,7 +232,8 @@ export async function encryptAndUploadImage({
     file: File
     comment?: string
 }) {
-    const { serialBlob, postInfo, postKey, ivBuffer } = await createMipsAndEncrypt(file)
+    const postKey = await getOrCreatePostKey()
+    const { serialBlob, postInfo, ivBuffer } = await createMipsAndEncrypt(file, postKey)
     const contentMD5 = md5.base64(serialBlob)
     const encryptedPostInfo = await encryptSymmetric(Buffer.from(JSON.stringify(postInfo)), postKey.key, ivBuffer)
     const postStartResult = await Routes.startPost(postKey.id, ivBuffer!.toString('base64'), contentMD5, Buffer.from(encryptedPostInfo.encrypted).toString('base64'))
@@ -389,32 +390,67 @@ function getClosestImageSize(imageSizes: Types.ImageSize[], desiredSize: number 
     return imageSizes[chosenIndex]
 }
 
-export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, encryptedPostInfo: string | null, encryptedUrl: string, desiredSize: number | undefined) {
+
+
+export function useEncryptedImage(post: Types.Post, basePostDataUrl: string, desiredSize: number | undefined) {
     const [state, dispatch] = useReducer(asyncReducer, { isLoading: false })
 
     useEffect(() => {
         let cancelRequest = false
-        let decryptedUrl = ''
-        if (!encryptedUrl) return
+        let decryptedBlobUrl = ''
+        if (!basePostDataUrl) return
 
         const decrypt = async () => {
             dispatch({ type: 'request' })
             try {
-                const postKey = await unwrapKeyAsymmetric(wrappedKeyBase64)
+                const postKey = await unwrapKeyAsymmetric(post.key)
                 let range: string | undefined
-                if (encryptedPostInfo) {
-                    const decryptedInfo = await decryptSymmetric(Buffer.from(encryptedPostInfo, 'base64'), ivBase64, postKey)
+                if (post.encryptedInfo) {
+                    const decryptedInfo = await decryptSymmetric(Buffer.from(post.encryptedInfo, 'base64'), post.iv, postKey)
                     const postInfo: PostInfo = JSON.parse(Buffer.from(decryptedInfo).toString('utf-8'))
                     const imageSize = getClosestImageSize(postInfo.imageSizes, desiredSize)
                     range = `bytes=${imageSize.byteOffset}-${imageSize.byteOffset+imageSize.byteLength-1}`
                 }
-                const encryptedImage = await Axios.get<ArrayBuffer>(encryptedUrl, { responseType: 'arraybuffer', headers: {'Range': range} })
+                const encryptedImage = await Axios.get<ArrayBuffer>(basePostDataUrl + post.filename, { responseType: 'arraybuffer', headers: {'Range': range} })
                 if (cancelRequest) return
-                const decrypted = await decryptSymmetric(encryptedImage.data, ivBase64, postKey)
+                const decrypted = await decryptSymmetric(encryptedImage.data, post.iv, postKey)
                 if (cancelRequest) return
                 const blob = new Blob([decrypted], { type: 'image/jpeg' })
-                decryptedUrl = URL.createObjectURL(blob)
-                dispatch({ type: 'success', results: decryptedUrl })
+
+                ////////////
+
+                if (post.version === 0) {
+                    const ivBuffer = Buffer.from(post.iv, 'base64')
+
+                    const { serialBlob, postInfo } = await createMipsAndEncrypt(
+                        blob,
+                        { key: postKey, id: post.postKeySetId },
+                        ivBuffer
+                    )
+                    const contentMD5 = md5.base64(serialBlob)
+                    const encryptedPostInfo = await encryptSymmetric(Buffer.from(JSON.stringify(postInfo)), postKey, ivBuffer)
+                    const updateResponse = await Routes.createPostUpgrade(post.id, Buffer.from(encryptedPostInfo.encrypted).toString('base64'), contentMD5)
+                    const signedRequest = updateResponse.signedRequest
+
+                    const options = {
+                        headers: {
+                            'Content-Type': kBinaryContentType,
+                            'Content-MD5': contentMD5,
+                        },
+                    }
+                    let success = true
+                    try {
+                        await Axios.put(signedRequest, serialBlob, options)
+                    } catch (error) {
+                        success = false
+                    }
+                    await Routes.applyPostUpgrade(updateResponse.postUpgradeId, success)
+                }
+
+                ////////////
+
+                decryptedBlobUrl = URL.createObjectURL(blob)
+                dispatch({ type: 'success', results: decryptedBlobUrl })
                 return
             } catch (error) {
                 console.log(error)
@@ -426,9 +462,9 @@ export function useEncryptedImage(wrappedKeyBase64: string, ivBase64: string, en
 
         return () => {
             cancelRequest = true
-            if (decryptedUrl) URL.revokeObjectURL(decryptedUrl)
+            if (decryptedBlobUrl) URL.revokeObjectURL(decryptedBlobUrl)
         }
-    }, [encryptedUrl, ivBase64, wrappedKeyBase64, encryptedPostInfo, desiredSize])
+    }, [basePostDataUrl, post, desiredSize])
 
     return state
 }

@@ -20,6 +20,11 @@ export interface StartPostResult {
     postId: number
 }
 
+export interface PostUpgradeResult {
+    signedRequest: string
+    postUpgradeId: number
+}
+
 export interface Comment {
     id: number
     authorId: number

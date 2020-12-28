@@ -1,4 +1,4 @@
-import { DeletePostResult, StartPostResult } from 'api'
+import { DeletePostResult, PostUpgradeResult, StartPostResult } from 'api'
 import { SimpleEventDispatcher } from 'strongly-typed-events'
 import Container, { Service } from 'typedi'
 import uuidv1 from 'uuid/v1'
@@ -6,6 +6,7 @@ import * as config from '../config/config'
 import * as Activity from '../queries/activity.gen'
 import * as Comments from '../queries/comments.gen'
 import * as Posts from '../queries/posts.gen'
+import * as PostUpgrades from '../queries/post_upgrades.gen'
 import AWSService from './AWSService'
 import Database from './DatabaseService'
 
@@ -78,6 +79,20 @@ export default class PostService {
     async publishPost(postId: number) {
         await Posts.publish.run({ postId }, this.db.pool)
         return { success: true }
+    }
+
+    async createPostUpgrade(postId: number, md5: string, encryptedInfo: string): Promise<PostUpgradeResult> {
+        const version = 1
+        const fileName = uuidv1()
+        const [signedRequest, [{ id: postUpgradeId }]] = await Promise.all([
+            this.aws.s3GetSignedUploadUrl(fileName, 'application/octet-stream', md5),
+            PostUpgrades.createAndReturn.run({ postId, encryptedInfo, fileName, version }, this.db.pool),
+        ])
+        return { signedRequest, postUpgradeId }
+    }
+
+    async applyPostUpgrade(upgradeId: number) {
+        await PostUpgrades.applyAndDelete.run({ upgradeId }, this.db.pool)
     }
 
     async removePostIfNotPublished(postId: number) {
