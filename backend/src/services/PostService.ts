@@ -1,10 +1,12 @@
-import { DeletePostResult, StartPostResult } from 'api'
+import { DeletePostResult, PostUpgradeResult, StartPostResult } from 'api'
 import { SimpleEventDispatcher } from 'strongly-typed-events'
 import Container, { Service } from 'typedi'
 import uuidv1 from 'uuid/v1'
 import * as config from '../config/config'
+import * as Activity from '../queries/activity.gen'
 import * as Comments from '../queries/comments.gen'
 import * as Posts from '../queries/posts.gen'
+import * as PostUpgrades from '../queries/post_upgrades.gen'
 import AWSService from './AWSService'
 import Database from './DatabaseService'
 
@@ -60,13 +62,13 @@ export default class PostService {
         postKeySetId: number,
         iv: string,
         md5: string,
-        aspect: number,
+        encryptedInfo: string,
     ): Promise<StartPostResult> {
         const fileName = uuidv1()
         const [signedRequest, [{ id: postId }]] = await Promise.all([
             this.aws.s3GetSignedUploadUrl(fileName, 'application/octet-stream', md5),
             Posts.createAndReturn.run(
-                { fileName, authorId, postKeySetId, iv, aspect },
+                { fileName, authorId, postKeySetId, iv, encryptedInfo },
                 this.db.pool,
             ),
         ])
@@ -77,6 +79,20 @@ export default class PostService {
     async publishPost(postId: number) {
         await Posts.publish.run({ postId }, this.db.pool)
         return { success: true }
+    }
+
+    async createPostUpgrade(postId: number, md5: string, encryptedInfo: string): Promise<PostUpgradeResult> {
+        const version = 1
+        const fileName = uuidv1()
+        const [signedRequest, [{ id: postUpgradeId }]] = await Promise.all([
+            this.aws.s3GetSignedUploadUrl(fileName, 'application/octet-stream', md5),
+            PostUpgrades.createAndReturn.run({ postId, encryptedInfo, fileName, version }, this.db.pool),
+        ])
+        return { signedRequest, postUpgradeId }
+    }
+
+    async applyPostUpgrade(upgradeId: number) {
+        await PostUpgrades.applyAndDelete.run({ upgradeId }, this.db.pool)
     }
 
     async removePostIfNotPublished(postId: number) {
@@ -93,6 +109,15 @@ export default class PostService {
 
     async getCommentsForPost(postId: number, userId: number, limit?: number) {
         return await Comments.getCommentsForPost.run({ postId, userId, limit }, this.db.pool)
+    }
+
+    async getActivity(userId: number, pageIndex?: string) {
+        return await Activity.getActivityForUser.run({ userId, pageIndex }, this.db.pool)
+    }
+
+    async getActivityCount(userId: number) {
+        const [{count}] = await Activity.getRecentActivityCount.run({ userId }, this.db.pool)
+        return count
     }
 
     onPostCreated(postId: number) {

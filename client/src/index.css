@@ -79,3 +79,31 @@ div.new-post-form {
 div.new-post-form div.fields {
     justify-content: space-between;
 }
+
+/* Activity */
+
+.activity-feed {
+    margin: 0.75em;
+}
+
+.post-thumbnail, .ui.fluid.image.post-thumbnail{
+    display: inline;
+    max-width: 64px;
+    max-height: 64px;
+    margin: 10px 5px 5px 10px;
+}
+
+.ui.feed .event {
+    align-items: center;
+}
+
+.ui.feed .event a {
+    margin-left: auto;
+}
+
+.ui.feed .date {
+    margin-left: 10px;
+    color: gray;
+    font-size: 90%;
+    display: inline;
+}

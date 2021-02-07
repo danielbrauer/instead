@@ -1,10 +1,7 @@
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
 import React from 'react'
 import { Post } from '../../backend/src/types/api'
+import dayjs from './relativeTime'
 import UserInList from './UserInList'
-
-dayjs.extend(relativeTime)
 
 export default function PostHeader({ post }: { post: Post }) {
     return (

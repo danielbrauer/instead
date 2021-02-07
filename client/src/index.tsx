@@ -14,7 +14,16 @@ const routing = (
             <Route path={['/signup', '/login']} component={AppUnauthenticated} />
 
             <Route
-                path={['/home', '/user/:username', '/post/:postid', '/followers', '/following', '/requests', '/new']}
+                path={[
+                    '/home',
+                    '/activity',
+                    '/user/:username',
+                    '/post/:postid',
+                    '/followers',
+                    '/following',
+                    '/requests',
+                    '/new',
+                ]}
                 component={AppAuthenticated}
             />
 

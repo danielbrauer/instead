@@ -144,3 +144,28 @@ const setFriendCodeIR: any = {"name":"SetFriendCode","params":[{"name":"friendCo
 export const setFriendCode = new PreparedQuery<ISetFriendCodeParams,ISetFriendCodeResult>(setFriendCodeIR);
 
 
+/** 'SetActivityLastCheckedDate' parameters type */
+export interface ISetActivityLastCheckedDateParams {
+  userId: number | null | void;
+}
+
+/** 'SetActivityLastCheckedDate' return type */
+export type ISetActivityLastCheckedDateResult = void;
+
+/** 'SetActivityLastCheckedDate' query type */
+export interface ISetActivityLastCheckedDateQuery {
+  params: ISetActivityLastCheckedDateParams;
+  result: ISetActivityLastCheckedDateResult;
+}
+
+const setActivityLastCheckedDateIR: any = {"name":"SetActivityLastCheckedDate","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":735,"b":740,"line":22,"col":71}]}}],"usedParamSet":{"userId":true},"statement":{"body":"UPDATE users SET activity_last_checked = CURRENT_TIMESTAMP WHERE id = :userId","loc":{"a":664,"b":740,"line":22,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * UPDATE users SET activity_last_checked = CURRENT_TIMESTAMP WHERE id = :userId
+ * ```
+ */
+export const setActivityLastCheckedDate = new PreparedQuery<ISetActivityLastCheckedDateParams,ISetActivityLastCheckedDateResult>(setActivityLastCheckedDateIR);
+
+

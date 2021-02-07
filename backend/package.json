@@ -1,88 +1,88 @@
 {
-  "name": "backend",
-  "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc",
-    "test": "jest",
-    "test-coverage": "jest --coverage",
-    "watch": "tsc-watch --noClear --onSuccess \"node --require dotenv/config --inspect dist/src/server.js\" --onFailure \"echo Compilation Failed\"",
-    "watch-debug": "concurrently --kill-others \"yarn watch\" \"pgtyped -w -c pgtconfig.json\"",
-    "types": "pgtyped -c pgtconfig.json",
-    "migrate-up": "PGSSLMODE=require ts-node --compiler-options '{\"module\":\"commonjs\"}' node_modules/node-pg-migrate/bin/node-pg-migrate --migration-file-language ts up",
-    "migrate": "ts-node --compiler-options '{\"module\":\"commonjs\"}' node_modules/node-pg-migrate/bin/node-pg-migrate --migration-file-language ts"
-  },
-  "author": "Daniel Brauer",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/danielbrauer/instead.git",
-    "directory": "backend"
-  },
-  "dependencies": {
-    "@hapi/joi": "15",
-    "@pgtyped/cli": "^0.8.1",
-    "@pgtyped/query": "^0.8.1",
-    "@types/connect-redis": "^0.0.14",
-    "@types/cors": "^2.8.6",
-    "@types/express": "^4.17.1",
-    "@types/express-session": "^1.15.14",
-    "@types/hapi__joi": "15",
-    "@types/helmet": "^0.0.44",
-    "@types/morgan": "^1.7.37",
-    "@types/permit": "^0.2.1",
-    "@types/pg": "^7.11.1",
-    "@types/uuid": "^3.4.5",
-    "aws-sdk": "^2.493.0",
-    "body-parser": "^1.19.0",
-    "connect-redis": "^5.0.0",
-    "cors": "^2.8.5",
-    "express": "^4.17.0",
-    "express-joi-validation": "danielbrauer/express-joi-validation#3.x",
-    "express-promise-router": "^3.0.3",
-    "express-session": "^1.16.2",
-    "helmet": "^3.21.1",
-    "joi-extract-type": "^15.0.8",
-    "morgan": "^1.9.1",
-    "node-pg-migrate": "^5.3.0",
-    "pg": "^7.12.1",
-    "pg-camelcase": "^0.0.3",
-    "redis": "^2.8.0",
-    "reflect-metadata": "^0.1.13",
-    "secure-remote-password": "^0.3.1",
-    "strongly-typed-events": "^1.6.13",
-    "ts-node": "^8.4.1",
-    "typedi": "^0.8.0",
-    "typescript": "^3.9.7",
-    "uuid": "^3.3.2"
-  },
-  "devDependencies": {
-    "@types/jest": "^26.0.5",
-    "@typescript-eslint/eslint-plugin": "^2.3.0",
-    "@typescript-eslint/parser": "^2.3.0",
-    "concurrently": "^4.1.2",
-    "dotenv": "^8.1.0",
-    "eslint": "^6.0.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-prettier": "^3.1.4",
-    "jest": "^26.1.0",
-    "prettier": "^2.0.5",
-    "ts-jest": "^26.4.1",
-    "tsc-watch": "^4.2.9"
-  },
-  "jest": {
-    "rootDir": "src",
-    "preset": "ts-jest",
-    "testEnvironment": "node",
-    "collectCoverageFrom": [
-      "**/*.ts"
-    ],
-    "coverageReporters": [
-      "lcov"
-    ],
-    "coveragePathIgnorePatterns": [
-      "/queries/"
-    ]
-  }
+    "name": "backend",
+    "version": "0.1.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc",
+        "test": "jest",
+        "test-coverage": "jest --coverage",
+        "watch": "tsc-watch --noClear --onSuccess \"node --require dotenv/config --inspect dist/src/server.js\" --onFailure \"echo Compilation Failed\"",
+        "watch-debug": "concurrently --kill-others \"yarn watch\" \"pgtyped -w -c pgtconfig.json\"",
+        "types": "pgtyped -c pgtconfig.json",
+        "migrate-up": "PGSSLMODE=require ts-node --compiler-options '{\"module\":\"commonjs\"}' node_modules/node-pg-migrate/bin/node-pg-migrate --reject-unauthorized false --migration-file-language ts up",
+        "migrate": "ts-node --compiler-options '{\"module\":\"commonjs\"}' node_modules/node-pg-migrate/bin/node-pg-migrate --migration-file-language ts"
+    },
+    "author": "Daniel Brauer",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/danielbrauer/instead.git",
+        "directory": "backend"
+    },
+    "dependencies": {
+        "@hapi/joi": "15",
+        "@pgtyped/cli": "^0.8.1",
+        "@pgtyped/query": "^0.8.1",
+        "@types/connect-redis": "^0.0.14",
+        "@types/cors": "^2.8.6",
+        "@types/express": "^4.17.1",
+        "@types/express-session": "^1.15.14",
+        "@types/hapi__joi": "15",
+        "@types/helmet": "^0.0.44",
+        "@types/morgan": "^1.7.37",
+        "@types/permit": "^0.2.1",
+        "@types/pg": "^7.11.1",
+        "@types/uuid": "^3.4.5",
+        "aws-sdk": "^2.493.0",
+        "body-parser": "^1.19.0",
+        "connect-redis": "^5.0.0",
+        "cors": "^2.8.5",
+        "express": "^4.17.0",
+        "express-joi-validation": "danielbrauer/express-joi-validation#3.x",
+        "express-promise-router": "^3.0.3",
+        "express-session": "^1.16.2",
+        "helmet": "^3.21.1",
+        "joi-extract-type": "^15.0.8",
+        "morgan": "^1.9.1",
+        "node-pg-migrate": "^5.3.0",
+        "pg": "^7.12.1",
+        "pg-camelcase": "^0.0.3",
+        "redis": "^2.8.0",
+        "reflect-metadata": "^0.1.13",
+        "secure-remote-password": "^0.3.1",
+        "strongly-typed-events": "^1.6.13",
+        "ts-node": "^8.4.1",
+        "typedi": "^0.8.0",
+        "typescript": "^3.9.7",
+        "uuid": "^3.3.2"
+    },
+    "devDependencies": {
+        "@types/jest": "^26.0.5",
+        "@typescript-eslint/eslint-plugin": "^2.3.0",
+        "@typescript-eslint/parser": "^2.3.0",
+        "concurrently": "^4.1.2",
+        "dotenv": "^8.1.0",
+        "eslint": "^6.0.0",
+        "eslint-config-prettier": "^6.11.0",
+        "eslint-plugin-prettier": "^3.1.4",
+        "jest": "^26.1.0",
+        "prettier": "^2.0.5",
+        "ts-jest": "^26.4.1",
+        "tsc-watch": "^4.2.9"
+    },
+    "jest": {
+        "rootDir": "src",
+        "preset": "ts-jest",
+        "testEnvironment": "node",
+        "collectCoverageFrom": [
+            "**/*.ts"
+        ],
+        "coverageReporters": [
+            "lcov"
+        ],
+        "coveragePathIgnorePatterns": [
+            "/queries/"
+        ]
+    }
 }

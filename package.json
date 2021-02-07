@@ -2,14 +2,15 @@
   "name": "instead",
   "version": "0.1.0",
   "engines": {
-    "node": "12.13.1",
-    "yarn": "1.22.5"
+    "node": "12.20.1",
+    "yarn": "1.22.10"
   },
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node backend/dist/src/server.js",
     "build": "cd backend && yarn install && yarn build && yarn migrate-up && cd ../client && yarn install && yarn build",
+    "install-local": "cd backend && yarn install && yarn migrate up && yarn types && yarn install && cd ../client && yarn install",
     "local": "concurrently --kill-others \"cd backend && yarn watch-debug\" \"cd client && yarn start\""
   },
   "keywords": [],

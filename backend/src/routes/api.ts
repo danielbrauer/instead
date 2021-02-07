@@ -61,7 +61,7 @@ router.get(
 
 router.get(
     '/getPost',
-    validator.query(Schema.postByIdQuery),
+    validator.query(Schema.postByIdParams),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.PostByIdRequest>, res) => {
         const post = await postService.getPost(req.query.id, req.userId)
@@ -95,11 +95,41 @@ router.post(
 
 router.delete(
     '/deletePost',
-    validator.query(Schema.postByIdQuery),
+    validator.query(Schema.postByIdParams),
     validator.body(Schema.empty),
     async (req: ValidatedRequest<Schema.PostByIdRequest>, res) => {
         const result = await postService.deletePost(req.query.id, req.userId)
         return res.json(result)
+    },
+)
+
+router.get(
+    '/activity',
+    validator.query(Schema.getActivityQuery),
+    validator.body(Schema.empty),
+    async (req: ValidatedRequest<Schema.GetActivityRequest>, res) => {
+        const activity = await postService.getActivity(req.userId, req.query.pageIndex)
+        return res.json(activity)
+    },
+)
+
+router.get(
+    '/activityCount',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const count = await postService.getActivityCount(req.userId)
+        return res.json(count)
+    },
+)
+
+router.post(
+    '/activityLastCheckedDate',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        await userService.setActivityLastCheckedDate(req.userId)
+        return res.json({success: true})
     },
 )
 
@@ -188,7 +218,7 @@ router.post(
             req.body.postKeySetId,
             req.body.iv,
             req.body.md5,
-            req.body.aspect,
+            req.body.encryptedInfo,
         )
         return res.json(postInfo)
     },
@@ -206,6 +236,26 @@ router.put(
         }
         return res.json({ success: true })
     },
+)
+
+router.put(
+    '/createPostUpgrade',
+    validator.query(Schema.empty),
+    validator.body(Schema.createPostUpgradeBody),
+    async (req: ValidatedRequest<Schema.CreatePostUpgradeRequest>, res) => {
+        const result = await postService.createPostUpgrade(req.body.postId, req.body.md5, req.body.encryptedInfo)
+        return res.json(result)
+    }
+)
+
+router.put(
+    '/applyPostUpgrade',
+    validator.query(Schema.empty),
+    validator.body(Schema.applyPostUpgradeBody),
+    async (req: ValidatedRequest<Schema.ApplyPostUpgradeRequest>, res) => {
+        await postService.applyPostUpgrade(req.body.postUpgradeId)
+        return res.json({ success: true })
+    }
 )
 
 router.get(
@@ -297,6 +347,16 @@ router.get(
     validator.body(Schema.empty),
     async (req, res) => {
         const requests = await userService.getFollowRequests(req.userId)
+        return res.json(requests)
+    },
+)
+
+router.get(
+    '/getFollowRequestCount',
+    validator.query(Schema.empty),
+    validator.body(Schema.empty),
+    async (req, res) => {
+        const requests = await userService.getFollowRequestCount(req.userId)
         return res.json(requests)
     },
 )

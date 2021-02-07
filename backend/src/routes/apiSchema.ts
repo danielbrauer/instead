@@ -4,12 +4,12 @@ import 'joi-extract-type'
 
 export const empty = Joi.object()
 
-export const postByIdQuery = Joi.object({
+export const postByIdParams = Joi.object({
     id: Joi.number().integer().required(),
 })
 
 export interface PostByIdRequest extends ValidatedRequestSchema {
-    [ContainerTypes.Query]: Joi.extractType<typeof postByIdQuery>
+    [ContainerTypes.Query]: Joi.extractType<typeof postByIdParams>
     [ContainerTypes.Body]: Joi.extractType<typeof empty>
 }
 
@@ -70,7 +70,7 @@ export const startPostBody = Joi.object({
     postKeySetId: Joi.number().integer().required(),
     iv: Joi.string().base64().required(),
     md5: Joi.string().base64().required(),
-    aspect: Joi.number().required(),
+    encryptedInfo: Joi.string().base64().required(),
 })
 
 export interface StartPostRequest extends ValidatedRequestSchema {
@@ -86,6 +86,26 @@ export const finishPostBody = Joi.object({
 export interface FinishPostRequest extends ValidatedRequestSchema {
     [ContainerTypes.Query]: Joi.extractType<typeof empty>
     [ContainerTypes.Body]: Joi.extractType<typeof finishPostBody>
+}
+
+export const createPostUpgradeBody = Joi.object({
+    postId: Joi.number().integer().required(),
+    md5: Joi.string().base64().required(),
+    encryptedInfo: Joi.string().base64().required(),
+})
+
+export interface CreatePostUpgradeRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof createPostUpgradeBody>
+}
+
+export const applyPostUpgradeBody = Joi.object({
+    postUpgradeId: Joi.number().integer().required(),
+})
+
+export interface ApplyPostUpgradeRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof empty>
+    [ContainerTypes.Body]: Joi.extractType<typeof applyPostUpgradeBody>
 }
 
 export const getByUserIdQuery = Joi.object({
@@ -176,4 +196,22 @@ export const setProfileBody = Joi.object({
 export interface SetProfileRequest extends ValidatedRequestSchema {
     [ContainerTypes.Query]: Joi.extractType<typeof empty>
     [ContainerTypes.Body]: Joi.extractType<typeof setProfileBody>
+}
+
+export const getActivityQuery = Joi.object({
+    pageIndex: Joi.string().regex(/^[0-9]+$/, 'integer'),
+})
+
+export interface GetActivityRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof getActivityQuery>
+    [ContainerTypes.Body]: Joi.extractType<typeof empty>
+}
+
+export const getActivityCountQuery = Joi.object({
+    afterDate: Joi.date().required(),
+})
+
+export interface GetActivityCountRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof getActivityCountQuery>
+    [ContainerTypes.Body]: Joi.extractType<typeof empty>
 }

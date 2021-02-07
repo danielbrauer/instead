@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { queryCache, useQuery } from 'react-query'
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom'
 import { Icon, Label, Menu } from 'semantic-ui-react'
+import Activity from './Activity'
 import CurrentUser from './CurrentUser'
 import FollowerPage from './FollowerPage'
 import HomePosts from './HomePosts'
@@ -17,7 +18,8 @@ export default function () {
     const fileInputElement = useRef<HTMLInputElement>(null)
 
     const history = useHistory()
-    const requests = useQuery('followRequests', Routes.getFollowRequests)
+    const requestCount = useQuery('followRequestCount', Routes.getFollowRequestCount)
+    const activityCount = useQuery('activityCount', Routes.getActivityCount)
 
     function onSelect(evt: React.ChangeEvent<HTMLInputElement>) {
         const file = evt.target.files && evt.target.files[0]
@@ -59,6 +61,7 @@ export default function () {
 
     const homeActive = history.location.pathname === '/home'
     const newActive = history.location.pathname === '/new'
+    const activityActive = history.location.pathname === '/activity'
     const followersActive = history.location.pathname === '/followers' || history.location.pathname === '/following'
     const profileActive = history.location.pathname === `/user/${CurrentUser.getId()}`
 
@@ -73,8 +76,20 @@ export default function () {
                 style={{ display: 'none' }}
             />
             {!uploadInput ? (
-                <Menu inverted borderless widths={4} fixed='bottom'>
+                <Menu inverted borderless widths='5' fixed='bottom'>
                     <Menu.Item icon='home' active={homeActive} onClick={() => !homeActive && history.push('/home')} />
+                    <Menu.Item active={activityActive} onClick={() => !activityActive && history.push('/activity')}>
+                        <Icon name='chat' />
+                        {activityCount.isSuccess && activityCount.data! > 0 ? (
+                            <Label
+                                content={activityCount.data!.toString()}
+                                color='red'
+                                size='small'
+                                circular
+                                floating
+                            />
+                        ) : null}
+                        </Menu.Item>
                     <Menu.Item
                         icon='camera'
                         active={newActive}
@@ -82,9 +97,9 @@ export default function () {
                     />
                     <Menu.Item active={followersActive} onClick={() => history.push('/followers')}>
                         <Icon name='users' />
-                        {requests.isSuccess && requests.data!.length > 0 ? (
+                        {requestCount.isSuccess && requestCount.data! > 0 ? (
                             <Label
-                                content={requests.data!.length.toString()}
+                                content={requestCount.data!.toString()}
                                 color='red'
                                 size='small'
                                 circular
@@ -102,6 +117,7 @@ export default function () {
             <Switch>
                 <Route path={['/followers', '/following']} component={FollowerPage} />
                 <Route path='/home' component={HomePosts} />
+                <Route path='/activity' component={Activity} />
                 <Route path='/new'>
                     <NewPost uploadInput={uploadInput!} onCancel={cancelUpload} onSuccess={afterUpload} />
                 </Route>

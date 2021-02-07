@@ -1,11 +1,11 @@
 import Axios from 'axios'
 import { queryCache } from 'react-query'
 import * as Types from '../../../backend/src/types/api'
-import config from '../config'
 import CurrentUser from '../CurrentUser'
 import { createKeysForNewFollower, createProfileKeyForViewer } from '../postCrypto'
+import devUrl from './devUrl'
 
-const baseURL = `${config.serverUrl}/api`
+const baseURL = `${devUrl}/api`
 
 const server = Axios.create({ withCredentials: true, baseURL })
 server.interceptors.response.use(
@@ -78,6 +78,26 @@ export async function createComment(comment: { postId: number; keySetId: number;
     return response.data
 }
 
+export async function getActivity(key: string, pageIndex?: string) {
+    const response = await server.get<Types.ActivityItem[]>('/activity', {
+        params: {
+            pageIndex,
+        }
+    })
+    return response.data
+}
+
+export async function getActivityCount() {
+    const response = await server.get<number>('/activityCount')
+    return response.data
+}
+
+export async function setActivityLastCheckedDate() {
+    const response = await server.post('/activityLastCheckedDate')
+    queryCache.invalidateQueries('activityCount')
+    return response.data
+}
+
 export async function deletePost(idTodelete: number) {
     const response = await server.delete<Types.DeletePostResult>('/deletePost', {
         params: {
@@ -136,12 +156,12 @@ export async function getFollowerPublicKeys() {
     return response.data
 }
 
-export async function startPost(postKeySetId: number, ivBase64: string, contentMD5Base64: string, aspect: number) {
+export async function startPost(postKeySetId: number, ivBase64: string, contentMD5Base64: string, encryptedInfoBase64: string) {
     const postResponse = await server.post<Types.StartPostResult>('/startPost', {
         postKeySetId,
         iv: ivBase64,
         md5: contentMD5Base64,
-        aspect,
+        encryptedInfo: encryptedInfoBase64,
     })
     return postResponse.data
 }
@@ -152,6 +172,21 @@ export async function finishPost(postId: number, success: boolean) {
         success,
     })
     queryCache.invalidateQueries('posts')
+}
+
+export async function createPostUpgrade(postId: number, encryptedInfo: string, md5: string) {
+    const response = await server.put<Types.PostUpgradeResult>('/createPostUpgrade', {
+        postId,
+        encryptedInfo,
+        md5,
+    })
+    return response.data
+}
+
+export async function applyPostUpgrade(postUpgradeId: number, success: boolean) {
+    await server.put('/applyPostUpgrade', {
+        postUpgradeId,
+    })
 }
 
 export async function getUserProfile(userId: number) {
@@ -224,6 +259,11 @@ export async function getFollowers() {
 
 export async function getFollowees() {
     const response = await server.get<number[]>('/getFollowees')
+    return response.data
+}
+
+export async function getFollowRequestCount() {
+    const response = await server.get<number>('/getFollowRequestCount')
     return response.data
 }
 

@@ -17,3 +17,6 @@ SELECT friend_code FROM users WHERE id = :userId;
 
 /* @name SetFriendCode */
 UPDATE users SET friend_code = :friendCode WHERE id = :userId;
+
+/* @name SetActivityLastCheckedDate */
+UPDATE users SET activity_last_checked = CURRENT_TIMESTAMP WHERE id = :userId;
