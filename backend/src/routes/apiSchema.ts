@@ -198,6 +198,15 @@ export interface SetProfileRequest extends ValidatedRequestSchema {
     [ContainerTypes.Body]: Joi.extractType<typeof setProfileBody>
 }
 
+export const getActivityQuery = Joi.object({
+    pageIndex: Joi.string().regex(/^[0-9]+$/, 'integer'),
+})
+
+export interface GetActivityRequest extends ValidatedRequestSchema {
+    [ContainerTypes.Query]: Joi.extractType<typeof getActivityQuery>
+    [ContainerTypes.Body]: Joi.extractType<typeof empty>
+}
+
 export const getActivityCountQuery = Joi.object({
     afterDate: Joi.date().required(),
 })

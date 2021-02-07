@@ -1,14 +1,19 @@
 import React, { useEffect } from 'react'
-import { useQuery } from 'react-query'
-import { Feed, Message } from 'semantic-ui-react'
+import InfiniteScroll from 'react-infinite-scroller'
+import { useInfiniteQuery } from 'react-query'
+import { Feed, Loader, Message } from 'semantic-ui-react'
 import InternalLink from './Components/InternalLink'
+import PostThumbnail from './PostThumbnail'
 import dayjs from './relativeTime'
 import { getActivity, setActivityLastCheckedDate } from './routes/api'
 import UserInList from './UserInList'
-import PostThumbnail from './PostThumbnail'
 
 export default function () {
-    const activityQuery = useQuery(['activity'], getActivity)
+    const activityQuery = useInfiniteQuery('activity', getActivity, {
+        getFetchMore: (lastGroup, allGroups) => lastGroup.length > 0 && lastGroup[lastGroup.length - 1].index,
+        staleTime: 30,
+        refetchOnWindowFocus: 'always',
+    })
     useEffect(() => {
         return () => {
             setActivityLastCheckedDate()
@@ -22,7 +27,14 @@ export default function () {
     return (
         <div className={'activity-feed'}>
             <Feed>
-                {activityQuery.data!.map((item) => (
+        <InfiniteScroll
+            loadMore={() => activityQuery.canFetchMore && activityQuery.fetchMore()}
+            hasMore={activityQuery.canFetchMore}
+            loader={<Loader key='0' />}
+            initialLoad={false}
+        >
+                {activityQuery.data!.map((group) =>
+                    group.map((item) => (
                     <Feed.Event key={item.postId.toString() + item.id.toString()}>
                         <Feed.Summary>
                             <UserInList id={item.authorId} /> commented on your post {' '}
@@ -32,7 +44,10 @@ export default function () {
                             <PostThumbnail postId={item.postId} />
                         </InternalLink>
                     </Feed.Event>
-                ))}
+                )),
+                    )
+                    .flat()}
+        </InfiniteScroll>
             </Feed>
         </div>
     )

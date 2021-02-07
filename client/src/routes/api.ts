@@ -78,8 +78,12 @@ export async function createComment(comment: { postId: number; keySetId: number;
     return response.data
 }
 
-export async function getActivity() {
-    const response = await server.get<Types.ActivityItem[]>('/activity')
+export async function getActivity(key: string, pageIndex?: string) {
+    const response = await server.get<Types.ActivityItem[]>('/activity', {
+        params: {
+            pageIndex,
+        }
+    })
     return response.data
 }
 

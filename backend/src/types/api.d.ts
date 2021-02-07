@@ -1,3 +1,4 @@
+import * as Activity from '../queries/activity.gen'
 import * as Comments from '../queries/comments.gen'
 import * as FollowRequests from '../queries/follow_requests.gen'
 import * as Keys from '../queries/keys.gen'
@@ -68,12 +69,7 @@ export type PostInfo = {
     imageSizes: ImageSize[]
 }
 
-export type ActivityItem = {
-    id: number
-    postId: number
-    authorId: number
-    published: Date
-}
+export type ActivityItem = Activity.IGetActivityForUserResult
 
 export type PublicKey = Keys.IGetFollowerPublicKeysResult
 

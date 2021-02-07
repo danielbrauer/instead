@@ -105,10 +105,10 @@ router.delete(
 
 router.get(
     '/activity',
-    validator.query(Schema.empty),
+    validator.query(Schema.getActivityQuery),
     validator.body(Schema.empty),
-    async (req, res) => {
-        const activity = await postService.getActivity(req.userId)
+    async (req: ValidatedRequest<Schema.GetActivityRequest>, res) => {
+        const activity = await postService.getActivity(req.userId, req.query.pageIndex)
         return res.json(activity)
     },
 )

@@ -111,8 +111,8 @@ export default class PostService {
         return await Comments.getCommentsForPost.run({ postId, userId, limit }, this.db.pool)
     }
 
-    async getActivity(userId: number) {
-        return await Activity.getActivityForUser.run({ userId }, this.db.pool)
+    async getActivity(userId: number, pageIndex?: string) {
+        return await Activity.getActivityForUser.run({ userId, pageIndex }, this.db.pool)
     }
 
     async getActivityCount(userId: number) {
