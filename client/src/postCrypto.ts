@@ -414,7 +414,7 @@ export function useEncryptedImage(post: Types.Post, basePostDataUrl: string, des
 
                 ////////////
 
-                if (post.version === 0) {
+                if (post.authorId === CurrentUser.getId() && post.version === 0) {
                     const ivBuffer = Buffer.from(post.iv, 'base64')
 
                     const { serialBlob, postInfo } = await createMipsAndEncrypt(

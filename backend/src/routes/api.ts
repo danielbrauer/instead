@@ -243,6 +243,9 @@ router.put(
     validator.query(Schema.empty),
     validator.body(Schema.createPostUpgradeBody),
     async (req: ValidatedRequest<Schema.CreatePostUpgradeRequest>, res) => {
+        const post = await postService.getPost(req.body.postId, req.userId)
+        if (post.authorId !== req.userId)
+            return res.status(403).json({ success: false })
         const result = await postService.createPostUpgrade(req.body.postId, req.body.md5, req.body.encryptedInfo)
         return res.json(result)
     }
