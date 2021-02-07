@@ -90,11 +90,12 @@ div.new-post-form div.fields {
     display: inline;
     max-width: 64px;
     max-height: 64px;
-    margin: 10px 5px 5px 10px;
+    margin: 5px 5px 5px 5px;
 }
 
 .ui.feed .event {
-    align-items: center;
+    display: flex;
+    align-items: flex-start;
 }
 
 .ui.feed .event a {
