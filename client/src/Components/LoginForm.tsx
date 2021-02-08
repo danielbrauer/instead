@@ -104,7 +104,7 @@ export default function LoginForm() {
                     fluid
                     hiddenbystate={(!!encryptedSecretKey).toString()}
                     type='text'
-                    id='secret-key'
+                    id='Secret Key'
                     icon='key'
                     iconPosition='left'
                     placeholder='Secret Key'

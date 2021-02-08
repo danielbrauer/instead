@@ -51,21 +51,23 @@ export default function SignupForm() {
                 <Header textAlign='center' content='Instead' />
                 <Form.Input
                     fluid
+                    id='username'
+                    type='username'
                     icon='user'
                     iconPosition='left'
                     placeholder='Username'
-                    type='username'
                     autoComplete='off'
                     error={!username && didMissUsername && 'Please provide a username'}
                     {...bindUsername}
                 />
                 <Form.Input
                     fluid
+                    id='password'
                     icon='ellipsis horizontal'
                     iconPosition='left'
                     placeholder='Password'
                     type='password'
-                    autoComplete='off'
+                    autoComplete='new-password'
                     error={
                         (!password && didMissPassword && 'Please provide a password') ||
                         (passwordCheckQuery.isError && (passwordCheckQuery.error as Error).message)
