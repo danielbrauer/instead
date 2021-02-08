@@ -11,3 +11,7 @@
 .ui.icon.button.saved-secret-key-clear-button {
     flex: 0 0 32px;
 }
+
+div.ui.input[hiddenbystate='true'],div.ui.checkbox[hiddenbystate='true'] {
+    display: none;
+}

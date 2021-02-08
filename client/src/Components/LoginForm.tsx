@@ -61,6 +61,8 @@ export default function LoginForm() {
                 <Header textAlign='center' content='Instead' />
                 <Form.Input
                     fluid
+                    id='username'
+                    type='text'
                     icon='user'
                     iconPosition='left'
                     placeholder='Username'
@@ -70,15 +72,16 @@ export default function LoginForm() {
                 />
                 <Form.Input
                     fluid
+                    id='password'
+                    type='password'
                     icon='ellipsis horizontal'
                     iconPosition='left'
                     placeholder='Password'
-                    type='password'
                     autoComplete='current-password'
                     error={!password && didMissPassword && 'Please enter your password'}
                     {...bindPassword}
                 />
-                {encryptedSecretKey ? (
+                {encryptedSecretKey &&
                     <div className='saved-secret-key-container'>
                         <Button.Group fluid size='large'>
                             <Button
@@ -96,19 +99,19 @@ export default function LoginForm() {
                             />
                         </Button.Group>
                     </div>
-                ) : (
-                    <>
-                        <Form.Input
-                            fluid
-                            icon='key'
-                            iconPosition='left'
-                            placeholder='Secret Key'
-                            error={!secretKey && didMissSecretKey && 'Please enter your Secret Key'}
-                            {...bindSecretKey}
-                        />
-                        <Form.Checkbox label='This is a public or shared computer' {...bindSharedComputer} />
-                    </>
-                )}
+                }
+                <Form.Input
+                    fluid
+                    hiddenbystate={(!!encryptedSecretKey).toString()}
+                    type='text'
+                    id='secret-key'
+                    icon='key'
+                    iconPosition='left'
+                    placeholder='Secret Key'
+                    error={!secretKey && didMissSecretKey && 'Please enter your Secret Key'}
+                    {...bindSecretKey}
+                />
+                <Form.Checkbox hiddenbystate={(!!encryptedSecretKey).toString()} label='This is a public or shared computer' {...bindSharedComputer} />
                 <Message error header='Could not log in' content={loginErrorMessage} />
                 <Button type='submit' size='large' content='Log in' />
             </Form>
