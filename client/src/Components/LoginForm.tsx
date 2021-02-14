@@ -56,7 +56,7 @@ export default function LoginForm() {
                 size='large'
                 error={loginQuery.isError}
                 loading={loginQuery.isLoading || loginQuery.isSuccess}
-                onSubmit={handleSubmit}
+                // onSubmit={handleSubmit}
             >
                 <Header textAlign='center' content='Instead' />
                 <Form.Input
