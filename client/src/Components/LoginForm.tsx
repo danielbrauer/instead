@@ -68,7 +68,7 @@ export default function LoginForm() {
                     placeholder='Username'
                     autoComplete='username'
                     error={!username && didMissUsername && 'Please enter your username'}
-                    {...bindUsername}
+                    // {...bindUsername}
                 />
                 <Form.Input
                     fluid
@@ -79,7 +79,7 @@ export default function LoginForm() {
                     placeholder='Password'
                     autoComplete='current-password'
                     error={!password && didMissPassword && 'Please enter your password'}
-                    {...bindPassword}
+                    // {...bindPassword}
                 />
                 {encryptedSecretKey &&
                     <div className='saved-secret-key-container'>
@@ -109,7 +109,7 @@ export default function LoginForm() {
                     iconPosition='left'
                     placeholder='Secret Key'
                     error={!secretKey && didMissSecretKey && 'Please enter your Secret Key'}
-                    {...bindSecretKey}
+                    // {...bindSecretKey}
                 />
                 <Form.Checkbox hiddenbystate={(!!encryptedSecretKey).toString()} label='This is a public or shared computer' {...bindSharedComputer} />
                 <Message error header='Could not log in' content={loginErrorMessage} />

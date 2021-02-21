@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, FormEvent } from 'react'
+import { ChangeEvent, FormEvent, useState } from 'react'
 import { CheckboxProps, FormProps } from 'semantic-ui-react'
 
 type Transform = (data: string) => string
@@ -12,8 +12,9 @@ export function useInput(initialValue: string, transform?: Transform) {
         bind: {
             value: value,
             onChange: (event: ChangeEvent<HTMLInputElement>, data: FormProps) => {
-                const result = transform ? transform(data.value) : data.value
-                setValue(result)
+                // const result = transform ? transform(data.value) : data.value
+                // setValue(result)
+                setValue(data.value)
             },
         },
     }
