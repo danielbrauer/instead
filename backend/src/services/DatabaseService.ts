@@ -1,7 +1,7 @@
-import pg, { Pool, ClientBase } from 'pg'
-import * as config from '../config/config'
-import { Service } from 'typedi'
+import pg, { ClientBase, Pool } from 'pg'
 import { inject } from 'pg-camelcase'
+import { Service } from 'typedi'
+import * as config from '../config/config'
 
 type TransactionContents = (client: ClientBase) => Promise<any>
 
@@ -12,7 +12,10 @@ export default class DatabaseService {
 
     constructor() {
         inject(pg)
-        this.pool = new Pool({connectionString: config.string('DATABASE_URL')})
+        this.pool = new Pool({
+            connectionString: config.string('DATABASE_URL'),
+            ssl: true,
+        })
     }
 
     async transaction(commands: TransactionContents) {
