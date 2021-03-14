@@ -14,7 +14,9 @@ export default class DatabaseService {
         inject(pg)
         this.pool = new Pool({
             connectionString: config.string('DATABASE_URL'),
-            ssl: true,
+            ssl: {
+                rejectUnauthorized: false,
+            },
         })
     }
 
