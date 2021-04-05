@@ -243,18 +243,12 @@ export async function encryptAndUploadImage({
         },
     }
     let success = true
-    try {
-        await Axios.put(signedRequest, serialBlob, options)
-    } catch (error) {
-        success = false
-    }
+    await Axios.put(signedRequest, serialBlob, options)
     await Routes.finishPost(postStartResult.postId, success)
 
     if (comment) {
         await postCommentWithKey({ postId: postStartResult.postId, postKey, comment })
     }
-
-    return success
 }
 
 export async function encryptAndPostComment({ post, comment }: { post: Types.Post; comment: string }) {

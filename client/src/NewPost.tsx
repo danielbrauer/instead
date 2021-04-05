@@ -15,7 +15,7 @@ export default function NewPost({
     onSuccess: () => void
 }) {
     const commentInput = useInput('')
-    const [uploadMutation, uploadStatus] = useMutation(encryptAndUploadImage)
+    const [uploadMutation, uploadStatus] = useMutation(encryptAndUploadImage, {throwOnError: true})
     const [blobUrl, dispatch] = useReducer((state: string, action: File | null) => {
         if (state) URL.revokeObjectURL(state)
         return action ? URL.createObjectURL(action) : ''
@@ -27,8 +27,12 @@ export default function NewPost({
 
     async function onSubmit(event: React.MouseEvent) {
         event.preventDefault()
-        const success = await uploadMutation({ file: uploadInput!, comment: commentInput.value })
-        if (success) onSuccess()
+        try {
+            await uploadMutation({ file: uploadInput!, comment: commentInput.value })
+            onSuccess()
+        } catch (error) {
+            console.log(error.message)
+        }
     }
 
     if (!uploadInput || uploadStatus.isSuccess) return <Redirect to='/home' />
@@ -37,7 +41,7 @@ export default function NewPost({
         <>
             {uploadStatus.error ? (
                 <Message negative>
-                    <Message.Header>Sorry, there was an error uploading your post</Message.Header>
+                    <Message.Header>Sorry, there was an error uploading your post: {(uploadStatus.error as Error).message}</Message.Header>
                 </Message>
             ) : null}
             <>
