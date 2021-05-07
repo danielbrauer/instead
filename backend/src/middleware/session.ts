@@ -1,13 +1,22 @@
+import connectRedis from 'connect-redis'
 import session, { SessionOptions } from 'express-session'
 import redis from 'redis'
 import * as config from '../config/config'
-import connectRedis from 'connect-redis'
 
 const RedisStore = connectRedis(session)
 
-const client = redis.createClient({
-    url: config.string('REDIS_URL'),
-})
+const redisOptions = config.isLocalDev()
+    ? {
+          url: config.string('REDIS_URL'),
+      }
+    : {
+          url: config.string('REDIS_TLS_URL'),
+          tls: {
+              rejectUnauthorized: false,
+          },
+      }
+
+const client = redis.createClient(redisOptions)
 
 const sessionConfig: SessionOptions = {
     secret: config.strings('SECURE_KEY'),
