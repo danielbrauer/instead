@@ -1,4 +1,5 @@
 {
+    "files.trimTrailingWhitespace": true,
     "typescript.tsdk": "./client/node_modules/typescript/lib",
     "files.exclude": {
         "backend": true,
