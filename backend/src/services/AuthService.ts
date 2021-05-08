@@ -86,14 +86,13 @@ export default class AuthService {
     }
 
     async signup(newUser: NewUser) {
-        await this.db.transaction(async (client) => {
-            const [{ count }] = await UsersAuth.countByName.run(
-                { username: newUser.username },
-                client,
-            )
-            if (count > 0) throw new ServerError(`Username '${newUser.username}' is already taken`)
-            const [user] = await UsersAuth.create.run(newUser, client)
+        try {
+            const [user] = await UsersAuth.create.run(newUser, this.db.pool)
             this._onUserCreated.dispatchAsync(user.id)
-        })
+        } catch (error) {
+            if (error.constraint === 'unique_usernames')
+                throw new ServerError(`Username '${newUser.username}' is already taken`)
+            else throw error
+        }
     }
 }
