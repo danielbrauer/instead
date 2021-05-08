@@ -1,4 +1,4 @@
-import * as config from './config'
+import config from './config'
 
 describe('config', () => {
     describe('string', () => {
@@ -8,7 +8,7 @@ describe('config', () => {
             expect(value).toEqual('VALUE')
         })
 
-        test('throws if doesn\'t exist', () => {
+        test("throws if doesn't exist", () => {
             expect(() => config.string('TEST2')).toThrow()
         })
     })

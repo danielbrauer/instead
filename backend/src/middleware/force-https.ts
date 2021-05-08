@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express-serve-static-core'
-import * as config from '../config/config'
+import config from '../config/config'
 
 const requireHTTPS: RequestHandler = function (req, res, next) {
     // The 'x-forwarded-proto' check is for Heroku

@@ -1,12 +1,12 @@
-import { Service } from 'typedi'
-import DatabaseService from './DatabaseService'
-import * as UsersAuth from '../queries/users-auth.gen'
+import { FinishLoginResult, NewUser, StartLoginResult } from 'auth'
 import srp from 'secure-remote-password/server'
-import crypto from '../util/crypto-promise'
-import * as config from '../config/config'
-import { StartLoginResult, FinishLoginResult, NewUser } from 'auth'
 import { SimpleEventDispatcher } from 'strongly-typed-events'
+import { Service } from 'typedi'
+import config from '../config/config'
 import { ServerError } from '../middleware/errors'
+import * as UsersAuth from '../queries/users-auth.gen'
+import crypto from '../util/crypto-promise'
+import DatabaseService from './DatabaseService'
 
 @Service()
 export default class AuthService {

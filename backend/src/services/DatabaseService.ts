@@ -1,7 +1,7 @@
 import pg, { ClientBase, Pool } from 'pg'
 import { inject } from 'pg-camelcase'
 import { Service } from 'typedi'
-import * as config from '../config/config'
+import config from '../config/config'
 
 type TransactionContents = (client: ClientBase) => Promise<any>
 

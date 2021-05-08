@@ -1,7 +1,7 @@
 import connectRedis from 'connect-redis'
 import session, { SessionOptions } from 'express-session'
 import redis from 'redis'
-import * as config from '../config/config'
+import config from '../config/config'
 
 const RedisStore = connectRedis(session)
 
