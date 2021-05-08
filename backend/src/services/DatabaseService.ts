@@ -7,16 +7,17 @@ type TransactionContents = (client: ClientBase) => Promise<any>
 
 @Service()
 export default class DatabaseService {
-
     readonly pool: Pool
 
     constructor() {
         inject(pg)
         this.pool = new Pool({
             connectionString: config.string('DATABASE_URL'),
-            ssl: {
-                rejectUnauthorized: false,
-            },
+            ssl: config.isLocalDev()
+                ? false
+                : {
+                      rejectUnauthorized: false,
+                  },
         })
     }
 
@@ -33,5 +34,4 @@ export default class DatabaseService {
             client.release()
         }
     }
-
 }
