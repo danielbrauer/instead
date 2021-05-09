@@ -2,7 +2,7 @@
   "name": "instead",
   "version": "0.1.0",
   "engines": {
-    "node": "12.22.1",
+    "node": "14.16.1",
     "yarn": "1.22.10"
   },
   "description": "",
