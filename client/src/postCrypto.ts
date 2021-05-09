@@ -5,11 +5,11 @@ import md5 from 'js-md5'
 import Pica from 'pica'
 import { readAsArrayBuffer } from 'promise-file-reader'
 import { useEffect, useReducer } from 'react'
+import typedArrayToBuffer from 'typedarray-to-buffer'
 import * as Types from '../../backend/src/types/api'
 import { PostInfo } from '../../backend/src/types/api'
 import CurrentUser from './CurrentUser'
 import * as Routes from './routes/api'
-const typedArrayToBuffer = require('typedarray-to-buffer') as (typedArray: Uint8Array) => Buffer
 require('buffer')
 const Crypto = window.crypto
 const kBinaryContentType = 'application/octet-stream'
@@ -189,7 +189,7 @@ async function createMipsAndEncrypt(original: Blob, postKey: PostKey, iv?: Buffe
     const originalBuffer = new Buffer(originalArrayBuffer)
     const dimensions = sizeOfImage(originalBuffer)
     const { encrypted: encryptedOriginal, ivBuffer } = await encryptSymmetric(originalArrayBuffer, postKey.key, iv)
-    let encryptedBuffers: Buffer[] = [Buffer.from(encryptedOriginal)]
+    const encryptedBuffers: Buffer[] = [Buffer.from(encryptedOriginal)]
     const postInfo: PostInfo = {
         aspect: dimensions.height!/dimensions.width!,
         imageSizes: [{

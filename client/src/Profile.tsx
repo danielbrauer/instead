@@ -8,7 +8,7 @@ import { longLivedQuery } from './QuerySettings'
 import SafetyButton from './SafetyButton'
 import UserInList from './UserInList'
 
-export default function ({ userId, logout }: { userId: number; logout: () => void }) {
+export default function Profile({ userId, logout }: { userId: number; logout: () => void }) {
     const [editing, setEditing] = useState(false)
     const user = useQuery(['userProfile', userId], getProfile, longLivedQuery)
     const { value: newName, setValue: setNewName, bind: bindNewName } = useInput('')

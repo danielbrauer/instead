@@ -19,12 +19,12 @@ export default function AppWelcome() {
                 <Header as='h5'>{WelcomeInfo.getSecretKey()}</Header>
                 <br />
                 <Message warning>
-                    <Message.Header>What's a Secret Key?</Message.Header>
+                    <Message.Header>What&apos;s a Secret Key?</Message.Header>
                     <p>
                         You will need this if you get a new phone or want to log in from another browser. Please make a copy and put it somewhere safe.
                     </p>
 
-                    <Button onClick={ok}>I've made a copy</Button>
+                    <Button onClick={ok}>I&apos;ve made a copy</Button>
                 </Message>
             </Segment>
         </div>

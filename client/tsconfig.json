@@ -18,12 +18,15 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "preserve"
+    "jsx": "react",
+    "noFallthroughCasesInSwitch": true
   },
   "include": [
     "src"
   ],
   "references": [
-      { "path": "../backend/tsconfig.json" }
+    {
+      "path": "../backend/tsconfig.json"
+    }
   ]
 }

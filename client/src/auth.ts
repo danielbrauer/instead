@@ -1,17 +1,13 @@
+import xor from 'buffer-xor'
+import hkdf from 'futoin-hkdf'
 import { pwnedPassword } from 'hibp'
 import scrypt, { ScryptOptions } from 'scrypt-async-modern'
 import srp from 'secure-remote-password/client'
+import toBuffer from 'typedarray-to-buffer'
 import { Json } from '../../backend/src/queries/users-auth.gen'
 import { EncryptedSecretKey, LoginInfo, NewUserInfo, SignupResult } from './Interfaces'
 import * as Auth from './routes/auth'
 import * as Signup from './routes/signup'
-const toBuffer = require('typedarray-to-buffer') as (x: Uint8Array) => Buffer
-const hkdf = require('futoin-hkdf') as (
-    ikm: string,
-    length: number,
-    { salt, info, hash }: { salt: string; info: string; hash: string },
-) => Buffer
-const xor = require('buffer-xor') as (a: Buffer, b: Buffer) => Buffer
 const RSAOAEP_SHA256: RsaHashedImportParams = { name: 'RSA-OAEP', hash: 'SHA-256' }
 
 async function derivePrivateKey(salt: string, password: string, secretKey: string, username: string) {
