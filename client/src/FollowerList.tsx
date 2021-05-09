@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { List, Message, Loader } from 'semantic-ui-react'
-import { useQuery, useMutation } from 'react-query'
-import FollowerListItem, { FollowerItemInfo } from './FollowerListItem'
-import { getFollowers, getFollowRequests, acceptFollowRequest, getFollowees, getSentFollowRequests } from './routes/api'
+import { useMutation, useQuery } from 'react-query'
+import { List, Loader, Message } from 'semantic-ui-react'
 import FriendCodeDisplay from './Components/FriendCodeDisplay'
+import FollowerListItem, { FollowerItemInfo } from './FollowerListItem'
+import { acceptFollowRequest, getFollowees, getFollowers, getFollowRequests, getSentFollowRequests } from './routes/api'
 
 export default function FollowerList() {
     const requests = useQuery('followRequests', getFollowRequests)
@@ -59,7 +59,7 @@ export default function FollowerList() {
         <>
             <FriendCodeDisplay />
             {requests.data!.length + followers.data!.length === 0 ? (
-                <Message>You don't have any followers yet</Message>
+                <Message>You don&apos;t have any followers yet</Message>
             ) : null}
             <List>
                 {listItems.map((item) => (

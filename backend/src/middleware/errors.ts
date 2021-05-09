@@ -1,4 +1,5 @@
 import { ErrorRequestHandler } from 'express'
+import config from '../config/config'
 
 export class ServerError extends Error {
     clientVisible: boolean
@@ -10,6 +11,7 @@ export class ServerError extends Error {
 }
 
 const forwardErrors: ErrorRequestHandler = function (err, req, res, next) {
+    if (config.isLocalDev()) console.log(err)
     if (err instanceof ServerError) {
         const serverError = err as ServerError
         if (serverError.clientVisible) return res.status(400).send(serverError.message)

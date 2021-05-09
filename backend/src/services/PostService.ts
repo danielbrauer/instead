@@ -2,7 +2,7 @@ import { DeletePostResult, PostUpgradeResult, StartPostResult } from 'api'
 import { SimpleEventDispatcher } from 'strongly-typed-events'
 import Container, { Service } from 'typedi'
 import uuidv1 from 'uuid/v1'
-import * as config from '../config/config'
+import config from '../config/config'
 import * as Activity from '../queries/activity.gen'
 import * as Comments from '../queries/comments.gen'
 import * as Posts from '../queries/posts.gen'
@@ -81,12 +81,19 @@ export default class PostService {
         return { success: true }
     }
 
-    async createPostUpgrade(postId: number, md5: string, encryptedInfo: string): Promise<PostUpgradeResult> {
+    async createPostUpgrade(
+        postId: number,
+        md5: string,
+        encryptedInfo: string,
+    ): Promise<PostUpgradeResult> {
         const version = 1
         const fileName = uuidv1()
         const [signedRequest, [{ id: postUpgradeId }]] = await Promise.all([
             this.aws.s3GetSignedUploadUrl(fileName, 'application/octet-stream', md5),
-            PostUpgrades.createAndReturn.run({ postId, encryptedInfo, fileName, version }, this.db.pool),
+            PostUpgrades.createAndReturn.run(
+                { postId, encryptedInfo, fileName, version },
+                this.db.pool,
+            ),
         ])
         return { signedRequest, postUpgradeId }
     }
@@ -116,7 +123,7 @@ export default class PostService {
     }
 
     async getActivityCount(userId: number) {
-        const [{count}] = await Activity.getRecentActivityCount.run({ userId }, this.db.pool)
+        const [{ count }] = await Activity.getRecentActivityCount.run({ userId }, this.db.pool)
         return count
     }
 

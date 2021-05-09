@@ -1,10 +1,10 @@
+import { createValidator, ValidatedRequest } from 'express-joi-validation'
 import Router from 'express-promise-router'
 import Container from 'typedi'
-import AuthService from '../services/AuthService'
-import { createValidator, ValidatedRequest } from 'express-joi-validation'
-import * as Schema from './authSchema'
+import config from '../config/config'
 import delayResponse from '../middleware/delay-response'
-import * as config from '../config/config'
+import AuthService from '../services/AuthService'
+import * as Schema from './authSchema'
 
 const router = Router()
 const validator = createValidator()

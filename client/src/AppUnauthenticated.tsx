@@ -1,10 +1,10 @@
 import React from 'react'
-import CurrentUser from './CurrentUser'
+import { ReactQueryConfigProvider } from 'react-query'
+import { Redirect, Route, Switch } from 'react-router-dom'
+import { Grid } from 'semantic-ui-react'
 import LoginForm from './Components/LoginForm'
 import SignupForm from './Components/SignupForm'
-import { Grid } from 'semantic-ui-react'
-import { Route, Switch, Redirect } from 'react-router-dom'
-import { ReactQueryConfigProvider } from 'react-query'
+import CurrentUser from './CurrentUser'
 
 const queryConfig = {
     mutations: {
@@ -12,7 +12,7 @@ const queryConfig = {
     },
 }
 
-export default function() {
+export default function AppUnauthenticated() {
     if (CurrentUser.loggedIn())
         return (<Redirect to='/home'/>)
 

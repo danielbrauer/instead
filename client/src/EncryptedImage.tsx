@@ -12,7 +12,7 @@ export type EncryptedImageProps = {
     className?: string
 }
 
-export default function (props: EncryptedImageProps) {
+export default function EncryptedImage(props: EncryptedImageProps) {
     const contentUrl = useQuery('contentUrl', getContentUrl, longLivedQuery)
     const vw = window.devicePixelRatio*Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
     const decryptedPost = useEncryptedImage(

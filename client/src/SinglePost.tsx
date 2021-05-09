@@ -11,7 +11,7 @@ import { longLivedQuery } from './QuerySettings'
 import { deletePost, getPost } from './routes/api'
 import SafetyButton from './SafetyButton'
 
-export default function () {
+export default function SinglePost() {
     const { id: postId } = useParams<{ id: string }>()
     const postQuery = useQuery(['post', postId], getPost, longLivedQuery)
     const [deletePostMutation] = useMutation(deletePost)

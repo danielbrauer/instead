@@ -1,6 +1,6 @@
-import { Service } from 'typedi'
-import * as config from '../config/config'
 import aws from 'aws-sdk'
+import { Service } from 'typedi'
+import config from '../config/config'
 
 @Service()
 export default class AWSService {
@@ -16,7 +16,7 @@ export default class AWSService {
         aws.config.update({
             region: region,
             accessKeyId: accessKeyId,
-            secretAccessKey: secretKey
+            secretAccessKey: secretKey,
         })
 
         this.s3 = new aws.S3()

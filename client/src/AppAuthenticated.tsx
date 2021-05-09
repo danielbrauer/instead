@@ -11,7 +11,7 @@ import * as Routes from './routes/api'
 import SinglePost from './SinglePost'
 import UserPosts from './UserPosts'
 
-export default function () {
+export default function AppAuthenticated() {
     const [uploadInput, setUploadInput] = useState<File | null>(null)
     const [previousPage, setPreviousPage] = useState('')
 

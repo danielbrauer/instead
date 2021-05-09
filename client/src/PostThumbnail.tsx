@@ -5,7 +5,7 @@ import EncryptedImage from './EncryptedImage'
 import { longLivedQuery } from './QuerySettings'
 import { getPost } from './routes/api'
 
-export default function (props: { postId: number }) {
+export default function PostThumbnail(props: { postId: number }) {
     const postQuery = useQuery(['post', props.postId], getPost, longLivedQuery)
     const className = { className: 'post-thumbnail'}
 

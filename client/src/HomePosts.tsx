@@ -4,7 +4,7 @@ import { Icon, Message } from 'semantic-ui-react'
 import Posts from './Posts'
 import { getHomePosts } from './routes/api'
 
-export default function () {
+export default function HomePosts() {
     const posts = useInfiniteQuery('posts', getHomePosts, {
         getFetchMore: (lastGroup, allGroups) => lastGroup.length > 0 && lastGroup[lastGroup.length - 1].index,
         staleTime: 30,

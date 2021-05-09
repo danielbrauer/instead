@@ -246,11 +246,11 @@ export const createCurrentPostKeySet = new PreparedQuery<ICreateCurrentPostKeySe
 
 /** 'AddPostKeys' parameters type */
 export interface IAddPostKeysParams {
-  keys: Array<{
+  keys: readonly ({
     recipientId: number | null | void,
     postKeySetId: number | null | void,
     key: string | null | void
-  }>;
+  })[];
 }
 
 /** 'AddPostKeys' return type */
@@ -341,11 +341,11 @@ export const createProfileKey = new PreparedQuery<ICreateProfileKeyParams,ICreat
 
 /** 'AddProfileKeys' parameters type */
 export interface IAddProfileKeysParams {
-  viewerKeys: Array<{
+  viewerKeys: readonly ({
     recipientId: number | null | void,
     ownerId: number | null | void,
     key: string | null | void
-  }>;
+  })[];
 }
 
 /** 'AddProfileKeys' return type */

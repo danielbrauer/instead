@@ -11,7 +11,7 @@ interface CommentsProps {
     compact?: boolean
 }
 
-export default function ({ postId, limit, compact }: CommentsProps) {
+export default function Comments({ postId, limit, compact }: CommentsProps) {
     const commentsQuery = useQuery(['comments', postId, limit], getComments)
     if (commentsQuery.isError) return <Message negative header='Error fetching comments' />
     if (commentsQuery.isLoading)

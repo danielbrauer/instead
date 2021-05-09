@@ -2,7 +2,7 @@ import React from 'react'
 import { useHistory } from 'react-router'
 import { Link, LinkProps } from 'react-router-dom'
 
-export default function (props: LinkProps) {
+export default function InternalLink(props: LinkProps) {
     const history = useHistory()
 
     const linkAction = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {

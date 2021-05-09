@@ -4,7 +4,7 @@ import * as Types from '../../backend/src/types/api'
 import dayjs from './relativeTime'
 import UserInList from './UserInList'
 
-export default function ({ comment }: { comment: Types.Comment }) {
+export default function SingleComment({ comment }: { comment: Types.Comment }) {
     return (
         <Comment>
             <Comment.Content>

@@ -5,7 +5,7 @@ import { Post } from '../../backend/src/types/api'
 import { useInput } from './Components/useInput'
 import { encryptAndPostComment } from './postCrypto'
 
-export default function ({ post }: { post: Post }) {
+export default function NewComment({ post }: { post: Post }) {
     const contentInput = useInput('')
     const [commentMutation, commentStatus] = useMutation(encryptAndPostComment)
 

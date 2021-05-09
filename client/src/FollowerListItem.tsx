@@ -1,8 +1,8 @@
 import React from 'react'
-import { List, Button, Label } from 'semantic-ui-react'
-import SafetyButton from './SafetyButton'
 import { useMutation } from 'react-query'
+import { Button, Label, List } from 'semantic-ui-react'
 import { rejectFollowRequest, removeFollower, sendFollowRequestDirect } from './routes/api'
+import SafetyButton from './SafetyButton'
 import UserInList from './UserInList'
 
 export interface FollowerItemInfo {
@@ -13,7 +13,7 @@ export interface FollowerItemInfo {
     requested?: boolean
 }
 
-export default function ({ item, onAccept }: { item: FollowerItemInfo; onAccept: (x: number) => void }) {
+export default function FollowerListItem({ item, onAccept }: { item: FollowerItemInfo; onAccept: (x: number) => void }) {
     const [rejectMutation] = useMutation(rejectFollowRequest)
     const [removeFollowerMutation] = useMutation(removeFollower)
     const [sendRequestMutation] = useMutation(sendFollowRequestDirect)
