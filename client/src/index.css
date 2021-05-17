@@ -6,6 +6,8 @@ div.root {
 
 div.item.post {
     padding: 0 0 2em 0;
+    max-width: 1024px;
+    margin: 0 auto;
 }
 
 div.post-header {
