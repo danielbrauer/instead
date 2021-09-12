@@ -50,7 +50,7 @@
         "pg-camelcase": "^0.0.3",
         "redis": "^3.1.1",
         "reflect-metadata": "^0.1.13",
-        "secure-remote-password": "^0.3.1",
+        "secure-remote-password": "LinusU/secure-remote-password#73e5f732b6ca0cdbdc19da1a0c5f48cdbad2cbf0",
         "strongly-typed-events": "^1.6.13",
         "ts-node": "^8.4.1",
         "typedi": "^0.8.0",

@@ -12346,10 +12346,9 @@ scrypt-async-modern@^3.0.7:
   resolved "https://registry.yarnpkg.com/scrypt-async-modern/-/scrypt-async-modern-3.0.12.tgz#2da4239053c57d042b4b76412ef691c06bfecbf2"
   integrity sha512-NkkoREZSg/KbM+60R1xwAReTcJJBVbWmnorf5rksso+Q3zlNJofhk/Ty32FqpAyuHLLIduLz/T+DvEBs8EELHg==
 
-secure-remote-password@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/secure-remote-password/-/secure-remote-password-0.3.1.tgz#8212e9411149e7fefaaa940a7e581de4e963e251"
-  integrity sha512-iEp/qLRfb9XYhfKFrPFfdeD7KVreCjhDKSTRP1G1nRIO0Sw1hjnVHD58ymOhiy9Zf5quHbDIbG9cTupji7qwnA==
+secure-remote-password@LinusU/secure-remote-password#73e5f732b6ca0cdbdc19da1a0c5f48cdbad2cbf0:
+  version "0.3.0"
+  resolved "https://codeload.github.com/LinusU/secure-remote-password/tar.gz/73e5f732b6ca0cdbdc19da1a0c5f48cdbad2cbf0"
   dependencies:
     array-buffer-to-hex "^1.0.0"
     crypto-digest-sync "^1.0.0"
